@@ -1,0 +1,7 @@
+Package: oligo
+Version: 0.0.2
+Title: Gene Expression Analysis
+Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber 
+Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
+Description: A package to analyze gene expression data.
+License: LGPL version 2 or newer
