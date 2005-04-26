@@ -1,11 +1,6 @@
-# Loads information contained in XYS files
+# Loads information contained in XYS files / NimbleGen
 # Author: Benilton Carvalho
 # Date: Apr/2005
-
-# Methods
-# Author: Benilton Carvalho
-# Date: April 2005
-
 
 oligoBatch <- function(path=".", loadDesign = TRUE){
   
@@ -15,18 +10,16 @@ oligoBatch <- function(path=".", loadDesign = TRUE){
   xysfiles <- info$xysfiles
   rm(info)
 
-   if(loadDesign){
-     nameVar <- paste("ng",designname,sep="")
-     ndfFile <- paste(designname,".ndf",sep="")
-     assign(nameVar,ndfenv(ndfFile),envir=.GlobalEnv)
-     xys$index <- xys$X * slot(get(nameVar),"seed") + xys$Y
-   }
+  if(loadDesign){
+    nameVar <- paste("ng",designname,sep="")
+    ndfFile <- paste(designname,".ndf",sep="")
+    assign(nameVar,makeNDFenv(ndfFile),envir=.GlobalEnv)
+  }
 
-   columns <- c(1,2,ncol(xys))
-
-   new("oligoBatch",
-       eList = list(exprs = as.matrix(xys[,-columns])),
-       designName = nameVar,
-       manufacturer = "NimbleGen",
-       indextable = as.matrix(xys[,columns]))
+#  rownames(xys) <- get("feature_names", envir = slot(get(nameVar),"featureInfo"))
+  columns <- c(1,2)
+  new("oligoBatch",
+      eList = list(exprs = as.matrix(xys[,-columns])),
+      designName = nameVar,
+      manufacturer = "NimbleGen")
  }
