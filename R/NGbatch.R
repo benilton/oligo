@@ -2,7 +2,7 @@
 # Author: Benilton Carvalho
 # Date: Apr/2005
 
-oligoBatch <- function(path=".", loadDesign = TRUE){
+NGBatch <- function(path=".", loadDesign = TRUE){
   
   info <- readxys(pathxys=path)
   xys <- info$xys
