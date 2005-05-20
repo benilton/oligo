@@ -4,11 +4,10 @@
 
 require(Biobase)
 setClass("oligoBatch",
-         representation(designName="character",
-                        manufacturer="character",
+         representation(manufacturer="character",
+                        platform="character",
                         nrow="numeric",
                         ncol="numeric",
-                        platform="character",
                         description="MIAME",
                         notes="character"),
          contains="eSet")
@@ -16,12 +15,12 @@ setClass("oligoBatch",
 ##simple accessors that needs to change!
 if (is.null(getGeneric("annotation")))
   setGeneric("annotation",function(object) standardGeneric("annotation"))
-setMethod("annotation","oligoBatch", function(object) object@designName)
+setMethod("annotation","oligoBatch", function(object) object@platform)
 
 ###same as above...but actual accessor
-if (is.null(getGeneric("designName")))
-  setGeneric("designName",function(object) standardGeneric("designName"))
-setMethod("designName","oligoBatch", function(object) object@designName)
+if (is.null(getGeneric("platform")))
+  setGeneric("platform",function(object) standardGeneric("platform"))
+setMethod("platform","oligoBatch", function(object) object@platform)
 
 ###for compatibility with previous package
 setMethod("length",signature(x="oligoBatch"),
@@ -34,7 +33,7 @@ if (is.null(getGeneric("platformDesignName"))){
 
 setMethod("platformDesignName","oligoBatch", function(object){
   if(object@manufacturer=="NimbleGen"){
-    return(gsub("[_-]","",paste("ng",object@designName,sep="")))
+    return(gsub("[_-]","",paste("ng",object@platform,sep="")))
   }})
 
 ##loading the library for now... this must change
@@ -144,7 +143,7 @@ if( !isGeneric("notes") )
 ###THESE will have to change:
 # if (is.null(getGeneric("featureInfo")))
 #   setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))
-# setMethod("featureInfo","oligoBatch", function(object) slot(get(designName(object)),"featureInfo"))
+# setMethod("featureInfo","oligoBatch", function(object) slot(get(platform(object)),"featureInfo"))
 
 # if (is.null(getGeneric("featureType")))
 #   setGeneric("featureType", function(object) standardGeneric("featureType"))

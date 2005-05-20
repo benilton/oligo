@@ -16,6 +16,7 @@ readonexysfile <- function(filename){
   header <-  scan(filename,sep = "\t",nlines = 1,skip = 1,quiet = TRUE,what = character(0))
   whatToRead <- types[match(header,names(types))]
 
+  ##RI: why does this return character
   sig <- scan(filename,
               sep = "\t",
               skip = 2,
@@ -90,7 +91,9 @@ read.xysfiles <- function(filenames,
     ##THIS MUST CHANGE
     designname=gsub("[_-]","",paste("ng",designnamelist[1],sep=""))
     library(designname,character.only=TRUE)
-    ##THIS MUST CHANGE                                    
+    ##THIS MUST CHANGE...
+    ##RI: instead read the first one. figure out size. then
+    ##RI: creat matrix e.
       
     e <- matrix(0,nProbes(get(designname)),length(filenames))
     colnames(e) <- tmp$samplenames
@@ -103,7 +106,7 @@ read.xysfiles <- function(filenames,
    return(new("oligoBatch",
               eList = new("exprList",
                 .Data = list(exprs=e), eMetadata=data.frame()),
-               designName = designnamelist[1],
+               platform = designnamelist[1],
                manufacturer = "NimbleGen",
                phenoData=tmp$phenoData,
                description=tmp$description,
