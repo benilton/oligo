@@ -1,2 +1,6 @@
 # Loading required libraries
-.First.lib <- library(Biobase)
+.First.lib <- function(libname, pkgname, where) {
+  library(Biobase)
+  library.dynam("oligo", pkgname, libname)
+
+}
