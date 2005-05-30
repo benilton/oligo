@@ -35,6 +35,9 @@ if (is.null(getGeneric("platformDesignName"))){
 setMethod("platformDesignName","oligoBatch", function(object){
   if(object@manufacturer=="NimbleGen"){
     return(gsub("[_-]","",paste("ng",object@platform,"pd",sep="")))
+  }
+  else if (object@manufacturer=="Affymetrix"){
+    return(gsub("[_-]","",paste(object@platform,"pd",sep="")))
   }})
 
 ##loading the library for now... this must change

@@ -105,7 +105,7 @@ read.affybatch <- function(..., filenames=character(0),
   out <- new("oligoBatch")
   out@eList$exprs <- expr
   rm(expr)
-  out@platform <- ref.cdfName
+  out@platform <- tolower(ref.cdfName)
   out@manufacturer <- "Affymetrix"
   out@phenoData <- phenoData
   out@description <- description
