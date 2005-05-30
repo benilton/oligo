@@ -1,13 +1,10 @@
 # Methods
 # Author: Benilton Carvalho
 # Date: April 2005
-
 require(Biobase)
 setClass("oligoBatch",
          representation(manufacturer="character",
                         platform="character",
-                        nrow="numeric",
-                        ncol="numeric",
                         description="MIAME",
                         notes="character"),
          contains="eSet")
@@ -24,7 +21,7 @@ setMethod("platform","oligoBatch", function(object) object@platform)
 
 ###for compatibility with previous package
 setMethod("length",signature(x="oligoBatch"),
-          function(x) ncol(exprs(x))) ##RI: assumes matrices
+          function(x) ncol(exprs(x))) 
 
 ###this might change. we might put pd at the end
 ## BC: May 29 - pd added at the end

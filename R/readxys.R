@@ -43,7 +43,7 @@ stuffForXYSandCELreaders <- function(filenames,
   pdata <- pData(phenoData)
   if(dim(pdata)[1] != n) {
     ##if empty pdata filename are samplenames
-    warning("Incompatible phenoData object. Created a new one.\n")
+    cat("Incompatible phenoData object. Created a new one.\n")
     
     samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
     pdata <- data.frame(sample=1:n, row.names=samplenames)
@@ -88,7 +88,6 @@ read.xysfiles <- function(filenames,
     stop("XYS Files do not refer to the same design!")
   }
   else{
-    
     ##THIS MUST CHANGE
     ## BC: corrected on May 28, adding "pd" at the end
     designname=gsub("[_-]","",paste("ng",designnamelist[1],"pd",sep=""))
@@ -108,26 +107,17 @@ read.xysfiles <- function(filenames,
     }
   }
 
-##  return(new("oligoBatch",
-##             eList = new("exprList",
-##               .Data = list(exprs=e), eMetadata=data.frame()),
-##             platform = designnamelist[1],
-##             manufacturer = "NimbleGen",
-##             phenoData=tmp$phenoData,
-##             description=tmp$description,
-##             notes=notes))  
-
-  out <- new("oligoBatch")
-  ## BC: design names always in lower case?
-  out@platform <- tolower(designnamelist[1])
-  out@manufacturer <- "NimbleGen"
-  out@phenoData <- tmp$phenoData
-  out@description <- tmp$description
-  out@notes <- notes
-  out@eList$exprs <- e
-  return(out)
-
   
+  colnames(e) <- tmp$samplenames
+  return(new("oligoBatch",
+             eList=new("exprList",
+               .Data=list(exprs=e),
+               eMetadata=data.frame()),
+             platform = designnamelist[1],
+             manufacturer = "NimbleGen",
+             phenoData=tmp$phenoData,
+             description=tmp$description,
+             notes=notes))
 }
 
 

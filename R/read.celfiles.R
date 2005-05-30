@@ -24,14 +24,57 @@
 #############################################################
 
 
+read.celfiles <- function(filenames,
+                          phenoData=new("phenoData"),
+                          description=NULL,
+                          notes="",
+                          verbose = FALSE,
+                          compress= FALSE,
+                          rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE){
+
+  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
+
+  filenames <- tmp$filenames
+
+  n <- length(filenames)
+
+  ## error if no file name !
+  if (n == 0)
+    stop("No file name given !")
+
+  ## read the first file to see what we have
+  headdetails <- .Call("ReadHeader",filenames[1], compress, PACKAGE="oligo")
+
+  ##now we use the length
+  dim.intensity <- headdetails[[2]]
+  ##and the cdfname as ref
+  ref.cdfName <- headdetails[[1]]
+  
+  out <- new("oligoBatch",
+             eList=new("exprList",
+               .Data=list(exprs=.Call("read_abatch",as.list(filenames),
+                            compress, rm.mask,
+                            rm.outliers, rm.extra, ref.cdfName,
+                            dim.intensity, verbose, PACKAGE="oligo")),
+               eMetadata=data.frame()),
+             platform = ref.cdfName,
+             manufacturer = "Affymetrix",
+             phenoData=tmp$phenoData,
+             description=tmp$description,
+             notes=notes)
+  colnames(out@eList$exprs) <- sampleNames(out)
+  return(out)
+}
+
 read.affybatch <- function(..., filenames=character(0),
-                           ##sd=FALSE,
                            phenoData=new("phenoData"),
                            description=NULL,
                            notes="",
                            compress = getOption("BioC")$affy$compress.cel,
                            rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE,
                            verbose = FALSE) {
+
+  warning("read.affybatch is depricated. Please use read.xysfile.")
 
   auxnames <- as.list(substitute(list(...)))[-1]
   filenames <- .Primitive("c")(filenames, auxnames)
@@ -42,77 +85,17 @@ read.affybatch <- function(..., filenames=character(0),
   if (n == 0)
     stop("No file name given !")
 
-  pdata <- pData(phenoData)
-  ##try to read sample names form phenoData. if not there use CEL filenames
-  if(dim(pdata)[1] != n) {
-    ##if empty pdata filename are samplenames
-    warning("Incompatible phenoData object. Created a new one.\n")
-
-    samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
-    pdata <- data.frame(sample=1:n, row.names=samplenames)
-    phenoData <- new("phenoData",pData=pdata,varLabels=list(sample="arbitrary numbering"))
-  }
-  else samplenames <- rownames(pdata)
-
-  if (is.null(description))
-    {
-      description <- new("MIAME")
-      description@preprocessing$filenames <- filenames
-      description@preprocessing$affyversion <- library(help=oligo)$info[[2]][2]
-    }
-  ## read the first file to see what we have
-  if (verbose) cat(1, "reading",filenames[[1]],"...")
-
-  headdetails <- .Call("ReadHeader",filenames[[1]],compress, PACKAGE="oligo")
-
-  #print(headdetails)
-
-
-
-  ##now we use the length
-  dim.intensity <- headdetails[[2]]   ##dim(intensity(cel))
-  ##and the cdfname as ref
-  ref.cdfName <- headdetails[[1]]   #cel@cdfName
-
-  if (verbose)
-    cat(paste("instantiating an oligoBatch (intensity a ", prod(dim.intensity), "x", length(filenames), " matrix)...", sep=""))
-
-
-
-  if (verbose)
-    cat("done.\n")
-
-  #### this is where the code changes from the original read.affybatch.
-  #### what we will do here is read in from the 1st to the nth CEL file
-
-## return(new("AffyBatch",
-##              exprs  = .Call("read_abatch",filenames,compress, rm.mask,
-##              rm.outliers, rm.extra, ref.cdfName,
-##              dim.intensity,verbose, PACKAGE="affy"),
-##              ##se.exprs = array(NaN, dim=dim.sd),
-##              cdfName    = ref.cdfName,   ##cel@cdfName,
-##              phenoData  = phenoData,
-##              nrow       = dim.intensity[1],
-##              ncol       = dim.intensity[2],
-##              annotation = cleancdfname(ref.cdfName, addcdf=FALSE),
-##              description= description,
-##              notes      = notes))
-
-
-  expr <- .Call("read_abatch",filenames,compress, rm.mask,
-                rm.outliers, rm.extra, ref.cdfName,
-                dim.intensity,verbose, PACKAGE="oligo")
-  out <- new("oligoBatch")
-  out@eList$exprs <- expr
-  rm(expr)
-  out@platform <- tolower(ref.cdfName)
-  out@manufacturer <- "Affymetrix"
-  out@phenoData <- phenoData
-  out@description <- description
-  out@notes <- notes
-  return(out)
-
+  read.celfiles(filenames,
+                phenoData=phenoData,
+                description=description,
+                notes=notes,
+                verbose = verbose,
+                rm.mask = rm.mask,
+                rm.outliers= rm.outliers,
+                rm.extra=rm.extra)
 }
+
+
 
 
 
@@ -126,14 +109,12 @@ read.probematrix <- function(..., filenames = character(0), phenoData = new("phe
 
   auxnames <- as.list(substitute(list(...)))[-1]
   filenames <- .Primitive("c")(filenames, auxnames)
-
+  
   which <- match.arg(which,c("pm","mm","both"))
-
-  if (verbose)
-        cat(1, "reading", filenames[[1]], "to get header information")
-    headdetails <- .Call("ReadHeader", filenames[[1]], compress, PACKAGE="oligo")
-    dim.intensity <- headdetails[[2]]
-    ref.cdfName <- headdetails[[1]]
+  
+  headdetails <- .Call("ReadHeader", filenames[[1]], compress, PACKAGE="oligo")
+  dim.intensity <- headdetails[[2]]
+  ref.cdfName <- headdetails[[1]]
 
   Data <- new("oligoBatch", cdfName = ref.cdfName, annotation = cleancdfname(ref.cdfName,addcdf = FALSE))
 
