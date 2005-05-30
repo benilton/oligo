@@ -27,13 +27,14 @@ setMethod("length",signature(x="oligoBatch"),
           function(x) ncol(exprs(x))) ##RI: assumes matrices
 
 ###this might change. we might put pd at the end
+## BC: May 29 - pd added at the end
 if (is.null(getGeneric("platformDesignName"))){
   setGeneric("platformDesignName",
              function(object) standardGeneric("platformDesignName"))}
 
 setMethod("platformDesignName","oligoBatch", function(object){
   if(object@manufacturer=="NimbleGen"){
-    return(gsub("[_-]","",paste("ng",object@platform,sep="")))
+    return(gsub("[_-]","",paste("ng",object@platform,"pd",sep="")))
   }})
 
 ##loading the library for now... this must change
@@ -55,7 +56,7 @@ if (is.null(getGeneric("probeNames")))
 setMethod("probeNames", "oligoBatch",
           function(object, genenames=NULL){
             pmIndex <- pmindex(getPlatformDesign(object))
-            pns <- get("feature_names",envir=featureInfo(getPlatformDesign(object)))
+            pns <- get("feature_name",envir=featureInfo(getPlatformDesign(object)))
             return(as.character(pns[pmIndex]))
           })
 
@@ -67,7 +68,7 @@ if (is.null(getGeneric("geneNames")))
 setMethod("geneNames", "oligoBatch",
           function(object){
             pmIndex <- pmindex(getPlatformDesign(object))
-            return(levels(factor(get("feature_names",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
+            return(levels(factor(get("feature_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
           })
 
 
@@ -158,7 +159,7 @@ if( !isGeneric("notes") )
 #   setGeneric("featureNames", function(object) standardGeneric("featureNames"))
 # setMethod("featureNames","oligoBatch",
 #           function(object){
-#             pmfeaturenames <- get("feature_names", envir = featureInfo(object))[featureType(object) == "PM"]
+#             pmfeaturenames <- get("feature_name", envir = featureInfo(object))[featureType(object) == "PM"]
 #             return(pmfeaturenames[order(pmfeatureGroup(object))])
 #           })
 

@@ -1,6 +1,6 @@
 # Reading NimbleGen Data
 # Author: Benilton Carvalho
-# Last Modification: Apr / 2005
+# Last Modification: May 28, 2005
 
 list.xysfiles <-   function(...){
   files <- list.files(...)
@@ -55,7 +55,8 @@ stuffForXYSandCELreaders <- function(filenames,
     {
       description <- new("MIAME")
       description@preprocessing$filenames <- filenames
-      description@preprocessing$oligoversion <- library(help="oligo")$info[[1]][[2]][2]
+      ## BC: corrected on May 28 (from [[1]][[2]][2] to [[2]][2])
+      description@preprocessing$oligoversion <- library(help="oligo")$info[[2]][2]
     }
   
   return(list(filenames=filenames,samplenames=samplenames,phenoData=phenoData,description=description))
@@ -89,7 +90,10 @@ read.xysfiles <- function(filenames,
   else{
     
     ##THIS MUST CHANGE
-    designname=gsub("[_-]","",paste("ng",designnamelist[1],sep=""))
+    ## BC: corrected on May 28, adding "pd" at the end
+    designname=gsub("[_-]","",paste("ng",designnamelist[1],"pd",sep=""))
+    ## BC: makePlatformDesign uses lower case (May 28)
+    designname <- tolower(designname)
     library(designname,character.only=TRUE)
     ##THIS MUST CHANGE...
     ##RI: instead read the first one. figure out size. then
@@ -103,14 +107,27 @@ read.xysfiles <- function(filenames,
         if(verbose) cat("Done.\n")
     }
   }
-   return(new("oligoBatch",
-              eList = new("exprList",
-                .Data = list(exprs=e), eMetadata=data.frame()),
-               platform = designnamelist[1],
-               manufacturer = "NimbleGen",
-               phenoData=tmp$phenoData,
-               description=tmp$description,
-               notes=notes))
+
+##  return(new("oligoBatch",
+##             eList = new("exprList",
+##               .Data = list(exprs=e), eMetadata=data.frame()),
+##             platform = designnamelist[1],
+##             manufacturer = "NimbleGen",
+##             phenoData=tmp$phenoData,
+##             description=tmp$description,
+##             notes=notes))  
+
+  out <- new("oligoBatch")
+  ## BC: design names always in lower case?
+  out@platform <- tolower(designnamelist[1])
+  out@manufacturer <- "NimbleGen"
+  out@phenoData <- tmp$phenoData
+  out@description <- tmp$description
+  out@notes <- notes
+  out@eList$exprs <- e
+  return(out)
+
+  
 }
 
 
