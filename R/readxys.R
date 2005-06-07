@@ -90,9 +90,7 @@ read.xysfiles <- function(filenames,
   else{
     ##THIS MUST CHANGE
     ## BC: corrected on May 28, adding "pd" at the end
-    designname=gsub("[_-]","",paste("ng",designnamelist[1],"pd",sep=""))
-    ## BC: makePlatformDesign uses lower case (May 28)
-    designname <- tolower(designname)
+    designname=cleanPlatformName(designnamelist[1],nimblegen=TRUE)
     library(designname,character.only=TRUE)
     ##THIS MUST CHANGE...
     ##RI: instead read the first one. figure out size. then

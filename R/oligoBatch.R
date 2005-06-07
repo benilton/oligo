@@ -30,12 +30,7 @@ if (is.null(getGeneric("platformDesignName"))){
              function(object) standardGeneric("platformDesignName"))}
 
 setMethod("platformDesignName","oligoBatch", function(object){
-  if(object@manufacturer=="NimbleGen"){
-    return(gsub("[_-]","",paste("ng",object@platform,"pd",sep="")))
-  }
-  else if (object@manufacturer=="Affymetrix"){
-    return(gsub("[_-]","",paste(object@platform,"pd",sep="")))
-  }})
+  cleanPlatformName(object@platform)})
 
 ##loading the library for now... this must change
 if (is.null(getGeneric("getPlatformDesign"))){
