@@ -88,3 +88,4 @@ setMethod("pmindex", "platformDesign",
             return(Index[order(pns[Index])])
           })
 
+
