@@ -1,5 +1,6 @@
+## BC: Jul 13, "pd" at the begining
 cleanPlatformName <- function(x)
-  gsub("[_-]","",paste(tolower(x),"pd",sep=""))
+  gsub("[_-]","",paste("pd",tolower(x),sep=""))
 
 setClass("platformDesign",
          representation(featureInfo = "environment",

@@ -25,6 +25,7 @@ setMethod("length",signature(x="oligoBatch"),
 
 ###this might change. we might put pd at the end
 ## BC: May 29 - pd added at the end
+## BC: Jul 13 - pd moved to the begining
 if (is.null(getGeneric("platformDesignName"))){
   setGeneric("platformDesignName",
              function(object) standardGeneric("platformDesignName"))}

@@ -90,6 +90,7 @@ read.xysfiles <- function(filenames,
   else{
     ##THIS MUST CHANGE
     ## BC: corrected on May 28, adding "pd" at the end
+    ## BC: Jul 13, "pd" at the begining
     designname=cleanPlatformName(designnamelist[1],nimblegen=TRUE)
     library(designname,character.only=TRUE)
     ##THIS MUST CHANGE...

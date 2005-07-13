@@ -63,6 +63,12 @@ read.celfiles <- function(filenames,
              description=tmp$description,
              notes=notes)
   colnames(out@eList$exprs) <- sampleNames(out)
+
+  ## BC: Jul 13, garbage collection.
+  ##     It wastes too much memory after reading a long list of files
+  ##     I hope this is not bad
+  gc()
+  
   return(out)
 }
 
