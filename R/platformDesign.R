@@ -2,10 +2,13 @@
 cleanPlatformName <- function(x)
   gsub("[_-]","",paste("pd",tolower(x),sep=""))
 
+## BC: added nrow/ncol
 setClass("platformDesign",
          representation(featureInfo = "environment",
                         manufacturer = "character",
-                        type = "character"))
+                        type = "character",
+                        nrow = "numeric",
+                        ncol = "numeric"))
 
 ##functions and methods
 featureInfo <- function(object) object@featureInfo
