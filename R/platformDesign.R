@@ -75,7 +75,7 @@ if( is.null(getGeneric("probeNames")))
 
 setMethod("probeNames","platformDesign",
           function(object){
-            return(get("feature_name",featureInfo(object)))
+            return(get("feature_set_name",featureInfo(object)))
           })
                                    
 

@@ -52,7 +52,7 @@ if (is.null(getGeneric("probeNames")))
 setMethod("probeNames", "oligoBatch",
           function(object, genenames=NULL){
             pmIndex <- pmindex(getPlatformDesign(object))
-            pns <- get("feature_name",envir=featureInfo(getPlatformDesign(object)))
+            pns <- get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))
             return(as.character(pns[pmIndex]))
           })
 
@@ -64,7 +64,7 @@ if (is.null(getGeneric("geneNames")))
 setMethod("geneNames", "oligoBatch",
           function(object){
             pmIndex <- pmindex(getPlatformDesign(object))
-            return(levels(factor(get("feature_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
+            return(levels(factor(get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
           })
 
 
@@ -155,7 +155,7 @@ if( !isGeneric("notes") )
 #   setGeneric("featureNames", function(object) standardGeneric("featureNames"))
 # setMethod("featureNames","oligoBatch",
 #           function(object){
-#             pmfeaturenames <- get("feature_name", envir = featureInfo(object))[featureType(object) == "PM"]
+#             pmfeaturenames <- get("feature_set_name", envir = featureInfo(object))[featureType(object) == "PM"]
 #             return(pmfeaturenames[order(pmfeatureGroup(object))])
 #           })
 
