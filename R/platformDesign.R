@@ -5,6 +5,7 @@ cleanPlatformName <- function(x)
 ## BC: added nrow/ncol
 setClass("platformDesign",
          representation(featureInfo = "environment",
+                        featureTypeDescription = "list",
                         manufacturer = "character",
                         type = "character",
                         nrow = "numeric",
@@ -22,19 +23,6 @@ setMethod("names","platformDesign",
             return(ls(featureInfo(x)))
           })
 
-setMethod("[", "platformDesign", function(x, i, j, ..., drop=FALSE) {
-  if( missing(j) ) j <- names(x)  else j <- names(x)[j] 
-  if( missing(i) ) i <- 1:nProbes(x)
-
-  env <- new.env()
-
-  for(col in j){
-    val <- get(col,featureInfo(x))[i]
-    assign(col,val,col,envir=env)
-  }
-  
-  return(new("platformDesign",featureInfo=env,manufacturer=x@manufacturer,type=x@type))
-})
 
 ##show method
 setMethod("show","platformDesign", function(object){
@@ -45,23 +33,12 @@ setMethod("show","platformDesign", function(object){
 
 
 as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
-
-  myCall <- "df=data.frame("
-  for(i in seq(along=names(x))){
-    myCall <- paste(myCall,"get(\"",names(x)[i],"\",featureInfo(x))",sep="")
-    if(i==length(names(x))){myCall <- paste(myCall,")")} else{ myCall<-paste(myCall,",")}
-  }
-  eval(parse(text=myCall))
-  names(df) <- names(x)
-  df <- as.data.frame(df,row.names=row.names,optional=optional)
-  return(df)
+  return(as.data.frame(as.list(featureInfo(x)),row.names=row.names,optional=optional))
 }
 
 "$.platformDesign" <- function(object, val)
   get(val,featureInfo(object))
       
-
-
 ##X is arbitrarily chosen
 nProbes <- function(object){
   colname <- ls(featureInfo(object))[1]
@@ -78,7 +55,6 @@ setMethod("probeNames","platformDesign",
             return(get("feature_set_name",featureInfo(object)))
           })
                                    
-
 ##pmindex method
 if( is.null(getGeneric("pmindex")))
   setGeneric("pmindex", function(object,...)
