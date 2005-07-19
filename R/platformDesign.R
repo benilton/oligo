@@ -63,7 +63,7 @@ if( is.null(getGeneric("pmindex")))
 ###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
 setMethod("pmindex", "platformDesign",
           function(object){
-            Index=which(get("feature_type",featureInfo(object))=="PM")
+            Index=which(get("feature_type_1",featureInfo(object))=="PM")
             pns = probeNames(object)
             return(Index[order(pns[Index])])
           })
