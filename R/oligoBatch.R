@@ -1,7 +1,6 @@
 # Methods
 # Author: Benilton Carvalho
 # Date: April 2005
-require(Biobase)
 setClass("oligoBatch",
          representation(manufacturer="character",
                         platform="character",
