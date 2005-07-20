@@ -88,6 +88,28 @@ setReplaceMethod("pm", "oligoBatch",
                    exprs(object)[pmIndex,] <- value
                    object
                  })
+##MM methods... designed for arrays that have one MM per PM
+if( is.null(getGeneric("mm") ))
+  setGeneric("mm", function(object, ...)
+             standardGeneric("mm"))
+
+setMethod("mm","oligoBatch", ##genenames is ignored for now.. we will get to it
+          function(object, genenames=NULL){
+             mmIndex <- mmindex(getPlatformDesign(object))
+             return(exprs(object)[mmIndex,,drop=FALSE])
+           })
+          
+if( is.null(getGeneric("mm<-") ))
+  setGeneric("mm<-", function(object, value)
+             standardGeneric("mm<-"))
+
+setReplaceMethod("mm", "oligoBatch",
+                 function(object, value){
+                   mmIndex <- mmindex(getPlatformDesign(object))
+                   exprs(object)[mmIndex,] <- value
+                   object
+                 })
+
 
 
 ###sampleNames and description should go away once eSet has them
@@ -136,70 +158,3 @@ if( !isGeneric("notes") )
   })
 
 
-###THESE will have to change:
-# if (is.null(getGeneric("featureInfo")))
-#   setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))
-# setMethod("featureInfo","oligoBatch", function(object) slot(get(platform(object)),"featureInfo"))
-
-# if (is.null(getGeneric("featureType")))
-#   setGeneric("featureType", function(object) standardGeneric("featureType"))
-# setMethod("featureType","oligoBatch", function(object) get("feature_type", envir = featureInfo(object)))
-
-# if (is.null(getGeneric("featureClass")))
-#   setGeneric("featureClass", function(object) standardGeneric("featureClass"))
-# setMethod("featureClass","oligoBatch", function(object) get("feature_class", envir = featureInfo(object)))
-
-
-# if (is.null(getGeneric("featureNames")))
-#   setGeneric("featureNames", function(object) standardGeneric("featureNames"))
-# setMethod("featureNames","oligoBatch",
-#           function(object){
-#             pmfeaturenames <- get("feature_set_name", envir = featureInfo(object))[featureType(object) == "PM"]
-#             return(pmfeaturenames[order(pmfeatureGroup(object))])
-#           })
-
-# if (is.null(getGeneric("featureGroup")))
-#   setGeneric("featureGroup", function(object) standardGeneric("featureGroup"))
-# setMethod("featureGroup","oligoBatch", function(object) get("feature_group", envir = featureInfo(object)))
-
-# if (is.null(getGeneric("pmfeatureGroup")))
-#   setGeneric("pmfeatureGroup", function(object) standardGeneric("pmfeatureGroup"))
-# setMethod("pmfeatureGroup","oligoBatch", function(object) featureGroup(object)[featureType(object) == "PM"])
-
-# if (is.null(getGeneric("mmfeatureGroup")))
-#   setGeneric("mmfeatureGroup", function(object) standardGeneric("mmfeatureGroup"))
-# setMethod("mmfeatureGroup","oligoBatch", function(object) featureGroup(object)[featureType(object) == "MM"])
-
-# if (is.null(getGeneric("mismatch")))
-#   setGeneric("mismatch", function(object) standardGeneric("mismatch"))
-# setMethod("mismatch","oligoBatch", function(object) get("mismatch", envir = featureInfo(object)))
-
-# ### PM
-# if (is.null(getGeneric("pm")))
-#   setGeneric("pm",function(object,...) standardGeneric("pm"))
-# setMethod("pm","oligoBatch",
-#           function(object) {
-#             pmnames <- featureNames(object)[featureType(object) == "PM"]
-#             pms <- exprs(object)[featureType(object) == "PM",]
-#             rownames(pms) <- pmnames
-#             pms <- pms[order(pmfeatureGroup(object)),]
-#             return(pms)
-#           })
-
-# ### MM
-# if (is.null(getGeneric("mm")))
-#   setGeneric("mm",function(object,...) standardGeneric("mm"))
-# setMethod("mm","oligoBatch",
-#           function(object) {
-#             maxmm <- max(mismatch(object))
-#             mmnames <- featureNames(object)[featureType(object) == "MM"]
-#             mms <- list()
-#             for (i in 1:maxmm){
-#               mmsl <- exprs(object)[featureType(object) == "MM" & mismatch(object) == i,]
-#               rownames(mmsl) <- mmnames
-#               mmsl <- mmsl[order(mmfeatureGroup(object)),]
-#               mms[[i]] <- mmsl 
-#             }
-#             if (maxmm == 1) mms <- mms[[1]]
-#             return(mms)
-#           })

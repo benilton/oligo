@@ -60,11 +60,29 @@ if( is.null(getGeneric("pmindex")))
   setGeneric("pmindex", function(object,...)
              standardGeneric("pmindex"))
 
-###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
+##WE assume feature_type_1 is PM or MM. this might change with other platforms
 setMethod("pmindex", "platformDesign",
           function(object){
             Index=which(get("feature_type_1",featureInfo(object))=="PM")
+
+            ids=get("feature_ID",featureInfo(object))
             pns = probeNames(object)
-            return(Index[order(pns[Index])])
+          
+            return(Index[order(pns[Index],ids[Index])])
           })
 
+##mmindex method.. for now we assume there is one MM per PM
+if( is.null(getGeneric("mmindex")))
+  setGeneric("mmindex", function(object,...)
+             standardGeneric("mmindex"))
+
+###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
+setMethod("mmindex", "platformDesign",
+          function(object){
+            Index=which(get("feature_type_1",featureInfo(object))=="MM")
+
+            ids=get("feature_ID",featureInfo(object))
+            pns = probeNames(object)
+          
+            return(Index[order(pns[Index],ids[Index])])
+          })
