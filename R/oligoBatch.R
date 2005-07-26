@@ -206,7 +206,7 @@ setMethod("image",signature(x="oligoBatch"),
           })
 
 
-###boxplot
+## Boxplot
 if( is.null(getGeneric("boxplot")))
   setGeneric("boxplot")
 
@@ -215,16 +215,77 @@ setMethod("boxplot",signature(x="oligoBatch"),
             tmp <- description(x)
             if (is(tmp, "MIAME")) main <- tmp@title
 
-            tmp <- unlist(indexProbes(x,which))
+            tmp <- unlist(featureIndex(x,which))
             tmp <- tmp[seq(1,length(tmp),len=5000)]
 
-            boxplot(data.frame(log2(intensity(x)[tmp,])),main=main,range=range, ...)
+            boxplot(data.frame(log2(exprs(x)[tmp,])),main=main,range=range, ...)
           })
 
-###hist
-###if (debug.affy123) cat("--->hist\n")
-###
-###if( is.null(getGeneric("hist")) )
-###  setGeneric("hist")
-###
-###setMethod("hist",signature(x="AffyBatch"), function(x,...) plotDensity.AffyBatch(x,...))
+
+
+## BC: Mon Jul 25, 2005 - added featureIndex, before called indexProbe
+##     so we can produce some plots.
+
+if( is.null(getGeneric("featureIndex") ))
+  setGeneric("featureIndex", function(object, ...)
+             standardGeneric("featureIndex"))
+
+setMethod("featureIndex","oligoBatch", ##genenames is ignored for now.. we will get to it
+          function(object, which="both", genenames=NULL){
+            if (which=="both"){
+              pmIndex <- pmindex(getPlatformDesign(object))
+              mmIndex <- mmindex(getPlatformDesign(object))
+              indexes <- sort(c(pmIndex,mmIndex))
+            } else if (which=="pm"){
+              indexes <- sort(pmindex(getPlatformDesign(object)))
+            } else if (which=="mm"){
+              indexes <- sort(mmindex(getPlatformDesign(object)))
+            } else {
+              cat("Not a valid type.\n")
+            }
+             return(indexes)
+           })
+
+
+## Histogram
+if( is.null(getGeneric("hist")) )
+  setGeneric("hist")
+
+setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.AffyBatch(x,...))
+
+## BC: Mon, Jul 25, 2005 - Plot density - from affy
+plotDensity <- function(mat,
+                        ylab="density", xlab="x", type="l", col=1:6,
+                        ...) {
+  
+  x.density <- apply(mat, 2, density)
+
+  all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
+  all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
+  
+  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+
+  invisible(list(all.x=all.x, all.y=all.y))
+}
+ 
+
+plotDensity.AffyBatch <- function(x, col=1:6, log=TRUE,
+                                  which="both",
+                                  ylab="density",
+                                  xlab=NULL,
+                                  ...){
+  
+  Index <- unlist(featureIndex(x,which))
+  
+  x <- exprs(x)[Index, ,drop=FALSE]
+  
+  if(log){
+    x <- log2(x)
+    if(is.null(xlab)) xlab <- "log intensity"
+  }
+  else  if(is.null(xlab)) xlab <- "intensity"
+  
+  rv <- plotDensity(x, ylab=ylab, xlab=xlab, col=col, ...)
+
+  invisible(rv)
+}
