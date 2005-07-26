@@ -211,7 +211,8 @@ if( is.null(getGeneric("boxplot")))
   setGeneric("boxplot")
 
 setMethod("boxplot",signature(x="oligoBatch"),
-          function(x,which="both",range=0,...){
+          function(x,which=c("both","pm","mm"),range=0,...){
+            which <- match.arg(which,c("both","pm","mm"))
             tmp <- description(x)
             if (is(tmp, "MIAME")) main <- tmp@title
 
@@ -231,7 +232,8 @@ if( is.null(getGeneric("featureIndex") ))
              standardGeneric("featureIndex"))
 
 setMethod("featureIndex","oligoBatch", ##genenames is ignored for now.. we will get to it
-          function(object, which="both", genenames=NULL){
+          function(object, which=c("both","pm","mm"), genenames=NULL){
+            which <- match.arg(which,c("both","pm","mm"))
             if (which=="both"){
               pmIndex <- pmindex(getPlatformDesign(object))
               mmIndex <- mmindex(getPlatformDesign(object))
@@ -240,8 +242,6 @@ setMethod("featureIndex","oligoBatch", ##genenames is ignored for now.. we will 
               indexes <- sort(pmindex(getPlatformDesign(object)))
             } else if (which=="mm"){
               indexes <- sort(mmindex(getPlatformDesign(object)))
-            } else {
-              cat("Not a valid type.\n")
             }
              return(indexes)
            })
@@ -270,11 +270,13 @@ plotDensity <- function(mat,
  
 
 plotDensity.AffyBatch <- function(x, col=1:6, log=TRUE,
-                                  which="both",
+                                  which=c("both","pm","mm"),
                                   ylab="density",
                                   xlab=NULL,
                                   ...){
-  
+
+  which <- match.arg(which,c("both","pm","mm"))
+
   Index <- unlist(featureIndex(x,which))
   
   x <- exprs(x)[Index, ,drop=FALSE]
