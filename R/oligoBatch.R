@@ -3,9 +3,7 @@
 # Date: April 2005
 setClass("oligoBatch",
          representation(manufacturer="character",
-                        platform="character",
-                        description="characterORMIAME",
-                        notes="character"),
+                        platform="character"),
          contains="eSet")
 
 ##simple accessors that needs to change!
@@ -130,16 +128,17 @@ setReplaceMethod("mm", "oligoBatch",
                  })
 
 ###sampleNames and description should go away once eSet has them
-if( !isGeneric("sampleNames") )
-  setGeneric("sampleNames", function(object)
-             standardGeneric("sampleNames"))
-setMethod("sampleNames", "oligoBatch",
-          function(object) {
-            if (! is.null(colnames(exprs(object))))
-              colnames(exprs(object))
-            else
-              row.names(pData(object))
-          })
+###COMMENT OUT TO SEE IF BIOBASE;s IS WORKING. IF IT IS WE GET RID OF IT
+# if( !isGeneric("sampleNames") )
+#   setGeneric("sampleNames", function(object)
+#              standardGeneric("sampleNames"))
+# setMethod("sampleNames", "oligoBatch",
+#           function(object) {
+#             if (! is.null(colnames(exprs(object))))
+#               colnames(exprs(object))
+#             else
+#               row.names(pData(object))
+#           })
 
 ##description
 if( !isGeneric("description") )
