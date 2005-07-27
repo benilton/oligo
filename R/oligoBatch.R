@@ -4,7 +4,7 @@
 setClass("oligoBatch",
          representation(manufacturer="character",
                         platform="character",
-                        description="MIAME",
+                        description="characterORMIAME",
                         notes="character"),
          contains="eSet")
 
@@ -67,6 +67,29 @@ setMethod("geneNames", "oligoBatch",
           })
 
 
+##pmindex method for oligoBatch
+if( is.null(getGeneric("pmindex")))
+  setGeneric("pmindex", function(object,...)
+             standardGeneric("pmindex"))
+
+##WE assume feature_type_1 is PM or MM. this might change with other platforms
+setMethod("pmindex", "oligoBatch",
+          function(object){
+            pmindex(getPlatformDesign(object))
+          })
+
+##mmindex method for oligoBatch
+if( is.null(getGeneric("mmindex")))
+  setGeneric("mmindex", function(object,...)
+             standardGeneric("mmindex"))
+
+##WE assume feature_type_1 is PM or MM. this might change with other platforms
+setMethod("mmindex", "oligoBatch",
+          function(object){
+            mmindex(getPlatformDesign(object))
+          })
+
+
 ##PM methods
 if( is.null(getGeneric("pm") ))
   setGeneric("pm", function(object, ...)
@@ -74,18 +97,16 @@ if( is.null(getGeneric("pm") ))
 
 setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
-             pmIndex <- pmindex(getPlatformDesign(object))
-             return(exprs(object)[pmIndex,,drop=FALSE])
-           })
-          
+            return(exprs(object)[pmindex(object),,drop=FALSE])
+          })
+
 if( is.null(getGeneric("pm<-") ))
   setGeneric("pm<-", function(object, value)
              standardGeneric("pm<-"))
 
 setReplaceMethod("pm", "oligoBatch",
                  function(object, value){
-                   pmIndex <- pmindex(getPlatformDesign(object))
-                   exprs(object)[pmIndex,] <- value
+                   exprs(object)[pmindex(object),] <- value
                    object
                  })
 ##MM methods... designed for arrays that have one MM per PM
@@ -95,9 +116,8 @@ if( is.null(getGeneric("mm") ))
 
 setMethod("mm","oligoBatch", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
-             mmIndex <- mmindex(getPlatformDesign(object))
-             return(exprs(object)[mmIndex,,drop=FALSE])
-           })
+            return(exprs(object)[mmindex(object),,drop=FALSE])
+          })
           
 if( is.null(getGeneric("mm<-") ))
   setGeneric("mm<-", function(object, value)
@@ -105,57 +125,54 @@ if( is.null(getGeneric("mm<-") ))
 
 setReplaceMethod("mm", "oligoBatch",
                  function(object, value){
-                   mmIndex <- mmindex(getPlatformDesign(object))
-                   exprs(object)[mmIndex,] <- value
+                   exprs(object)[mmindex(object),] <- value
                    object
                  })
 
-
-
 ###sampleNames and description should go away once eSet has them
 if( !isGeneric("sampleNames") )
-    setGeneric("sampleNames", function(object)
-               standardGeneric("sampleNames"))
-  setMethod("sampleNames", "oligoBatch",
-            function(object) {
-              if (! is.null(colnames(exprs(object))))
-                colnames(exprs(object))
-              else
-                row.names(pData(object))
-            })
+  setGeneric("sampleNames", function(object)
+             standardGeneric("sampleNames"))
+setMethod("sampleNames", "oligoBatch",
+          function(object) {
+            if (! is.null(colnames(exprs(object))))
+              colnames(exprs(object))
+            else
+              row.names(pData(object))
+          })
 
 ##description
 if( !isGeneric("description") )
-    setGeneric("description", function(object)
-               standardGeneric("description"))
-  setMethod("description", "oligoBatch", function(object)
-            object@description)
+  setGeneric("description", function(object)
+             standardGeneric("description"))
+setMethod("description", "oligoBatch", function(object)
+          object@description)
 
-  ##replace method for description
-  if( !isGeneric("description<-") )
-    setGeneric("description<-", function(object, value)
-               standardGeneric("description<-"))
+##replace method for description
+if( !isGeneric("description<-") )
+  setGeneric("description<-", function(object, value)
+             standardGeneric("description<-"))
 
-  setReplaceMethod("description", "oligoBatch", function(object, value) {
-    object@description <- value
-    object
-  })
+setReplaceMethod("description", "oligoBatch", function(object, value) {
+  object@description <- value
+  object
+})
 
 ##notes
 if( !isGeneric("notes") )
-    setGeneric("notes", function(object)
-               standardGeneric("notes"))
-  setMethod("notes", "oligoBatch", function(object)
-            object@notes)
+  setGeneric("notes", function(object)
+             standardGeneric("notes"))
+setMethod("notes", "oligoBatch", function(object)
+          object@notes)
 
-  if( !isGeneric("notes<-") )
-    setGeneric("notes<-", function(object, value)
-               standardGeneric("notes<-"))
+if( !isGeneric("notes<-") )
+  setGeneric("notes<-", function(object, value)
+             standardGeneric("notes<-"))
 
-  setReplaceMethod("notes", "oligoBatch", function(object, value) {
-    object@notes <- value
-    object
-  })
+setReplaceMethod("notes", "oligoBatch", function(object, value) {
+  object@notes <- value
+  object
+})
 
 
 ## BC: Fri Jul 22, 2005 - I needed this methods today
