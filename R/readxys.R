@@ -91,7 +91,7 @@ read.xysfiles <- function(filenames,
     ##THIS MUST CHANGE
     ## BC: corrected on May 28, adding "pd" at the end
     ## BC: Jul 13, "pd" at the begining
-    designname=cleanPlatformName(designnamelist[1],nimblegen=TRUE)
+    designname=cleanPlatformName(designnamelist[1])
     library(designname,character.only=TRUE)
     ##THIS MUST CHANGE...
     ##RI: instead read the first one. figure out size. then
