@@ -76,7 +76,7 @@ read.xysfiles <- function(filenames,
   ## Read all XYS files, get design name for each
   for (xysfile in filenames){
     firstline <- readxysHeader(xysfile)
-    designname <- unlist(strsplit(firstline[grep("designname",firstline)],"="))[2]
+    designname <- unlist(strsplit(firstline[grep("designname",firstline,fixed=TRUE,useBytes=TRUE)],"="))[2]
     designnamelist <- rbind(designnamelist,designname)
   }
 
