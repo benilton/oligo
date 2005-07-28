@@ -36,7 +36,15 @@ setMethod("getPlatformDesign","oligoBatch", function(object){
   return(get(pdn,pos=paste("package:",pdn,sep="")))
 })
 
-###probeNames - returns probeNames for PMs ... genenames ignored for now
+
+## BC: Thu, Jul 28, 2005 - is there a smarter way of creating a nickname?
+if (is.null(getGeneric("getPD"))){
+  setGeneric("getPD",
+             function(object) standardGeneric("getPD"))}
+setMethod("getPD","oligoBatch", function(object){
+  getPlatformDesign(object)})
+
+## probeNames - returns probeNames for PMs ... genenames ignored for now
 if (is.null(getGeneric("probeNames")))
   setGeneric("probeNames", function(object, ...)
              standardGeneric("probeNames"))
@@ -82,16 +90,43 @@ setMethod("mmindex", "oligoBatch",
             mmindex(getPlatformDesign(object))
           })
 
+## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
+##     it'll return the indexes for a given feature_set_name
+if( is.null(getGeneric("indexFeatureSetName") ))
+  setGeneric("indexFeatureSetName", function(object, ...)
+             standardGeneric("indexFeatureSetName"))
+
+setMethod("indexFeatureSetName","oligoBatch",
+          function(object, featurenames){
+            tmp <- NULL
+            for (i in featurenames)
+              tmp <- c(tmp,which(getPlatformDesign(object)$feature_set_name == i))
+            return(sort(tmp))
+          })
+
 
 ##PM methods
 if( is.null(getGeneric("pm") ))
   setGeneric("pm", function(object, ...)
              standardGeneric("pm"))
 
+## BC: Th, Jul 28, 2005 - This is an attempt of
+##     selecting the feature_set_name for pm/mm
+##     if it is working, we need to rename the variables
 setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
-            return(exprs(object)[pmindex(object),,drop=FALSE])
+            index <- pmindex(object)
+            if (!is.null(genenames))
+              index <- intersect(index,indexFeatureSetName(object,genenames))
+            return(exprs(object)[index,,drop=FALSE])
           })
+
+### Trying to make the above to work
+### if it is working, we remove the one below
+###setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
+###          function(object, genenames=NULL){
+###            return(exprs(object)[pmindex(object),,drop=FALSE])
+###          })
 
 if( is.null(getGeneric("pm<-") ))
   setGeneric("pm<-", function(object, value)
@@ -102,15 +137,27 @@ setReplaceMethod("pm", "oligoBatch",
                    exprs(object)[pmindex(object),] <- value
                    object
                  })
+
 ##MM methods... designed for arrays that have one MM per PM
 if( is.null(getGeneric("mm") ))
   setGeneric("mm", function(object, ...)
              standardGeneric("mm"))
 
-setMethod("mm","oligoBatch", ##genenames is ignored for now.. we will get to it
-          function(object, genenames=NULL){
-            return(exprs(object)[mmindex(object),,drop=FALSE])
+## BC: Th, Jul 28, 2005 - This is an attempt of
+##     selecting the feature_set_name for pm/mm
+##     if it is working, we need to rename the variables
+setMethod("mm","oligoBatch", function(object, genenames=NULL){
+            index <- mmindex(object)
+            if (!is.null(genenames))
+              index <- intersect(index,indexFeatureSetName(object,genenames))
+            return(exprs(object)[index,,drop=FALSE])
           })
+
+
+##setMethod("mm","oligoBatch", ##genenames is ignored for now.. we will get to it
+##          function(object, genenames=NULL){
+##            return(exprs(object)[mmindex(object),,drop=FALSE])
+##          })
           
 if( is.null(getGeneric("mm<-") ))
   setGeneric("mm<-", function(object, value)
@@ -137,121 +184,8 @@ if( is.null(getGeneric("nrow")))
 setMethod("nrow",signature(x="oligoBatch"),
           function(x) getPlatformDesign(x)@nrow)
 
-
-if( is.null(getGeneric("image")))
-  setGeneric("image")
-
-setMethod("image",signature(x="oligoBatch"),
-          function(x, transfo=log, col=gray(c(0:64)/64),xlab="",ylab="", ...){
-            scn <- prod(par("mfrow"))
-            ask <- dev.interactive()
-            which.plot <- 0
-
-            ## x.pos <- (1:nrow(x)) - (1 + getOption("BioC")$affy$xy.offset)
-            ## y.pos <- (1:ncol(x)) - (1 + getOption("BioC")$affy$xy.offset)
-
-            x.pos <- (1:nrow(x)) - 1
-            y.pos <- (1:ncol(x)) - 1
-
-            for(i in 1:length(sampleNames(x))){
-              which.plot <- which.plot+1;
-              if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)  par(ask=TRUE)
-              m <- exprs(x)[,i]
-              if (is.function(transfo)) {
-                m <- transfo(m)
-              }
-              m <- as.matrix(rev(as.data.frame(matrix(m, nrow=length(x.pos), ncol=length(y.pos)))))
-              image(x.pos, y.pos, m,
-                    col=col, main=sampleNames(x)[i],
-                    xlab=xlab, ylab=ylab,,xaxt='n',
-                      yaxt='n', ...)
-              par(ask=FALSE)
-            }
-          })
-
-
-## Boxplot
-if( is.null(getGeneric("boxplot")))
-  setGeneric("boxplot")
-
-setMethod("boxplot",signature(x="oligoBatch"),
-          function(x,which=c("both","pm","mm"),range=0,...){
-            which <- match.arg(which,c("both","pm","mm"))
-            tmp <- description(x)
-            if (is(tmp, "MIAME")) main <- tmp@title
-
-            tmp <- unlist(featureIndex(x,which))
-            tmp <- tmp[seq(1,length(tmp),len=5000)]
-
-            boxplot(data.frame(log2(exprs(x)[tmp,])),main=main,range=range, ...)
-          })
-
-
-
-## BC: Mon Jul 25, 2005 - added featureIndex, before called indexProbe
-##     so we can produce some plots.
-
-if( is.null(getGeneric("featureIndex") ))
-  setGeneric("featureIndex", function(object, ...)
-             standardGeneric("featureIndex"))
-
-setMethod("featureIndex","oligoBatch", ##genenames is ignored for now.. we will get to it
-          function(object, which=c("both","pm","mm"), genenames=NULL){
-            which <- match.arg(which,c("both","pm","mm"))
-            if (which=="both"){
-              pmIndex <- pmindex(getPlatformDesign(object))
-              mmIndex <- mmindex(getPlatformDesign(object))
-              indexes <- sort(c(pmIndex,mmIndex))
-            } else if (which=="pm"){
-              indexes <- sort(pmindex(getPlatformDesign(object)))
-            } else if (which=="mm"){
-              indexes <- sort(mmindex(getPlatformDesign(object)))
-            }
-             return(indexes)
-           })
-
-
 ## Histogram
 if( is.null(getGeneric("hist")) )
   setGeneric("hist")
 
-setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.AffyBatch(x,...))
-
-## BC: Mon, Jul 25, 2005 - Plot density - from affy
-plotDensity <- function(mat,
-                        ylab="density", xlab="x", type="l", col=1:6,
-                        ...) {
-  
-  x.density <- apply(mat, 2, density)
-
-  all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
-  all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
-  
-  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-
-  invisible(list(all.x=all.x, all.y=all.y))
-}
- 
-
-plotDensity.AffyBatch <- function(x, col=1:6, log=TRUE,
-                                  which=c("both","pm","mm"),
-                                  ylab="density",
-                                  xlab=NULL,
-                                  ...){
-
-  which <- match.arg(which,c("both","pm","mm"))
-
-  Index <- unlist(featureIndex(x,which))
-  
-  x <- exprs(x)[Index, ,drop=FALSE]
-  
-  if(log){
-    x <- log2(x)
-    if(is.null(xlab)) xlab <- "log intensity"
-  }
-  else  if(is.null(xlab)) xlab <- "intensity"
-  
-  rv <- plotDensity(x, ylab=ylab, xlab=xlab, col=col, ...)
-
-  invisible(rv)
-}
+setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.oligoBatch(x,...))
