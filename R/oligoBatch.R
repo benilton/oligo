@@ -6,11 +6,6 @@ setClass("oligoBatch",
                         platform="character"),
          contains="eSet")
 
-##simple accessors that needs to change!
-if (is.null(getGeneric("annotation")))
-  setGeneric("annotation",function(object) standardGeneric("annotation"))
-setMethod("annotation","oligoBatch", function(object) object@platform)
-
 ###same as above...but actual accessor
 if (is.null(getGeneric("platform")))
   setGeneric("platform",function(object) standardGeneric("platform"))
@@ -127,53 +122,6 @@ setReplaceMethod("mm", "oligoBatch",
                    object
                  })
 
-###sampleNames and description should go away once eSet has them
-###COMMENT OUT TO SEE IF BIOBASE;s IS WORKING. IF IT IS WE GET RID OF IT
-# if( !isGeneric("sampleNames") )
-#   setGeneric("sampleNames", function(object)
-#              standardGeneric("sampleNames"))
-# setMethod("sampleNames", "oligoBatch",
-#           function(object) {
-#             if (! is.null(colnames(exprs(object))))
-#               colnames(exprs(object))
-#             else
-#               row.names(pData(object))
-#           })
-
-##description
-if( !isGeneric("description") )
-  setGeneric("description", function(object)
-             standardGeneric("description"))
-setMethod("description", "oligoBatch", function(object)
-          object@description)
-
-##replace method for description
-if( !isGeneric("description<-") )
-  setGeneric("description<-", function(object, value)
-             standardGeneric("description<-"))
-
-setReplaceMethod("description", "oligoBatch", function(object, value) {
-  object@description <- value
-  object
-})
-
-##notes
-if( !isGeneric("notes") )
-  setGeneric("notes", function(object)
-             standardGeneric("notes"))
-setMethod("notes", "oligoBatch", function(object)
-          object@notes)
-
-if( !isGeneric("notes<-") )
-  setGeneric("notes<-", function(object, value)
-             standardGeneric("notes<-"))
-
-setReplaceMethod("notes", "oligoBatch", function(object, value) {
-  object@notes <- value
-  object
-})
-
-
 ## BC: Fri Jul 22, 2005 - I needed this methods today
 ##     Copied from affy and a few modifications
 
@@ -184,10 +132,10 @@ setMethod("ncol",signature(x="oligoBatch"),
                     function(x) getPlatformDesign(x)@ncol)
 
 if( is.null(getGeneric("nrow")))
-    setGeneric("nrow")
+  setGeneric("nrow")
 
-  setMethod("nrow",signature(x="oligoBatch"),
-                        function(x) getPlatformDesign(x)@nrow)
+setMethod("nrow",signature(x="oligoBatch"),
+          function(x) getPlatformDesign(x)@nrow)
 
 
 if( is.null(getGeneric("image")))
