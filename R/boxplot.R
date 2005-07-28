@@ -1,17 +1,6 @@
 ## Boxplot
 ## begining of boxplot.R - by BC Th Jul 28, 2005
 
-## FIX ME!!!
-## BC: it seems that the final code (after building)
-##     is created using the .R files in ascending order.
-##     boxplot() uses an oligoBatch argument and
-##     to get rid of some warning messages I defined the
-##     class in the first file that appears in the directory
-setClass("oligoBatch",
-         representation(manufacturer="character",
-                        platform="character"),
-         contains="eSet")
-
 if( is.null(getGeneric("boxplot")))
   setGeneric("boxplot")
 

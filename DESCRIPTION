@@ -6,4 +6,5 @@ Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: R (>= 2.1.0), Biobase (>= 1.6.2), reposTools
 Description: A package to analyze gene expression data.
 License: LGPL version 2 or newer
+Collate: oligoBatch.R boxplot.R image.R platformDesign.R read.celfiles.R rma.R zzz.R featureIndex.R plotDensity.R readxys.R sequence.R
 SaveImage: Yes
