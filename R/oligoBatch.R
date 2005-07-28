@@ -92,6 +92,8 @@ setMethod("mmindex", "oligoBatch",
 
 ## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
 ##     it'll return the indexes for a given feature_set_name
+##     This is used by pm/mm when getting intensities for given feature_set_names
+
 if( is.null(getGeneric("indexFeatureSetName") ))
   setGeneric("indexFeatureSetName", function(object, ...)
              standardGeneric("indexFeatureSetName"))
@@ -105,73 +107,8 @@ setMethod("indexFeatureSetName","oligoBatch",
           })
 
 
-##PM methods
-if( is.null(getGeneric("pm") ))
-  setGeneric("pm", function(object, ...)
-             standardGeneric("pm"))
-
-## BC: Th, Jul 28, 2005 - This is an attempt of
-##     selecting the feature_set_name for pm/mm
-##     if it is working, we need to rename the variables
-setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
-          function(object, genenames=NULL){
-            index <- pmindex(object)
-            if (!is.null(genenames))
-              index <- intersect(index,indexFeatureSetName(object,genenames))
-            return(exprs(object)[index,,drop=FALSE])
-          })
-
-### Trying to make the above to work
-### if it is working, we remove the one below
-###setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
-###          function(object, genenames=NULL){
-###            return(exprs(object)[pmindex(object),,drop=FALSE])
-###          })
-
-if( is.null(getGeneric("pm<-") ))
-  setGeneric("pm<-", function(object, value)
-             standardGeneric("pm<-"))
-
-setReplaceMethod("pm", "oligoBatch",
-                 function(object, value){
-                   exprs(object)[pmindex(object),] <- value
-                   object
-                 })
-
-##MM methods... designed for arrays that have one MM per PM
-if( is.null(getGeneric("mm") ))
-  setGeneric("mm", function(object, ...)
-             standardGeneric("mm"))
-
-## BC: Th, Jul 28, 2005 - This is an attempt of
-##     selecting the feature_set_name for pm/mm
-##     if it is working, we need to rename the variables
-setMethod("mm","oligoBatch", function(object, genenames=NULL){
-            index <- mmindex(object)
-            if (!is.null(genenames))
-              index <- intersect(index,indexFeatureSetName(object,genenames))
-            return(exprs(object)[index,,drop=FALSE])
-          })
-
-
-##setMethod("mm","oligoBatch", ##genenames is ignored for now.. we will get to it
-##          function(object, genenames=NULL){
-##            return(exprs(object)[mmindex(object),,drop=FALSE])
-##          })
-          
-if( is.null(getGeneric("mm<-") ))
-  setGeneric("mm<-", function(object, value)
-             standardGeneric("mm<-"))
-
-setReplaceMethod("mm", "oligoBatch",
-                 function(object, value){
-                   exprs(object)[mmindex(object),] <- value
-                   object
-                 })
-
 ## BC: Fri Jul 22, 2005 - I needed this methods today
 ##     Copied from affy and a few modifications
-
 if(is.null(getGeneric("ncol")))
   setGeneric("ncol")
 
