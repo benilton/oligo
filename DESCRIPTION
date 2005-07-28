@@ -6,3 +6,4 @@ Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: R (>= 2.1.0), Biobase (>= 1.6.2), reposTools
 Description: A package to analyze gene expression data.
 License: LGPL version 2 or newer
+SaveImage: Yes
