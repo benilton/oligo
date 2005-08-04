@@ -118,8 +118,6 @@ read.xysfiles <- function(filenames,
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes))
-  colnames(out@eList@eList$exprs) <- sampleNames(out)
-
 }
 
 
