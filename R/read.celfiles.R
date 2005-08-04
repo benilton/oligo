@@ -52,7 +52,7 @@ read.celfiles <- function(filenames,
 ###INSTALL IT
   out <- new("oligoBatch",
              eList=new("exprList",
-               .Data=list(exprs=.Call("read_abatch",as.list(filenames),
+               eList=list(exprs=.Call("read_abatch",as.list(filenames),
                             compress, rm.mask,
                             rm.outliers, rm.extra, ref.cdfName,
                             dim.intensity, verbose, PACKAGE="oligo")),
@@ -63,7 +63,7 @@ read.celfiles <- function(filenames,
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes)
-  colnames(out@eList$exprs) <- sampleNames(out)
+  colnames(out@eList@eList$exprs) <- sampleNames(out)
 
   ## BC: Jul 13, garbage collection.
   ##     It wastes too much memory after reading a long list of files

@@ -110,7 +110,7 @@ read.xysfiles <- function(filenames,
   colnames(e) <- tmp$samplenames
   return(new("oligoBatch",
              eList=new("exprList",
-               .Data=list(exprs=e),
+               eList=list(exprs=e),
                eMetadata=data.frame()),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = designnamelist[1],
@@ -118,6 +118,8 @@ read.xysfiles <- function(filenames,
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes))
+  colnames(out@eList@eList$exprs) <- sampleNames(out)
+
 }
 
 
