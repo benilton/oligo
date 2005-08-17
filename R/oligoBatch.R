@@ -126,3 +126,13 @@ if( is.null(getGeneric("hist")) )
   setGeneric("hist")
 
 setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.oligoBatch(x,...))
+
+## Show
+setMethod("show","oligoBatch", function(object){
+  dm <-dim(exprs(object))
+  nfeatures <- dm[1]
+  nsamples <- dm[2]
+  cat("oligoBatch with \n\t", nfeatures, " features\n\t", sep="")
+  cat(nsamples, "samples\n\t")
+  show(phenoData(object))
+})

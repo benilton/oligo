@@ -28,6 +28,8 @@ setMethod("names","platformDesign",
 setMethod("show","platformDesign", function(object){
   cat("Manufacturer:",object@manufacturer,"\n")
   cat("Array type:",object@type,"\n")
+  cat("Number of columns:",object@ncol,"\n")
+  cat("Number of rows:",object@nrow,"\n")
   cat("Number of features:",nProbes(object),"\n")
 })
 
