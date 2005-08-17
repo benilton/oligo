@@ -16,7 +16,7 @@
  **
  ** aim: read in from 1st to nth chips of CEL data
  **
- ** Copyright (C) 2003    B. M. Bolstad
+ ** Copyright (C) 2003-2005    B. M. Bolstad
  **
  ** Created on Jun 13, 2003
  **
@@ -110,6 +110,8 @@
  **               with cdf name capitalization. 
  ** May 11, 2004 - fix error message in case when zlib not available
  **                and a gzipped file has been supplied.
+ ** Aug 16, 2005 - fix bit flipping when more than one number read
+ **
  **
  *************************************************************/
  
@@ -1267,11 +1269,14 @@ static size_t fread_int32(int *destination, int n, FILE *instream){
   
   result = fread(destination,sizeof(int),n,instream);
 
-#ifdef WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN 
+  while( n-- > 0 ){
   /* bit flip since all Affymetrix binary files are little endian */
     
-  *destination=(((*destination>>24)&0xff) | ((*destination&0xff)<<24) |
-		((*destination>>8)&0xff00) | ((*destination&0xff00)<<8));  
+    *destination=(((*destination>>24)&0xff) | ((*destination&0xff)<<24) |
+		  ((*destination>>8)&0xff00) | ((*destination&0xff00)<<8));  
+    destination++;
+  }
 #endif
   return result;
 }
@@ -1287,10 +1292,12 @@ static size_t fread_uint32(unsigned int *destination, int n, FILE *instream){
 
   
 #ifdef WORDS_BIGENDIAN
-  /* bit flip since all Affymetrix binary files are little endian */
-  *destination=(((*destination>>24)&0xff) | ((*destination&0xff)<<24) |
-	    ((*destination>>8)&0xff00) | ((*destination&0xff00)<<8));  
- 
+  while( n-- > 0 ){
+    /* bit flip since all Affymetrix binary files are little endian */
+    *destination=(((*destination>>24)&0xff) | ((*destination&0xff)<<24) |
+		  ((*destination>>8)&0xff00) | ((*destination&0xff00)<<8));  
+    destination++;
+  } 
 #endif
   return result;
 }
@@ -1303,9 +1310,11 @@ static size_t fread_int16(short *destination, int n, FILE *instream){
    result = fread(destination,sizeof(short),n,instream);
 
 #ifdef WORDS_BIGENDIAN
-  /* bit flip since all Affymetrix binary files are little endian */
-   *destination=(((*destination>>8)&0xff) | ((*destination&0xff)<<8));  
-
+   while( n-- > 0 ){
+     /* bit flip since all Affymetrix binary files are little endian */
+     *destination=(((*destination>>8)&0xff) | ((*destination&0xff)<<8));  
+     destination++;
+   }
 #endif
    return result;
 
@@ -1329,7 +1338,10 @@ static size_t fread_float32(float *destination, int n, FILE *instream){
   result = fread(destination,sizeof(float),n,instream);
 
 #ifdef WORDS_BIGENDIAN 
-  swap_float_4(destination);
+  while( n-- > 0 ){
+    swap_float_4(destination);
+    destination++;
+  }
 #endif
   
   return result;
