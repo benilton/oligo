@@ -67,6 +67,6 @@ normalize.quantiles <- function(x,copy=TRUE){
     copy <- FALSE
   }
 
-  .Call("R_qnorm_c",x,copy, PACKAGE="affy");
+  .Call("R_qnorm_c",x,copy, PACKAGE="oligo");
 }
 
