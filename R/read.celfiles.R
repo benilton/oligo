@@ -51,19 +51,17 @@ read.celfiles <- function(filenames,
 ###RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
 ###INSTALL IT
   out <- new("oligoBatch",
-             eList=new("exprList",
-               eList=list(exprs=.Call("read_abatch",as.list(filenames),
+               assayData=list(exprs=.Call("read_abatch",as.list(filenames),
                             compress, rm.mask,
                             rm.outliers, rm.extra, ref.cdfName,
                             dim.intensity, verbose, PACKAGE="oligo")),
-               eMetadata=data.frame()),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = ref.cdfName,
              manufacturer = "Affymetrix",
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes)
-  colnames(out@eList@eList$exprs) <- sampleNames(out)
+#  colnames(out@eList@eList$exprs) <- sampleNames(out)
 
   ## BC: Jul 13, garbage collection.
   ##     It wastes too much memory after reading a long list of files
