@@ -109,9 +109,10 @@ read.xysfiles <- function(filenames,
   
   colnames(e) <- tmp$samplenames
   return(new("oligoBatch",
-             eList=new("exprList",
-               eList=list(exprs=e),
-               eMetadata=data.frame()),
+#             eList=new("exprList",
+#               eList=list(exprs=e),
+#               eMetadata=data.frame()),
+	     assayData=list(exprs=e), # that is the new line of code
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = designnamelist[1],
              manufacturer = "NimbleGen",
