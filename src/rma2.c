@@ -88,6 +88,11 @@
  ** Jul 27, 2004 - fix a small memory leak
  ** Aug 4, 2004 - move the "Background correcting" message. 
  ** Nov 8, 2004 - change how things are structured in do_RMA()
+ ** Sep 3, 2005 - In extremely high memory usage situations
+ **               R was garbage collecting something that shouldn't have
+ **               been. This was leading to a seg fault. Fixed by
+ **               moving an UNPROTECT.
+ **  
  **
  ************************************************************************/
 
@@ -496,6 +501,8 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   SEXP dim1;
   SEXP outvec; /* ,outnamesvec; */
   SEXP dimnames,names;
+
+  SEXP temp;
   
   PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
   rows = INTEGER(dim1)[0];
@@ -536,16 +543,18 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
 
   do_RMA(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets);
 
-  UNPROTECT(2);
+  
 
   /* now lets put names on the matrix */
 
   PROTECT(dimnames = allocVector(VECSXP,2));
   PROTECT(names = allocVector(STRSXP,nprobesets));
   
-  for ( i =0; i < nprobesets; i++)
-    SET_VECTOR_ELT(names,i,mkChar(outnames[i]));
-  
+  for ( i =0; i < nprobesets; i++){
+    PROTECT(temp = mkChar(outnames[i]));
+    SET_VECTOR_ELT(names,i,temp); /* was a direct mkChar prior to Sep 2, 2005*/
+    UNPROTECT(1);
+  }
   SET_VECTOR_ELT(dimnames,0,names);
   setAttrib(outvec, R_DimNamesSymbol, dimnames);
   UNPROTECT(2);
@@ -554,6 +563,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   
   Free(outnames);
   Free(ProbeNames);
+  UNPROTECT(2);
   return outvec;
 }
 
