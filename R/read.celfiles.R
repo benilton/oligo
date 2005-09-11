@@ -79,7 +79,7 @@ read.affybatch <- function(..., filenames=character(0),
                            rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE,
                            verbose = FALSE) {
 
-  warning("read.affybatch is depricated. Please use read.xysfile.")
+  warning("read.affybatch is depricated. Please use read.celfiles.")
 
   auxnames <- as.list(substitute(list(...)))[-1]
   filenames <- .Primitive("c")(filenames, auxnames)
@@ -99,15 +99,6 @@ read.affybatch <- function(..., filenames=character(0),
                 rm.outliers= rm.outliers,
                 rm.extra=rm.extra)
 }
-
-
-
-
-
-
-
-
-
 
 list.celfiles <-   function(...){
   files <- list.files(...)
