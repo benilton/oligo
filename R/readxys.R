@@ -102,7 +102,7 @@ read.xysfiles <- function(filenames,
     for (i in seq(along=filenames)){
         if (verbose) cat(i, "reading",filenames[1],"...")
         tmp2 <- readonexysfile(filenames[i])
-        if (length(tmp) != nProbes(get(designname))){
+        if (length(tmp2) != nProbes(get(designname))){
           cat("It is likely the NDF has duplicated FEATURE_ID for different control probes.\n")
           cat("You can rebuild the package using makePDpackage(<your NDF>, checkNG = TRUE) for validity check.\n")
           stop("XYS file is not compatible with NDF.\n")
