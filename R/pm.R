@@ -25,13 +25,6 @@ setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
             return(exprs(object)[index,,drop=FALSE])
           })
 
-### Trying to make the above to work
-### if it is working, we remove the one below
-###setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
-###          function(object, genenames=NULL){
-###            return(exprs(object)[pmindex(object),,drop=FALSE])
-###          })
-
 if( is.null(getGeneric("pm<-") ))
   setGeneric("pm<-", function(object, value)
              standardGeneric("pm<-"))

@@ -129,7 +129,6 @@ setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.oligoBat
 
 ## Show
 setMethod("show","oligoBatch", function(object){
-#  dm <-dim(getExpData(object, "exprs"))
   dm <- dim(exprs(object))
   nprobes <- dm[1]
   nsamples <- dm[2]

@@ -88,37 +88,23 @@ read.xysfiles <- function(filenames,
     stop("XYS Files do not refer to the same design!")
   }
   else{
-    ##THIS MUST CHANGE
-    ## BC: corrected on May 28, adding "pd" at the end
-    ## BC: Jul 13, "pd" at the begining
     designname=cleanPlatformName(designnamelist[1])
     library(designname,character.only=TRUE)
-    ##THIS MUST CHANGE...
-    ##RI: instead read the first one. figure out size. then
-    ##RI: creat matrix e.
-      
-    e <- matrix(0,nProbes(get(designname)),length(filenames))
+    e <- matrix(NA,nProbes(get(designname)),length(filenames))
     colnames(e) <- tmp$samplenames
     for (i in seq(along=filenames)){
         if (verbose) cat(i, "reading",filenames[1],"...")
-        tmp2 <- readonexysfile(filenames[i])
-        if (length(tmp2) != nProbes(get(designname))){
-          cat("It is likely the NDF has duplicated FEATURE_ID for different control probes.\n")
-          cat("You can rebuild the package using makePDpackage(<your NDF>, checkNG = TRUE) for validity check.\n")
-          stop("XYS file is not compatible with NDF.\n")
-        }
-        e[,i] <- tmp2
+        e[,i] <- readonexysfile(filenames[i])
         if(verbose) cat("Done.\n")
     }
+    order_index <- get(designname,pos=paste("package:",designname,sep=""))$order_index
+    e <- e[order_index,,drop=FALSE]
   }
 
   
 #  colnames(e) <- tmp$samplenames
   return(new("oligoBatch",
-#             eList=new("exprList",
-#               eList=list(exprs=e),
-#               eMetadata=data.frame()),
-	     assayData=list(exprs=e), # that is the new line of code
+	     assayData=list(exprs=e),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = designnamelist[1],
              manufacturer = "NimbleGen",

@@ -21,6 +21,8 @@
 ## May 28, 2005 - Moving to oligo... (BC)
 ## May 29, 2005 - It's working partially:
 ##                if I try to read multiple CEL, it fails on sampleNames
+## Nov 15, 2005 - Started changing the order of the intensities
+##                after reading the CEL files, so pm/mm will be faster. (BC)
 #############################################################
 read.celfiles <- function(filenames,
                           phenoData=new("phenoData"),
@@ -50,18 +52,29 @@ read.celfiles <- function(filenames,
   
 ###RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
 ###INSTALL IT
+  
+  pkgname <- cleanPlatformName(ref.cdfName)
+  cat(paste("Loading",pkgname,"\n"))
+  library(pkgname,character.only=TRUE)
+  cat("Package loaded.\n")
+
+  ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
+  ##     we want PM/MMs to be. So, we need to reorder the cel
+  ##     input, so the pm/mm methods are faster.
+  order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
+  
+  tmpExprs <- .Call("read_abatch",as.list(filenames),
+                    compress, rm.mask,
+                    rm.outliers, rm.extra, ref.cdfName,
+                    dim.intensity, verbose, PACKAGE="oligo")
   out <- new("oligoBatch",
-               assayData=list(exprs=.Call("read_abatch",as.list(filenames),
-                            compress, rm.mask,
-                            rm.outliers, rm.extra, ref.cdfName,
-                            dim.intensity, verbose, PACKAGE="oligo")),
+             assayData=list(exprs=tmpExprs[order_index,,drop=FALSE]),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = ref.cdfName,
              manufacturer = "Affymetrix",
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes)
-#  colnames(out@eList@eList$exprs) <- sampleNames(out)
 
   ## BC: Jul 13, garbage collection.
   ##     It wastes too much memory after reading a long list of files

@@ -67,11 +67,22 @@ setMethod("pmindex", "platformDesign",
           function(object){
             Index=which(get("feature_type_1",featureInfo(object))=="PM")
 
-            ids=get("feature_ID",featureInfo(object))
-            pns = probeNames(object)
-          
-            return(Index[order(pns[Index],ids[Index])])
+##            ids=get("feature_ID",featureInfo(object))
+##            pns = probeNames(object)
+  return(Index)        
+##            return(Index[order(pns[Index],ids[Index])])
           })
+
+
+##setMethod("pmindex", "platformDesign",
+##          function(object){
+##            Index=which(get("feature_type_1",featureInfo(object))=="PM")
+##
+##            ids=get("feature_ID",featureInfo(object))
+##            pns = probeNames(object)
+##          
+##            return(Index[order(pns[Index],ids[Index])])
+##          })
 
 ##mmindex method.. for now we assume there is one MM per PM
 if( is.null(getGeneric("mmindex")))
@@ -83,8 +94,8 @@ setMethod("mmindex", "platformDesign",
           function(object){
             Index=which(get("feature_type_1",featureInfo(object))=="MM")
 
-            ids=get("feature_ID",featureInfo(object))
-            pns = probeNames(object)
-          
-            return(Index[order(pns[Index],ids[Index])])
+##            ids=get("feature_ID",featureInfo(object))
+##            pns = probeNames(object)
+  return(Index)
+##            return(Index[order(pns[Index],ids[Index])])
           })
