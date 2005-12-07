@@ -9,22 +9,26 @@ list.xysfiles <-   function(...){
 
 readxysHeader <- function(filename) scan(filename,nlines=1,quiet=TRUE, what=character(0))
 
-readonexysfile <- function(filename){
-  types <- list(X = numeric(0), Y = numeric(0), SIGNAL = numeric(0), COUNT = numeric(0))
-  header <- readxysHeader(filename)
-  whatToRead <- types[match(header,names(types))]
-  sig <- scan(filename, sep = "\t", skip = 2, quiet = T, what = whatToRead)$SIGNAL
-  return(sig)
-}
+##readonexysfile <- function(filename){
+##  types <- list(X = numeric(0), Y = numeric(0), SIGNAL = numeric(0), COUNT = numeric(0))
+##  header <- readxysHeader(filename)
+##  whatToRead <- types[match(header,names(types))]
+##  out <- scan(filename, sep = "\t", skip = 2, quiet = T, what = whatToRead)
+##  return(out)
+##}
 
+readonexysfile <- function(filename)
+  read.delim(filename)
 
 stuffForXYSandCELreaders <- function(filenames,
                                      phenoData=new("phenoData"),
                                      description=NULL,
                                      notes="",
-                                     verbose = FALSE) {
+                                     verbose = FALSE,
+                                     nwells = 1) {
   
-  n <- length(filenames)
+  nfiles <- length(filenames)
+  n <- nfiles*nwells
   
   ## error if no file name !
   if (n == 0)
@@ -37,6 +41,12 @@ stuffForXYSandCELreaders <- function(filenames,
     ##if empty pdata filename are samplenames
     cat("Incompatible phenoData object. Created a new one.\n")
     samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
+
+    if(nwells>1){
+      wells <- paste(".W",1:nwells,sep="")
+      samplenames <- as.character(t(outer(samplenames,wells,paste,sep="")))
+    }
+    
     pdata <- data.frame(sample=1:n, row.names=samplenames)
     phenoData <- new("phenoData",pData=pdata,varLabels=list(sample="arbitrary numbering"))
   }
@@ -58,12 +68,13 @@ read.xysfiles <- function(filenames,
                          notes="",
                          verbose = FALSE) {
   
-  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
-  filenames <- tmp$filenames
+##  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
+##  filenames <- tmp$filenames
+  
   ## Create space to store the design names
   designnamelist <- NULL
 
-  ## Read all XYS files, get design name for each
+  ## Read the header for all XYS files, get design name for each
   for (xysfile in filenames){
     firstline <- readxysHeader(xysfile)
     designname <- unlist(strsplit(firstline[grep("designname",firstline,fixed=TRUE,useBytes=TRUE)],"="))[2]
@@ -81,20 +92,39 @@ read.xysfiles <- function(filenames,
   designname=cleanPlatformName(designnamelist[1])
   library(designname,character.only=TRUE)
 
+  ## Get the number of wells
+  nwells <- get(designname)@nwells
+
+  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose,nwells)
+
   ## Allocate memory for the intensities
   ## And giving the correct names for the columns
-  e <- matrix(NA,nProbes(get(designname)),length(filenames))
+  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
   colnames(e) <- tmp$samplenames
+
+  ## Loading lookup table to correctly assign the wells
+  lookup <- get(designname)@lookup
+  j <- 1
   for (i in seq(along=filenames)){
     if (verbose) cat(i, "reading",filenames[1],"...")
-    e[,i] <- readonexysfile(filenames[i])
+
+    ## Read XYS "as is"
+    tmpE <- readonexysfile(filenames[i])
+    tmpE$index <- tmpE$X + (tmpE$Y-1)*get(designname)@ncol
+
+    ## get those probes which are in the NDF
+    ## in that order
+    inndf <- tmpE$index %in% lookup$index
+    tmpE <- tmpE[inndf,]
+
+    ndforder <- match(lookup$index,tmpE$index)
+    e[,j:(j+nwells-1)] <- matrix(tmpE$SIGNAL[ndforder],
+##                                 ncol = length(unique(lookup$feature_type_5)),
+                                 ncol = nwells,
+                                 byrow = TRUE)       
+    j <- j+nwells
     if(verbose) cat("Done.\n")
   }
-
-  ## Put intensities in the same order as
-  ## in the PDenv, this way, things get faster
-  order_index <- get(designname,pos=paste("package:",designname,sep=""))$order_index
-  e <- e[order_index,,drop=FALSE]
 
   return(new("oligoBatch",
 	     assayData=list(exprs=e),
