@@ -9,7 +9,9 @@ setClass("platformDesign",
                         manufacturer = "character",
                         type = "character",
                         nrow = "numeric",
-                        ncol = "numeric"))
+                        ncol = "numeric",
+                        nwells = "numeric",
+                        lookup = "data.frame"))
 
 ##functions and methods
 featureInfo <- function(object) object@featureInfo
