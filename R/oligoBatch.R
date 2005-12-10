@@ -73,7 +73,7 @@ if( is.null(getGeneric("pmindex")))
   setGeneric("pmindex", function(object,...)
              standardGeneric("pmindex"))
 
-##WE assume feature_type_1 is PM or MM. this might change with other platforms
+##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "oligoBatch",
           function(object){
             pmindex(getPlatformDesign(object))
@@ -84,7 +84,7 @@ if( is.null(getGeneric("mmindex")))
   setGeneric("mmindex", function(object,...)
              standardGeneric("mmindex"))
 
-##WE assume feature_type_1 is PM or MM. this might change with other platforms
+##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("mmindex", "oligoBatch",
           function(object){
             mmindex(getPlatformDesign(object))

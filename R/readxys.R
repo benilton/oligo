@@ -25,7 +25,8 @@ stuffForXYSandCELreaders <- function(filenames,
                                      description=NULL,
                                      notes="",
                                      verbose = FALSE,
-                                     nwells = 1) {
+                                     nwells = 1,
+                                     designname=NULL) {
   
   nfiles <- length(filenames)
   n <- nfiles*nwells
@@ -43,7 +44,7 @@ stuffForXYSandCELreaders <- function(filenames,
     samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
 
     if(nwells>1){
-      wells <- paste(".W",1:nwells,sep="")
+      wells <- paste(".",as.character(unique(get(designname)@lookup$container)),sep="")
       samplenames <- as.character(t(outer(samplenames,wells,paste,sep="")))
     }
     
@@ -67,9 +68,6 @@ read.xysfiles <- function(filenames,
                          description=NULL,
                          notes="",
                          verbose = FALSE) {
-  
-##  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
-##  filenames <- tmp$filenames
   
   ## Create space to store the design names
   designnamelist <- NULL
@@ -95,7 +93,7 @@ read.xysfiles <- function(filenames,
   ## Get the number of wells
   nwells <- get(designname)@nwells
 
-  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose,nwells)
+  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose,nwells,designname)
 
   ## Allocate memory for the intensities
   ## And giving the correct names for the columns
@@ -119,7 +117,6 @@ read.xysfiles <- function(filenames,
 
     ndforder <- match(lookup$index,tmpE$index)
     e[,j:(j+nwells-1)] <- matrix(tmpE$SIGNAL[ndforder],
-##                                 ncol = length(unique(lookup$feature_type_5)),
                                  ncol = nwells,
                                  byrow = TRUE)       
     j <- j+nwells

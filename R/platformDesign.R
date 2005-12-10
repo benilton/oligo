@@ -44,10 +44,23 @@ as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
   get(val,featureInfo(object))
       
 ##X is arbitrarily chosen
-nProbes <- function(object){
-  colname <- ls(featureInfo(object))[1]
-  length( get(colname,featureInfo(object)))
-}
+## ATTENTION: This is failing
+## nProbes <- function(object){
+##   colname <- ls(featureInfo(object))[1]
+##   length( get(colname,featureInfo(object)))
+## }
+
+##nProbes method
+if( is.null(getGeneric("nProbes")))
+  setGeneric("nProbes", function(object, ...)
+             standardGeneric("nProbes"))
+
+setMethod("nProbes","platformDesign",
+          function(object){
+            return(length(get("feature_set_name",featureInfo(object))))
+          })
+
+
 
 ##probeNames method
 if( is.null(getGeneric("probeNames")))
@@ -64,27 +77,12 @@ if( is.null(getGeneric("pmindex")))
   setGeneric("pmindex", function(object,...)
              standardGeneric("pmindex"))
 
-##WE assume feature_type_1 is PM or MM. this might change with other platforms
+##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "platformDesign",
           function(object){
-            Index=which(get("feature_type_1",featureInfo(object))=="PM")
-
-##            ids=get("feature_ID",featureInfo(object))
-##            pns = probeNames(object)
-  return(Index)        
-##            return(Index[order(pns[Index],ids[Index])])
+            Index=which(get("feature_type",featureInfo(object))=="PM")
+            return(Index)        
           })
-
-
-##setMethod("pmindex", "platformDesign",
-##          function(object){
-##            Index=which(get("feature_type_1",featureInfo(object))=="PM")
-##
-##            ids=get("feature_ID",featureInfo(object))
-##            pns = probeNames(object)
-##          
-##            return(Index[order(pns[Index],ids[Index])])
-##          })
 
 ##mmindex method.. for now we assume there is one MM per PM
 if( is.null(getGeneric("mmindex")))
@@ -94,10 +92,6 @@ if( is.null(getGeneric("mmindex")))
 ###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
 setMethod("mmindex", "platformDesign",
           function(object){
-            Index=which(get("feature_type_1",featureInfo(object))=="MM")
-
-##            ids=get("feature_ID",featureInfo(object))
-##            pns = probeNames(object)
-  return(Index)
-##            return(Index[order(pns[Index],ids[Index])])
+            Index=which(get("feature_type",featureInfo(object))=="MM")
+            return(Index)
           })
