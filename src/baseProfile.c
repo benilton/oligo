@@ -11,27 +11,28 @@ SEXP gcrma_getSeq2(SEXP psequence, SEXP x, SEXP length) {
     SEXP outMatrix;
     char *pseq;
     int k,i;
-    R_len_t nx,K;
+    R_len_t nx,K,seql;
     K=INTEGER(x)[0];
     pseq=STR(psequence);
+    seql=INTEGER(length)[0];
 
-    PROTECT(outMatrix = allocMatrix(INTSXP, K, (3*length)));
+    PROTECT(outMatrix = allocMatrix(INTSXP, K, 3*seql));
         for(k=0;k<K;k++){
-      for (i = 0; i < length; i++) {
-	if (pseq[k*length+i] == 'A')
+      for (i = 0; i < seql; i++) {
+	if (pseq[k*seql+i] == 'A')
 	  INTEGER(outMatrix)[i*K+k]=1;
 	else
 	  INTEGER(outMatrix)[i*K+k]=0;
 	
-	if (pseq[k*length+i] == 'C')
-	  INTEGER(outMatrix)[(i+length)*K+k] = 1;
+	if (pseq[k*seql+i] == 'C')
+	  INTEGER(outMatrix)[(i+seql)*K+k] = 1;
 	else
-	  INTEGER(outMatrix)[(i+length)*K+k] = 0;
+	  INTEGER(outMatrix)[(i+seql)*K+k] = 0;
 	
-	if (pseq[k*length+i] == 'G')
-	  INTEGER(outMatrix)[(i+(2*length))*K+k] = 1;
+	if (pseq[k*seql+i] == 'G')
+	  INTEGER(outMatrix)[(i+2*seql)*K+k] = 1;
 	else
-	  INTEGER(outMatrix)[(i+(2*length))*K+k] = 0;
+	  INTEGER(outMatrix)[(i+2*seql)*K+k] = 0;
       }
       }
     /*  for (i=0;i<strlen(pseq);i++){
