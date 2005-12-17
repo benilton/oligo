@@ -123,8 +123,9 @@ read.xysfiles <- function(filenames,
     if(verbose) cat("Done.\n")
   }
 
+  rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
   return(new("oligoBatch",
-	     assayData=list(exprs=e),
+	     assayData=list(exprs=e[,,drop=FALSE]),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = designnamelist[1],
              manufacturer = "NimbleGen",

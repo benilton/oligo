@@ -67,6 +67,7 @@ read.celfiles <- function(filenames,
                     compress, rm.mask,
                     rm.outliers, rm.extra, ref.cdfName,
                     dim.intensity, verbose, PACKAGE="oligo")
+  rownames(tmpExprs) <- get(pkgname,pos=paste("package:",pkgname,sep=""))$feature_set_name
   out <- new("oligoBatch",
              assayData=list(exprs=tmpExprs[order_index,,drop=FALSE]),
              sampleNames=rownames(pData(tmp$phenoData)),
@@ -75,11 +76,6 @@ read.celfiles <- function(filenames,
              phenoData=tmp$phenoData,
              description=tmp$description,
              notes=notes)
-
-  ## BC: Jul 13, garbage collection.
-  ##     It wastes too much memory after reading a long list of files
-  ##     I hope this is not bad
-  gc()
   
   return(out)
 }
