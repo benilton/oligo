@@ -104,7 +104,7 @@ read.xysfiles <- function(filenames,
   lookup <- get(designname)@lookup
   j <- 1
   for (i in seq(along=filenames)){
-    if (verbose) cat(i, "reading",filenames[1],"...")
+    if (verbose) cat(i, "reading",filenames[i],"...")
 
     ## Read XYS "as is"
     tmpE <- readonexysfile(filenames[i])
@@ -112,8 +112,8 @@ read.xysfiles <- function(filenames,
 
     ## get those probes which are in the NDF
     ## in that order
-    inndf <- tmpE$index %in% lookup$index
-    tmpE <- tmpE[inndf,]
+#    inndf <- tmpE$index %in% lookup$index
+#    tmpE <- tmpE[inndf,]
 
     ndforder <- match(lookup$index,tmpE$index)
     e[,j:(j+nwells-1)] <- matrix(tmpE$SIGNAL[ndforder],
