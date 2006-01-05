@@ -6,7 +6,8 @@ setClass("platformDesign",
                         nrow = "numeric",
                         ncol = "numeric",
                         nwells = "numeric",
-                        lookup = "data.frame"))
+                        lookup = "data.frame"),
+         prototype = list(lookup=data.frame()))
 
 setClass("oligoBatch",
          representation(manufacturer="character",

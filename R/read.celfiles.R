@@ -68,11 +68,13 @@ read.celfiles <- function(filenames,
   ##     input, so the pm/mm methods are faster.
   order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
   
-  tmpExprs <- .Call("read_abatch",as.list(filenames), compress, rm.mask, rm.outliers,
-                    rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="oligo")
-  rownames(tmpExprs) <- get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name
+  tmpExprs <- .Call("read_abatch",as.list(filenames),compress,
+                    rm.mask,rm.outliers,rm.extra,ref.cdfName,
+                    dim.intensity,verbose,PACKAGE="oligo")
+
+  rownames(tmpExprs) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
   tmpExprs <- tmpExprs[order_index,,drop=FALSE]
-  
+
   out <- new(oligoClass,
              assayData=list(exprs=tmpExprs),
              sampleNames=rownames(pData(tmp$phenoData)),
