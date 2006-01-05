@@ -33,12 +33,8 @@ read.celfiles <- function(filenames,
                           rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE){
 
   tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
-
   filenames <- tmp$filenames
-
   n <- length(filenames)
-
-  ## error if no file name !
   if (n == 0)
     stop("No file name given !")
 
@@ -50,26 +46,35 @@ read.celfiles <- function(filenames,
   ##and the cdfname as ref
   ref.cdfName <- headdetails[[1]]
   
-###RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
-###INSTALL IT
+  ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
+  ## INSTALL IT
   
   pkgname <- cleanPlatformName(ref.cdfName)
   cat(paste("Loading",pkgname,"\n"))
   library(pkgname,character.only=TRUE)
   cat("Package loaded.\n")
 
+  arrayType <- get(pkgname)@type
+  if (arrayType == "expression"){
+    oligoClass <- "affyexprsBatch"
+  }else if (arrayType == "SNP"){
+    oligoClass <- "affysnpBatch"
+  }else{
+    stop("Invalid array platform: should be expression or SNP.\n")
+  }
+
   ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
   ##     we want PM/MMs to be. So, we need to reorder the cel
   ##     input, so the pm/mm methods are faster.
   order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
   
-  tmpExprs <- .Call("read_abatch",as.list(filenames),
-                    compress, rm.mask,
-                    rm.outliers, rm.extra, ref.cdfName,
-                    dim.intensity, verbose, PACKAGE="oligo")
-  rownames(tmpExprs) <- get(pkgname,pos=paste("package:",pkgname,sep=""))$feature_set_name
-  out <- new("oligoBatch",
-             assayData=list(exprs=tmpExprs[order_index,,drop=FALSE]),
+  tmpExprs <- .Call("read_abatch",as.list(filenames), compress, rm.mask, rm.outliers,
+                    rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="oligo")
+  rownames(tmpExprs) <- get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name
+  tmpExprs <- tmpExprs[order_index,,drop=FALSE]
+  
+  out <- new(oligoClass,
+             assayData=list(exprs=tmpExprs),
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = ref.cdfName,
              manufacturer = "Affymetrix",
