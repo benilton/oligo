@@ -25,6 +25,8 @@
 ##                after reading the CEL files, so pm/mm will be faster. (BC)
 #############################################################
 read.celfiles <- function(filenames,
+                          pdenv=TRUE,
+                          arrayType=NULL,
                           phenoData=new("phenoData"),
                           description=NULL,
                           notes="",
@@ -32,6 +34,9 @@ read.celfiles <- function(filenames,
                           compress= FALSE,
                           rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE){
 
+  if (!pdenv & is.null(arrayType))
+    stop("You chose not to load the pdenv, so you are required to define arrayType (SNP/expression)")
+  
   tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
   filenames <- tmp$filenames
   n <- length(filenames)
@@ -48,13 +53,16 @@ read.celfiles <- function(filenames,
   
   ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
   ## INSTALL IT
-  
-  pkgname <- cleanPlatformName(ref.cdfName)
-  cat(paste("Loading",pkgname,"\n"))
-  library(pkgname,character.only=TRUE)
-  cat("Package loaded.\n")
 
-  arrayType <- get(pkgname)@type
+  if (pdenv){
+    pkgname <- cleanPlatformName(ref.cdfName)
+    cat(paste("Loading",pkgname,"\n"))
+    library(pkgname,character.only=TRUE)
+    cat("Package loaded.\n")
+
+    arrayType <- get(pkgname)@type
+  }
+  
   if (arrayType == "expression"){
     oligoClass <- "affyexprsBatch"
   }else if (arrayType == "SNP"){
@@ -63,18 +71,19 @@ read.celfiles <- function(filenames,
     stop("Invalid array platform: should be expression or SNP.\n")
   }
 
-  ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
-  ##     we want PM/MMs to be. So, we need to reorder the cel
-  ##     input, so the pm/mm methods are faster.
-  order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
-  
   tmpExprs <- .Call("read_abatch",as.list(filenames),compress,
                     rm.mask,rm.outliers,rm.extra,ref.cdfName,
                     dim.intensity,verbose,PACKAGE="oligo")
 
-  rownames(tmpExprs) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
-  tmpExprs <- tmpExprs[order_index,,drop=FALSE]
-
+  if (pdenv){
+    ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
+    ##     we want PM/MMs to be. So, we need to reorder the cel
+    ##     input, so the pm/mm methods are faster.
+    order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
+    rownames(tmpExprs) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
+    tmpExprs <- tmpExprs[order_index,,drop=FALSE]
+  }
+  
   out <- new(oligoClass,
              assayData=list(exprs=tmpExprs),
              sampleNames=rownames(pData(tmp$phenoData)),
