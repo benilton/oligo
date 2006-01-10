@@ -75,3 +75,7 @@ if( is.null(getGeneric("featureIndex") ))
 
 if( is.null(getGeneric("boxplot")))
   setGeneric("boxplot")
+
+if( is.null(getGeneric("npixels")))
+  setGeneric("npixels",
+             function(object) standardGeneric("npixels"))

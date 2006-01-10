@@ -187,3 +187,9 @@ setMethod("image",signature(x="oligoBatch"),
             }
           })
 
+setMethod("sd", "oligoBatch",
+          function(x, na.rm=TRUE) return(assayData(x)$sd))
+
+setMethod("npixels", signature(object="oligoBatch"),
+          function(object) return(assayData(object)$npixels))
+

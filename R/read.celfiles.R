@@ -23,16 +23,23 @@
 ##                if I try to read multiple CEL, it fails on sampleNames
 ## Nov 15, 2005 - Started changing the order of the intensities
 ##                after reading the CEL files, so pm/mm will be faster. (BC)
+## Jan 09, 2006 - added feature so power-users can choose to NOT load PDEnv
+##                added feature to return SD
+##                added feature to return number of pixels (BC)
 #############################################################
 read.celfiles <- function(filenames,
                           pdenv=TRUE,
                           arrayType=NULL,
+                          sd=FALSE,
+                          npixels=FALSE,
                           phenoData=new("phenoData"),
                           description=NULL,
                           notes="",
                           verbose = FALSE,
                           compress= FALSE,
-                          rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE){
+                          rm.mask = FALSE,
+                          rm.outliers=FALSE,
+                          rm.extra=FALSE){
 
   if (!pdenv & is.null(arrayType))
     stop("You chose not to load the pdenv, so you are required to define arrayType (SNP/expression)")
@@ -71,10 +78,22 @@ read.celfiles <- function(filenames,
     stop("Invalid array platform: should be expression or SNP.\n")
   }
 
-  tmpExprs <- .Call("read_abatch",as.list(filenames),compress,
-                    rm.mask,rm.outliers,rm.extra,ref.cdfName,
-                    dim.intensity,verbose,PACKAGE="oligo")
+  tmpExprs <- .Call("read_abatch", as.list(filenames), compress,
+                    rm.mask, rm.outliers, rm.extra, ref.cdfName,
+                    dim.intensity, verbose, PACKAGE="oligo")
 
+  if (sd){
+    tmpSD <- .Call("read_abatch_stddev", as.list(filenames), compress,
+                   rm.mask, rm.outliers, rm.extra, ref.cdfName,
+                   dim.intensity, verbose, PACKAGE="oligo")
+  }
+
+  if (npixels){
+    tmpNP <- .Call("read_abatch_npixels", as.list(filenames), compress,
+                   rm.mask, rm.outliers, rm.extra, ref.cdfName,
+                   dim.intensity, verbose, PACKAGE="oligo")
+  }
+  
   if (pdenv){
     ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
     ##     we want PM/MMs to be. So, we need to reorder the cel
@@ -82,10 +101,29 @@ read.celfiles <- function(filenames,
     order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
     rownames(tmpExprs) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
     tmpExprs <- tmpExprs[order_index,,drop=FALSE]
+
+    if (sd){
+      rownames(tmpSD) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
+      tmpSD <- tmpSD[order_index,,drop=FALSE]
+    }
+
+    if (npixels){
+      rownames(tmpNP) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
+      tmpNP <- tmpNP[order_index,,drop=FALSE]
+    }
   }
-  
+
   out <- new(oligoClass,
-             assayData=list(exprs=tmpExprs),
+             assayData=
+             if(!sd & !npixels){
+               list(exprs=tmpExprs)
+             }else if(sd & !npixels){
+               list(exprs=tmpExprs, sd=tmpSD)
+             }else if(sd & npixels){
+               list(exprs=tmpExprs, sd=tmpSD, npixels=tmpNP)
+             }else if(!sd & npixels){
+               list(exprs=tmpExprs, npixels=tmpNP)
+             },
              sampleNames=rownames(pData(tmp$phenoData)),
              platform = ref.cdfName,
              manufacturer = "Affymetrix",

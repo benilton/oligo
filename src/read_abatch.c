@@ -111,7 +111,7 @@
  ** May 11, 2004 - fix error message in case when zlib not available
  **                and a gzipped file has been supplied.
  ** Aug 16, 2005 - fix bit flipping when more than one number read
- **
+ ** Nov 15, 2005 - ability to read in SD and npixels values
  **
  *************************************************************/
  
@@ -535,6 +535,151 @@ static int read_cel_file_intensities(char *filename, double *intensity, int chip
   return 0;
 }
 
+
+/************************************************************************
+ **
+ ** int read_cel_file_stddev(char *filename, double *intensity, int chip_num, int rows, int cols)
+ **
+ ** char *filename - the name of the cel file to read
+ ** double *intensity  - the intensity matrix to fill
+ ** int chip_num - the column of the intensity matrix that we will be filling
+ ** int rows - dimension of intensity matrix
+ ** int cols - dimension of intensity matrix
+ **
+ ** returns 0 if successful, non zero if unsuccessful
+ **
+ ** This function reads from the specified file the cel stddev for that
+ ** array and fills a column of the intensity matrix.
+ **
+ ************************************************************************/
+
+static int read_cel_file_stddev(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+  
+  int i, cur_x,cur_y,cur_index;
+  double cur_mean, cur_stddev;
+  FILE *currentFile; 
+  char buffer[BUF_SIZE];
+  /* tokenset *cur_tokenset;*/
+  char *current_token;
+
+  currentFile = open_cel_file(filename);
+  
+  AdvanceToSection(currentFile,"[INTENSITY]",buffer);
+  findStartsWith(currentFile,"CellHeader=",buffer);  
+  
+  for (i=0; i < rows; i++){
+    ReadFileLine(buffer, BUF_SIZE,  currentFile);
+    /* cur_tokenset = tokenize(buffer," \t");
+    cur_x = atoi(get_token(cur_tokenset,0));
+    cur_y = atoi(get_token(cur_tokenset,1));
+    cur_mean = atof(get_token(cur_tokenset,2)); */
+    
+    if (strlen(buffer) <=2){
+      Rprintf("Warning: found an empty line where not expected in %s.\n This means that there is a cel intensity missing from the cel file.\n Sucessfully read to cel intensity %d of %d expected\n", filename, i-1, i);
+      break;
+    }
+
+    current_token = strtok(buffer," \t");
+    cur_x = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_y = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_mean = atof(current_token);
+    current_token = strtok(NULL," \t");
+    cur_stddev = atof(current_token);
+
+
+    cur_index = cur_x + chip_dim_rows*(cur_y);
+    intensity[chip_num*rows + cur_index] = cur_stddev;
+    /* delete_tokens(cur_tokenset); */
+  }
+
+  fclose(currentFile);
+
+  return 0;
+}
+
+
+
+
+/************************************************************************
+ **
+ ** int read_cel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols)
+ **
+ ** char *filename - the name of the cel file to read
+ ** double *intensity  - the intensity matrix to fill
+ ** int chip_num - the column of the intensity matrix that we will be filling
+ ** int rows - dimension of intensity matrix
+ ** int cols - dimension of intensity matrix
+ **
+ ** returns 0 if successful, non zero if unsuccessful
+ **
+ ** This function reads from the specified file the cel stddev for that
+ ** array and fills a column of the intensity matrix.
+ **
+ ************************************************************************/
+
+static int read_cel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+  
+  int i, cur_x,cur_y,cur_index,cur_npixels;
+  double cur_mean, cur_stddev;
+  FILE *currentFile; 
+  char buffer[BUF_SIZE];
+  /* tokenset *cur_tokenset;*/
+  char *current_token;
+
+  currentFile = open_cel_file(filename);
+  
+  AdvanceToSection(currentFile,"[INTENSITY]",buffer);
+  findStartsWith(currentFile,"CellHeader=",buffer);  
+  
+  for (i=0; i < rows; i++){
+    ReadFileLine(buffer, BUF_SIZE,  currentFile);
+    /* cur_tokenset = tokenize(buffer," \t");
+    cur_x = atoi(get_token(cur_tokenset,0));
+    cur_y = atoi(get_token(cur_tokenset,1));
+    cur_mean = atof(get_token(cur_tokenset,2)); */
+    
+    if (strlen(buffer) <=2){
+      Rprintf("Warning: found an empty line where not expected in %s.\n This means that there is a cel intensity missing from the cel file.\n Sucessfully read to cel intensity %d of %d expected\n", filename, i-1, i);
+      break;
+    }
+
+    current_token = strtok(buffer," \t");
+    cur_x = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_y = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_mean = atof(current_token);
+    current_token = strtok(NULL," \t");
+    cur_stddev = atof(current_token);
+
+    current_token = strtok(NULL," \t");
+    cur_npixels = atoi(current_token);
+
+    cur_index = cur_x + chip_dim_rows*(cur_y);
+    intensity[chip_num*rows + cur_index] = (double)cur_npixels;
+    /* delete_tokens(cur_tokenset); */
+  }
+
+  fclose(currentFile);
+
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /****************************************************************
  **
  ** void apply_masks(char *filename, double *intensity, int chip_num, 
@@ -741,7 +886,7 @@ static int isTextCelFile(char *filename){
 
 static void ReadgzFileLine(char *buffer, int buffersize, gzFile currentFile){
   if (gzgets( currentFile,buffer, buffersize) == NULL){
-    error("End of file reached unexpectedly. Perhaps this file is truncated.\n");
+    error("End of gz file reached unexpectedly. Perhaps this file is truncated.\n");
   }  
 }
 
@@ -762,7 +907,7 @@ static void ReadgzFileLine(char *buffer, int buffersize, gzFile currentFile){
 
 static gzFile open_gz_cel_file(char *filename){
   
-  const char *mode = "r";
+  const char *mode = "rb";
 
   gzFile currentFile= NULL; 
   char buffer[BUF_SIZE];
@@ -950,6 +1095,125 @@ static int read_gzcel_file_intensities(char *filename, double *intensity, int ch
   return 0;
 }
 
+/************************************************************************
+ **
+ ** int read_gzcel_file_stddev(char *filename, double *intensity, int chip_num, int rows, int cols)
+ **
+ ** char *filename - the name of the cel file to read
+ ** double *intensity  - the intensity matrix to fill
+ ** int chip_num - the column of the intensity matrix that we will be filling
+ ** int rows - dimension of intensity matrix
+ ** int cols - dimension of intensity matrix
+ **
+ ** returns 0 if successful, non zero if unsuccessful
+ **
+ ** This function reads from the specified file the cel intensities for that
+ ** array and fills a column of the intensity matrix.
+ **
+ ************************************************************************/
+
+static int read_gzcel_file_stddev(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+  
+  int i, cur_x,cur_y,cur_index;
+  double cur_mean, cur_stddev;
+  gzFile currentFile; 
+  char buffer[BUF_SIZE];
+  /* tokenset *cur_tokenset;*/
+  char *current_token;
+
+  currentFile = open_gz_cel_file(filename);
+  
+  gzAdvanceToSection(currentFile,"[INTENSITY]",buffer);
+  gzfindStartsWith(currentFile,"CellHeader=",buffer);  
+  
+  for (i=0; i < rows; i++){
+    ReadgzFileLine(buffer, BUF_SIZE,  currentFile);
+    /* cur_tokenset = tokenize(buffer," \t");
+    cur_x = atoi(get_token(cur_tokenset,0));
+    cur_y = atoi(get_token(cur_tokenset,1));
+    cur_mean = atof(get_token(cur_tokenset,2)); */
+    
+    current_token = strtok(buffer," \t");
+    cur_x = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_y = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_mean = atof(current_token);
+  
+    current_token = strtok(NULL," \t");
+    cur_stddev = atof(current_token);
+    
+    cur_index = cur_x + chip_dim_rows*(cur_y);
+    intensity[chip_num*rows + cur_index] = cur_stddev;
+    /* delete_tokens(cur_tokenset); */
+  }
+
+  gzclose(currentFile);
+
+  return 0;
+}
+
+
+/************************************************************************
+ **
+ ** int read_gzcel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols)
+ **
+ ** char *filename - the name of the cel file to read
+ ** double *intensity  - the intensity matrix to fill
+ ** int chip_num - the column of the intensity matrix that we will be filling
+ ** int rows - dimension of intensity matrix
+ ** int cols - dimension of intensity matrix
+ **
+ ** returns 0 if successful, non zero if unsuccessful
+ **
+ ** This function reads from the specified file the cel npixels for that
+ ** array and fills a column of the intensity matrix.
+ **
+ ************************************************************************/
+
+static int read_gzcel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+  
+  int i, cur_x,cur_y,cur_index,cur_npixels;
+  double cur_mean, cur_stddev;
+  gzFile currentFile; 
+  char buffer[BUF_SIZE];
+  /* tokenset *cur_tokenset;*/
+  char *current_token;
+
+  currentFile = open_gz_cel_file(filename);
+  
+  gzAdvanceToSection(currentFile,"[INTENSITY]",buffer);
+  gzfindStartsWith(currentFile,"CellHeader=",buffer);  
+  
+  for (i=0; i < rows; i++){
+    ReadgzFileLine(buffer, BUF_SIZE,  currentFile);
+    /* cur_tokenset = tokenize(buffer," \t");
+    cur_x = atoi(get_token(cur_tokenset,0));
+    cur_y = atoi(get_token(cur_tokenset,1));
+    cur_mean = atof(get_token(cur_tokenset,2)); */
+    
+    current_token = strtok(buffer," \t");
+    cur_x = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_y = atoi(current_token);
+    current_token = strtok(NULL," \t");
+    cur_mean = atof(current_token);
+  
+    current_token = strtok(NULL," \t");
+    cur_stddev = atof(current_token);
+    
+    current_token = strtok(NULL," \t");
+    cur_npixels = atoi(current_token);
+
+    cur_index = cur_x + chip_dim_rows*(cur_y);
+    intensity[chip_num*rows + cur_index] = (double)cur_npixels;
+    /* delete_tokens(cur_tokenset); */
+  }
+
+  gzclose(currentFile);
+
+  return 0;
+}
 
 
 
@@ -1113,7 +1377,7 @@ static char *gz_get_header_info(char *filename, int *dim1, int *dim2){
 static int isgzTextCelFile(char *filename){
   
 #if defined HAVE_ZLIB
-  const char *mode = "r"; 
+  const char *mode = "rb"; 
  gzFile currentFile = NULL; 
  char buffer[BUF_SIZE];
  currentFile = gzopen(filename,mode);
@@ -1707,6 +1971,99 @@ static int read_binarycel_file_intensities(char *filename, double *intensity, in
   return(0);
 }
 
+
+
+
+/***************************************************************
+ **
+ ** static int read_binarycel_file_stdev(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows)
+ **
+ ** 
+ ** This function reads binary cel file stddev values into the data matrix
+ **
+ **************************************************************/
+
+static int read_binarycel_file_stddev(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+
+  int i=0, j=0;
+  int cur_index;
+
+
+  celintens_record *cur_intensity = Calloc(1,celintens_record);
+  binary_header *my_header;
+
+  my_header = read_binary_header(filename,1);
+  
+  for (i = 0; i < my_header->rows; i++){
+    for (j =0; j < my_header->cols; j++){
+      cur_index = j + my_header->rows*i; /* i + my_header->rows*j; */
+      fread_float32(&(cur_intensity->cur_intens),1,my_header->infile);
+      fread_float32(&(cur_intensity->cur_sd),1,my_header->infile);
+      fread_int16(&(cur_intensity->npixels),1,my_header->infile);
+      intensity[chip_num*my_header->n_cells + cur_index] = (double )cur_intensity->cur_sd;
+    }
+  }
+  
+  fclose(my_header->infile);
+  delete_binary_header(my_header);
+  Free(cur_intensity);
+  return(0);
+}
+
+
+
+
+/***************************************************************
+ **
+ ** static int read_binarycel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows)
+ **
+ ** 
+ ** This function reads binary cel file npixels values into the data matrix
+ **
+ **************************************************************/
+
+static int read_binarycel_file_npixels(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows){
+
+  int i=0, j=0;
+  int cur_index;
+
+
+  celintens_record *cur_intensity = Calloc(1,celintens_record);
+  binary_header *my_header;
+
+  my_header = read_binary_header(filename,1);
+  
+  for (i = 0; i < my_header->rows; i++){
+    for (j =0; j < my_header->cols; j++){
+      cur_index = j + my_header->rows*i; /* i + my_header->rows*j; */
+      fread_float32(&(cur_intensity->cur_intens),1,my_header->infile);
+      fread_float32(&(cur_intensity->cur_sd),1,my_header->infile);
+      fread_int16(&(cur_intensity->npixels),1,my_header->infile);
+      intensity[chip_num*my_header->n_cells + cur_index] = (double )cur_intensity->npixels;
+    }
+  }
+  
+  fclose(my_header->infile);
+  delete_binary_header(my_header);
+  Free(cur_intensity);
+  return(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /***************************************************************
  **
  ** static void binary_apply_masks(char *filename, double *intensity, int chip_num, int rows, int cols,int chip_dim_rows, int rm_mask, int rm_outliers)
@@ -2210,4 +2567,361 @@ SEXP read_probeintensities(SEXP filenames, SEXP compress,  SEXP rm_mask, SEXP rm
   }
   return(output_list);
 
+}
+
+
+
+
+
+
+
+
+
+/************************************************************************
+ **
+ **  SEXP read_abatch_stddev(SEXP filenames, SEXP compress,  
+ **                   SEXP rm_mask, SEXP rm_outliers, SEXP rm_extra, 
+ **                   SEXP ref_cdfName)
+ **
+ ** SEXP filenames - an R list of filenames to read
+ ** SEXP compress  - logical flag TRUE means files are *.gz
+ ** SEXP rm_mask   - if true set MASKS  to NA
+ ** SEXP rm_outliers - if true set OUTLIERS to NA
+ ** SEXP rm_extra    - if true  overrides rm_mask and rm_outliers settings
+ ** SEXP ref_cdfName - the reference CDF name to check each CEL file against 
+ ** SEXP ref_dim     - cols/rows of reference chip
+ ** SEXP verbose     - if verbose print out more information to the screen
+ **
+ ** RETURNS an intensity matrix with cel file stddev from
+ ** each chip in columns
+ **
+ ** this function will read in all the cel files in a affybatch.
+ ** this function will stop on possible errors with an error() call.
+ **
+ ** The intensity matrix will be allocated here. It will be given
+ ** column names here. the column names that it will be given here are the 
+ ** filenames.
+ **
+ *************************************************************************/
+
+SEXP read_abatch_stddev(SEXP filenames, SEXP compress,  SEXP rm_mask, SEXP rm_outliers, SEXP rm_extra, SEXP ref_cdfName, SEXP ref_dim, SEXP verbose){
+  
+  int i; 
+  
+  int n_files;
+  int ref_dim_1, ref_dim_2;
+
+  char *cur_file_name;
+  char *cdfName;
+  double *intensityMatrix;
+
+  SEXP intensity,names,dimnames;
+
+  ref_dim_1 = INTEGER(ref_dim)[0];
+  ref_dim_2 = INTEGER(ref_dim)[1];
+  
+  n_files = GET_LENGTH(filenames);
+  
+  PROTECT(intensity = allocMatrix(REALSXP, ref_dim_1*ref_dim_2, n_files));
+  
+  cdfName = CHAR(STRING_ELT(ref_cdfName,0));
+  intensityMatrix = NUMERIC_POINTER(AS_NUMERIC(intensity));
+
+
+
+  /* before we do any real reading check that all the files are of the same cdf type */
+
+  for (i =0; i < n_files; i++){
+    cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+    if (isTextCelFile(cur_file_name)){
+      if (check_cel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+      }
+    } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB
+      if (check_gzcel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+      }
+      
+#else
+       error("Compress option not supported on your platform\n");
+#endif
+     } else if (isBinaryCelFile(cur_file_name)){
+      
+       if (check_binary_cel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	 error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+       }
+     } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+     }
+  }
+
+  /* 
+     Now read in each of the cel files, one by one, filling out the columns of the intensity matrix.
+  */
+  
+  for (i=0; i < n_files; i++){ 
+      cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+      if (asInteger(verbose)){
+	Rprintf("Reading in : %s\n",cur_file_name);
+      }
+      if (isTextCelFile(cur_file_name)){
+	read_cel_file_stddev(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+      } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB
+      read_gzcel_file_stddev(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+#else
+      error("Compress option not supported on your platform\n");
+#endif
+    } else if (isBinaryCelFile(cur_file_name)){
+      read_binarycel_file_stddev(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+    } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+    }
+
+  }
+  
+
+  /* Now lets go through all the files  filling in masks etc */
+
+
+  if (asInteger(rm_mask) || asInteger(rm_outliers) || asInteger(rm_extra)){
+    for (i=0; i < n_files; i++){ 
+      cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+      if (isTextCelFile(cur_file_name)){
+	if (asInteger(rm_extra)){
+	  apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+      } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB	
+	if (asInteger(rm_extra)){
+	  gz_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  gz_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+#else
+	error("Compress option not supported on your platform\n");
+#endif
+      } else if (isBinaryCelFile(cur_file_name)){
+	if (asInteger(rm_extra)){
+	  binary_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  binary_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+      } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+      }
+      
+
+
+
+    }
+  }
+  
+  PROTECT(dimnames = allocVector(VECSXP,2));
+  PROTECT(names = allocVector(STRSXP,n_files));
+  for ( i =0; i < n_files; i++){
+    cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+    SET_VECTOR_ELT(names,i,mkChar(cur_file_name));
+  }
+  SET_VECTOR_ELT(dimnames,1,names);
+  setAttrib(intensity, R_DimNamesSymbol, dimnames);
+  
+
+  UNPROTECT(3);
+  
+  return intensity;  
+}
+
+
+
+
+
+
+
+
+
+
+/************************************************************************
+ **
+ **  SEXP read_abatch_npixels(SEXP filenames, SEXP compress,  
+ **                   SEXP rm_mask, SEXP rm_outliers, SEXP rm_extra, 
+ **                   SEXP ref_cdfName)
+ **
+ ** SEXP filenames - an R list of filenames to read
+ ** SEXP compress  - logical flag TRUE means files are *.gz
+ ** SEXP rm_mask   - if true set MASKS  to NA
+ ** SEXP rm_outliers - if true set OUTLIERS to NA
+ ** SEXP rm_extra    - if true  overrides rm_mask and rm_outliers settings
+ ** SEXP ref_cdfName - the reference CDF name to check each CEL file against 
+ ** SEXP ref_dim     - cols/rows of reference chip
+ ** SEXP verbose     - if verbose print out more information to the screen
+ **
+ ** RETURNS an intensity matrix with cel file stddev from
+ ** each chip in columns
+ **
+ ** this function will read in all the cel files in a affybatch.
+ ** this function will stop on possible errors with an error() call.
+ **
+ ** The intensity matrix will be allocated here. It will be given
+ ** column names here. the column names that it will be given here are the 
+ ** filenames.
+ **
+ *************************************************************************/
+
+SEXP read_abatch_npixels(SEXP filenames, SEXP compress,  SEXP rm_mask, SEXP rm_outliers, SEXP rm_extra, SEXP ref_cdfName, SEXP ref_dim, SEXP verbose){
+  
+  int i; 
+  
+  int n_files;
+  int ref_dim_1, ref_dim_2;
+
+  char *cur_file_name;
+  char *cdfName;
+  double *intensityMatrix;
+
+  SEXP intensity,names,dimnames;
+
+  ref_dim_1 = INTEGER(ref_dim)[0];
+  ref_dim_2 = INTEGER(ref_dim)[1];
+  
+  n_files = GET_LENGTH(filenames);
+  
+  PROTECT(intensity = allocMatrix(REALSXP, ref_dim_1*ref_dim_2, n_files));
+  
+  cdfName = CHAR(STRING_ELT(ref_cdfName,0));
+  intensityMatrix = NUMERIC_POINTER(AS_NUMERIC(intensity));
+
+
+
+  /* before we do any real reading check that all the files are of the same cdf type */
+
+  for (i =0; i < n_files; i++){
+    cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+    if (isTextCelFile(cur_file_name)){
+      if (check_cel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+      }
+    } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB
+      if (check_gzcel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+      }
+      
+#else
+       error("Compress option not supported on your platform\n");
+#endif
+     } else if (isBinaryCelFile(cur_file_name)){
+      
+       if (check_binary_cel_file(cur_file_name,cdfName, ref_dim_1, ref_dim_2)){
+	 error("File %s does not seem to have correct dimension or is not of %s chip type.", cur_file_name, cdfName);
+       }
+     } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+     }
+  }
+
+  /* 
+     Now read in each of the cel files, one by one, filling out the columns of the intensity matrix.
+  */
+  
+  for (i=0; i < n_files; i++){ 
+      cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+      if (asInteger(verbose)){
+	Rprintf("Reading in : %s\n",cur_file_name);
+      }
+      if (isTextCelFile(cur_file_name)){
+	read_cel_file_npixels(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+      } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB
+      read_gzcel_file_npixels(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+#else
+      error("Compress option not supported on your platform\n");
+#endif
+    } else if (isBinaryCelFile(cur_file_name)){
+      read_binarycel_file_npixels(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1);
+    } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+    }
+
+  }
+  
+
+  /* Now lets go through all the files  filling in masks etc */
+
+
+  if (asInteger(rm_mask) || asInteger(rm_outliers) || asInteger(rm_extra)){
+    for (i=0; i < n_files; i++){ 
+      cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+      if (isTextCelFile(cur_file_name)){
+	if (asInteger(rm_extra)){
+	  apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+      } else if (isgzTextCelFile(cur_file_name)){
+#if defined HAVE_ZLIB	
+	if (asInteger(rm_extra)){
+	  gz_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  gz_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+#else
+	error("Compress option not supported on your platform\n");
+#endif
+      } else if (isBinaryCelFile(cur_file_name)){
+	if (asInteger(rm_extra)){
+	  binary_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,1,1);
+	} else {
+	  binary_apply_masks(cur_file_name,intensityMatrix, i, ref_dim_1*ref_dim_2, n_files,ref_dim_1,asInteger(rm_mask),asInteger(rm_outliers));
+	}
+      } else {
+#if defined HAVE_ZLIB
+       error("Is %s really a CEL file? tried reading as text, gzipped text and binary\n",cur_file_name);
+#else
+       error("Is %s really a CEL file? tried reading as text and binary. The gzipped text format is not supported on your platform.\n",cur_file_name);
+#endif
+      }
+      
+
+
+
+    }
+  }
+  
+  PROTECT(dimnames = allocVector(VECSXP,2));
+  PROTECT(names = allocVector(STRSXP,n_files));
+  for ( i =0; i < n_files; i++){
+    cur_file_name = CHAR(VECTOR_ELT(VECTOR_ELT(filenames,i),0));
+    SET_VECTOR_ELT(names,i,mkChar(cur_file_name));
+  }
+  SET_VECTOR_ELT(dimnames,1,names);
+  setAttrib(intensity, R_DimNamesSymbol, dimnames);
+  
+
+  UNPROTECT(3);
+  
+  return intensity;  
 }
