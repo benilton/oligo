@@ -30,6 +30,8 @@
 read.celfiles <- function(filenames,
                           pdenv=TRUE,
                           arrayType=NULL,
+                          pkgname=NULL,
+                          uniquecdf=TRUE,
                           sd=FALSE,
                           npixels=FALSE,
                           phenoData=new("phenoData"),
@@ -43,31 +45,45 @@ read.celfiles <- function(filenames,
 
   if (!pdenv & is.null(arrayType))
     stop("You chose not to load the pdenv, so you are required to define arrayType (SNP/expression)")
+
+  if (pdenv & is.null(pkgname) & !uniquecdf)
+    stop("Inconsistency: Load standard PDEnv for CEL files pointing to different CDFs. Don't load the standard PDEnv or specify an alternative PDEnv.")
+
+  if (!is.null(pkgname))
+    pdenv <- FALSE
   
-  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose)
+  tmp <- stuffForXYSandCELreaders(filenames, phenoData, description, notes, verbose)
   filenames <- tmp$filenames
   n <- length(filenames)
   if (n == 0)
     stop("No file name given !")
 
   ## read the first file to see what we have
-  headdetails <- .Call("ReadHeader",filenames[1], compress, PACKAGE="oligo")
+  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="oligo")
 
   ##now we use the length
   dim.intensity <- headdetails[[2]]
   ##and the cdfname as ref
-  ref.cdfName <- headdetails[[1]]
-  
+  if (uniquecdf){
+    ref.cdfName <- headdetails[[1]]
+  }else{
+    # work-around to ignore multiple CDFs
+    # only for power-users
+    ref.cdfName <- "multipleCDFs"
+  }
+
   ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
   ## INSTALL IT
 
-  if (pdenv){
-    pkgname <- cleanPlatformName(ref.cdfName)
-    cat(paste("Loading",pkgname,"\n"))
-    library(pkgname,character.only=TRUE)
+  ## if pdenv is to be loaded or user specifies alt.pdenv
+  if (pdenv | !is.null(pkgname)){
+    if (is.null(pkgname))
+      pkgname <- cleanPlatformName(ref.cdfName)
+    cat(paste("Loading", pkgname, "\n"))
+    library(pkgname, character.only=TRUE)
     cat("Package loaded.\n")
-
-    arrayType <- get(pkgname)@type
+    if (is.null(arrayType))
+      arrayType <- get(pkgname)@type
   }
   
   if (arrayType == "expression"){
@@ -94,22 +110,22 @@ read.celfiles <- function(filenames,
                    dim.intensity, verbose, PACKAGE="oligo")
   }
   
-  if (pdenv){
+  if (pdenv | !is.null(pkgname)){
     ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
     ##     we want PM/MMs to be. So, we need to reorder the cel
     ##     input, so the pm/mm methods are faster.
-    order_index <- get(pkgname,pos=paste("package:",pkgname,sep=""))$order_index
-    rownames(tmpExprs) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
-    tmpExprs <- tmpExprs[order_index,,drop=FALSE]
+    order_index <- get(pkgname, pos=paste("package:", pkgname, sep=""))$order_index
+    rownames(tmpExprs) <- as.character(get(pkgname,  pos=paste("package:", pkgname, sep=""))$feature_set_name)
+    tmpExprs <- tmpExprs[order_index,, drop=FALSE]
 
     if (sd){
-      rownames(tmpSD) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
-      tmpSD <- tmpSD[order_index,,drop=FALSE]
+      rownames(tmpSD) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
+      tmpSD <- tmpSD[order_index,, drop=FALSE]
     }
 
     if (npixels){
-      rownames(tmpNP) <- as.character(get(pkgname, pos=paste("package:",pkgname,sep=""))$feature_set_name)
-      tmpNP <- tmpNP[order_index,,drop=FALSE]
+      rownames(tmpNP) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
+      tmpNP <- tmpNP[order_index,, drop=FALSE]
     }
   }
 

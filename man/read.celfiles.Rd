@@ -9,6 +9,8 @@
 read.celfiles(filenames,
               pdenv=TRUE,
               arrayType=NULL,
+              pkgname=NULL,
+              uniqueCDF=TRUE,
               sd=FALSE,
               npixels=FALSE,
               phenoData=new("phenoData"),
@@ -23,9 +25,12 @@ read.celfiles(filenames,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filenames}{a character vector containing the file names.}
-  \item{pdenv}{should load the Platform Design Environment (pdenv)
+  \item{pdenv}{should load the standard Platform Design Environment (pdenv)
     associated to the CEL files?}
   \item{arrayType}{type of array: "SNP" or "expression".}
+  \item{pkgname}{string specifying the alternative PDEnv to be
+    loaded. (see Details)}
+  \item{uniquecdf}{do the CEL files point to only one CDF?}
   \item{sd}{should return standard deviations?}
   \item{npixels}{should return number of pixels?}
   \item{phenoData}{a \code{\link[Biobase]{phenoData}} object.}
@@ -43,7 +48,14 @@ read.celfiles(filenames,
 
   If \code{pdenv} is set to \code{FALSE}, then \code{arrayType} is required and
   expected to assume either "SNP" or "expression". This will allow for
-  the correct assignment of the class of the object (affysnpBatch/affyexprsBatch).
+  the correct assignment of the class of the object
+  (affysnpBatch/affyexprsBatch).
+
+  If \code{pkgname} is not \code{NULL}, then \code{pdenv} is
+  automatically set to \code{FALSE}.
+
+  The arguments \code{pdenv}, \code{arrayType}, \code{pkgname} and
+  \code{uniquecdf} are meant to be changed only by "power-users".
 }
 
 \value{
