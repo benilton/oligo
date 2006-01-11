@@ -10,7 +10,7 @@ read.celfiles(filenames,
               pdenv=TRUE,
               arrayType=NULL,
               pkgname=NULL,
-              uniqueCDF=TRUE,
+%              uniqueCDF=TRUE,
               sd=FALSE,
               npixels=FALSE,
               phenoData=new("phenoData"),
@@ -30,7 +30,7 @@ read.celfiles(filenames,
   \item{arrayType}{type of array: "SNP" or "expression".}
   \item{pkgname}{string specifying the alternative PDEnv to be
     loaded. (see Details)}
-  \item{uniquecdf}{do the CEL files point to only one CDF?}
+%  \item{uniquecdf}{do the CEL files point to only one CDF?}
   \item{sd}{should return standard deviations?}
   \item{npixels}{should return number of pixels?}
   \item{phenoData}{a \code{\link[Biobase]{phenoData}} object.}

@@ -31,7 +31,7 @@ read.celfiles <- function(filenames,
                           pdenv=TRUE,
                           arrayType=NULL,
                           pkgname=NULL,
-                          uniquecdf=TRUE,
+  ## still need to fix                        uniquecdf=TRUE,
                           sd=FALSE,
                           npixels=FALSE,
                           phenoData=new("phenoData"),
@@ -45,9 +45,6 @@ read.celfiles <- function(filenames,
 
   if (!pdenv & is.null(arrayType))
     stop("You chose not to load the pdenv, so you are required to define arrayType (SNP/expression)")
-
-  if (pdenv & is.null(pkgname) & !uniquecdf)
-    stop("Inconsistency: Load standard PDEnv for CEL files pointing to different CDFs. Don't load the standard PDEnv or specify an alternative PDEnv.")
 
   if (!is.null(pkgname))
     pdenv <- FALSE
@@ -66,10 +63,10 @@ read.celfiles <- function(filenames,
   ##and the cdfname as ref
   if (uniquecdf){
     ref.cdfName <- headdetails[[1]]
-  }else{
+##  }else{
     # work-around to ignore multiple CDFs
     # only for power-users
-    ref.cdfName <- "multipleCDFs"
+##    ref.cdfName <- "multipleCDFs"
   }
 
   ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
