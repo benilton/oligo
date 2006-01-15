@@ -61,13 +61,13 @@ read.celfiles <- function(filenames,
   ##now we use the length
   dim.intensity <- headdetails[[2]]
   ##and the cdfname as ref
-  if (uniquecdf){
+##  if (uniquecdf){
     ref.cdfName <- headdetails[[1]]
 ##  }else{
     # work-around to ignore multiple CDFs
     # only for power-users
 ##    ref.cdfName <- "multipleCDFs"
-  }
+##  }
 
   ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
   ## INSTALL IT
@@ -112,17 +112,17 @@ read.celfiles <- function(filenames,
     ##     we want PM/MMs to be. So, we need to reorder the cel
     ##     input, so the pm/mm methods are faster.
     order_index <- get(pkgname, pos=paste("package:", pkgname, sep=""))$order_index
-    rownames(tmpExprs) <- as.character(get(pkgname,  pos=paste("package:", pkgname, sep=""))$feature_set_name)
     tmpExprs <- tmpExprs[order_index,, drop=FALSE]
+    rownames(tmpExprs) <- as.character(get(pkgname,  pos=paste("package:", pkgname, sep=""))$feature_set_name)
 
     if (sd){
-      rownames(tmpSD) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
       tmpSD <- tmpSD[order_index,, drop=FALSE]
+      rownames(tmpSD) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
     }
 
     if (npixels){
-      rownames(tmpNP) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
       tmpNP <- tmpNP[order_index,, drop=FALSE]
+      rownames(tmpNP) <- as.character(get(pkgname, pos=paste("package:", pkgname, sep=""))$feature_set_name)
     }
   }
 
