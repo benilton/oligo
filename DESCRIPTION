@@ -1,11 +1,11 @@
 Package: oligo
-Version: 0.4.3
+Version: 0.4.4
 Title: Gene Expression Analysis
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber 
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: R (>= 2.2.0), Biobase (>= 1.6.6)
 Description: A package to analyze gene expression data.
 License: LGPL version 2 or newer
-Collate: AllClasses.R AllGeneric.R methods-platformDesign.R methods-oligoBatch.R normalize.quantiles.R read.celfiles.R rma.R zzz.R plotDensity.R readxys.R sequence.R utils.R
+Collate: AllClasses.R AllGeneric.R methods-platformDesign.R methods-oligoBatch.R bg.R normalize.quantiles.R read.celfiles.R rma.R zzz.R plotDensity.R readxys.R sequence.R utils.R
 SaveImage: Yes
 biocViews: OneChannel,Microarray,Preprocessing
