@@ -105,7 +105,8 @@ setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
 
 setReplaceMethod("pm", "oligoBatch",
                  function(object, value){
-                   exprs(object)[pmindex(object),] <- value
+##                   exprs(object)[pmindex(object),] <- value
+                   assayData(object)[["exprs"]][pmindex(object),] <- value
                    object
                  })
 
@@ -127,7 +128,8 @@ setMethod("mm","oligoBatch", function(object, genenames=NULL){
 
 setReplaceMethod("mm", "oligoBatch",
                  function(object, value){
-                   exprs(object)[mmindex(object),] <- value
+##                   exprs(object)[mmindex(object),] <- value
+                   assayData(object)[["exprs"]][mmindex(object),] <- value
                    object
                  })
 
