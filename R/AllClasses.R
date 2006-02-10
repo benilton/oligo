@@ -15,7 +15,7 @@ setClass("oligoBatch",
          contains="eSet")
 
 ## Add affysnpBatch; affyexprsBatch; ngexprBatch
-
+## remove this
 setClass("affysnpBatch",
          contains="oligoBatch",
          prototype=list(manufacturer="Affymetrix"))
