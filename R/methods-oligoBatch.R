@@ -18,13 +18,6 @@ setMethod("getPlatformDesign","oligoBatch", function(object){
 
 getPD <- getPlatformDesign
 
-## ## BC: Thu, Jul 28, 2005 - is there a smarter way of creating a nickname?
-## if (is.null(getGeneric("getPD"))){
-##   setGeneric("getPD",
-##              function(object) standardGeneric("getPD"))}
-## setMethod("getPD","oligoBatch", function(object){
-##   getPlatformDesign(object)})
-
 ## probeNames - returns probeNames for PMs ... genenames ignored for now
 setMethod("probeNames", "oligoBatch",
           function(object, genenames=NULL){
@@ -74,7 +67,9 @@ setMethod("nrow",signature(x="oligoBatch"),
           function(x) getPlatformDesign(x)@nrow)
 
 ## Histogram
-setMethod("hist",signature(x="oligoBatch"), function(x,...) plotDensity.oligoBatch(x,...))
+setMethod("hist",signature(x="oligoBatch"),
+          function(x, which=c("both","pm","mm"), ...)
+          plotDensity.oligoBatch(x, which=c("both","pm","mm"), ...))
 
 ## Show
 setMethod("show","oligoBatch", function(object){
@@ -128,7 +123,6 @@ setMethod("mm","oligoBatch", function(object, genenames=NULL){
 
 setReplaceMethod("mm", "oligoBatch",
                  function(object, value){
-##                   exprs(object)[mmindex(object),] <- value
                    assayData(object)[["exprs"]][mmindex(object),] <- value
                    object
                  })
@@ -150,41 +144,45 @@ setMethod("featureIndex","oligoBatch",
            })
 
 setMethod("boxplot",signature(x="oligoBatch"),
-          function(x,which=c("both","pm","mm"),range=0,...){
-            which <- match.arg(which,c("both","pm","mm"))
+          function(x, which=c("both", "pm", "mm"), range=0, ...){
+            which <- match.arg(which, c("both", "pm", "mm"))
             tmp <- description(x)
             if (is(tmp, "MIAME")) main <- tmp@title
 
-            tmp <- unlist(featureIndex(x,which))
-            tmp <- tmp[seq(1,length(tmp),len=5000)]
+            tmp <- unlist(featureIndex(x, which))
+            tmp <- tmp[seq(1, length(tmp), len=5000)]
 
-            boxplot(data.frame(log2(exprs(x)[tmp,])),main=main,range=range, ...)
+            boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
           })
 
 setMethod("image",signature(x="oligoBatch"),
-          function(x, transfo=log, col=gray(c(0:64)/64),xlab="",ylab="", ...){
+          function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
             scn <- prod(par("mfrow"))
             ask <- dev.interactive()
             which.plot <- 0
 
-            ## x.pos <- (1:nrow(x)) - (1 + getOption("BioC")$affy$xy.offset)
-            ## y.pos <- (1:ncol(x)) - (1 + getOption("BioC")$affy$xy.offset)
-
             x.pos <- (1:nrow(x)) - 1
             y.pos <- (1:ncol(x)) - 1
 
+            correctOrder <- order(getPD(x)$X, getPD(x)$Y)
+            
             for(i in 1:length(sampleNames(x))){
               which.plot <- which.plot+1;
-              if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)  par(ask=TRUE)
-              m <- exprs(x)[,i]
-              if (is.function(transfo)) {
+
+              if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)
+                par(ask=TRUE)
+              
+              m <- matrix(exprs(x)[correctOrder, i], ncol=ncol(x))
+              
+              if (is.function(transfo))
                 m <- transfo(m)
-              }
-              m <- as.matrix(rev(as.data.frame(matrix(m, nrow=length(x.pos), ncol=length(y.pos)))))
-              image(x.pos, y.pos, m,
-                    col=col, main=sampleNames(x)[i],
-                    xlab=xlab, ylab=ylab,,xaxt='n',
-                      yaxt='n', ...)
+
+              m <- t(as.matrix(rev(as.data.frame(m))))
+##              image(x.pos, y.pos, m, col=col,
+              image(m, col=col,
+                    main=sampleNames(x)[i],
+                    xlab=xlab, ylab=ylab,
+                    xaxt='n', yaxt='n', ...)
               par(ask=FALSE)
             }
           })
