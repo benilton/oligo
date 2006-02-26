@@ -33,7 +33,8 @@ normalize.oligoBatch.quantiles <- function(obatch,type=c("separate","pmonly","mm
 
     noNA <- rowSums(is.na(exprs(obatch)[pms,,drop=FALSE])) == 0
     pms <- pms[noNA]
-    exprs(obatch)[pms,] <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
+##    exprs(obatch)[pms,] <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
+    pm(obatch) <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
   }
   if((type == "mmonly") | (type == "separate")){
     mms <- unlist(mmindex(obatch))
@@ -41,11 +42,11 @@ normalize.oligoBatch.quantiles <- function(obatch,type=c("separate","pmonly","mm
     noNA <- rowSums(is.na(exprs(obatch)[mms,,drop=FALSE])) == 0
     mms <- mms[noNA]
 
-    exprs(obatch)[mms,] <- normalize.quantiles(exprs(obatch)[mms,,drop=FALSE ],copy=FALSE)
+    mm(obatch) <- normalize.quantiles(exprs(obatch)[mms,,drop=FALSE ],copy=FALSE)
   }
   if (type == "together"){
     pms <- unlist(indexProbes(obatch,"both"))
-    exprs(obatch)[pms,]  <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
+    pm(obatch)  <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
   }
 
   ##ADD CHANGE TO MIAME
