@@ -31,7 +31,6 @@ read.celfiles <- function(filenames,
                           pdenv=TRUE,
                           arrayType=NULL,
                           pkgname=NULL,
-  ## still need to fix                        uniquecdf=TRUE,
                           sd=FALSE,
                           npixels=FALSE,
                           phenoData=new("phenoData"),
@@ -56,18 +55,13 @@ read.celfiles <- function(filenames,
     stop("No file name given !")
 
   ## read the first file to see what we have
-  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="oligo")
+  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="affyio")
 
   ##now we use the length
   dim.intensity <- headdetails[[2]]
+
   ##and the cdfname as ref
-##  if (uniquecdf){
-    ref.cdfName <- headdetails[[1]]
-##  }else{
-    # work-around to ignore multiple CDFs
-    # only for power-users
-##    ref.cdfName <- "multipleCDFs"
-##  }
+  ref.cdfName <- headdetails[[1]]
 
   ## RI: WE SHOULD CHECK IF THE PD PACKAGE IS AVAILABLE HERE. IF not TRY TO
   ## INSTALL IT
@@ -83,28 +77,20 @@ read.celfiles <- function(filenames,
       arrayType <- get(pkgname)@type
   }
   
-  if (arrayType == "expression"){
-    oligoClass <- "affyexprsBatch"
-  }else if (arrayType == "SNP"){
-    oligoClass <- "affysnpBatch"
-  }else{
-    stop("Invalid array platform: should be expression or SNP.\n")
-  }
-
-  tmpExprs <- .Call("read_abatch", as.list(filenames), compress,
+  tmpExprs <- .Call("read_abatch", as.list(filenames), 
                     rm.mask, rm.outliers, rm.extra, ref.cdfName,
-                    dim.intensity, verbose, PACKAGE="oligo")
+                    dim.intensity, verbose, PACKAGE="affyio")
 
   if (sd){
-    tmpSD <- .Call("read_abatch_stddev", as.list(filenames), compress,
+    tmpSD <- .Call("read_abatch_stddev", as.list(filenames),
                    rm.mask, rm.outliers, rm.extra, ref.cdfName,
-                   dim.intensity, verbose, PACKAGE="oligo")
+                   dim.intensity, verbose, PACKAGE="affyio")
   }
 
   if (npixels){
-    tmpNP <- .Call("read_abatch_npixels", as.list(filenames), compress,
+    tmpNP <- .Call("read_abatch_npixels", as.list(filenames),
                    rm.mask, rm.outliers, rm.extra, ref.cdfName,
-                   dim.intensity, verbose, PACKAGE="oligo")
+                   dim.intensity, verbose, PACKAGE="affyio")
   }
   
   if (pdenv | !is.null(pkgname)){
@@ -126,7 +112,7 @@ read.celfiles <- function(filenames,
     }
   }
 
-  out <- new(oligoClass,
+  out <- new("oligoBatch",
              assayData=
              if(!sd & !npixels){
                list(exprs=tmpExprs)
