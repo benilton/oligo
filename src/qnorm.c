@@ -4,12 +4,12 @@
  **
  ** aim: A c implementation of the quantile normalization method 
  **
- ** Copyright (C) 2002-2005    Ben Bolstad
+ ** Copyright (C) 2002-2006    Ben Bolstad
  **
- ** written by: B. M. Bolstad  <bolstad@stat.berkeley.edu>
+ ** written by: B. M. Bolstad  <bmb@bmbolstad.com>
  **
  ** written: Feb 2, 2002
- ** last modified: Mar 3, 2005
+ ** last modified: Mar 12, 2006
  ** 
  ** This c code implements the quantile normalization method
  ** for normalizing high density oligonucleotide data as discussed
@@ -35,6 +35,7 @@
  ** Oct 7, 2003 - fix a bug with length is qnorm_robust
  ** Mar 6, 2004 - change malloc/free pairs to Calloc/Free
  ** Mar 3, 2005 - port across the low memory quantile normalization from RMAExpress (and make it the new qnorm_c (previous version made qnorm_c_old)
+ ** Mar 12, 2006 - make some internal functions static
  **
  ***********************************************************/
 
@@ -75,7 +76,7 @@ typedef struct{
  **		    
  **********************************************************/
 
-int min(int x1,int x2){
+static int min(int x1,int x2){
   if (x1 > x2)
     return x2;
   else
@@ -91,7 +92,7 @@ int min(int x1,int x2){
  **
  **********************************************************/
 
-int sort_fn(const void *a1,const void *a2){
+static int sort_fn(const void *a1,const void *a2){
   dataitem *s1, *s2;
   s1 = (dataitem *)a1;
   s2 = (dataitem *)a2;
@@ -114,7 +115,7 @@ int sort_fn(const void *a1,const void *a2){
  **
  ***********************************************************/
 
-dataitem **get_di_matrix(double *data, int rows, int cols){
+static dataitem **get_di_matrix(double *data, int rows, int cols){
   int i,j;
   dataitem **dimat;
   /* dataitem *xtmp; */
@@ -151,7 +152,7 @@ dataitem **get_di_matrix(double *data, int rows, int cols){
  **
  *************************************************************/
 
-void get_ranks(double *rank, dataitem *x,int n){
+static void get_ranks(double *rank, dataitem *x,int n){
   int i,j,k;
    
   i = 0;
@@ -182,7 +183,7 @@ void get_ranks(double *rank, dataitem *x,int n){
  ** 
  ********************************************************/
 
-void qnorm_c_old(double *data, int *rows, int *cols){
+static void qnorm_c_old(double *data, int *rows, int *cols){
   int i,j,ind;
   dataitem **dimat;
   double sum;
@@ -352,9 +353,9 @@ void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use
 int qnorm_c(double *data, int *rows, int *cols){
   int i,j,ind;
   dataitem **dimat;
-  double sum;
+  /*  double sum; */
   double *row_mean = (double *)Calloc((*rows),double);
-  double *datvec; // = (double *)Calloc(*cols,double);
+  double *datvec; /* = (double *)Calloc(*cols,double); */
   double *ranks = (double *)Calloc((*rows),double);
   
   datvec = (double *)Calloc(*rows,double);
