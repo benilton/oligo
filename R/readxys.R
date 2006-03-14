@@ -110,11 +110,6 @@ read.xysfiles <- function(filenames,
     tmpE <- readonexysfile(filenames[i])
     tmpE$index <- tmpE$X + (tmpE$Y-1)*get(designname)@ncol
 
-    ## get those probes which are in the NDF
-    ## in that order
-#    inndf <- tmpE$index %in% lookup$index
-#    tmpE <- tmpE[inndf,]
-
     ndforder <- match(lookup$index,tmpE$index)
     e[,j:(j+nwells-1)] <- matrix(tmpE$SIGNAL[ndforder],
                                  ncol = nwells,
