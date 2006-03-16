@@ -8,4 +8,4 @@ Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling)
 License: LGPL version 2 or newer
 Collate: AllClasses.R AllGeneric.R methods-platformDesign.R methods-oligoBatch.R bg.R normalize.quantiles.R read.celfiles.R rma.R zzz.R plotDensity.R readxys.R sequence.R utils.R
 SaveImage: Yes
-biocViews: OneChannel,Microarray,Preprocessing
+biocViews: Microarray, OneChannel, TwoChannel, Preprocessing
