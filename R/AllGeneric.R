@@ -79,3 +79,6 @@ if( is.null(getGeneric("boxplot")))
 if( is.null(getGeneric("npixels")))
   setGeneric("npixels",
              function(object) standardGeneric("npixels"))
+
+if( is.null(getGeneric("allele")))
+  setGeneric("allele", function(object) standardGeneric("allele"))

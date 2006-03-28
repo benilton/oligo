@@ -20,7 +20,8 @@ getPD <- getPlatformDesign
 
 ## probeNames - returns probeNames for PMs ... genenames ignored for now
 setMethod("probeNames", "oligoBatch",
-          function(object, genenames=NULL){
+         ## function(object, genenames=NULL){
+          function(object){
             pmIndex <- pmindex(getPlatformDesign(object))
             pns <- get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))
             return(as.character(pns[pmIndex]))
@@ -193,3 +194,12 @@ setMethod("sd", "oligoBatch",
 setMethod("npixels", signature(object="oligoBatch"),
           function(object) return(assayData(object)$npixels))
 
+type <- function(object) getPD(object)@type
+
+setMethod("allele", signature(object="oligoBatch"),
+          function(object){
+            if(type(object)!="SNP"){
+              stop("This array does not have allele information")
+            }else{
+              getPD(object)$allele
+            }})
