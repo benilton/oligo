@@ -1,7 +1,7 @@
 \name{boxplot}
 \alias{boxplot}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Boxplot for \code{oligoBatch}}
+\title{Boxplot}
 \description{
   Creates boxplots for \code{oligoBatch} objects.
 }

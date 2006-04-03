@@ -1,4 +1,4 @@
-\name{read.celfiles}
+\name{File Parsers}
 \alias{read.celfiles}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Affymetrix CEL files parser}
@@ -65,7 +65,7 @@ read.celfiles(filenames,
 
 \author{Benilton Carvalho \email{bcarvalh@jhsph.edu}, Rafael A. Irizarry, Ben Bolstad.}
 
-\seealso{ \code{\link{list.celfiles}} }
+\seealso{ \code{\link{list.celfiles}}, \code{\link{read.xysfiles}}, \code{\link{list.xysfiles}} }
 \examples{
 ## NOT RUN
 ##

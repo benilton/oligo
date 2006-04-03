@@ -1,15 +1,13 @@
 \name{File parsers}
 \alias{read.xysfiles}
-\alias{read.celfiles}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Functions to parse CEL and XYS files.}
+\title{XYS files parser.}
 \description{
   These functions provide parsing capabilities to the oligo package,
-  making it possible to read CEL and XYS files.
+  making it possible to read XYS files.
 }
 \usage{
 read.xysfiles(filenames, phenoData = new("phenoData"), description = NULL, notes = "", verbose = FALSE)
-read.celfiles(filenames, phenoData = new("phenoData"), description = NULL, notes = "", verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,8 +21,10 @@ read.celfiles(filenames, phenoData = new("phenoData"), description = NULL, notes
 \value{
   The functions return an \code{oligoBatch} object.
 }
+
+\seealso{ \code{\link{list.celfiles}}, \code{\link{read.celfiles}}, \code{\link{list.xysfiles}} }
 \examples{
 ## Do not run
-## oBatch <- read.celfiles(list.celfiles())
+## oBatch <- read.xysfiles(list.xysfiles())
 }
 \keyword{methods}% at least one, from doc/KEYWORDS
