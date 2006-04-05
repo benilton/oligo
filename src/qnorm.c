@@ -36,6 +36,10 @@
  ** Mar 6, 2004 - change malloc/free pairs to Calloc/Free
  ** Mar 3, 2005 - port across the low memory quantile normalization from RMAExpress (and make it the new qnorm_c (previous version made qnorm_c_old)
  ** Mar 12, 2006 - make some internal functions static
+ ** Mar 13, 2006 - re-working of the "robust" quantile normalizer. The old function is
+ **                still here with a _old added to the name. Also now
+ **                have a .Call() interface for the robust method
+ **
  **
  ***********************************************************/
 
@@ -234,7 +238,7 @@ static void qnorm_c_old(double *data, int *rows, int *cols){
 
 /*********************************************************
  **
- ** void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median)
+ ** void qnorm_robust_c_old(double *data,double *weights, int *rows, int *cols, int *use_median)
  **
  ** double *data - datamatrix
  ** double *weights - weights to give each chip when computing normalization chip
@@ -251,9 +255,12 @@ static void qnorm_c_old(double *data, int *rows, int *cols){
  **
  ** note that log scale with mean is equivalent to geometric mean.
  **
+ ** SPECIAL NOTE. This is the old qnorm_robust_c function
+ **
+ **
  ********************************************************/
 
-void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median, int *use_log2){
+static void qnorm_robust_c_old(double *data,double *weights, int *rows, int *cols, int *use_median, int *use_log2){
   int i,j,ind;
   int half,length;
   dataitem **dimat;
@@ -401,10 +408,301 @@ int qnorm_c(double *data, int *rows, int *cols){
   return 0;
 }
 
+static double weights_huber(double u, double k){
+  
+  if ( 1 < k/fabs(u)){
+    return 1.0;
+  } else {
+    return  k/fabs(u);
+  }
+}
+
+
+/**************************************************************************
+ **
+ ** double median(double *x, int length)
+ **
+ ** double *x - vector
+ ** int length - length of *x
+ **
+ ** returns the median of *x
+ **
+ *************************************************************************/
+
+static double median(double *x, int length){
+  int i;
+  int half;
+  double med;
+  double *buffer = Calloc(length,double);
+  
+  for (i = 0; i < length; i++)
+    buffer[i] = x[i];
+  
+  qsort(buffer,length,sizeof(double), (int(*)(const void*, const void*))sort_double);
+  half = (length + 1)/2;
+  if (length % 2 == 1){
+    med = buffer[half - 1];
+  } else {
+    med = (buffer[half] + buffer[half-1])/2.0;
+  }
+  
+  Free(buffer);
+  return med;
+}
+
+
+
+static double med_abs(double *x, int length){
+  int i;
+  double med_abs;
+  double *buffer = Calloc(length,double);
+
+  for (i = 0; i < length; i++)
+    buffer[i] = fabs(x[i]);
+
+  med_abs = median(buffer,length);
+
+  Free(buffer);
+  return(med_abs);
+}
 
 
 
 
+
+
+
+
+
+/*********************************************************
+ **
+ ** void qnorm_robust_c_old(double *data,double *weights, int *rows, int *cols, int *use_median,int *use_log2,int *weight_scheme)
+ ** 
+ ** 
+ **
+ **
+ **
+ ********************************************************/
+
+int qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median, int *use_log2, int *weight_scheme){
+  
+  int i,j,ind,rep;  
+  int half,length;
+  dataitem **dimat;
+  double *row_mean = (double *)Calloc((*rows),double);
+  double *datvec; /* = (double *)Calloc(*cols,double); */
+  double *ranks = (double *)Calloc((*rows),double);
+  
+  double sum_weights = 0.0;
+  double mean, scale; /* used in M-estimation routine */
+
+
+  
+  for (i =0; i < *rows; i++){
+    row_mean[i] = 0.0;
+  }
+
+
+  if ((*weight_scheme == 0) && !(*use_median)){
+    datvec = (double *)Calloc(*rows,double);
+    
+    if (!(*use_log2)){
+      for (j = 0; j < *cols; j++){
+	sum_weights+=weights[j];
+      }
+
+
+      for (j = 0; j < *cols; j++){
+	for (i =0; i < *rows; i++){
+	  datvec[i] = data[j*(*rows) + i];
+	}
+	qsort(datvec,*rows,sizeof(double),(int(*)(const void*, const void*))sort_double);
+	if (weights[j] > 0.0){
+	  for (i =0; i < *rows; i++){
+	    row_mean[i] += weights[j]*datvec[i]/sum_weights;
+	  }
+	}
+      } 
+    } else {
+      for (j = 0; j < *cols; j++){
+	sum_weights+=weights[j];
+      }
+
+
+      for (j = 0; j < *cols; j++){
+	for (i =0; i < *rows; i++){
+	  datvec[i] = data[j*(*rows) + i];
+	}
+	qsort(datvec,*rows,sizeof(double),(int(*)(const void*, const void*))sort_double);
+	if (weights[j] > 0.0){
+	  for (i =0; i < *rows; i++){
+	    row_mean[i] += weights[j]*(log(datvec[i])/log(2.0))/sum_weights;
+	  }
+	}
+      } 
+      for (i =0; i < *rows; i++){
+	row_mean[i] = pow(2.0,row_mean[i]);
+      }
+    } 
+  } else if ((*weight_scheme == 1) && !(*use_median)){
+    /** row-wise huber weights **/
+    dimat = get_di_matrix(data, *rows, *cols);
+   
+    datvec = Calloc(*cols,double);
+    
+    for (j=0; j < *cols; j++){
+      qsort(dimat[j],*rows,sizeof(dataitem),sort_fn);
+    }
+    
+
+    if (!(*use_log2)){
+      for (i=0; i < *rows; i++){
+	for (j=0; j < *cols; j++)
+	  datvec[j] = dimat[j][i].data;
+	
+	/* five step huber estimate of location */
+	mean = 0.0;
+	for (j=0; j < *cols; j++){
+	  mean += datvec[j]/(double)(*cols);
+	}
+	
+	for (rep = 0; rep < 5; rep++){
+	  for (j=0; j < *cols; j++){
+	    datvec[j] = datvec[j] - mean;
+	  }
+	  scale = med_abs(datvec,*cols)/0.6745;
+	  if (scale == 0.0){
+	    break;
+	  }
+	  
+	  for (j=0; j < *cols; j++){
+	    datvec[j] = (datvec[j] - mean)/scale;
+	  }
+	  
+	  mean = 0.0;
+	  sum_weights=0.0;
+	  for (j=0; j < *cols; j++){
+	    mean+= weights_huber(datvec[j],1.345) * dimat[j][i].data;
+	    sum_weights+=weights_huber(datvec[j],1.345);
+	  }
+	  mean/=sum_weights;
+	  for (j=0; j < *cols; j++)
+	    datvec[j] = dimat[j][i].data;
+	  /* Rprintf("rep %d %f %f\n",rep,mean,scale); */
+	}
+	row_mean[i] = mean;
+      }
+    } else {
+      for (i=0; i < *rows; i++){
+	for (j=0; j < *cols; j++)
+	  datvec[j] = log(dimat[j][i].data)/log(2.0);
+	
+	/* five step huber estimate of location */
+	mean = 0.0;
+	for (j=0; j < *cols; j++){
+	  mean += datvec[j]/(double)(*cols);
+	}
+	
+	for (rep = 0; rep < 5; rep++){
+	  for (j=0; j < *cols; j++){
+	    datvec[j] = datvec[j] - mean;
+	  }
+	  scale = med_abs(datvec,*cols)/0.6745;
+	  if (scale == 0.0){
+	    break;
+	  }
+	  
+	  for (j=0; j < *cols; j++){
+	    datvec[j] = (datvec[j] - mean)/scale;
+	  }
+	  
+	  mean = 0.0;
+	  sum_weights=0.0;
+	  for (j=0; j < *cols; j++){
+	    mean+= weights_huber(datvec[j],1.345) * log(dimat[j][i].data)/log(2.0);
+	    sum_weights+=weights_huber(datvec[j],1.345);
+	  }
+	  mean/=sum_weights;
+	  for (j=0; j < *cols; j++)
+	    datvec[j] = log(dimat[j][i].data)/log(2.0);
+	  /* Rprintf("rep %d %f %f\n",rep,mean,scale); */
+	}
+	row_mean[i] = pow(2.0,mean);
+      }
+    }
+    for (j=0; j < *cols; j++){
+      Free(dimat[j]);
+    }
+    
+    Free(dimat);
+
+
+
+
+  } else if ((*use_median)){
+    dimat = get_di_matrix(data, *rows, *cols);
+   
+    datvec = Calloc(*cols,double);
+    
+    for (j=0; j < *cols; j++){
+      qsort(dimat[j],*rows,sizeof(dataitem),sort_fn);
+    }
+    
+    for (i=0; i < *rows; i++){
+      for (j=0; j < *cols; j++)
+	datvec[j] = dimat[j][i].data;
+      
+      
+      qsort(datvec,*cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
+      half = (*cols + 1)/2;
+      length = *cols;
+      if (length % 2 == 1){
+	row_mean[i] = datvec[half - 1];
+      } else {
+	row_mean[i] = (datvec[half] + datvec[half-1])/2.0;
+      }
+    }
+    for (j=0; j < *cols; j++){
+      Free(dimat[j]);
+    }
+    
+    Free(dimat);
+  } else {
+    error("Not sure that these inputs are recognised for the robust quantile normalization routine.\n");
+
+
+  }
+	     
+
+
+
+
+  /* now assign back distribution */
+  dimat = (dataitem **)Calloc(1,dataitem *);
+  dimat[0] = (dataitem *)Calloc(*rows,dataitem);
+  
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      dimat[0][i].data = data[j*(*rows) + i];
+      dimat[0][i].rank = i;
+    }
+    qsort(dimat[0],*rows,sizeof(dataitem),sort_fn);
+    get_ranks(ranks,dimat[0],*rows);
+    for (i =0; i < *rows; i++){
+      ind = dimat[0][i].rank;
+      data[j*(*rows) +ind] = row_mean[(int)floor(ranks[i])-1];
+      }
+  }
+  
+  Free(ranks);
+  Free(datvec);
+  Free(dimat[0]);
+  
+  Free(dimat);
+  Free(row_mean);
+  return 0;
+  
+}
 
 
 
@@ -446,6 +744,70 @@ SEXP R_qnorm_c(SEXP X, SEXP copy){
   Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
   
   qnorm_c(Xptr, &rows, &cols);
+  if (asInteger(copy)){
+    UNPROTECT(2);
+  } else {
+    UNPROTECT(1);
+  }
+  return Xcopy;
+}
+
+
+
+
+
+
+
+
+/*********************************************************
+ **
+ ** SEXP R_qnorm_robust_c(SEXP X)
+ **
+ ** SEXP X      - a matrix
+ ** SEXP copy   - a flag if TRUE then make copy
+ **               before normalizing, if FALSE work in place
+ **               note that this can be dangerous since
+ **               it will change the original matrix.
+ **
+ ** returns a quantile normalized matrix.
+ **
+ ** This is a .Call() interface for quantile normalization
+ **
+ *********************************************************/
+
+
+SEXP R_qnorm_robust_c(SEXP X, SEXP copy, SEXP R_weights, SEXP R_use_median, SEXP R_use_log2, SEXP R_weight_scheme){
+
+  SEXP Xcopy,dim1;
+  double *Xptr;
+  int rows,cols;
+  
+  double *weights;
+  int use_median;
+  int use_log2;
+  int weight_scheme;
+
+
+  
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  if (asInteger(copy)){
+    PROTECT(Xcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(Xcopy,X,0);
+  } else {
+    Xcopy = X;
+  }
+  Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
+  
+  weights =  NUMERIC_POINTER(AS_NUMERIC(R_weights));
+  
+  use_median = INTEGER(R_use_median)[0];
+  use_log2 = INTEGER(R_use_log2)[0];
+  weight_scheme = INTEGER(R_weight_scheme)[0];
+
+
+  qnorm_robust_c(Xptr,weights, &rows, &cols, &use_median, &use_log2, &weight_scheme);
   if (asInteger(copy)){
     UNPROTECT(2);
   } else {
