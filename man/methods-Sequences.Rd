@@ -23,7 +23,7 @@ sequenceDesignMatrix(seqs)
 
   \code{sequenceDesignMatrix} returns a matrix of indicator variables
   with \code{length(seqs)} lines and \code{3*nchar(seqs[1])}
-  columns. The name of the columns use the format X_Y standing for the
+  columns. The name of the columns use the format X.Y standing for the
   indicator variable of base X at position Y.
 }
 \examples{

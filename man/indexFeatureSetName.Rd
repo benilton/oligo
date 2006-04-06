@@ -11,6 +11,6 @@ indexFeatureSetName(object, featurenames)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{An \code{oligoBatch} object.}
-  \item{featirenames}{A character vector with the feature set names.}
+  \item{featurenames}{A character vector with the feature set names.}
 }
 \keyword{manip}% at least one, from doc/KEYWORDS

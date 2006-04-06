@@ -10,7 +10,7 @@ if (is.null(getGeneric("getPlatformDesign"))){
              function(object) standardGeneric("getPlatformDesign"))}
 
 if (is.null(getGeneric("probeNames")))
-  setGeneric("probeNames", function(object, ...)
+  setGeneric("probeNames", function(object)
              standardGeneric("probeNames"))
 
 if (is.null(getGeneric("geneNames")))
@@ -18,15 +18,15 @@ if (is.null(getGeneric("geneNames")))
              standardGeneric("geneNames"))
 
 if( is.null(getGeneric("pmindex")))
-  setGeneric("pmindex", function(object,...)
+  setGeneric("pmindex", function(object)
              standardGeneric("pmindex"))
 
 if( is.null(getGeneric("mmindex")))
-  setGeneric("mmindex", function(object,...)
+  setGeneric("mmindex", function(object)
              standardGeneric("mmindex"))
 
 if( is.null(getGeneric("indexFeatureSetName") ))
-  setGeneric("indexFeatureSetName", function(object, ...)
+  setGeneric("indexFeatureSetName", function(object, featurenames)
              standardGeneric("indexFeatureSetName"))
 
 if(is.null(getGeneric("ncol")))
@@ -43,7 +43,7 @@ if( is.null(getGeneric("names")))
              standardGeneric("names"))
 
 if( is.null(getGeneric("nProbes")))
-  setGeneric("nProbes", function(object, ...)
+  setGeneric("nProbes", function(object)
              standardGeneric("nProbes"))
 
 if( is.null(getGeneric("probeNames")))
@@ -51,7 +51,7 @@ if( is.null(getGeneric("probeNames")))
              standardGeneric("probeNames"))
 
 if( is.null(getGeneric("pm") ))
-  setGeneric("pm", function(object, ...)
+  setGeneric("pm", function(object, genenames=NULL)
              standardGeneric("pm"))
 
 if( is.null(getGeneric("pm<-") ))
@@ -59,7 +59,7 @@ if( is.null(getGeneric("pm<-") ))
              standardGeneric("pm<-"))
 
 if( is.null(getGeneric("mm") ))
-  setGeneric("mm", function(object, ...)
+  setGeneric("mm", function(object, genenames=NULL)
              standardGeneric("mm"))
 
 if( is.null(getGeneric("mm<-") ))
@@ -70,7 +70,7 @@ if( is.null(getGeneric("image")))
   setGeneric("image")
 
 if( is.null(getGeneric("featureIndex") ))
-  setGeneric("featureIndex", function(object, ...)
+  setGeneric("featureIndex", function(object, which=c("both","pm","mm"), genenames=NULL)
              standardGeneric("featureIndex"))
 
 if( is.null(getGeneric("boxplot")))

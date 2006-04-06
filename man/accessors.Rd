@@ -1,5 +1,4 @@
 \name{Accessors}
-\alias{exprs}
 \alias{npixels}
 \alias{sd}
 \alias{platform}
@@ -9,7 +8,6 @@
   Set of accessors for \code{oligoBatch} objects.
 }
 \usage{
-exprs(object)
 npixels(object)
 sd(object)
 platform(object)

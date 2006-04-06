@@ -33,13 +33,13 @@ normalize.oligoBatch.quantiles(obatch, type=c("separate","pmonly","mmonly","toge
   A normalized \code{oligoBatch}.
 }
 \references{
-  Bolstad, B (2001) _Probe Level Quantile Normalization of High Density
-  Oligonucleotide Array Data_. Unpublished manuscript
+  Bolstad, B (2001) Probe Level Quantile Normalization of High Density
+  Oligonucleotide Array Data. Unpublished manuscript
   \url{http://bmbolstad.com/stuff/qnorm.pdf}
 
-  Bolstad, B. M., Irizarry R. A., Astrand, M, and Speed, T. P. (2003) _A
+  Bolstad, B. M., Irizarry R. A., Astrand, M, and Speed, T. P. (2003) A
   Comparison of Normalization Methods for High Density Oligonucleotide
-  Array Data Based on Bias and Variance._ Bioinformatics 19(2) ,pp
+  Array Data Based on Bias and Variance. Bioinformatics 19(2) ,pp
   185-193.
   \url{http://bmbolstad.com/misc/normalize/normalize.html}
 }

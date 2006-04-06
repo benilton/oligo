@@ -22,7 +22,7 @@ basecontent(seq)
   'A', 'C', 'T', 'G', and the values in each column are the counts of
   the corresponding bases in the elements of 'x'.
 }
-\note{Based on MP_basecontent in matchprobes}
+\note{Based on MPbasecontent in matchprobes}
 \examples{
 seqs <- c("AATCG", "gTCa", "aaaTTTT")
 basecontent(seqs)

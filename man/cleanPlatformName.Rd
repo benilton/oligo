@@ -10,7 +10,7 @@ cleanPlatformName(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
+  \item{x}{Usually the Design File Name.}
 }
 \details{
   The function removes underscore and dash symbols from the string and

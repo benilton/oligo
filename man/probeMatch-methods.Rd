@@ -1,20 +1,23 @@
 \name{probeMatch-methods}
 \alias{pm}
 \alias{mm}
+\alias{pmindex}
+\alias{mmindex}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Accessors for perfect match (pm) and mismatch (mm) probes.}
 \description{
   Methods for perfect match and mismatch probes.
 }
 \usage{
-pm(object)
+pm(object, genenames=NULL)
 pmindex(object)
-mm(object)
+mm(object, genenames=NULL)
 mmindex(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{oligoBatch object}
+  \item{genenames}{character vector with the featureset names of interest}
 }
 \value{
   \code{pm} and \code{mm} will return respectively the PM and MM
@@ -23,7 +26,6 @@ mmindex(object)
   \code{pmindex} and \code{mmindex} will return vectors containing the
   indexes for the PM and MM probes.
 }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
 ## Do not run
 ## oBatch <- read.celfiles(list.celfiles())

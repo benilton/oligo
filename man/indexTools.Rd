@@ -1,5 +1,6 @@
-\name{i2xy}
+\name{Conversion fro XY to Index}
 \alias{i2xy}
+\alias{xy2i}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Index <-> XY}
 \description{

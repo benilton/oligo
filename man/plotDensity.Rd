@@ -11,7 +11,7 @@
 \usage{
 plotDensity(mat, ylab = "density", xlab = "x", type = "l", col = 1:6,
 ...)
-plotDensity.AffyBatch(x, col = 1:6, log=TRUE, which=c("pm","mm","both"),
+plotDensity.oligoBatch(x, col = 1:6, log=TRUE, which=c("both","pm","mm"),
 ylab = "density", xlab = NULL, ...)
 hist(x, which=c("both","pm","mm"), ...)
 }
@@ -26,6 +26,7 @@ hist(x, which=c("both","pm","mm"), ...)
   \item{xlab}{A title for the x axis.}
   \item{type}{the type of the plot.}
   \item{col}{The colors to use fot the different arrays.}
+  \item{which}{Feature type to be plotted.}
   \item{\dots}{graphical parameters can be given as arguments to \code{plot}}
 }
 \examples{
