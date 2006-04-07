@@ -1,16 +1,14 @@
-
-setMethod("platform","oligoBatch", function(object) object@platform)
+setMethod("platform", "oligoBatch", function(object) object@platform)
 
 ###for compatibility with previous package
 setMethod("length",signature(x="oligoBatch"),
           function(x) ncol(exprs(x))) 
 
-
-setMethod("platformDesignName","oligoBatch", function(object){
+setMethod("platformDesignName", "oligoBatch", function(object){
   cleanPlatformName(object@platform)})
 
 ##loading the library for now... this must change
-setMethod("getPlatformDesign","oligoBatch", function(object){
+setMethod("getPlatformDesign", "oligoBatch", function(object){
   pdn <- platformDesignName(object)
   library(pdn,character.only=TRUE)
   return(get(pdn,pos=paste("package:",pdn,sep="")))
@@ -52,14 +50,13 @@ setMethod("mmindex", "oligoBatch",
 ## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
 ##     it'll return the indexes for a given feature_set_name
 ##     This is used by pm/mm when getting intensities for given feature_set_names
-setMethod("indexFeatureSetName","oligoBatch",
+setMethod("indexFeatureSetName", "oligoBatch",
           function(object, featurenames){
             tmp <- NULL
             for (i in featurenames)
               tmp <- c(tmp,which(getPlatformDesign(object)$feature_set_name == i))
             return(sort(tmp))
           })
-
 
 setMethod("ncol",signature(x="oligoBatch"),
                     function(x) getPlatformDesign(x)@ncol)
@@ -68,12 +65,12 @@ setMethod("nrow",signature(x="oligoBatch"),
           function(x) getPlatformDesign(x)@nrow)
 
 ## Histogram
-setMethod("hist",signature(x="oligoBatch"),
-          function(x, which=c("both","pm","mm"), ...)
-          plotDensity.oligoBatch(x, which=c("both","pm","mm"), ...))
+setMethod("hist", signature(x="oligoBatch"),
+          function(x, which=c("both", "pm", "mm"), ...)
+          plotDensity.oligoBatch(x, which=c("both", "pm", "mm"), ...))
 
 ## Show
-setMethod("show","oligoBatch", function(object){
+setMethod("show", "oligoBatch", function(object){
   dm <- dim(exprs(object))
   nprobes <- dm[1]
   nsamples <- dm[2]
@@ -83,7 +80,7 @@ setMethod("show","oligoBatch", function(object){
 })
 
 ## PM
-setMethod("pm","oligoBatch", ##genenames is ignored for now.. we will get to it
+setMethod("pm", "oligoBatch", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
             index <- pmindex(object)
             if (!is.null(genenames)){
@@ -107,7 +104,7 @@ setReplaceMethod("pm", "oligoBatch",
                  })
 
 ## MM
-setMethod("mm","oligoBatch", function(object, genenames=NULL){
+setMethod("mm", "oligoBatch", function(object, genenames=NULL){
             index <- mmindex(object)
             if (!is.null(genenames)){
               index <- intersect(index,indexFeatureSetName(object,genenames))
@@ -128,10 +125,9 @@ setReplaceMethod("mm", "oligoBatch",
                    object
                  })
 
-
-setMethod("featureIndex","oligoBatch",
-          function(object, which=c("both","pm","mm"), genenames=NULL){
-            which <- match.arg(which,c("both","pm","mm"))
+setMethod("featureIndex", "oligoBatch",
+          function(object, which=c("both", "pm", "mm"), genenames=NULL){
+            which <- match.arg(which,c("both", "pm", "mm"))
             if (which=="both"){
               pmIndex <- pmindex(getPlatformDesign(object))
               mmIndex <- mmindex(getPlatformDesign(object))
@@ -144,7 +140,7 @@ setMethod("featureIndex","oligoBatch",
              return(indexes)
            })
 
-setMethod("boxplot",signature(x="oligoBatch"),
+setMethod("boxplot", signature(x="oligoBatch"),
           function(x, which=c("both", "pm", "mm"), range=0, ...){
             which <- match.arg(which, c("both", "pm", "mm"))
             tmp <- description(x)
@@ -156,7 +152,7 @@ setMethod("boxplot",signature(x="oligoBatch"),
             boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
           })
 
-setMethod("image",signature(x="oligoBatch"),
+setMethod("image", signature(x="oligoBatch"),
           function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
             scn <- prod(par("mfrow"))
             ask <- dev.interactive()
@@ -179,7 +175,6 @@ setMethod("image",signature(x="oligoBatch"),
                 m <- transfo(m)
 
               m <- t(as.matrix(rev(as.data.frame(m))))
-##              image(x.pos, y.pos, m, col=col,
               image(m, col=col,
                     main=sampleNames(x)[i],
                     xlab=xlab, ylab=ylab,

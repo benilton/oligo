@@ -1,7 +1,7 @@
 \name{Plot Densities}
 \alias{plotDensity}
 \alias{plotDensity.oligoBatch}
-\alias{hist}
+%- \alias{hist}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Plot Densities}
 \description{
@@ -13,7 +13,7 @@ plotDensity(mat, ylab = "density", xlab = "x", type = "l", col = 1:6,
 ...)
 plotDensity.oligoBatch(x, col = 1:6, log=TRUE, which=c("both","pm","mm"),
 ylab = "density", xlab = NULL, ...)
-hist(x, which=c("both","pm","mm"), ...)
+%- hist(x, which=c("both","pm","mm"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
