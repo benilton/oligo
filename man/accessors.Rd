@@ -1,6 +1,6 @@
 \name{Accessors}
 \alias{npixels}
-%- \alias{sd}
+\alias{type}
 \alias{platform}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Accessors for oligoBatch objects.}
@@ -9,7 +9,7 @@
 }
 \usage{
 npixels(object)
-%- sd(object)
+type(object)
 platform(object)
 }
 %- maybe also 'usage' for other objects documented here.

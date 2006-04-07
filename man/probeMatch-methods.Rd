@@ -1,6 +1,8 @@
 \name{probeMatch-methods}
 \alias{pm}
 \alias{mm}
+\alias{pm<-}
+\alias{mm<-}
 \alias{pmindex}
 \alias{mmindex}
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -11,13 +13,17 @@
 \usage{
 pm(object, genenames=NULL)
 pmindex(object)
+pm(object)<-value
 mm(object, genenames=NULL)
 mmindex(object)
+mm(object)<-value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{oligoBatch object}
-  \item{genenames}{character vector with the featureset names of interest}
+  \item{genenames}{character vector with the featureset names of
+    interest}
+  \item{value}{new values to replace the PM/MM matrices.}
 }
 \value{
   \code{pm} and \code{mm} will return respectively the PM and MM

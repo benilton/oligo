@@ -1,5 +1,7 @@
 \name{File Parsers}
 \alias{read.celfiles}
+\alias{read.affybatch}
+\alias{stuffForXYSandCELreaders}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Affymetrix CEL files parser}
 \description{
@@ -10,7 +12,6 @@ read.celfiles(filenames,
               pdenv=TRUE,
               arrayType=NULL,
               pkgname=NULL,
-%              uniqueCDF=TRUE,
               sd=FALSE,
               npixels=FALSE,
               phenoData=new("phenoData"),
@@ -21,6 +22,9 @@ read.celfiles(filenames,
               rm.mask=FALSE,
               rm.outliers=FALSE,
               rm.extra=FALSE)
+read.affybatch(..., filenames = character(0), phenoData = new("phenoData"),
+          description = NULL, notes = "", compress=getOption("BioC")$affy$compress.cel,
+          rm.mask = FALSE, rm.outliers = FALSE, rm.extra = FALSE, verbose =FALSE) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,7 +34,6 @@ read.celfiles(filenames,
   \item{arrayType}{type of array: "SNP" or "expression".}
   \item{pkgname}{string specifying the alternative PDEnv to be
     loaded. (see Details)}
-%  \item{uniquecdf}{do the CEL files point to only one CDF?}
   \item{sd}{should return standard deviations?}
   \item{npixels}{should return number of pixels?}
   \item{phenoData}{a \code{\link[Biobase]{phenoData}} object.}
@@ -40,7 +43,9 @@ read.celfiles(filenames,
   \item{compress}{are the CEL files compressed?}
   \item{rm.mask}{should the spots marked as 'MASKS' set to \code{NA}?}
   \item{rm.outliers}{should the spots marked as 'OUTLIERS' set to \code{NA}?}
-  \item{rm.extra}{if \code{TRUE}, overrides what is in \code{rm.mask} and \code{rm.oultiers}}
+  \item{rm.extra}{if \code{TRUE}, overrides what is in \code{rm.mask}
+    and \code{rm.oultiers}}
+  \item{\dots}{extra arguments to be passed to \code{\link{list}}}
 }
 
 \details{
