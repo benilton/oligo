@@ -29,7 +29,7 @@
 \title{Class "oligoBatch"}
 \description{
   This is a class representation for oligonucleotide arrays at probe level. The main component are the intensities from multiple arrays of
-  the same design file. It is an extension of the \code{\link{eSet-class}}.
+  the same design file. It is an extension of the \code{eSet-class}.
 }
 \section{Objects from the Class}{
 Objects can be created by calls of the form \code{new("oligoBatch", ...)}.
@@ -41,7 +41,7 @@ Objects can be created by calls of the form \code{new("oligoBatch", ...)}.
     \item{\code{platform}:}{Object of class \code{"character"}
       describing the design file associated to the object.}
     \item{\code{assayData}:}{Object of class \code{"listOrEnv"} as
-      described in \code{\link{eSet-class}}.}
+      described in \code{eSet-class}.}
     \item{\code{sampleNames}:}{Object of class \code{"character"} with
       the sample names.}
     \item{\code{reporterNames}:}{Object of class \code{"character"} with
@@ -105,7 +105,7 @@ Class \code{"annotatedDataset"}, by class \code{"eSet"}.
 }
 
 \seealso{
-  \code{\link{eSet-class}}
+  \code{eSet-class}
 }
 
 \keyword{classes}
