@@ -60,12 +60,20 @@ rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=T
   }
   colnames(exprs) <- sampleNames(object)
   se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
+  dimnames(se.exprs) <- dimnames(exprs)
 
-  phenodata <- phenoData(object)
-  annotation <- annotation(object)
-  description <- description(object)
-  notes <- notes(object)
+##  phenodata <- phenoData(object)
+##  annotation <- annotation(object)
+##  description <- description(object)
+##  notes <- notes(object)
 
-  new("exprSet", exprs = exprs, se.exprs = se.exprs, phenoData = phenodata,
-       annotation = annotation, description = description, notes = notes)
+##   new("exprSet", exprs = exprs, se.exprs = se.exprs, phenoData = phenodata,
+##        annotation = annotation, description = description, notes = notes)
+#return(exprs)
+  out <- new("ExpressionSet")
+  assayData(out) <- assayDataNew(storage.mode="list", exprs=exprs, se.exprs=se.exprs)
+  phenoData(out) <- phenoData(object)
+  experimentData(out) <- experimentData(object)
+  annotation(out) <- annotation(object)
+  return(out)
 }

@@ -38,7 +38,8 @@ setMethod("length",signature(x="FeatureSet"),
           function(x) ncol(exprs(x))) 
 
 setMethod("platformDesignName", "FeatureSet", function(object){
-  cleanPlatformName(object@platform)})
+#  cleanPlatformName(object@platform)})
+  platform(object)})
 
 ##loading the library for now... this must change
 setMethod("getPlatformDesign", "FeatureSet", function(object){
@@ -50,13 +51,14 @@ setMethod("getPlatformDesign", "FeatureSet", function(object){
 getPD <- getPlatformDesign
 
 ## probeNames - returns probeNames for PMs ... genenames ignored for now
-setMethod("probeNames", "FeatureSet",
-         ## function(object, genenames=NULL){
-          function(object){
+##setMethod("probeNames", c("FeatureSet", "characterOrNULL"),
+probeNames <- function(object, subset=NULL){
+         ## function(object){
             pmIndex <- pmindex(getPlatformDesign(object))
             pns <- get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))
             return(as.character(pns[pmIndex]))
-          })
+#          })
+          }
 
 ###geneNames - returns geneNames for PMs
 setMethod("geneNames", "FeatureSet",

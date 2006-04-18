@@ -28,10 +28,10 @@ setMethod("nProbes","platformDesign",
           })
 
 ##probeNames method
-setMethod("probeNames","platformDesign",
-          function(object){
-            return(get("feature_set_name",featureInfo(object)))
-          })
+## setMethod("probeNames", c("platformDesign", "characterOrNULL"),
+##           function(object, subset){
+##             return(get("feature_set_name",featureInfo(object)))
+##           })
                                    
 ##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "platformDesign",

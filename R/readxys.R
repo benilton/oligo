@@ -133,7 +133,8 @@ read.xysfiles <- function(filenames,
              phenoData=tmp$phenoData,
              experimentData=tmp$description) ##,
   manufacturer(out) <- "NimbleGen"
-  platform(out) <-  designnamelist[1]
+##  platform(out) <-  designnamelist[1]
+  platform(out) <- designname
   return(out)
 ##             notes=notes))
 ##  out@manufacturer <- "NimbleGen"

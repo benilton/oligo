@@ -20,9 +20,9 @@ if (is.null(getGeneric("getPlatformDesign"))){
   setGeneric("getPlatformDesign",
              function(object) standardGeneric("getPlatformDesign"))}
 
-if (is.null(getGeneric("probeNames")))
-  setGeneric("probeNames", function(object)
-             standardGeneric("probeNames"))
+## if (is.null(getGeneric("probeNames")))
+##   setGeneric("probeNames", function(object, subset)
+##              standardGeneric("probeNames"))
 
 if (is.null(getGeneric("geneNames")))
   setGeneric("geneNames", function(object)
@@ -57,9 +57,9 @@ if( is.null(getGeneric("nProbes")))
   setGeneric("nProbes", function(object)
              standardGeneric("nProbes"))
 
-if( is.null(getGeneric("probeNames")))
-  setGeneric("probeNames", function(object, ...)
-             standardGeneric("probeNames"))
+## if( is.null(getGeneric("probeNames")))
+##   setGeneric("probeNames", function(object, ...)
+##              standardGeneric("probeNames"))
 
 if( is.null(getGeneric("pm") ))
   setGeneric("pm", function(object, genenames=NULL)

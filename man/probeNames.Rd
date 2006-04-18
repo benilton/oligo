@@ -6,11 +6,12 @@
   The function returns the feature set names for all PM probes.
 }
 \usage{
-probeNames(object)
+probeNames(object, subset)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{An \code{FeatureSet} object.}
+  \item{object}{A \code{FeatureSet} object.}
+  \item{subset}{a \code{characterOrNULL} object. The subset to be used (not implemented yet)}
 }
 \value{
   A character vector with the feature set names. Restricted to PM only.

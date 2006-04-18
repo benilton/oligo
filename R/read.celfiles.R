@@ -135,7 +135,7 @@ read.celfiles <- function(filenames,
              experimentData=tmp$description) #,
   ##           description=tmp$description) #,
   ##           notes=notes)
-  platform(out) <- ref.cdfName
+  platform(out) <- pkgname
   manufacturer(out) <- "Affymetrix"
 ##  out@platform=ref.cdfName
 ##  out@manufacturer="Affymetrix"

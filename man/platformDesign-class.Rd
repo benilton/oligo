@@ -46,7 +46,8 @@ Objects can be created by calls of the form \code{new("platformDesign", ...)}.
       of features.}
     \item{pmindex}{\code{signature(object = "platformDesign")}: indexes
       of PMs.}
-    \item{probeNames}{\code{signature(object = "platformDesign")}:
+    \item{probeNames}{\code{signature(object = "platformDesign", subset
+	= "characterOrNULL")}:
       feature names for PMs.}
     \item{show}{\code{signature(object = "platformDesign")}: basic
       description of the PDEnv.}

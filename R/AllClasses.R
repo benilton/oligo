@@ -19,3 +19,4 @@ setClass("FeatureSet",
            manufacturer=character(),
            platform=character()))
 
+setClassUnion("characterOrNULL", c("character", NULL))
