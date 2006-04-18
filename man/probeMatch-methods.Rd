@@ -20,21 +20,21 @@ mm(object)<-value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{oligoBatch object}
+  \item{object}{FeatureSet object}
   \item{genenames}{character vector with the featureset names of
     interest}
   \item{value}{new values to replace the PM/MM matrices.}
 }
 \value{
   \code{pm} and \code{mm} will return respectively the PM and MM
-  matrices associated to the oligoBatch object.
+  matrices associated to the FeatureSet object.
 
   \code{pmindex} and \code{mmindex} will return vectors containing the
   indexes for the PM and MM probes.
 }
 \examples{
 ## Do not run
-## oBatch <- read.celfiles(list.celfiles())
-## pms <- pm(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## pms <- pm(FeatureSetObject)
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

@@ -14,7 +14,7 @@ sequenceDesignMatrix(seqs)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{oligoBatch object.}
+  \item{x}{FeatureSet object.}
   \item{seqs}{character vector containing sequences of same length.}
 }
 \value{
@@ -29,8 +29,8 @@ sequenceDesignMatrix(seqs)
 \examples{
 ## Do not run
 ##
-## oBatch <- read.celfiles(list.celfiles())
-## pmSeqs <- pmSequence(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## pmSeqs <- pmSequence(FeatureSetObject)
 ## dMatrix <- sequenceDesignMatrix(pmSeqs)
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

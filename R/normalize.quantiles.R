@@ -23,7 +23,7 @@
 ## Aug 22, 2005 - modified it for oligoBatch
 ##################################################################
 
-normalize.oligoBatch.quantiles <- function(obatch,type=c("separate","pmonly","mmonly","together")) {
+normalize.FeatureSet.quantiles <- function(obatch,type=c("separate","pmonly","mmonly","together")) {
 
 
   type <- match.arg(type)

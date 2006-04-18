@@ -9,7 +9,7 @@
   making it possible to read XYS files.
 }
 \usage{
-read.xysfiles(filenames, phenoData = new("phenoData"), description =
+read.xysfiles(filenames, phenoData = new("AnnotatedDataFrame"), description =
 NULL, notes = "", verbose = FALSE)
 readonexysfile(filename)
 readxysHeader(filename)
@@ -30,12 +30,12 @@ readxysHeader(filename)
   internal use.
 }
 \value{
-  The functions return an \code{oligoBatch} object.
+  The functions return an \code{FeatureSet} object.
 }
 
 \seealso{ \code{\link{list.celfiles}}, \code{\link{read.celfiles}}, \code{\link{list.xysfiles}} }
 \examples{
 ## Do not run
-## oBatch <- read.xysfiles(list.xysfiles())
+## FeatureSetObject <- read.xysfiles(list.xysfiles())
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

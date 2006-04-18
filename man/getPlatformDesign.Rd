@@ -12,15 +12,15 @@ getPD(object)
 }
 
 \arguments{
-  \item{object}{oligoBatch object.}
+  \item{object}{FeatureSet object.}
 }
 \value{
   The function returns the platform design object associated to the
-  oligoBatch object.
+  FeatureSet object.
 }
 \examples{
 ## Do not  run:
-## oBatch <- read.celfiles(list.celfiles())
-## getPD(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## getPD(FeatureSetObject)
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

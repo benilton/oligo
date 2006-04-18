@@ -10,7 +10,7 @@ featureIndex(object, which=c("both","pm","mm"), genenames=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{An \code{oligoBatch} object.}
+  \item{object}{An \code{FeatureSet} object.}
   \item{which}{A string defining what type of probes should have the
     indexes returned.}
   \item{genenames}{A character vector descbribing what feature sets the

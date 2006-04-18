@@ -31,7 +31,7 @@
 \examples{
 ## NOT RUN
 ##
-## oligoBatch <- read.celfiles(list.celfiles())
-## theDataFrame <- as.data.frame(getPD(oligoBatch))
+## FeatureSet <- read.celfiles(list.celfiles())
+## theDataFrame <- as.data.frame(getPD(FeatureSet))
 }
 \keyword{manip}% at least one, from doc/KEYWORDS

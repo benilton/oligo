@@ -15,6 +15,6 @@ xy2i(x,y,obatch)
   \item{i}{vector of indexes}
   \item{x}{vector of X locations}
   \item{y}{vector of Y locations}
-  \item{obatch}{An \code{oligoBatch} object.}
+  \item{obatch}{An \code{FeatureSet} object.}
 }
 \keyword{manip}% at least one, from doc/KEYWORDS

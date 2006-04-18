@@ -5,7 +5,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Affymetrix CEL files parser}
 \description{
-  Read Affymetrix CEL files into an oligoBatch.
+  Read Affymetrix CEL files into an FeatureSet.
 }
 \usage{
 read.celfiles(filenames,
@@ -14,7 +14,7 @@ read.celfiles(filenames,
               pkgname=NULL,
               sd=FALSE,
               npixels=FALSE,
-              phenoData=new("phenoData"),
+              phenoData=new("AnnotatedDataFrame"),
               description=NULL,
               notes="",
               verbose=FALSE,
@@ -22,7 +22,7 @@ read.celfiles(filenames,
               rm.mask=FALSE,
               rm.outliers=FALSE,
               rm.extra=FALSE)
-read.affybatch(..., filenames = character(0), phenoData = new("phenoData"),
+read.affybatch(..., filenames = character(0), phenoData = new("AnnotatedDataFrame"),
           description = NULL, notes = "", compress=getOption("BioC")$affy$compress.cel,
           rm.mask = FALSE, rm.outliers = FALSE, rm.extra = FALSE, verbose =FALSE) 
 }
@@ -74,6 +74,6 @@ read.affybatch(..., filenames = character(0), phenoData = new("phenoData"),
 \examples{
 ## NOT RUN
 ##
-## oligoBatch <- read.celfiles(list.celfiles())
+## FeatureSet <- read.celfiles(list.celfiles())
 }
 \keyword{manip}% at least one, from doc/KEYWORDS

@@ -11,7 +11,7 @@ plotDensity <- function(mat,
 }
  
 
-plotDensity.oligoBatch <- function(x, col=1:6, log=TRUE,
+plotDensity.FeatureSet <- function(x, col=1:6, log=TRUE,
                                   which=c("both","pm","mm"),
                                   ylab="density",
                                   xlab=NULL,

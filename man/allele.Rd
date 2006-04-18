@@ -11,14 +11,14 @@ allele(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{an oligoBatch object.}
+  \item{object}{an FeatureSet object.}
 }
 \value{
   A character vector of alleles.
 }
 \examples{
 ## DO NOT RUN
-## oBatch <- read.celfiles(list.celfiles())
-## theAlleles <- allele(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## theAlleles <- allele(FeatureSetObject)
 }
 \keyword{manip}% at least one, from doc/KEYWORDS

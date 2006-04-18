@@ -10,16 +10,16 @@ nrow(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{oligoBatch object.}
+  \item{x}{FeatureSet object.}
 }
 \value{
   \code{nrow} returns the number of columns and number of
-  rows of the array associated to the oligoBatch object.
+  rows of the array associated to the FeatureSet object.
 }
 \seealso{\code{\link{ncol}}}
 \examples{
 ## DO NOT RUN
-## oBatch <- read.celfiles(list.celfiles())
-## ncol(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## ncol(FeatureSetObject)
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

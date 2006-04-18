@@ -1,6 +1,6 @@
 \name{Quantile Normalization}
 \alias{normalize.quantiles}
-\alias{normalize.oligoBatch.quantiles}
+\alias{normalize.FeatureSet.quantiles}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Quantile Normalization Functions}
 \description{
@@ -8,7 +8,7 @@
 }
 \usage{
 normalize.quantiles(x, copy = TRUE)
-normalize.oligoBatch.quantiles(obatch, type=c("separate","pmonly","mmonly","together"))
+normalize.FeatureSet.quantiles(obatch, type=c("separate","pmonly","mmonly","together"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +16,7 @@ normalize.oligoBatch.quantiles(obatch, type=c("separate","pmonly","mmonly","toge
     chip and each row is a probe.}
   \item{copy}{Make a copy of matrix before normalizing. Usually safer to
     work with a copy.}
-  \item{obatch}{An \code{oligoBatch} object.}
+  \item{obatch}{An \code{FeatureSet} object.}
   \item{type}{A string specifying how the normalization should be applied.}
 }
 \details{
@@ -30,7 +30,7 @@ normalize.oligoBatch.quantiles(obatch, type=c("separate","pmonly","mmonly","toge
   (PM,MM) or both together or separately.
 }
 \value{
-  A normalized \code{oligoBatch}.
+  A normalized \code{FeatureSet}.
 }
 \references{
   Bolstad, B (2001) Probe Level Quantile Normalization of High Density

@@ -33,7 +33,8 @@ read.celfiles <- function(filenames,
                           pkgname=NULL,
                           sd=FALSE,
                           npixels=FALSE,
-                          phenoData=new("phenoData"),
+##                          phenoData=new("phenoData"),
+                          phenoData=new("AnnotatedDataFrame"),
                           description=NULL,
                           notes="",
                           verbose = FALSE,
@@ -112,29 +113,38 @@ read.celfiles <- function(filenames,
     }
   }
 
-  out <- new("oligoBatch",
-             assayData=
-             if(!sd & !npixels){
-               list(exprs=tmpExprs)
-             }else if(sd & !npixels){
-               list(exprs=tmpExprs, sd=tmpSD)
-             }else if(sd & npixels){
-               list(exprs=tmpExprs, sd=tmpSD, npixels=tmpNP)
-             }else if(!sd & npixels){
-               list(exprs=tmpExprs, npixels=tmpNP)
-             },
-             sampleNames=rownames(pData(tmp$phenoData)),
-             platform = ref.cdfName,
-             manufacturer = "Affymetrix",
+#  return(list(tmpExprs=tmpExprs, tmp=tmp, ref.cdfName=ref.cdfName))
+  if(!sd & !npixels){
+    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs)
+  }else if(sd & !npixels){
+    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, sd=tmpSD)
+  }else if(sd & npixels){
+    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, sd=tmpSD, npixels=tmpNP)
+  }else if(!sd & npixels){
+    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, npixels=tmpNP)
+  }
+
+##  print(ref.cdfName)
+  out <- new("FeatureSet",
+             exprs=tmpExprs,
+##             assayData=ad,
+##             sampleNames=rownames(pData(tmp$phenoData)),
+             platform=ref.cdfName,
+             manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
-             description=tmp$description,
-             notes=notes)
-  
+             experimentData=tmp$description) #,
+  ##           description=tmp$description) #,
+  ##           notes=notes)
+  platform(out) <- ref.cdfName
+  manufacturer(out) <- "Affymetrix"
+##  out@platform=ref.cdfName
+##  out@manufacturer="Affymetrix"
   return(out)
 }
 
 read.affybatch <- function(..., filenames=character(0),
-                           phenoData=new("phenoData"),
+##                           phenoData=new("phenoData"),
+                           phenoData=new("AnnotatedDataFrame"),
                            description=NULL,
                            notes="",
                            compress = getOption("BioC")$affy$compress.cel,

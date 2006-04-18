@@ -1,5 +1,16 @@
+if (is.null(getGeneric("manufacturer")))
+  setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
+
+if( is.null(getGeneric("manufacturer<-") ))
+  setGeneric("manufacturer<-", function(object, value)
+             standardGeneric("manufacturer<-"))
+
 if (is.null(getGeneric("platform")))
   setGeneric("platform",function(object) standardGeneric("platform"))
+
+if( is.null(getGeneric("platform<-") ))
+  setGeneric("platform<-", function(object, value)
+             standardGeneric("platform<-"))
 
 if (is.null(getGeneric("platformDesignName"))){
   setGeneric("platformDesignName",

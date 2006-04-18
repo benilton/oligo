@@ -11,7 +11,11 @@ setClass("platformDesign",
                         platforms="character"),
          prototype = list(lookup=data.frame()))
 
-setClass("oligoBatch",
+setClass("FeatureSet",
          representation(manufacturer="character",
                         platform="character"),
-         contains="eSet")
+         contains="eSet",
+         prototype=list(
+           manufacturer=character(),
+           platform=character()))
+

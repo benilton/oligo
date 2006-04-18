@@ -21,7 +21,8 @@ readonexysfile <- function(filename)
   read.delim(filename)
 
 stuffForXYSandCELreaders <- function(filenames,
-                                     phenoData=new("phenoData"),
+##                                     phenoData=new("phenoData"),
+                                     phenoData=new("AnnotatedDataFrame"),
                                      description=NULL,
                                      notes="",
                                      verbose = FALSE,
@@ -49,7 +50,8 @@ stuffForXYSandCELreaders <- function(filenames,
     }
     
     pdata <- data.frame(sample=1:n, row.names=samplenames)
-    phenoData <- new("phenoData",pData=pdata,varLabels=list(sample="arbitrary numbering"))
+##    phenoData <- new("phenoData",pData=pdata,varLabels=list(sample="arbitrary numbering"))
+    phenoData <- new("AnnotatedDataFrame", data=pdata, varMetadata=data.frame(labelDescription="arbitrary numbering", row.names="sample"))
   }
   else samplenames <- rownames(pdata)
   
@@ -60,11 +62,12 @@ stuffForXYSandCELreaders <- function(filenames,
       description@preprocessing$oligoversion <- library(help="oligo")$info[[2]][2]
     }
   
-  return(list(filenames=filenames,samplenames=samplenames,phenoData=phenoData,description=description))
+  return(list(filenames=filenames,samplenames=samplenames, phenoData=phenoData, description=description))
 }
 
 read.xysfiles <- function(filenames,
-                         phenoData=new("phenoData"),
+##                         phenoData=new("phenoData"),
+                          phenoData=new("AnnotatedDataFrame"),
                          description=NULL,
                          notes="",
                          verbose = FALSE) {
@@ -93,7 +96,7 @@ read.xysfiles <- function(filenames,
   ## Get the number of wells
   nwells <- get(designname)@nwells
 
-  tmp <- stuffForXYSandCELreaders(filenames,phenoData,description,notes,verbose,nwells,designname)
+  tmp <- stuffForXYSandCELreaders(filenames, phenoData, description, notes, verbose, nwells, designname)
 
   ## Allocate memory for the intensities
   ## And giving the correct names for the columns
@@ -119,12 +122,22 @@ read.xysfiles <- function(filenames,
   }
 
   rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
-  return(new("oligoBatch",
-	     assayData=list(exprs=e[,,drop=FALSE]),
-             sampleNames=rownames(pData(tmp$phenoData)),
-             platform = designnamelist[1],
+##  ad <- assayDataNew(storage.mode="list", exprs=e[,,drop=FALSE])
+
+  out <- new("FeatureSet",
+##             assayData=ad,
              manufacturer = "NimbleGen",
+             platform = designnamelist[1],
+             exprs=e[,,drop=FALSE],
+##             sampleNames=rownames(pData(tmp$phenoData)),
              phenoData=tmp$phenoData,
-             description=tmp$description,
-             notes=notes))
+             experimentData=tmp$description) ##,
+  manufacturer(out) <- "NimbleGen"
+  platform(out) <-  designnamelist[1]
+  return(out)
+##             notes=notes))
+##  out@manufacturer <- "NimbleGen"
+##  out@platform <- designnamelist[1]
+##  return(out)
+
 }

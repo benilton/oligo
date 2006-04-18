@@ -19,7 +19,7 @@ names(x)
 \seealso{\code{\link{getPD}}}
 \examples{
 ## DO NOT RUN
-## oBatch <- read.celfiles(list.celfiles())
-## names(getPD(oBatch))
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## names(getPD(FeatureSetObject))
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

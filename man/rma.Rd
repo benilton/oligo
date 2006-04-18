@@ -10,7 +10,7 @@ rma(object, subset = NULL, verbose = TRUE, destructive = TRUE, normalize = TRUE,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{An \code{oligoBatch} object.}
+  \item{object}{An \code{FeatureSet} object.}
   \item{subset}{a character vector with the the names of the probesets
     to be used in expression calculation.}
   \item{verbose}{logical value. If 'TRUE' it writes out some messages.}
@@ -35,7 +35,7 @@ rma(object, subset = NULL, verbose = TRUE, destructive = TRUE, normalize = TRUE,
   scale. This differs from most of the other expression measure methods.
 }
 \value{
-  An \code{oligoBatch} object.
+  An \code{FeatureSet} object.
 }
 \references{
   Rafael. A. Irizarry, Benjamin M. Bolstad, Francois Collin, Leslie
@@ -55,7 +55,7 @@ rma(object, subset = NULL, verbose = TRUE, destructive = TRUE, normalize = TRUE,
 }
 \examples{
 ## Do not run
-## oBatch <- read.celfiles(list.celfiles())
-## oBatchNew <- rma(oBatch)
+## FeatureSetObject <- read.celfiles(list.celfiles())
+## FeatureSetObjectNew <- rma(FeatureSetObject)
 }
 \keyword{methods}% at least one, from doc/KEYWORDS

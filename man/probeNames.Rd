@@ -10,7 +10,7 @@ probeNames(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{An \code{oligoBatch} object.}
+  \item{object}{An \code{FeatureSet} object.}
 }
 \value{
   A character vector with the feature set names. Restricted to PM only.
