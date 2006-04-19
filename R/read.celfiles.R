@@ -124,26 +124,29 @@ read.celfiles <- function(filenames,
     ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, npixels=tmpNP)
   }
 
-##  print(ref.cdfName)
-  out <- new("FeatureSet",
+  ArrayType <- get(pkgname, pos=paste("package:", pkgname, sep=""))@type
+  if(ArrayType == "tiling"){
+    TheClass <- "TilingFeatureSet"
+  }else if(ArrayType == "expression"){
+    TheClass <- "ExpressionFeatureSet"
+  }else if(ArrayType == "SNP"){
+    TheClass <- "SnpFeatureSet"
+  }else{
+    stop(paste("I don't know how to handle", ArrayType, "arrays."))
+  }
+
+  out <- new(TheClass,
              exprs=tmpExprs,
-##             assayData=ad,
-##             sampleNames=rownames(pData(tmp$phenoData)),
              platform=ref.cdfName,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
-             experimentData=tmp$description) #,
-  ##           description=tmp$description) #,
-  ##           notes=notes)
+             experimentData=tmp$description)
   platform(out) <- pkgname
   manufacturer(out) <- "Affymetrix"
-##  out@platform=ref.cdfName
-##  out@manufacturer="Affymetrix"
   return(out)
 }
 
 read.affybatch <- function(..., filenames=character(0),
-##                           phenoData=new("phenoData"),
                            phenoData=new("AnnotatedDataFrame"),
                            description=NULL,
                            notes="",

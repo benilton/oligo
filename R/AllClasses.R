@@ -20,3 +20,7 @@ setClass("FeatureSet",
            platform=character()))
 
 setClassUnion("characterOrNULL", c("character", NULL))
+
+setClass("ExpressionFeatureSet", contains="FeatureSet")
+setClass("SnpFeatureSet", contains="FeatureSet")
+setClass("TilingFeatureSet", contains="FeatureSet")

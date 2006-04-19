@@ -124,21 +124,24 @@ read.xysfiles <- function(filenames,
   rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
 ##  ad <- assayDataNew(storage.mode="list", exprs=e[,,drop=FALSE])
 
-  out <- new("FeatureSet",
-##             assayData=ad,
+  ArrayType <- get(pkgname, pos=paste("package:", pkgname, sep=""))@type
+  if(ArrayType == "tiling"){
+    TheClass <- "TilingFeatureSet"
+  }else if(ArrayType == "expression"){
+    TheClass <- "ExpressionFeatureSet"
+  }else if(ArrayType == "SNP"){
+    TheClass <- "SnpFeatureSet"
+  }else{
+    stop(paste("I don't know how to handle", ArrayType, "arrays."))
+  }
+
+  out <- new(TheClass,
              manufacturer = "NimbleGen",
              platform = designnamelist[1],
              exprs=e[,,drop=FALSE],
-##             sampleNames=rownames(pData(tmp$phenoData)),
              phenoData=tmp$phenoData,
-             experimentData=tmp$description) ##,
+             experimentData=tmp$description)
   manufacturer(out) <- "NimbleGen"
-##  platform(out) <-  designnamelist[1]
   platform(out) <- designname
   return(out)
-##             notes=notes))
-##  out@manufacturer <- "NimbleGen"
-##  out@platform <- designnamelist[1]
-##  return(out)
-
 }
