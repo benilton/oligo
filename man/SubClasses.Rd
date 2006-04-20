@@ -33,7 +33,7 @@ Class \code{"eSet"}, by class \code{"FeatureSet"}.
   Methods defined for \code{FeatureSet}.
 }
 \seealso{
-  \code{\link{eSet-class}}, \code{\link{FeatureSet-class}}.
+  \code{\link[Biobase]{eSet-class}}, \code{\link{FeatureSet-class}}.
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
