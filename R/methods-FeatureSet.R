@@ -6,15 +6,16 @@ setMethod("initialize", "FeatureSet",
                    phenoData = new("AnnotatedDataFrame"),
                    experimentData = new("MIAME"),
                    annotation = new("character")){
-            callNextMethod(.Object,
-                           manufacturer=manufacturer,
-                           platform=platform,
-                           assayData = assayDataNew(
-                             storage.mode="list",
-                             exprs=exprs),
-                           phenoData = phenoData,
-                           experimentData = experimentData,
-                           annotation = annotation)
+            .Object <- callNextMethod(.Object,
+                                      assayData = assayDataNew(
+                                        storage.mode="list",
+                                        exprs=exprs),
+                                      phenoData = phenoData,
+                                      experimentData = experimentData,
+                                      annotation = annotation)
+            .Object@manufacturer <- manufacturer
+            .Object@platform <- platform
+            .Object
           })
 
 setMethod("exprs", "FeatureSet", function(object) assayDataElement(object, "exprs"))

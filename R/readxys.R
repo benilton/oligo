@@ -141,7 +141,7 @@ read.xysfiles <- function(filenames,
              exprs=e[,,drop=FALSE],
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
-  manufacturer(out) <- "NimbleGen"
-  platform(out) <- designname
+#  manufacturer(out) <- "NimbleGen"
+#  platform(out) <- designname
   return(out)
 }

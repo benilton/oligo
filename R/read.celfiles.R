@@ -141,8 +141,8 @@ read.celfiles <- function(filenames,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
-  platform(out) <- pkgname
-  manufacturer(out) <- "Affymetrix"
+#  platform(out) <- pkgname
+#  manufacturer(out) <- "Affymetrix"
   return(out)
 }
 
