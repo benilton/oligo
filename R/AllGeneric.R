@@ -93,3 +93,12 @@ if( is.null(getGeneric("npixels")))
 
 if( is.null(getGeneric("allele")))
   setGeneric("allele", function(object) standardGeneric("allele"))
+
+if( is.null(getGeneric("chromosome")))
+  setGeneric("chromosome", function(object) standardGeneric("chromosome"))
+
+if( is.null(getGeneric("position")))
+  setGeneric("position", function(object) standardGeneric("position"))
+
+if( is.null(getGeneric("GenomeBuild")))
+  setGeneric("GenomeBuild", function(object) standardGeneric("GenomeBuild"))

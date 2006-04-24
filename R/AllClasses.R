@@ -3,13 +3,14 @@ setClass("platformDesign",
                         featureTypeDescription = "list",
                         manufacturer = "character",
                         type = "character",
+                        genomebuild = "character",
                         nrow = "numeric",
                         ncol = "numeric",
                         nwells = "numeric",
                         lookup = "data.frame",
                         indexes = "list",
                         platforms="character"),
-         prototype = list(lookup=data.frame()))
+         prototype = list(lookup=data.frame(), genomebuild=character()))
 
 setClass("FeatureSet",
          representation(manufacturer="character",
