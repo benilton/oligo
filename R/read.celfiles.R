@@ -137,7 +137,7 @@ read.celfiles <- function(filenames,
 
   out <- new(TheClass,
              exprs=tmpExprs,
-             platform=ref.cdfName,
+             platform=pkgname,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
