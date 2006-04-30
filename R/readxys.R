@@ -124,7 +124,7 @@ read.xysfiles <- function(filenames,
   rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
 ##  ad <- assayDataNew(storage.mode="list", exprs=e[,,drop=FALSE])
 
-  ArrayType <- get(pkgname, pos=paste("package:", pkgname, sep=""))@type
+  ArrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
   if(ArrayType == "tiling"){
     TheClass <- "TilingFeatureSet"
   }else if(ArrayType == "expression"){
@@ -137,7 +137,7 @@ read.xysfiles <- function(filenames,
 
   out <- new(TheClass,
              manufacturer = "NimbleGen",
-             platform = designnamelist[1],
+             platform = designname,
              exprs=e[,,drop=FALSE],
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
