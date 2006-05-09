@@ -33,7 +33,6 @@ read.celfiles <- function(filenames,
                           pkgname=NULL,
                           sd=FALSE,
                           npixels=FALSE,
-##                          phenoData=new("phenoData"),
                           phenoData=new("AnnotatedDataFrame"),
                           description=NULL,
                           notes="",
@@ -82,6 +81,8 @@ read.celfiles <- function(filenames,
                     rm.mask, rm.outliers, rm.extra, ref.cdfName,
                     dim.intensity, verbose, PACKAGE="affyio")
 
+  tmpNP <- tmpSD <- matrix(NA, ncol=ncol(tmpExprs), nrow=nrow(tmpExprs))
+  
   if (sd){
     tmpSD <- .Call("read_abatch_stddev", as.list(filenames),
                    rm.mask, rm.outliers, rm.extra, ref.cdfName,
@@ -113,17 +114,6 @@ read.celfiles <- function(filenames,
     }
   }
 
-#  return(list(tmpExprs=tmpExprs, tmp=tmp, ref.cdfName=ref.cdfName))
-  if(!sd & !npixels){
-    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs)
-  }else if(sd & !npixels){
-    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, sd=tmpSD)
-  }else if(sd & npixels){
-    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, sd=tmpSD, npixels=tmpNP)
-  }else if(!sd & npixels){
-    ad <- assayDataNew(storage.mode="list", exprs=tmpExprs, npixels=tmpNP)
-  }
-
   ArrayType <- get(pkgname, pos=paste("package:", pkgname, sep=""))@type
   if(ArrayType == "tiling"){
     TheClass <- "TilingFeatureSet"
@@ -137,12 +127,12 @@ read.celfiles <- function(filenames,
 
   out <- new(TheClass,
              exprs=tmpExprs,
+             sd=tmpSD,
+             npixels=tmpNP,
              platform=pkgname,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
-#  platform(out) <- pkgname
-#  manufacturer(out) <- "Affymetrix"
   return(out)
 }
 

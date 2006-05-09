@@ -3,13 +3,17 @@ setMethod("initialize", "FeatureSet",
                    manufacturer=new("character"),
                    platform=new("character"),
                    exprs=new("matrix"),
+                   sd=new("matrix"),
+                   npixels=new("matrix"),
                    phenoData = new("AnnotatedDataFrame"),
                    experimentData = new("MIAME"),
                    annotation = new("character")){
             .Object <- callNextMethod(.Object,
                                       assayData = assayDataNew(
                                         storage.mode="list",
-                                        exprs=exprs),
+                                        exprs=exprs,
+                                        sd=sd,
+                                        npixels=npixels),
                                       phenoData = phenoData,
                                       experimentData = experimentData,
                                       annotation = annotation)

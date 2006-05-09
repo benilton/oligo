@@ -102,3 +102,9 @@ if( is.null(getGeneric("position")))
 
 if( is.null(getGeneric("GenomeBuild")))
   setGeneric("GenomeBuild", function(object) standardGeneric("GenomeBuild"))
+
+if( is.null(getGeneric("pmChr")))
+  setGeneric("pmChr", function(object) standardGeneric("pmChr"))
+
+if( is.null(getGeneric("pmPosition")))
+  setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
