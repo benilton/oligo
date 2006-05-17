@@ -81,7 +81,7 @@ read.celfiles <- function(filenames,
                     rm.mask, rm.outliers, rm.extra, ref.cdfName,
                     dim.intensity, verbose, PACKAGE="affyio")
 
-  tmpNP <- tmpSD <- matrix(NA, ncol=ncol(tmpExprs), nrow=nrow(tmpExprs))
+  tmpNP <- tmpSD <- NULL
   
   if (sd){
     tmpSD <- .Call("read_abatch_stddev", as.list(filenames),

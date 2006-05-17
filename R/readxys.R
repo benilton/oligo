@@ -139,6 +139,8 @@ read.xysfiles <- function(filenames,
              manufacturer = "NimbleGen",
              platform = designname,
              exprs=e[,,drop=FALSE],
+             sd=NULL,
+             npixels=NULL,
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
 #  manufacturer(out) <- "NimbleGen"
