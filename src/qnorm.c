@@ -1564,13 +1564,13 @@ int qnorm_c_determine_target(double *data, int *rows, int *cols, double *target,
 
 
       if (row_mean_ind_double  == 0.0){
-	row_mean_ind = (int)floor(target_ind_double_floor + 0.5);  /* (int)nearbyint(row_mean_ind_double_floor); */	
+	row_mean_ind = (int)floor(row_mean_ind_double_floor + 0.5);  /* (int)nearbyint(row_mean_ind_double_floor); */	
 	target[i] = row_mean[row_mean_ind-1];
       } else if (row_mean_ind_double == 1.0){
-	row_mean_ind = (int)floor(target_ind_double_floor + 1.5);  /* (int)nearbyint(row_mean_ind_double_floor + 1.0); */ 
+	row_mean_ind = (int)floor(row_mean_ind_double_floor + 1.5);  /* (int)nearbyint(row_mean_ind_double_floor + 1.0); */ 
 	target[i] = row_mean[row_mean_ind-1];
       } else {
-	row_mean_ind =  (int)floor(target_ind_double_floor + 0.5); /* (int)nearbyint(row_mean_ind_double_floor); */
+	row_mean_ind =  (int)floor(row_mean_ind_double_floor + 0.5); /* (int)nearbyint(row_mean_ind_double_floor); */
 
 	if ((row_mean_ind < *rows) && (row_mean_ind > 0)){
 	  target[i] = (1.0- row_mean_ind_double)*row_mean[row_mean_ind-1] + row_mean_ind_double*row_mean[row_mean_ind];
