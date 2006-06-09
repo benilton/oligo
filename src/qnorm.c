@@ -47,6 +47,7 @@
  **               Add a function for determing target distribution.
  ** Jun 5, 2006 - Re-organize code blocks
  **               Add normalization within blocks functions
+ ** Jun 9, 2006 - change nearbyint to floor(x +0.5) (to fix problems on Sparc Solaris builds)
  **
  ***********************************************************/
 
@@ -1470,15 +1471,15 @@ int qnorm_c_using_target(double *data, int *rows, int *cols, double *target, int
 
 	
 	if (target_ind_double  == 0.0){
-	  target_ind = (int)nearbyint(target_ind_double_floor);	
+	  target_ind = (int)floor(target_ind_double_floor + 0.5); /* nearbyint(target_ind_double_floor); */	
 	  ind = dimat[0][i].rank;
 	  data[j*(*rows) +ind] = row_mean[target_ind-1];
 	} else if (target_ind_double == 1.0){
-	  target_ind = (int)nearbyint(target_ind_double_floor + 1.0); 
+	  target_ind = (int)floor(target_ind_double_floor + 1.5); /* (int)nearbyint(target_ind_double_floor + 1.0); */ 
 	  ind = dimat[0][i].rank;
 	  data[j*(*rows) +ind] = row_mean[target_ind-1];
 	} else {
-	  target_ind = (int)nearbyint(target_ind_double_floor);
+	  target_ind = (int)floor(target_ind_double_floor + 0.5); /* nearbyint(target_ind_double_floor); */	
 	  ind = dimat[0][i].rank;
 	  if ((target_ind < *targetrows) && (target_ind > 0)){
 	    data[j*(*rows) +ind] = (1.0- target_ind_double)*row_mean[target_ind-1] + target_ind_double*row_mean[target_ind];
@@ -1563,13 +1564,13 @@ int qnorm_c_determine_target(double *data, int *rows, int *cols, double *target,
 
 
       if (row_mean_ind_double  == 0.0){
-	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor);	
+	row_mean_ind = (int)floor(target_ind_double_floor + 0.5);  /* (int)nearbyint(row_mean_ind_double_floor); */	
 	target[i] = row_mean[row_mean_ind-1];
       } else if (row_mean_ind_double == 1.0){
-	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor + 1.0); 
+	row_mean_ind = (int)floor(target_ind_double_floor + 1.5);  /* (int)nearbyint(row_mean_ind_double_floor + 1.0); */ 
 	target[i] = row_mean[row_mean_ind-1];
       } else {
-	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor);
+	row_mean_ind =  (int)floor(target_ind_double_floor + 0.5); /* (int)nearbyint(row_mean_ind_double_floor); */
 
 	if ((row_mean_ind < *rows) && (row_mean_ind > 0)){
 	  target[i] = (1.0- row_mean_ind_double)*row_mean[row_mean_ind-1] + row_mean_ind_double*row_mean[row_mean_ind];
