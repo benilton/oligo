@@ -27,10 +27,19 @@ setGeneric("SenseThetaA", function(obj) standardGeneric("SenseThetaA"))
 setGeneric("SenseThetaB", function(obj) standardGeneric("SenseThetaB"))
 setGeneric("AntisenseThetaA", function(obj) standardGeneric("AntisenseThetaA"))
 setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
+setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
+setGeneric("getM", function(obj) standardGeneric("getM"))
+setGeneric("getA", function(obj) standardGeneric("getA"))
 setMethod("SenseThetaA", "SnpQSet", function(obj) assayData(obj)$SenseThetaA)
 setMethod("SenseThetaB", "SnpQSet", function(obj) assayData(obj)$SenseThetaB)
 setMethod("AntisenseThetaA", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaA)
 setMethod("AntisenseThetaB", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaB)
+setMethod("getM", "SnpQSet", function(obj)
+          list(Antisense=(AntisenseThetaA(obj)-AntisenseThetaB(obj)),
+               Sense=(SenseThetaA(obj)-SenseThetaB(obj))))
+setMethod("getA", "SnpQSet", function(obj)
+          list(Antisense=.5*(AntisenseThetaA(obj)+AntisenseThetaB(obj)),
+               Sense=.5*(SenseThetaA(obj)+SenseThetaB(obj))))
 
 fitRma <- function(pmMat, mmMat, pnVec, nProbes,
                    densFunction, rEnv, normalize,
@@ -83,7 +92,7 @@ getRmaPars <- function(object, method, background, normalize, sequence){
   return(out)
 }
 
-snprma <- function(object, method=1, subset=NULL, verbose=TRUE,
+summSnp <- function(object, method=1, subset=NULL, verbose=TRUE,
                    destructive=TRUE, normalize=TRUE, background=TRUE,
                    sequence=FALSE, bgversion=2,...){
 
@@ -170,7 +179,7 @@ preProcess <- function(oBatch, hapmapNormalized=NULL){
   }
 }
 
-getSnpQSet <- function(oBatch){
+snprma <- function(oBatch){
   cat("Loading reference distribution...")
 
   ## load(paste("~/projects/crlmm/code/4pkg/", platform(oBatch), "Ref.rda", sep=""))
@@ -179,7 +188,7 @@ getSnpQSet <- function(oBatch){
   cat("\n")
   pm(oBatch) <- preProcess(oBatch, reference)
   gc()
-  tmp <- snprma(oBatch, 3, normalize=FALSE, background=FALSE)
+  tmp <- summSnp(oBatch, 3, normalize=FALSE, background=FALSE)
   new("SnpQSet",
       SenseThetaA=tmp[2,1,,],
       SenseThetaB=tmp[2,2,,],
