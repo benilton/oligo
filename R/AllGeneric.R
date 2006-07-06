@@ -100,11 +100,23 @@ if( is.null(getGeneric("chromosome")))
 if( is.null(getGeneric("position")))
   setGeneric("position", function(object) standardGeneric("position"))
 
-if( is.null(getGeneric("GenomeBuild")))
-  setGeneric("GenomeBuild", function(object) standardGeneric("GenomeBuild"))
+if( is.null(getGeneric("genomeBuild")))
+  setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 
 if( is.null(getGeneric("pmChr")))
   setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 
 if( is.null(getGeneric("pmPosition")))
   setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
+
+if( is.null(getGeneric("snpBasePair")))
+  setGeneric("snpBasePair", function(object) standardGeneric("snpBasePair"))
+
+if( is.null(getGeneric("pmSnpBasePair")))
+  setGeneric("pmSnpBasePair", function(object) standardGeneric("pmSnpBasePair"))
+
+if( is.null(getGeneric("alleleAB")))
+  setGeneric("alleleAB", function(object) standardGeneric("alleleAB"))
+
+if( is.null(getGeneric("pmAlleleAB")))
+  setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
