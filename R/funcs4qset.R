@@ -30,16 +30,29 @@ setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
 setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
 setGeneric("getM", function(obj) standardGeneric("getM"))
 setGeneric("getA", function(obj) standardGeneric("getA"))
+
 setMethod("SenseThetaA", "SnpQSet", function(obj) assayData(obj)$SenseThetaA)
 setMethod("SenseThetaB", "SnpQSet", function(obj) assayData(obj)$SenseThetaB)
 setMethod("AntisenseThetaA", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaA)
 setMethod("AntisenseThetaB", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaB)
-setMethod("getM", "SnpQSet", function(obj)
-          list(Antisense=(AntisenseThetaA(obj)-AntisenseThetaB(obj)),
-               Sense=(SenseThetaA(obj)-SenseThetaB(obj))))
-setMethod("getA", "SnpQSet", function(obj)
-          list(Antisense=.5*(AntisenseThetaA(obj)+AntisenseThetaB(obj)),
-               Sense=.5*(SenseThetaA(obj)+SenseThetaB(obj))))
+setMethod("getM", "SnpQSet",
+          function(obj){
+            tmp <- array(NA, dim=c(nrow(AntisenseThetaA(obj)), ncol(AntisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(AntisenseThetaA(obj)), colnames(AntisenseThetaA(obj)),
+                           c("antisense", "sense")))
+            tmp[,,1] <- AntisenseThetaA(obj)-AntisenseThetaB(obj)
+            tmp[,,2] <- SenseThetaA(obj)-SenseThetaB(obj)
+            return(tmp)
+          })
+setMethod("getA", "SnpQSet",
+          function(obj){
+            tmp <- array(NA, dim=c(nrow(AntisenseThetaA(obj)), ncol(AntisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(AntisenseThetaA(obj)), colnames(AntisenseThetaA(obj)),
+                           c("antisense", "sense")))
+            tmp[,,1] <- .5*(AntisenseThetaA(obj)+AntisenseThetaB(obj))
+            tmp[,,2] <- .5*(SenseThetaA(obj)+SenseThetaB(obj))
+            return(tmp)
+          })
 
 fitRma <- function(pmMat, mmMat, pnVec, nProbes,
                    densFunction, rEnv, normalize,
@@ -61,32 +74,14 @@ getRmaPars <- function(object, method, background, normalize, sequence){
   if (method == 1){
     pnVec <- probeNames(object)
     nProbes <- length(unique(pnVec))
-  }else if (method == 2){
-    pmi <- pmindex(object)
-    pmAllele <- getPD(object)$allele[pmi]
-
-    pnVec <- paste(probeNames(object), pmAllele, sep="")
-    nProbes <- length(unique(pnVec))
   }else if (method == 3){
     pmi <- pmindex(object)
-    pmAllele <- getPD(object)$allele[pmi]
+    pmAllele <- as.character(pmAlleleAB(object))
     pmStrand <- substr(as.character(getPD(object)$target_strand[pmi]),1,1)
-
-    pnVec <- paste( probeNames(object), pmAllele, pmStrand, sep="")
+    pnVec <- paste(probeNames(object), pmAllele, pmStrand, sep="")
     nProbes <- length(unique(pnVec))
-  }else if (method == 4){
-    pns <- probeNames(object)
-    ngenes <- length(pns)/20
-    Index1 <- rep(seq(0,ngenes-1)*20,rep(10,ngenes))+rep(1:10,ngenes)
-    Index2 <- Index1+10
-    pmi <- pmindex(object)
-    pmStrand <- substr(as.character(getPD(object)$target_strand[pmi]),1,1)
-
-    pmMat1 <- pms[Index1,]/pms[Index2,]
-    pmMat2 <- sqrt(pms[Index1,]*pms[Index2,])
-    pms <- list(m=pmMat1, a=pmMat2)
-    pnVec <- paste(pns, pmStrand, sep="")[Index1]
-    nProbes <- length(unique(pnVec))
+  }else{
+    stop("Not a valid option.\n")
   }
   out <- list(pmMat=pms, pnVec=pnVec, nProbes=nProbes)
   return(out)
@@ -95,39 +90,24 @@ getRmaPars <- function(object, method, background, normalize, sequence){
 summSnp <- function(object, method=1, subset=NULL, verbose=TRUE,
                    destructive=TRUE, normalize=TRUE, background=TRUE,
                    sequence=FALSE, bgversion=2,...){
-
-  ## background correction
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
-    
   rmaPars <- getRmaPars(object, method, normalize, background, sequence)
-
-  if (method < 4){
-    exprs <- fitRma(rmaPars$pmMat, rmaPars$pmMat, rmaPars$pnVec,
-                    rmaPars$nProbes, body(bg.dens), new.env(),
-                    normalize=FALSE, background=FALSE, bgversion, destructive)
-    if (method == 2){
-      exprs <- array(as.vector(exprs), dim=c(2, nrow(exprs)/2, ncol(exprs)))
-      dimnames(exprs) <- list(c("A", "B"), unique(probeNames(object, subset)), colnames(rmaPars$pmMat))
-    }else if(method == 3){
-      exprs <- array(as.vector(exprs), dim=c(2, 2, nrow(exprs)/4, ncol(exprs)))
-      dimnames(exprs) <- list(c("antisense", "sense"), c("A", "B"),
-                              unique(probeNames(object, subset)),
-                              colnames(rmaPars$pmMat))
-    }
-  }else{
-    m <- fitRma(rmaPars$pmMat$m, pm(object), rmaPars$pnVec,
-                rmaPars$nProbes, body(bg.dens), new.env(),
-                normalize=FALSE, background=FALSE, bgversion, destructive)
-    a <- fitRma(rmaPars$pmMat$a, pm(object), rmaPars$pnVec,
-                rmaPars$nProbes, body(bg.dens), new.env(),
-                normalize=FALSE, background=FALSE, bgversion, destructive)
-    m <- array(as.vector(m),dim=c(2,nrow(m)/2,ncol(m)))
-    pns <- unique(probeNames(object, subset))
-    dimnames(m) <- list(c("antisense", "sense"), unique(pns),colnames(rmaPars$pmMat$m))   
-    a <- array(as.vector(a),dim=c(2,nrow(a)/2,ncol(a)))
-    dimnames(a) <- list(c("antisense", "sense"), unique(pns),colnames(rmaPars$pmMat$a))
-    exprs <- list(m=m,a=a)
-    rm(m,a)
+  exprs <- fitRma(rmaPars$pmMat, rmaPars$pmMat, rmaPars$pnVec,
+                  rmaPars$nProbes, body(bg.dens), new.env(),
+                  normalize=FALSE, background=FALSE, bgversion, destructive)
+  if(method == 3){
+    pns <- paste(rep(unique(probeNames(object)), each=4),
+                 rep(c("AA", "AS", "BA", "BS"), length(unique(probeNames(object)))), sep="")
+    tmp <- matrix(NA, ncol=ncol(exprs), nrow=length(pns))
+    rownames(tmp) <- pns
+    idx <- match(rownames(exprs), pns)
+    tmp[idx,] <- exprs
+    exprs <- tmp
+    rm(tmp); gc()
+    exprs <- array(as.vector(exprs), dim=c(2, 2, nrow(exprs)/4, ncol(exprs)))
+    dimnames(exprs) <- list(c("antisense", "sense"), c("A", "B"),
+                            unique(probeNames(object, subset)),
+                            colnames(rmaPars$pmMat))
   }
   return(exprs)
 }
@@ -143,14 +123,11 @@ CorrectSequenceLength <- function(y, X){
 normalizeToSample <- function(toNormalize, Normalized){
   ncols <- ncol(toNormalize)
   Normalized <- sort(Normalized)
-  cat("Normalizing")
   for (i in 1:ncols){
-    cat(".")
     idx <- order(toNormalize[, i])
     toNormalize[idx, i] <- Normalized
     gc()
   }
-  cat("\n")
   return(toNormalize)
 }
 
@@ -158,16 +135,12 @@ preProcess <- function(oBatch, hapmapNormalized=NULL){
   pns <- probeNames(oBatch)
   pms <- pm(oBatch)
   SeqMat <- sequenceDesignMatrix(pmSequence(oBatch))
-  
-##  load(paste("~/projects/crlmm/code/4pkg/", platform(oBatch), "annot.rda", sep=""))
-
-  data(list=paste(platform(oBatch), "annot", sep=""))
+  data(list=annotation(oBatch))
   theLengths <- annot[match(pns, annot$SNP), "Length"]
   med <- median(theLengths, na.rm=TRUE)
   theLengths[is.na(theLengths)] <- med
   L <- ns(theLengths, df=3)
   rm(med, theLengths)
-  cat("Correcting for sequence and fragment length...\n")
   tmp <- CorrectSequenceLength(pms, cbind(SeqMat, L))
   rm(oBatch)
   pms <- tmp[[1]]
@@ -180,15 +153,12 @@ preProcess <- function(oBatch, hapmapNormalized=NULL){
 }
 
 snprma <- function(oBatch){
-  cat("Loading reference distribution...")
-
-  ## load(paste("~/projects/crlmm/code/4pkg/", platform(oBatch), "Ref.rda", sep=""))
-  
+  cat("This may take several minutes...")
   data(list=paste(platform(oBatch), "Ref", sep=""))
-  cat("\n")
   pm(oBatch) <- preProcess(oBatch, reference)
   gc()
   tmp <- summSnp(oBatch, 3, normalize=FALSE, background=FALSE)
+  cat(" done.\n")
   new("SnpQSet",
       SenseThetaA=tmp[2,1,,],
       SenseThetaB=tmp[2,2,,],
@@ -199,3 +169,49 @@ snprma <- function(oBatch){
       annotation=annotation(oBatch))
 }
 
+justsnprma <- function(files){
+  ttt=stuffForXYSandCELreaders(files, new("AnnotatedDataFrame"), NULL, NULL, NULL)
+  tmp <- read.celfiles(files[1])
+  pd <- platform(tmp)
+  pmi <- pmindex(tmp)
+  pns0 <- probeNames(tmp)
+  pns <- paste(pns0, pmAlleleAB(tmp),
+               substr(as.character(getPD(tmp)$target_strand[pmi]), 1, 1), sep="")
+  data(list=paste(platform(tmp), "Ref", sep=""))
+  tmpPP <- preProcess(tmp, reference)
+  n <- length(files)
+  data(list=paste(platform(tmp), "RmaPLM", sep=""))
+  out <- matrix(NA, nrow=length(unique(pns)), ncol=length(files))
+  rownames(out) <- unique(pns)
+  colnames(out) <- files
+  out[,1] <- aggregate(log2(tmpPP)-probeEffects, by=list(pns), median)[,2]
+  rm(tmp, tmpPP)
+  gc()
+  if (n>1){
+    for (i in 2:n){
+      cat(".")
+      out[,i] <- aggregate(log2(preProcess(read.celfiles(files[i]), reference))-probeEffects, by=list(pns), median)[,2]
+    }
+    cat(" Done.\n")
+  }
+  pns <- paste(rep(unique(pns0), each=4),
+               rep(c("AA", "AS", "BA", "BS"),
+                   length(unique(pns0))), sep="")
+  tmp <- matrix(NA, ncol=ncol(out), nrow=length(pns))
+  rownames(tmp) <- pns
+  idx <- match(rownames(out), pns)
+  tmp[idx,] <- out
+  out <- tmp
+  rm(tmp); gc()
+  out <- array(as.vector(out), dim=c(2, 2, nrow(out)/4, ncol(out)))
+  dimnames(out) <- list(c("antisense", "sense"), c("A", "B"),
+                            unique(pns0), files)
+  new("SnpQSet",
+      SenseThetaA=out[2,1,,],
+      SenseThetaB=out[2,2,,],
+      AntisenseThetaA=out[1,1,,],
+      AntisenseThetaB=out[1,2,,],
+      phenoData=ttt$phenoData,
+      experimentData=ttt$description,
+      annotation=substr(pd, 3, nchar(pd)))
+}

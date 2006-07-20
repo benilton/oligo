@@ -70,9 +70,7 @@ read.celfiles <- function(filenames,
   if (pdenv | !is.null(pkgname)){
     if (is.null(pkgname))
       pkgname <- cleanPlatformName(ref.cdfName)
-    cat(paste("Loading", pkgname, "\n"))
     library(pkgname, character.only=TRUE)
-    cat("Package loaded.\n")
     if (is.null(arrayType))
       arrayType <- get(pkgname)@type
   }
@@ -132,7 +130,8 @@ read.celfiles <- function(filenames,
              platform=pkgname,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
-             experimentData=tmp$description)
+             experimentData=tmp$description,
+             annotation=substr(pkgname, 3, nchar(pkgname)))
   return(out)
 }
 

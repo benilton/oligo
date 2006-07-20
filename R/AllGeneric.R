@@ -120,3 +120,4 @@ if( is.null(getGeneric("alleleAB")))
 
 if( is.null(getGeneric("pmAlleleAB")))
   setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
+

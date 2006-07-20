@@ -6,6 +6,6 @@ Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: R (>= 2.3.0), Biobase (>= 1.9.28), affyio
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling) at probe-level.
 License: LGPL version 2 or newer
-Collate: AllClasses.R AllGeneric.R basecontent.R methods-platformDesign.R methods-FeatureSet.R methods-TilingFeatureSet.R bg.R normalize.quantiles.R read.celfiles.R rma.R zzz.R plotDensity.R readxys.R sequence.R utils.R funcs4qset.R methods-SnpFeatureSet.R
+Collate: AllClasses.R AllGeneric.R basecontent.R methods-platformDesign.R methods-FeatureSet.R methods-TilingFeatureSet.R bg.R normalize.quantiles.R read.celfiles.R rma.R zzz.R plotDensity.R readxys.R sequence.R utils.R funcs4qset.R methods-SnpFeatureSet.R crlmm.R
 SaveImage: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing
