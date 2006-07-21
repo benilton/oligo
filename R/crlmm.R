@@ -425,10 +425,11 @@ getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
   cat("Making calls for ",ncol(res)," arrays")
   ##apply is faster apply but takes too much memory
   N<-nrow(Calls)
-  Index<-1:N
+  Index<-1:N; ##browser()
   for(j in 1:ncol(res)){
     if(maleIndex[j]){
-      Index2=Index[!XIndex]
+##      Index2=Index[!XIndex]
+      Index2=Index[-XIndex]
     }
     else{
       Index2=Index
@@ -499,7 +500,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
   myDist<-getAffySnpDistance(object,params,correction$fs)
 
   XIndex<-getChrXIndex(object)
-               
+  
   myCalls<-getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose)
 
   LLR<-getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
