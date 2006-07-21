@@ -462,6 +462,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                   returnCorrectedM=FALSE,
                   returnParams=FALSE,
                   verbose=TRUE){
+  require(paste("pd", annotation(object), sep=""), character.only=TRUE)
   if(is.null(correction)){
     if(verbose) cat("M correction not provided. Calculating. Will take several minutes.\n")
      correction=fitAffySnpMixture(object,verbose=verbose)
@@ -495,7 +496,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
 
   rparams<-updateAffySnpParams(rparams,priors,verbose=TRUE)
   
-  replaceAffySnpParams(params,rparams,Index)
+  params <- replaceAffySnpParams(params,rparams,Index)
 
   myDist<-getAffySnpDistance(object,params,correction$fs)
 
