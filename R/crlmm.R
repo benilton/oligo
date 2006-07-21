@@ -473,7 +473,8 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
     maleIndex <- object$gender=="male"
   }
   
-  load(paste(annotation(object),"CrlmmInfo.rda",sep=""))
+##  load(paste(annotation(object),"CrlmmInfo.rda",sep=""))
+  data(list=paste(annotation(object),"CrlmmInfo",sep=""))  
   myenv <- get(paste(annotation(object),"Crlmm",sep=""))
   params <- get("params",myenv)
   priors <- get("priors",myenv)
