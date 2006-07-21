@@ -26,7 +26,7 @@ getChrXIndex <- function(object){
 
 ##gender in pData keeps male female
 fitAffySnpMixture <- function(object, df1=3, df2=5,
-                              probs=rep(1/3,3), eps=10^(-1),
+                              probs=rep(1/3,3), eps=50,
                               subSampleSize=10^5,verbose=TRUE){
   if(is.null(object$gender)){
     maleIndex <- snpGenderCall(object)=="male"
@@ -91,8 +91,10 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       z <- sweep(z, 1, LogLik, "/")
       LogLik <- sum(log(LogLik))
       change <- abs(LogLik-PreviousLogLik)
-      if(verbose) cat("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
-      if(verbose) cat("Array ",j,": epsilon=",signif(change,2),"     ",sep="")
+##      if(verbose) cat("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
+      if(verbose) cat("Array ",j,": epsilon=",round(change,2),"    \n",sep="")
+      if(verbose) cat("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
+
       
       PreviousLogLik <- LogLik
       probs <- colMeans(z)
