@@ -109,15 +109,6 @@ setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
           plotDensity.FeatureSet(x, which=c("both", "pm", "mm"), ...))
 
-## Show
-## setMethod("show", "FeatureSet", function(object){
-##   dm <- dim(exprs(object))
-##   nprobes <- dm[1]
-##   nsamples <- dm[2]
-##   cat("FeatureSet with \n\t", nprobes, " probes\n\t", sep="")
-##   cat(nsamples, "samples\n\t")
-##   show(phenoData(object))
-## })
 
 ## PM
 setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
