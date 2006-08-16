@@ -83,6 +83,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     change <- eps+1
     itmax <- 0
     while (change > eps & itmax < 1000){
+      gc()
       itmax <- itmax+1
       
       ## E
@@ -91,10 +92,13 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       z <- sweep(z, 1, LogLik, "/")
       LogLik <- sum(log(LogLik))
       change <- abs(LogLik-PreviousLogLik)
-##      if(verbose) cat("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
-      if(verbose) cat("Array ",j,": epsilon=",round(change,2),"    \n",sep="")
-      if(verbose) cat("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
-
+      
+      if (verbose){
+        if (itmax > 1 | j > 1) cat(del)
+        message <- paste("Array ",j,": epsilon = ", signif(change,2), "  ", sep="")
+        del <- paste(rep("\b", nchar(message)), collapse="")
+        cat(message)
+      }
       
       PreviousLogLik <- LogLik
       probs <- colMeans(z)
@@ -115,9 +119,11 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       weights[y <= 0, 3] <- 0
     }
 
+    gc()
     pred1 <- predict(fit1,newdata=data.frame(l=L,a=A))
     pred2 <- rep(fit2,length(Y))
     pred3 <- predict(fit3,newdata=data.frame(l=L,a=A))
+    gc()
 
     weights <- matrix(0,length(Y),3)
     weights[,1] <- dnorm(Y,pred1,sigmas[1])
@@ -149,29 +155,50 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
                                    verbose=FALSE){
   if(is.null(subset)) subset <- 1:(dim(object$pis)[1])
   pi1 <- object$pis[subset,,,1]
-  pi2 <- object$pis[subset,,,2]
+  pi2 <- object$pis[subset,,,2]; rm(object); gc()
+
+  ## fixing SNPs that have probes only on one strand:
+  idx <- is.na(pi1[,1,1])
+  pi1[idx,,] <- pi2[idx,,]
+  idx <- is.na(pi2[,1,1])
+  pi2[idx,,] <- pi1[idx,,]
+  rm(idx); gc()
+  
   if(verbose) cat("Picking good starting value: ")
   if(verbose) cat("Computing entropy, ")
   E1<-apply(pi1,1,function(x) mean(rowEntropy(x)))
-  E2<-apply(pi2,1,function(x) mean(rowEntropy(x)))
+  E2<-apply(pi2,1,function(x) mean(rowEntropy(x))); gc()
   
+  tmpN <- dim(pi1)
+  tmpcall1 <- tmpcall2 <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
+  rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
+  colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
+  gc()
   if(verbose) cat("calculating calls, ")
-  tmpcall1 <- apply(pi1,c(1,2),which.max)
-  tmpcall2 <- apply(pi2,c(1,2),which.max)
+##  tmpcall1 <- apply(pi1,c(1,2),which.max)
+##  tmpcall2 <- apply(pi2,c(1,2),which.max); gc()
+  for (i in 1:tmpN[1]){
+    for (j in 1:tmpN[2]){
+      tmpcall1[i, j] <- which.max(pi1[i,j,])
+      tmpcall2[i, j] <- which.max(pi2[i,j,])
+    }
+  }
   
   if(verbose) cat("determining non-concordant calls, ")
-  concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2)
+  concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); gc()
 
   if(verbose) cat("deciding which strand(s) to use")
   noABIndex1 <- (rowSums(tmpcall1==2)<3)*(rowSums(tmpcall1==3)>0)*(rowSums(tmpcall1==1)>0)
-  noABIndex2 <- (rowSums(tmpcall2==2)<3)*(rowSums(tmpcall2==3)>0)*(rowSums(tmpcall2==1)>0)
+  noABIndex2 <- (rowSums(tmpcall2==2)<3)*(rowSums(tmpcall2==3)>0)*(rowSums(tmpcall2==1)>0); gc()
   
   E1[which(noABIndex1==1)] <- -Inf
   E2[which(noABIndex1==1)] <- -Inf
 
   jointprobs<-(pi1+pi2)/2
   ##NA if all 0
-  for(i in 1:(dim(pi1)[1])){
+  nrows <- dim(pi1)[1]; cat("\n")
+  for(i in 1:nrows){
+    gc()
     if(noABIndex1[i]==1 & noABIndex2[i]==1){
       jointprobs[i,,] <- 1/3 ##no info
     } 
@@ -187,14 +214,31 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
         }
       }
     }
+    cat("\b\b\b\b\b\b\b\b\b", sprintf("%2d", as.integer(round(i/nrows,2)*100)), "% done.", sep="")
   }
-  if(verbose) cat("finalizing")
-  tmpcall <- apply(jointprobs,c(1,2),which.max)
-  if(verbose) cat(".")
-  tmpmax =  apply(jointprobs,c(1,2),max) 
+
+  rm(pi1, pi2); gc()
+  tmpN <- dim(jointprobs)
+  tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
+  rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
+  colnames(tmpcall) <- colnames(tmpmax) <- dimnames(jointprobs)[[2]]
+  gc()
+
+  if(verbose) cat("finalizing"); gc()
+##  tmpcall <- apply(jointprobs,c(1,2),which.max)
+  if(verbose) cat("."); gc()
+##  tmpmax =  apply(jointprobs,c(1,2),max) ; gc()
+
+  for (i in 1:tmpN[1]){
+    for (j in 1:tmpN[2]){
+      tmpcall[i, j] <- which.max(jointprobs[i, j, ])
+      tmpmax[i, j] <- max(jointprobs[i, j, ])
+    }
+  }
+  
   for(i in 1:3)
     tmpcall[tmpcall==i & tmpmax<cutoffs[i]] <- NA
-  if(verbose) cat("Done!\n")
+  if(verbose) cat("\n Completed!\n")
   if(returnProbs) return(list(calls=tmpcall,probs=jointprobs)) else return(tmpcall)
 }
 
@@ -289,7 +333,7 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
     scales[,,s] <- tmp$scales
   }
   N <- tmp$N
-  return(list(centers=centers,scales=scales,N=N,f0=median(f)))
+  return(list(centers=centers,scales=scales,N=N,f0=median(f, na.rm=TRUE)))
 }
 
 getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
@@ -313,8 +357,8 @@ getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
   dgs <- N-1
   egs <- zgs-digamma(dgs/2)+log(dgs/2)
   n <- length(Index)
-  d0s <- 2*trigammaInverse(colMeans(n*(egs-colMeans(egs))^2/(n-1)-trigamma(dgs/2)))
-  s20 <- exp(colMeans(egs)+digamma(d0s/2)-log(d0s/2))
+  d0s <- 2*trigammaInverse(colMeans(n*(egs-colMeans(egs, na.rm=TRUE))^2/(n-1)-trigamma(dgs/2), na.rm=TRUE))
+  s20 <- exp(colMeans(egs, na.rm=TRUE)+digamma(d0s/2)-log(d0s/2))
   return(list(V=V,d0s=d0s,s20=s20,maxsigmas=maxsigmas))
 }
 
@@ -380,7 +424,7 @@ getAffySnpDistance <- function(object,params,f=0,subset=1:(dim(object)[1]),
       if(j==3) tmp <- tmp+f[subset,,i]
       Dist[,,j,i]=  2*log(params$scales[subset,j,i]) +
         ((tmp-params$centers[subset,j,i])/params$scales[subset,j,i])^2
-      if(!is.null(w)) Dist[,,j,i] <-  Dist[,,j,i] - 2*log(w[subset,,j,i]) 
+      if(!is.null(w)) Dist[,,j,i] <-  Dist[,,j,i] - 2*log(w[subset,,j,i])
     }
   }
   dimnames(Dist) <- list(dimnames(x)[[1]],
@@ -393,18 +437,27 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
                             verbose=FALSE){
   Dist <- Dist[subset,,,,drop=FALSE]
   XIndex <- which(subset%in%XIndex)
+  gc()
+  res <- array(NA,dim=dim(Dist)[c(1,2)]); gc()
   
-  res <- array(NA,dim=dim(Dist)[c(1,2)])
-  dimnames(res)=list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-  Dist <- Dist[,,,1]+Dist[,,,2]
+##  dimnames(res)=list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
   
+  dimnames(res) <- dimnames(Dist)[1:2]
+  
+##  Dist <- Dist[,,,1]+Dist[,,,2]
+  
+  Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
   Dist[XIndex,maleIndex,2] <- Inf
+
   ##the following is slow!
+  
   if(verbose) cat("Making calls for ",ncol(res)," arrays")
+  
   ##apply is faster but I want to see how far along it is
   for(j in 1:ncol(res)){
     if(verbose) cat(".")
-    res[,j] <- apply(Dist[,j,],1,which.min)
+    res[,j] <- apply(Dist[,j,],1, which.min)
+    gc()
   }
   if(verbose) cat("Done\n")  
   return(res)
@@ -425,10 +478,9 @@ getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
   cat("Making calls for ",ncol(res)," arrays")
   ##apply is faster apply but takes too much memory
   N<-nrow(Calls)
-  Index<-1:N; ##browser()
+  Index<-1:N
   for(j in 1:ncol(res)){
     if(maleIndex[j]){
-##      Index2=Index[!XIndex]
       Index2=Index[-XIndex]
     }
     else{
