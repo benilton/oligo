@@ -20,8 +20,27 @@ setClass("FeatureSet",
            manufacturer=character(),
            platform=character()))
 
-setClassUnion("characterOrNULL", c("character", NULL))
+##setClassUnion("characterOrNULL", c("character", NULL))
 
 setClass("ExpressionFeatureSet", contains="FeatureSet")
 setClass("SnpFeatureSet", contains="FeatureSet")
 setClass("TilingFeatureSet", contains="FeatureSet")
+setClass("SnpQSet", contains="eSet")
+setClass("SnpCopyNumberSet", contains = "SnpQSet")
+setClass("SnpCallSet", contains = "SnpQSet")
+
+setClassUnion("oligoSnpSet", c("SnpCopyNumberSet", "SnpCallSet"))
+
+
+## setMethod("initialize", "SnpSet",
+##           function(.Object,
+##                    phenoData = new("AnnotatedDataFrame"),
+##                    experimentData = new("MIAME"),
+##                    annotation = character(),
+##                    calls = new("matrix"),
+##                    copyNumber = new("matrix")) {
+##             .Object@assayData$calls <- calls
+##             .Object@assayData$copyNumber <- copyNumber
+##             .Object
+##           })
+

@@ -10,10 +10,14 @@ setMethod("initialize", "FeatureSet",
                    annotation = new("character")){
             .Object <- callNextMethod(.Object,
                                       assayData = assayDataNew(
-                                        storage.mode="list",
-                                        exprs=exprs,
-                                        sd=sd,
-                                        npixels=npixels),
+
+##                                        storage.mode="list",
+                                        
+exprs=exprs),
+                                      
+##                                        exprs=exprs,
+##                                        sd=sd,
+##                                        npixels=npixels),
                                       phenoData = phenoData,
                                       experimentData = experimentData,
                                       annotation = annotation)
@@ -129,8 +133,14 @@ setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
 
 setReplaceMethod("pm", "FeatureSet",
                  function(object, value){
+                   
 ##                   exprs(object)[pmindex(object),] <- value
-                   assayData(object)[["exprs"]][pmindex(object),] <- value
+##                   assayData(object)[["exprs"]][pmindex(object),] <- value
+                   
+                   tmp <- exprs(object)
+                   pmi <- pmindex(object)
+                   tmp[pmi,] <- value
+                   assayData(y)[["exprs"]] <- tmp
                    object
                  })
 
@@ -152,7 +162,11 @@ setMethod("mm", "FeatureSet", function(object, genenames=NULL){
 
 setReplaceMethod("mm", "FeatureSet",
                  function(object, value){
-                   assayData(object)[["exprs"]][mmindex(object),] <- value
+##                   assayData(object)[["exprs"]][mmindex(object),] <- value
+                   tmp <- exprs(object)
+                   mmi <- mmindex(object)
+                   tmp[mmi,] <- value
+                   assayData(y)[["exprs"]] <- tmp
                    object
                  })
 

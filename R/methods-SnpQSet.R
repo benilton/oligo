@@ -1,56 +1,61 @@
-require(splines)
-
-setClass("SnpQSet", contains="eSet")
 setMethod("initialize", "SnpQSet",
           function(.Object,
-                   SenseThetaA=new("matrix"),
-                   SenseThetaB=new("matrix"),
-                   AntisenseThetaA=new("matrix"),
-                   AntisenseThetaB=new("matrix"),
+                   senseThetaA=new("matrix"),
+                   senseThetaB=new("matrix"),
+                   antisenseThetaA=new("matrix"),
+                   antisenseThetaB=new("matrix"),
                    phenoData=new("AnnotatedDataFrame"),
                    experimentData=new("MIAME"),
                    annotation=new("character")){
             .Object <- callNextMethod(.Object,
                                   assayData = assayDataNew(
-                                    storage.mode="list",
-                                    SenseThetaA=SenseThetaA,
-                                    SenseThetaB=SenseThetaB,
-                                    AntisenseThetaA=AntisenseThetaA,
-                                    AntisenseThetaB=AntisenseThetaB),
+                                    senseThetaA=senseThetaA,
+                                    senseThetaB=senseThetaB,
+                                    antisenseThetaA=antisenseThetaA,
+                                    antisenseThetaB=antisenseThetaB),
                                   phenoData=phenoData,
                                   experimentData=experimentData,
                                   annotation=annotation)
             .Object
           })
 
-setGeneric("SenseThetaA", function(obj) standardGeneric("SenseThetaA"))
-setGeneric("SenseThetaB", function(obj) standardGeneric("SenseThetaB"))
-setGeneric("AntisenseThetaA", function(obj) standardGeneric("AntisenseThetaA"))
-setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
-setGeneric("AntisenseThetaB", function(obj) standardGeneric("AntisenseThetaB"))
+setValidity("SnpQSet",
+            function(object)
+            assayDataValidMembers(assayData(object),
+                                  c("senseThetaA",
+                                    "senseThetaB",
+                                    "antisenseThetaA",
+                                    "antisenseThetaB"))
+            )
+
+setGeneric("senseThetaA", function(obj) standardGeneric("senseThetaA"))
+setGeneric("senseThetaB", function(obj) standardGeneric("senseThetaB"))
+setGeneric("antisenseThetaA", function(obj) standardGeneric("antisenseThetaA"))
+setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
+setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
 setGeneric("getM", function(obj) standardGeneric("getM"))
 setGeneric("getA", function(obj) standardGeneric("getA"))
 
-setMethod("SenseThetaA", "SnpQSet", function(obj) assayData(obj)$SenseThetaA)
-setMethod("SenseThetaB", "SnpQSet", function(obj) assayData(obj)$SenseThetaB)
-setMethod("AntisenseThetaA", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaA)
-setMethod("AntisenseThetaB", "SnpQSet", function(obj) assayData(obj)$AntisenseThetaB)
+setMethod("senseThetaA", "SnpQSet", function(obj) assayData(obj)$senseThetaA)
+setMethod("senseThetaB", "SnpQSet", function(obj) assayData(obj)$senseThetaB)
+setMethod("antisenseThetaA", "SnpQSet", function(obj) assayData(obj)$antisenseThetaA)
+setMethod("antisenseThetaB", "SnpQSet", function(obj) assayData(obj)$antisenseThetaB)
 setMethod("getM", "SnpQSet",
           function(obj){
-            tmp <- array(NA, dim=c(nrow(AntisenseThetaA(obj)), ncol(AntisenseThetaA(obj)), 2),
-                         dimnames=list(rownames(AntisenseThetaA(obj)), colnames(AntisenseThetaA(obj)),
+            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)), ncol(antisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(antisenseThetaA(obj)), colnames(antisenseThetaA(obj)),
                            c("antisense", "sense")))
-            tmp[,,1] <- AntisenseThetaA(obj)-AntisenseThetaB(obj)
-            tmp[,,2] <- SenseThetaA(obj)-SenseThetaB(obj)
+            tmp[,,1] <- antisenseThetaA(obj)-antisenseThetaB(obj)
+            tmp[,,2] <- senseThetaA(obj)-senseThetaB(obj)
             return(tmp)
           })
 setMethod("getA", "SnpQSet",
           function(obj){
-            tmp <- array(NA, dim=c(nrow(AntisenseThetaA(obj)), ncol(AntisenseThetaA(obj)), 2),
-                         dimnames=list(rownames(AntisenseThetaA(obj)), colnames(AntisenseThetaA(obj)),
+            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)), ncol(antisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(antisenseThetaA(obj)), colnames(antisenseThetaA(obj)),
                            c("antisense", "sense")))
-            tmp[,,1] <- .5*(AntisenseThetaA(obj)+AntisenseThetaB(obj))
-            tmp[,,2] <- .5*(SenseThetaA(obj)+SenseThetaB(obj))
+            tmp[,,1] <- .5*(antisenseThetaA(obj)+antisenseThetaB(obj))
+            tmp[,,2] <- .5*(senseThetaA(obj)+senseThetaB(obj))
             return(tmp)
           })
 
@@ -160,10 +165,10 @@ snprma <- function(oBatch){
   tmp <- summSnp(oBatch, 3, normalize=FALSE, background=FALSE)
   cat(" done.\n")
   new("SnpQSet",
-      SenseThetaA=tmp[2,1,,],
-      SenseThetaB=tmp[2,2,,],
-      AntisenseThetaA=tmp[1,1,,],
-      AntisenseThetaB=tmp[1,2,,],
+      senseThetaA=tmp[2,1,,],
+      senseThetaB=tmp[2,2,,],
+      antisenseThetaA=tmp[1,1,,],
+      antisenseThetaB=tmp[1,2,,],
       phenoData=phenoData(oBatch),
       experimentData=experimentData(oBatch),
       annotation=annotation(oBatch))
@@ -207,10 +212,10 @@ justsnprma <- function(files){
   dimnames(out) <- list(c("antisense", "sense"), c("A", "B"),
                             unique(pns0), files)
   new("SnpQSet",
-      SenseThetaA=out[2,1,,],
-      SenseThetaB=out[2,2,,],
-      AntisenseThetaA=out[1,1,,],
-      AntisenseThetaB=out[1,2,,],
+      senseThetaA=out[2,1,,],
+      senseThetaB=out[2,2,,],
+      antisenseThetaA=out[1,1,,],
+      antisenseThetaB=out[1,2,,],
       phenoData=ttt$phenoData,
       experimentData=ttt$description,
       annotation=substr(pd, 3, nchar(pd)))
