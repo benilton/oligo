@@ -26,10 +26,10 @@ setClass("ExpressionFeatureSet", contains="FeatureSet")
 setClass("SnpFeatureSet", contains="FeatureSet")
 setClass("TilingFeatureSet", contains="FeatureSet")
 setClass("SnpQSet", contains="eSet")
-setClass("SnpCopyNumberSet", contains = "SnpQSet")
-setClass("SnpCallSet", contains = "SnpQSet")
+setClass("SnpCopyNumberSet", contains = "eSet")
+setClass("SnpCallSet", contains = "eSet")
 
-setClassUnion("oligoSnpSet", c("SnpCopyNumberSet", "SnpCallSet"))
+setClass("SnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))
 
 
 ## setMethod("initialize", "SnpSet",

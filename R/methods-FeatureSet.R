@@ -140,7 +140,7 @@ setReplaceMethod("pm", "FeatureSet",
                    tmp <- exprs(object)
                    pmi <- pmindex(object)
                    tmp[pmi,] <- value
-                   assayData(y)[["exprs"]] <- tmp
+                   assayData(object)[["exprs"]] <- tmp
                    object
                  })
 

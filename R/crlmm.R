@@ -7,7 +7,6 @@ rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
 getSnpFragmentLength <- function(object){
   annotname <- annotation(object)
-##  data(list=annotname)
   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
   return(annot$Length[match(featureNames(object),annot$SNP)])
 }
@@ -22,7 +21,6 @@ snpGenderCall <- function(object){
 
 getChrXIndex <- function(object){
   annotname <- paste(annotation(object),sep="")
-##  data(list=annotname)
   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
   annot <- annot[match(featureNames(object),annot$SNP),]
   return(which(annot$Chromosome=="chrX"))
@@ -32,6 +30,7 @@ getChrXIndex <- function(object){
 fitAffySnpMixture <- function(object, df1=3, df2=5,
                               probs=rep(1/3,3), eps=50,
                               subSampleSize=10^4,verbose=TRUE){
+
   if(is.null(object$gender)){
     maleIndex <- snpGenderCall(object)=="male"
   }
@@ -71,11 +70,6 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1],Y[Y>mus[3]]-mus[3]), na.rm=TRUE),3)
     sigmas[2] <- sigmas[2]/2
     
-    ## this is the original BC - Jul 18, 2006
-    ## l <- L[idx];L=L-mean(l);l=l-mean(l)
-    ## a <- A[idx];A=A-mean(A);a=a-mean(a)
-    ## y <- Y[idx]
-
     l <- L[idx];L=L-mean(L, na.rm=TRUE);l=l-mean(l, na.rm=TRUE)
     a <- A[idx];A=A-mean(A, na.rm=TRUE);a=a-mean(a, na.rm=TRUE)
     y <- Y[idx]
@@ -99,7 +93,6 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       z <- sweep(z, 1, LogLik, "/")
       LogLik <- sum(log(LogLik))
       change <- abs(LogLik-PreviousLogLik)
-      print(c(change, LogLik, PreviousLogLik))
       if (verbose){
         if (itmax > 1 | j > 1) cat(del)
         message <- paste("Array ",j,": epsilon = ", signif(change,2), "  ", sep="")
@@ -111,10 +104,8 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       probs <- colMeans(z)
 
       ## M
-##      fit1 <- lm(y~ns(l,df1)+ns(a,df2),weights=z[,1])
       fit1 <- lm(y~matL+matA,weights=z[,1])
       fit2 <- sum(z[,2]*y)/sum(z[,2])
-##      fit3 <- lm(y~ns(l,df1)+ns(a,df2),weights=z[,3])
       fit3 <- lm(y~matL+matA,weights=z[,3])
       
       sigmas[1] <- sqrt(sum(z[,1]*residuals(fit1)^2)/sum(z[,1]))
@@ -134,10 +125,8 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     rm(matL, matA); gc()
 
     pred1 <- bigX%*%coef(fit1)
-##    pred1 <- predict(fit1,newdata=data.frame(l=L,a=A))
     pred2 <- rep(fit2,length(Y))
     pred3 <- bigX%*%coef(fit3)
-##    pred3 <- predict(fit3,newdata=data.frame(l=L,a=A))
     rm(bigX); gc()
 
     weights <- matrix(0,length(Y),3)
@@ -156,7 +145,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     for(k in 1:3){
       pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
     }
-    snr[j] <- median(fs[,j,])^2/(sigmas[1]^2+sigmas[2]^2)
+    snr[j] <- median(fs[,j,], na.rm=TRUE)^2/(sigmas[1]^2+sigmas[2]^2)
   }
   if(verbose) cat("Done.\n")
   return(list(f0=median(fs),fs=fs, pis=pis, snr=snr))
@@ -170,7 +159,7 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
                                    verbose=FALSE){
   if(is.null(subset)) subset <- 1:(dim(object$pis)[1])
   pi1 <- object$pis[subset,,,1]
-  pi2 <- object$pis[subset,,,2]; rm(object); gc()
+  pi2 <- object$pis[subset,,,2]; gc()
 
   ## fixing SNPs that have probes only on one strand:
   idx <- is.na(pi1[,1,1])
@@ -181,8 +170,6 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   
   if(verbose) cat("Picking good starting value: ")
   if(verbose) cat("Computing entropy, ")
-##   E1<-apply(pi1,1,function(x) mean(rowEntropy(x)))
-##   E2<-apply(pi2,1,function(x) mean(rowEntropy(x))); gc()
   E1 <- rowEntropy(pi1)
   E2 <- rowEntropy(pi2); gc()
   
@@ -192,8 +179,6 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
   gc()
   if(verbose) cat("calculating calls, ")
-##  tmpcall1 <- apply(pi1,c(1,2),which.max)
-##  tmpcall2 <- apply(pi2,c(1,2),which.max); gc()
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
       tmpcall1[i, j] <- which.max(pi1[i,j,])
@@ -221,43 +206,24 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   jointprobs<-(pi1+pi2)/2
 
   gc()
-noInfoIndex <- (noABIndex1 == 1) & (noABIndex2 == 1)
-jointprobs[noInfoIndex,,] <- 1/3
-
-notBoth <- concordance < concordanceCutoff
-E1bE2 <- E1 > E2
-i1 <- notBoth & E1bE2
-i2 <- notBoth & !E1bE2
-
-jointprobs[i1,,] <- pi1[i1,,]
-jointprobs[i2,,] <- pi2[i2,,]
-
-rm(noInfoIndex, notBoth, i1, i2)
-gc()
   
-###     ##NA if all 0
-###     nrows <- dim(pi1)[1]; cat("\n")
-###     for(i in 1:nrows){
-###       gc()
-###       if(noABIndex1[i]==1 & noABIndex2[i]==1){
-###         jointprobs[i,,] <- 1/3 ##no info
-###       } 
-###       else{
-###         ##Not Both
-###         if(concordance[i]<concordanceCutoff){
-###           ##use one or the other
-###           if(E1[i] >  E2[i]){
-###             jointprobs[i,,] <- pi1[i,,]
-###           }
-###           else{
-###             jointprobs[i,,] <- pi2[i,,]
-###           }
-###         }
-###       }
-###       cat("\b\b\b\b\b\b\b\b\b", sprintf("%2d", as.integer(round(i/nrows,2)*100)), "% done.", sep="")
-###     }
+  noInfoIndex <- (noABIndex1 == 1) & (noABIndex2 == 1)
+  
+  rm(noABIndex1, noABIndex2)
+  
+  jointprobs[noInfoIndex,,] <- 1/3
+  rm(noInfoIndex)
+  
+  notBoth <- concordance < concordanceCutoff
+  E1bE2 <- E1 > E2
+  rm(E1, E2)
+  i1 <- notBoth & E1bE2
+  i2 <- notBoth & !E1bE2
+  rm(notBoth, E1bE2)
+  jointprobs[i1,,] <- pi1[i1,,]
+  jointprobs[i2,,] <- pi2[i2,,]
+  rm(i1, i2, pi1, pi2); gc()
 
-  rm(pi1, pi2); gc()
   tmpN <- dim(jointprobs)
   tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
   rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
@@ -265,9 +231,6 @@ gc()
   gc()
 
   if(verbose) cat(" finalizing"); gc()
-##  tmpcall <- apply(jointprobs,c(1,2),which.max)
-  if(verbose) cat("."); gc()
-##  tmpmax =  apply(jointprobs,c(1,2),max) ; gc()
 
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
@@ -323,27 +286,24 @@ getGenotypeRegionParams <- function(M,initialcalls,f=0,verbose=TRUE){
     if(k==3) tmp <- M + f
     tmp[initialcalls!=k] <- NA
     tmp[is.na(initialcalls)]<- NA
-##    centers[,k]<-apply(tmp,1,median,na.rm=TRUE)
     for (i in 1:nrows) centers[i,k] <- median(tmp[i,], na.rm=TRUE)
     
     ##The if below is neede becasue we combine the AA BB for the var estimate
     ##which comes later
     if(k==2){
-##      scales[,k]=apply(tmp,1,mad,na.rm=TRUE)
       for (i in 1:nrows) scales[i,k] <- mad(tmp[i,], na.rm=TRUE)
     }
-    N[,k]=rowSums((!is.na(tmp)))
+    N[,k]=rowSums((!is.na(tmp))); rm(tmp); gc()
   }
   ##now compute the scales for AA,AB
   tmp1 <- M-f
-  tmp3 <- M+f
+  tmp3 <- M+f; rm(M, f); gc()
   tmp1[initialcalls!=1] <- NA;tmp1[is.na(initialcalls)]<- NA 
-  tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA
+  tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA; rm(initialcalls); gc()
   tmp1 <- sweep(tmp1,1,centers[,1])
   tmp3 <- sweep(tmp3,1,centers[,3])
-  tmp=cbind(tmp1,tmp3)
-##  scales[,1] <- apply(tmp,1,mad,na.rm=TRUE)
-##  scales[,3] <- scales[,1]
+  tmp <- cbind(tmp1,tmp3);
+  rm(tmp1, tmp3); gc()
   for (i in 1:nrows) scales[i,1] <- scales[i,2] <- mad(tmp[i,], na.rm=TRUE)
   
   if(verbose) cat(" Done\n")
@@ -379,7 +339,7 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
     centers[,,s] <- tmp$centers
     scales[,,s] <- tmp$scales
   }
-  N <- tmp$N
+  N <- tmp$N; rm(tmp)
   return(list(centers=centers,scales=scales,N=N,f0=median(f, na.rm=TRUE)))
 }
 
@@ -391,18 +351,20 @@ getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
   Index <- subset[which(rowMeans(N[subset,]>minN)==1)]
   N <- N[Index,]
   mus <- cbind(object$centers[Index,,1],object$centers[Index,,2])
+
+  ##variance for prior for mu
+  ##need to make robust
+  V <- cov(mus,use="pairwise.complete")
+  rm(mus)
+  
   sigmas <- cbind(object$scales[Index,,1],object$scales[Index,,2])
   maxsigmas <- c(quantile(sigmas[,c(1,3,4,6)],.99, na.rm=TRUE),
                  quantile(sigmas[,c(2,5)],.99, na.rm=TRUE))
   
-  ##variance for prior for mu
-  ##need to make robust
-  V <- cov(mus,use="pairwise.complete")
-  
   ##prior for sigma
-  zgs <- log(sigmas^2)
+  zgs <- log(sigmas^2); rm(sigmas); gc()
   dgs <- N-1
-  egs <- zgs-digamma(dgs/2)+log(dgs/2)
+  egs <- zgs-digamma(dgs/2)+log(dgs/2); rm(zgs); gc()
   n <- length(Index)
   d0s <- 2*trigammaInverse(colMeans(n*(egs-colMeans(egs, na.rm=TRUE))^2/(n-1)-trigamma(dgs/2), na.rm=TRUE))
   s20 <- exp(colMeans(egs, na.rm=TRUE)+digamma(d0s/2)-log(d0s/2))
@@ -430,6 +392,7 @@ updateAffySnpParams <- function(object,priors,
       N<-N[Index];s<-s[Index]
       object$scale[Index,j,i] <- sqrt (  ( (N-1)*s^2 + d0s*s20 ) / (d0s+N-1) )
       object$scale[!Index,j,i] <- sqrt(s20)
+      rm(s, d0s, s20, Index, N); gc()
     }
   }
   object$scales[,3,] <- object$scales[,1,] ##AA=BB 
@@ -445,13 +408,16 @@ updateAffySnpParams <- function(object,priors,
   Vinv <- solve(priors$V)
   mu[is.na(mu)]<-0
   NSinv <- t(N)/priors$s20
-  tmp <- t(sapply(1:nrow(mu),function(i){
-    if(verbose){if(i%%5000==0)  cat(".")}
-    mus=mu[i,]
-    Ns=N[i,]
-    mus[Ns<minN]<-0
-    return(solve(Vinv+diag(NSinv[,i]))%*%(NSinv[,i]*mus))
-  }))
+  tmp <- t(sapply(1:nrow(mu),
+                  function(i){
+                    if(verbose)
+                      if(i%%5000==0)  cat(".")
+                    mus=mu[i,]
+                    Ns=N[i,]
+                    mus[Ns<minN]<-0
+                    return(solve(Vinv+diag(NSinv[,i]))%*%(NSinv[,i]*mus))
+                  }))
+  rm(mu, N, Vinv, NSinv, minN); gc()
   if(verbose) cat("Done.\n")
   object$centers[,,1] <- tmp[,1:3]
   object$centers[,,2] <- tmp[,4:6]
@@ -486,18 +452,11 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
   XIndex <- which(subset%in%XIndex)
   gc()
   res <- array(NA,dim=dim(Dist)[c(1,2)]); gc()
-  
-##  dimnames(res)=list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-  
   dimnames(res) <- dimnames(Dist)[1:2]
-  
-##  Dist <- Dist[,,,1]+Dist[,,,2]
-  
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
   Dist[XIndex,maleIndex,2] <- Inf
 
   ##the following is slow!
-  
   if(verbose) cat("Making calls for ",ncol(res)," arrays")
   
   ##apply is faster but I want to see how far along it is
@@ -516,16 +475,16 @@ getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
   Dist <- Dist[subset,,,,drop=FALSE]
   Calls <- Calls[subset,,drop=FALSE]
   XIndex <- which(subset%in%XIndex)
-
     
   res <- array(NA,dim=dim(Dist)[c(1,2)])
   dimnames(res)=list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-  Dist <- Dist[,,,1]+Dist[,,,2]
-  
+##  Dist <- Dist[,,,1]+Dist[,,,2]
+  Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
+
   cat("Making calls for ",ncol(res)," arrays")
   ##apply is faster apply but takes too much memory
-  N<-nrow(Calls)
-  Index<-1:N
+  N <- nrow(Calls)
+  Index <- 1:N
   for(j in 1:ncol(res)){
     if(maleIndex[j]){
       Index2=Index[-XIndex]
@@ -539,7 +498,7 @@ getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
     res[tmpIndex[[1]],j] <- tmpdist[tmpIndex[[1]],1]
     res[tmpIndex[[3]],j] <- tmpdist[tmpIndex[[3]],2]
     res[tmpIndex[[2]],j] <- apply(tmpdist[tmpIndex[[2]],],1,min)
-
+    rm(tmpIndex, tmpdist); gc()
     if(maleIndex[j]){
       Index2=Index[XIndex]
       res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
@@ -561,13 +520,14 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                   returnCorrectedM=FALSE,
                   returnParams=FALSE,
                   verbose=TRUE){
-##  require(paste("pd", annotation(object), sep=""), character.only=TRUE)
+
   if(is.null(correction)){
     if(verbose) cat("M correction not provided. Calculating. Will take several minutes.\n")
      correction=fitAffySnpMixture(object,verbose=verbose)
   }
   if(is.null(object$gender)){
-    if(verbose) cat("Gender not provided... using data to predict.\n")
+##    if(verbose) cat("Gender not provided... using data to predict.\n")
+    warning("Gender not provided... using data to predict.")
     maleIndex <- snpGenderCall(object)=="male"
   }
   else{
@@ -576,33 +536,34 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
 
   load(system.file(paste("data/",annotation(object), "CrlmmInfo.rda", sep=""),
                    package=paste("pd", annotation(object), sep="")))
-##  load(paste(annotation(object),"CrlmmInfo.rda",sep=""))
-##  data(list=paste(annotation(object),"CrlmmInfo",sep=""))  
-  myenv <- get(paste(annotation(object),"Crlmm",sep=""))
-  params <- get("params",myenv)
-  priors <- get("priors",myenv)
-  hapmapCallIndex <- get("hapmapCallIndex",myenv)
-  badCallIndex <- get("badCallIndex",myenv)
   
-  Index <- which(!hapmapCallIndex  |  badCallIndex )
+  myenv <- get(paste(annotation(object),"Crlmm",sep=""))
+
+##  params <- get("params",myenv)
+##  priors <- get("priors",myenv)
+##  hapmapCallIndex <- get("hapmapCallIndex",myenv)
+##  badCallIndex <- get("badCallIndex",myenv)
+  
+##  Index <- which(!hapmapCallIndex  |  badCallIndex )
+  Index <- which(!get("hapmapCallIndex",myenv)  |  get("badCallIndex",myenv))
 
   myCalls <- matrix(NA,dim(object)[1],dim(object)[2])
   
   myCalls[Index,]<-getInitialAffySnpCalls(correction,Index,verbose=verbose)
 
-##   pkgname <- paste("package:pd", annotation(object))
-##   detach(pos=which(search() == pkgname)); gc()
-
   rparams <- getAffySnpGenotypeRegionParams(object,
                                            myCalls,
                                            correction$fs,
                                            subset=Index,verbose=verbose)
-##  require(paste("pd", annotation(object), sep=""), character.only=TRUE)
+
   gc()
 
-  rparams<-updateAffySnpParams(rparams,priors,verbose=TRUE)
+##  rparams<-updateAffySnpParams(rparams,priors,verbose=TRUE)
+  rparams<-updateAffySnpParams(rparams, get("priors",myenv),verbose=TRUE)
   
-  params <- replaceAffySnpParams(params,rparams,Index)
+##  params <- replaceAffySnpParams(params,rparams,Index)
+  
+  params <- replaceAffySnpParams(get("params",myenv), rparams, Index)
 
   myDist<-getAffySnpDistance(object,params,correction$fs)
 
@@ -622,19 +583,15 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
       }
     }
 
-##     pkgname <- paste("package:pd", annotation(object))
-##     detach(pos=which(search() == pkgname)); gc()
-
     rparams<-getAffySnpGenotypeRegionParams(object,
                                             myCalls,
                                             correction$fs,
                                             verbose=verbose)
-##    require(paste("pd", annotation(object), sep=""), character.only=TRUE);
     gc()
 
-    
-    rparams<-updateAffySnpParams(rparams,priors)
-    
+##    rparams<-updateAffySnpParams(rparams,priors)
+    rparams <- updateAffySnpParams(rparams, get("priors", myenv))
+
     myDist <- getAffySnpDistance(object,rparams,
                                  correction$fs,
                                  verbose=verbose)
@@ -646,6 +603,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
   }
   ret <- list(calls=myCalls,llr=LLR)
+  rm(LLR)
   if(returnCorrectedM){
     cM <-getM(object)
     for(i in 1:nrow(cM)){
@@ -660,7 +618,40 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
   if(returnParams){
     ret$params <- rparams
   }
-  return(ret)
+  
+  ## correction$snr
+  ## maleIndex
+  gender <- rep("female", length(maleIndex))
+  gender[maleIndex] <- "male"
+  if (is.null(object$gender)){
+    addPhenoData <- new("AnnotatedDataFrame",
+                        data=cbind(pData(object),
+                          data.frame(crlmmSNR=as.numeric(correction$snr),
+                                     gender=gender,
+                                     row.names=sampleNames(object))),
+                        varMetadata= rbind(varMetadata(object),
+                          data.frame(labelDescription=c("crlmmSNR", "gender"),
+                                     row.names=c("crlmmSNR", "gender"))))
+  }else{
+    addPhenoData <- new("AnnotatedDataFrame",
+                        data=cbind(pData(object),
+                          data.frame(crlmmSNR=as.numeric(correction$snr),
+                                     row.names=sampleNames(object))),
+                        varMetadata= rbind(varMetadata(object),
+                          data.frame(labelDescription=c("crlmmSNR"),
+                                     row.names=c("crlmmSNR"))))
+  }    
+  
+  if (!returnCorrectedM & !returnParams){
+    return(new("SnpCallSet",
+               phenoData=addPhenoData,
+               experimentData=experimentData(object),
+               annotation=annotation(object),
+               calls=ret$calls,
+               callsConfidence=ret$llr))
+  }else{
+    return(ret)
+  }
 }
 
 

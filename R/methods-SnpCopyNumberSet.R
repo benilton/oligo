@@ -18,3 +18,8 @@ setMethod("initialize", "SnpCopyNumberSet",
                            annotation = annotation)
           })
 
+setMethod("copyNumber", "SnpCopyNumberSet", function(object) assayDataElement(object, "copyNumber"))
+setMethod("copyNumber<-", "SnpCopyNumberSet", function(object, value) assayDataElement(object, "copyNumber") <- value)
+
+setMethod("cnConfidence", "SnpCallSet", function(object) assayDataElement(object, "cnConfidence"))
+setMethod("cnConfidence<-", "SnpCallSet", function(object, value) assayDataElement(object, "cnConfidence") <- value)

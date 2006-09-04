@@ -178,10 +178,10 @@ justsnprma <- function(files){
   ttt=stuffForXYSandCELreaders(files, new("AnnotatedDataFrame"), NULL, NULL, NULL)
   tmp <- read.celfiles(files[1])
   pd <- platform(tmp)
-  pmi <- pmindex(tmp)
-  pns0 <- probeNames(tmp)
-  pns <- paste(pns0, pmAlleleAB(tmp),
-               substr(as.character(getPD(tmp)$target_strand[pmi]), 1, 1), sep="")
+##  pmi <- pmindex(tmp)
+##  pns0 <- probeNames(tmp)
+  pns <- paste(probeNames(tmp), pmAlleleAB(tmp),
+               substr(as.character(getPD(tmp)$target_strand[pmindex(tmp)]), 1, 1), sep="")
   data(list=paste(platform(tmp), "Ref", sep=""))
   tmpPP <- preProcess(tmp, reference)
   n <- length(files)
@@ -193,15 +193,13 @@ justsnprma <- function(files){
   rm(tmp, tmpPP)
   gc()
   if (n>1){
-    for (i in 2:n){
-      cat(".")
+    for (i in 2:n)
       out[,i] <- aggregate(log2(preProcess(read.celfiles(files[i]), reference))-probeEffects, by=list(pns), median)[,2]
-    }
     cat(" Done.\n")
   }
-  pns <- paste(rep(unique(pns0), each=4),
+  pns <- paste(rep(unique(probeNames(tmp)), each=4),
                rep(c("AA", "AS", "BA", "BS"),
-                   length(unique(pns0))), sep="")
+                   length(unique(probeNames(tmp)))), sep="")
   tmp <- matrix(NA, ncol=ncol(out), nrow=length(pns))
   rownames(tmp) <- pns
   idx <- match(rownames(out), pns)
@@ -210,7 +208,7 @@ justsnprma <- function(files){
   rm(tmp); gc()
   out <- array(as.vector(out), dim=c(2, 2, nrow(out)/4, ncol(out)))
   dimnames(out) <- list(c("antisense", "sense"), c("A", "B"),
-                            unique(pns0), files)
+                            unique(probeNames(tmp)), files)
   new("SnpQSet",
       senseThetaA=out[2,1,,],
       senseThetaB=out[2,2,,],
@@ -219,4 +217,15 @@ justsnprma <- function(files){
       phenoData=ttt$phenoData,
       experimentData=ttt$description,
       annotation=substr(pd, 3, nchar(pd)))
+}
+
+updateSnpQSet <- function(obj){
+  new("SnpQSet",
+      senseThetaA=assayData(obj)$SenseThetaA,
+      senseThetaB=assayData(obj)$SenseThetaB,
+      antisenseThetaA=assayData(obj)$AntisenseThetaA,
+      antisenseThetaB=assayData(obj)$AntisenseThetaB,
+      phenoData=phenoData(obj),
+      experimentData=experimentData(obj),
+      annotation=annotation(obj))
 }

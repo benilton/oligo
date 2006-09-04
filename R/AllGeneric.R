@@ -121,3 +121,26 @@ if( is.null(getGeneric("alleleAB")))
 if( is.null(getGeneric("pmAlleleAB")))
   setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
 
+if( is.null(getGeneric("calls<-")))
+  setGeneric("calls<-", function(object, value) standardGeneric("calls"))
+
+if( is.null(getGeneric("callsConfidence<-")))
+  setGeneric("callsConfidence<-", function(object, value) standardGeneric("callsConfidence"))
+
+if( is.null(getGeneric("copyNumber<-")))
+  setGeneric("copyNumber<-", function(object, value) standardGeneric("copyNumber"))
+
+if( is.null(getGeneric("cnConfidence<-")))
+  setGeneric("cnConfidence<-", function(object, value) standardGeneric("cnConfidence"))
+
+if( is.null(getGeneric("calls")))
+  setGeneric("calls", function(object) standardGeneric("calls"))
+
+if( is.null(getGeneric("callsConfidence")))
+  setGeneric("callsConfidence", function(object) standardGeneric("callsConfidence"))
+
+if( is.null(getGeneric("copyNumber")))
+  setGeneric("copyNumber", function(object) standardGeneric("copyNumber"))
+
+if( is.null(getGeneric("cnConfidence")))
+  setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
