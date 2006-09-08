@@ -178,9 +178,8 @@ justsnprma <- function(files){
   ttt=stuffForXYSandCELreaders(files, new("AnnotatedDataFrame"), NULL, NULL, NULL)
   tmp <- read.celfiles(files[1])
   pd <- platform(tmp)
-##  pmi <- pmindex(tmp)
-##  pns0 <- probeNames(tmp)
-  pns <- paste(probeNames(tmp), pmAlleleAB(tmp),
+  pns0 <- probeNames(tmp)
+  pns <- paste(pns0, pmAlleleAB(tmp),
                substr(as.character(getPD(tmp)$target_strand[pmindex(tmp)]), 1, 1), sep="")
   data(list=paste(platform(tmp), "Ref", sep=""))
   tmpPP <- preProcess(tmp, reference)
@@ -193,13 +192,15 @@ justsnprma <- function(files){
   rm(tmp, tmpPP)
   gc()
   if (n>1){
-    for (i in 2:n)
+    for (i in 2:n){
+      cat(".")
       out[,i] <- aggregate(log2(preProcess(read.celfiles(files[i]), reference))-probeEffects, by=list(pns), median)[,2]
+    }
     cat(" Done.\n")
   }
-  pns <- paste(rep(unique(probeNames(tmp)), each=4),
+  pns <- paste(rep(unique(pns0), each=4),
                rep(c("AA", "AS", "BA", "BS"),
-                   length(unique(probeNames(tmp)))), sep="")
+                   length(unique(pns0))), sep="")
   tmp <- matrix(NA, ncol=ncol(out), nrow=length(pns))
   rownames(tmp) <- pns
   idx <- match(rownames(out), pns)
@@ -208,7 +209,7 @@ justsnprma <- function(files){
   rm(tmp); gc()
   out <- array(as.vector(out), dim=c(2, 2, nrow(out)/4, ncol(out)))
   dimnames(out) <- list(c("antisense", "sense"), c("A", "B"),
-                            unique(probeNames(tmp)), files)
+                        unique(pns0), files)
   new("SnpQSet",
       senseThetaA=out[2,1,,],
       senseThetaB=out[2,2,,],

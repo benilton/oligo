@@ -8,11 +8,13 @@ setMethod("initialize", "SnpCallSet",
                    experimentData = new("MIAME"),
                    annotation = character(),
                    calls = new("matrix"),
-                   callsConfidence = new("matrix")) {
+                   callsConfidence = new("matrix"),
+                   ...) {
             callNextMethod(.Object,
                            assayData = assayDataNew(
                              calls = calls,
-                             callsConfidence = callsConfidence),
+                             callsConfidence = callsConfidence,
+                             ...),
                            phenoData = phenoData,
                            experimentData = experimentData,
                            annotation = annotation)

@@ -120,6 +120,9 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     }
 
     gc()
+    fix <- is.na(A)
+    A[fix] <- median(A, na.rm=TRUE)
+    rm(fix)
     bigX <- cbind(1, ns(L, knots=as.numeric(attr(matL, "knots")), Boundary.knots=attr(matL, "Boundary.knots")),
                   ns(A, knots=as.numeric(attr(matA, "knots")), Boundary.knots=attr(matA, "Boundary.knots")))
     rm(matL, matA); gc()
@@ -145,7 +148,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     for(k in 1:3){
       pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
     }
-    snr[j] <- median(fs[,j,], na.rm=TRUE)^2/(sigmas[1]^2+sigmas[2]^2)
+    snr[j] <- median(fs[,j,])^2/(sigmas[1]^2+sigmas[2]^2)
   }
   if(verbose) cat("Done.\n")
   return(list(f0=median(fs),fs=fs, pis=pis, snr=snr))
@@ -517,7 +520,7 @@ replaceAffySnpParams <- function(object,value,subset){
 
 crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                   minLLRforCalls=c(50,40,50),
-                  returnCorrectedM=FALSE,
+                  returnCorrectedM=TRUE,
                   returnParams=FALSE,
                   verbose=TRUE){
 
@@ -589,7 +592,6 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                                             verbose=verbose)
     gc()
 
-##    rparams<-updateAffySnpParams(rparams,priors)
     rparams <- updateAffySnpParams(rparams, get("priors", myenv))
 
     myDist <- getAffySnpDistance(object,rparams,
@@ -614,6 +616,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
       }
     }
     ret$M <- cM
+    rm(cM)
   }
   if(returnParams){
     ret$params <- rparams
@@ -642,13 +645,15 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                                      row.names=c("crlmmSNR"))))
   }    
   
-  if (!returnCorrectedM & !returnParams){
-    return(new("SnpCallSet",
+  if (!returnParams){
+    return(new("SnpCallSetPlus",
                phenoData=addPhenoData,
                experimentData=experimentData(object),
                annotation=annotation(object),
                calls=ret$calls,
-               callsConfidence=ret$llr))
+               callsConfidence=ret$llr,
+               logRatioAntisense=ret$M[,,"antisense"],
+               logRatioSense=ret$M[,,"sense"]))
   }else{
     return(ret)
   }

@@ -31,6 +31,7 @@ setClass("SnpCallSet", contains = "eSet")
 
 setClass("SnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))
 
+setClass("SnpCallSetPlus", contains = "SnpCallSet")
 
 ## setMethod("initialize", "SnpSet",
 ##           function(.Object,
