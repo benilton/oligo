@@ -18,7 +18,7 @@ readxysHeader <- function(filename) scan(filename,nlines=1,quiet=TRUE, what=char
 ##}
 
 readonexysfile <- function(filename)
-  read.delim(filename)
+  read.delim(filename, comment.char="#")
 
 stuffForXYSandCELreaders <- function(filenames,
 ##                                     phenoData=new("phenoData"),

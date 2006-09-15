@@ -10,14 +10,12 @@ setMethod("initialize", "FeatureSet",
                    annotation = new("character")){
             .Object <- callNextMethod(.Object,
                                       assayData = assayDataNew(
-
-##                                        storage.mode="list",
-                                        
-exprs=exprs),
+                                        exprs=exprs),
                                       
 ##                                        exprs=exprs,
 ##                                        sd=sd,
 ##                                        npixels=npixels),
+                                      
                                       phenoData = phenoData,
                                       experimentData = experimentData,
                                       annotation = annotation)
@@ -131,17 +129,11 @@ setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
             return(exprs(object)[index,,drop=FALSE])
           })
 
-setReplaceMethod("pm", "FeatureSet",
+setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                  function(object, value){
-                   
-##                   exprs(object)[pmindex(object),] <- value
-##                   assayData(object)[["exprs"]][pmindex(object),] <- value
-                   
                    tmp <- exprs(object)
-                   pmi <- pmindex(object)
-                   tmp[pmi,] <- value
-                   assayData(object)[["exprs"]] <- tmp
-                   object
+                   tmp[pmindex(object),] <- value
+                   assayDataElementReplace(object, "exprs", tmp)
                  })
 
 ## MM
@@ -160,14 +152,11 @@ setMethod("mm", "FeatureSet", function(object, genenames=NULL){
             return(exprs(object)[index,,drop=FALSE])
           })
 
-setReplaceMethod("mm", "FeatureSet",
+setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                  function(object, value){
-##                   assayData(object)[["exprs"]][mmindex(object),] <- value
                    tmp <- exprs(object)
-                   mmi <- mmindex(object)
-                   tmp[mmi,] <- value
-                   assayData(y)[["exprs"]] <- tmp
-                   object
+                   tmp[mmindex(object),] <- value
+                   assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setMethod("featureIndex", "FeatureSet",

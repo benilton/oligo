@@ -122,16 +122,16 @@ if( is.null(getGeneric("pmAlleleAB")))
   setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
 
 if( is.null(getGeneric("calls<-")))
-  setGeneric("calls<-", function(object, value) standardGeneric("calls"))
+  setGeneric("calls<-", function(object, value) standardGeneric("calls<-"))
 
 if( is.null(getGeneric("callsConfidence<-")))
-  setGeneric("callsConfidence<-", function(object, value) standardGeneric("callsConfidence"))
+  setGeneric("callsConfidence<-", function(object, value) standardGeneric("callsConfidence<-"))
 
 if( is.null(getGeneric("copyNumber<-")))
-  setGeneric("copyNumber<-", function(object, value) standardGeneric("copyNumber"))
+  setGeneric("copyNumber<-", function(object, value) standardGeneric("copyNumber<-"))
 
 if( is.null(getGeneric("cnConfidence<-")))
-  setGeneric("cnConfidence<-", function(object, value) standardGeneric("cnConfidence"))
+  setGeneric("cnConfidence<-", function(object, value) standardGeneric("cnConfidence<-"))
 
 if( is.null(getGeneric("calls")))
   setGeneric("calls", function(object) standardGeneric("calls"))
@@ -144,3 +144,12 @@ if( is.null(getGeneric("copyNumber")))
 
 if( is.null(getGeneric("cnConfidence")))
   setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
+
+if( is.null(getGeneric("snpMedianSilhouette")))
+  setGeneric("snpMedianSilhouette", function(object) standardGeneric("snpMedianSilhouette"))
+
+if( is.null(getGeneric("logRatioAntisense")))
+  setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntisense"))
+
+if( is.null(getGeneric("logRatioSense")))
+  setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))

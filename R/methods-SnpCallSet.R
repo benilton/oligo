@@ -21,7 +21,9 @@ setMethod("initialize", "SnpCallSet",
           })
 
 setMethod("calls", "SnpCallSet", function(object) assayDataElement(object, "calls"))
-setMethod("calls<-", "SnpCallSet", function(object, value) assayDataElement(object, "calls") <- value)
+setReplaceMethod("calls", signature(object="SnpCallSet", value="matrix"),
+                 function(object, value) assayDataElementReplace(object, "calls", value))
 
 setMethod("callsConfidence", "SnpCallSet", function(object) assayDataElement(object, "callsConfidence"))
-setMethod("callsConfidence<-", "SnpCallSet", function(object, value) assayDataElement(object, "callsConfidence") <- value)
+setReplaceMethod("callsConfidence", signature(object="SnpCallSet", value="matrix"),
+                 function(object, value) assayDataElementReplace(object, "callsConfidence", value))

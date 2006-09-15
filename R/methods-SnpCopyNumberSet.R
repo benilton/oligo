@@ -19,7 +19,9 @@ setMethod("initialize", "SnpCopyNumberSet",
           })
 
 setMethod("copyNumber", "SnpCopyNumberSet", function(object) assayDataElement(object, "copyNumber"))
-setMethod("copyNumber<-", "SnpCopyNumberSet", function(object, value) assayDataElement(object, "copyNumber") <- value)
+setReplaceMethod("copyNumber", signature(object="SnpCopyNumberSet", value="matrix"),
+                 function(object, value) assayDataElementReplace(object, "copyNumber", value))
 
-setMethod("cnConfidence", "SnpCallSet", function(object) assayDataElement(object, "cnConfidence"))
-setMethod("cnConfidence<-", "SnpCallSet", function(object, value) assayDataElement(object, "cnConfidence") <- value)
+setMethod("cnConfidence", "SnpCopyNumberSet", function(object) assayDataElement(object, "cnConfidence"))
+setReplaceMethod("cnConfidence", signature(object="SnpCopyNumberSet", value="matrix"),
+                 function(object, value) assayDataElementReplace(object, "cnConfidence", value))

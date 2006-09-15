@@ -174,7 +174,7 @@ snprma <- function(oBatch){
       annotation=annotation(oBatch))
 }
 
-justsnprma <- function(files){
+justsnprma <- function(files, phenoData=NULL){
   ttt=stuffForXYSandCELreaders(files, new("AnnotatedDataFrame"), NULL, NULL, NULL)
   tmp <- read.celfiles(files[1])
   pd <- platform(tmp)
@@ -210,6 +210,8 @@ justsnprma <- function(files){
   out <- array(as.vector(out), dim=c(2, 2, nrow(out)/4, ncol(out)))
   dimnames(out) <- list(c("antisense", "sense"), c("A", "B"),
                         unique(pns0), files)
+  if (!is.null(phenoData))
+    ttt$phenoData <- phenoData
   new("SnpQSet",
       senseThetaA=out[2,1,,],
       senseThetaB=out[2,2,,],
