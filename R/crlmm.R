@@ -529,7 +529,7 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
      correction=fitAffySnpMixture(object,verbose=verbose)
   }
   if(is.null(object$gender)){
-##    if(verbose) cat("Gender not provided... using data to predict.\n")
+    if(verbose) cat("Gender not provided... using data to predict.\n")
     warning("Gender not provided... using data to predict.")
     maleIndex <- snpGenderCall(object)=="male"
   }
@@ -619,7 +619,13 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
     rm(cM)
   }
   if(returnParams){
-    ret$params <- rparams
+    rparams <- as.data.frame(rparams)
+    fD <- new("AnnotatedDataFrame",
+              data=rparams,
+              varMetadata=data.frame(labelDescription=colnames(rparams),
+                row.names=colnames(rparams)))
+  }else{
+    fD <- new("AnnotatedDataFrame")
   }
   
   ## correction$snr
@@ -644,19 +650,16 @@ crlmm <- function(object,correction=NULL,recalibrate=TRUE,
                           data.frame(labelDescription=c("crlmmSNR"),
                                      row.names=c("crlmmSNR"))))
   }    
-  
-  if (!returnParams){
-    return(new("SnpCallSetPlus",
-               phenoData=addPhenoData,
-               experimentData=experimentData(object),
-               annotation=annotation(object),
-               calls=ret$calls,
-               callsConfidence=ret$llr,
-               logRatioAntisense=ret$M[,,"antisense"],
-               logRatioSense=ret$M[,,"sense"]))
-  }else{
-    return(ret)
-  }
+
+  return(new("SnpCallSetPlus",
+             featureData=fD,
+             phenoData=addPhenoData,
+             experimentData=experimentData(object),
+             annotation=annotation(object),
+             calls=ret$calls,
+             callsConfidence=ret$llr,
+             logRatioAntisense=ret$M[,,"antisense"],
+             logRatioSense=ret$M[,,"sense"]))
 }
 
 
@@ -668,4 +671,55 @@ addRegions <- function(i,params,...){
     points(t(params$centers[i,k,])+ADD[k],pch="+",col=k)
     lines(ellipse(diag(2),scale=params$scales[i,k,],centre=params$centers[i,k,]+ADD[k]),col=k,...)
   }
+}
+
+addPriorRegions <- function(i,params,...){
+  require(ellipse)
+  ADD <- params$f0*c(1,0,-1)
+  for(k in 1:3){
+    points(t(params$centers[i,k,])+ADD[k],pch="+",col="gray")
+    lines(ellipse(diag(2),scale=params$scales[i,k,],centre=params$centers[i,k,]+ADD[k]),col="gray",...)
+  }
+}
+
+plotRegions <- function(Ms, callsObject, i, range=4, ...){
+  lim <- c(-1,1)*range
+  require(ellipse)
+  m <- Ms[i,,]
+  colNA <- which(is.na(m[1,]))
+  if (length(colNA) == 1){
+    cat("Missing strand")
+    m[, colNA] <- m[, -colNA]
+  }
+  plot(m, xlim=lim, ylim=lim, xlab=expression(theta[A]), ylab=expression(theta[B]),
+       col=palette()[calls(callsObject)[i,]])
+  ADD <- f0(callsObject)*c(1,0,-1)
+  gtypes <- c("AA", "AB", "BB")
+  for(k in 1:3){
+    centers <- c(center(callsObject, gtypes[k], "antisense")[i],
+                 center(callsObject, gtypes[k], "sense")[i])
+    scales <- c(scale(callsObject, gtypes[k], "antisense")[i],
+                scale(callsObject, gtypes[k], "sense")[i])
+    points(t(centers)+ADD[k],pch="+", col=k)
+    lines(ellipse(diag(2),scale=scales, centre=centers+ADD[k]),col=palette()[k], lwd=3, ...)
+  }
+  crlmmObj <- paste(annotation(callsObject), "Crlmm", sep="")
+  if (!exists(crlmmObj))
+    load(system.file(paste("data/", annotation(nspSet3Calls), "CrlmmInfo.rda", sep=""),
+                     package=paste("pd", annotation(nspSet3Calls), sep="")))
+  addPriorRegions(i, get(crlmmObj)$params)
+}
+
+center <- function(callsObject, gtype, strand){
+  objName <- paste("centers", gtype, strand, sep=".")
+  pData(featureData(callsObject))[, objName]
+}
+
+scale <- function(callsObject, gtype, strand){
+  objName <- paste("scale", gtype, strand, sep=".")
+  pData(featureData(callsObject))[, objName]
+}
+
+f0 <- function(callsObject){
+  pData(featureData(callsObject))[1, "f0"]
 }

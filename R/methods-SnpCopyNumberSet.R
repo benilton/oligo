@@ -18,6 +18,19 @@ setMethod("initialize", "SnpCopyNumberSet",
                            annotation = annotation)
           })
 
+if( is.null(getGeneric("copyNumber<-")))
+  setGeneric("copyNumber<-", function(object, value) standardGeneric("copyNumber<-"))
+
+if( is.null(getGeneric("cnConfidence<-")))
+  setGeneric("cnConfidence<-", function(object, value) standardGeneric("cnConfidence<-"))
+
+if( is.null(getGeneric("copyNumber")))
+  setGeneric("copyNumber", function(object) standardGeneric("copyNumber"))
+
+if( is.null(getGeneric("cnConfidence")))
+  setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
+
+
 setMethod("copyNumber", "SnpCopyNumberSet", function(object) assayDataElement(object, "copyNumber"))
 setReplaceMethod("copyNumber", signature(object="SnpCopyNumberSet", value="matrix"),
                  function(object, value) assayDataElementReplace(object, "copyNumber", value))

@@ -1,24 +1,43 @@
+##### setMethod("initialize", "FeatureSet",
+#####           function(.Object,
+#####                    manufacturer=new("character"),
+#####                    platform=new("character"),
+#####                    exprs=new("matrix"),
+##### ##                   sd=new("matrix"),
+##### ##                   npixels=new("matrix"),
+#####                    phenoData = new("AnnotatedDataFrame"),
+#####                    experimentData = new("MIAME"),
+#####                    annotation = new("character")){
+#####             .Object@manufacturer <- manufacturer
+#####             .Object@platform <- platform
+#####             .Object <- callNextMethod(.Object,
+#####                                       assayData = assayDataNew(exprs=exprs),
+#####                                       
+##### ##                                        exprs=exprs,
+##### ##                                        sd=sd,
+##### ##                                        npixels=npixels),
+#####                                       
+#####                                       phenoData = phenoData,
+#####                                       experimentData = experimentData,
+#####                                       annotation = annotation)
+#####             .Object
+#####           })
+
 setMethod("initialize", "FeatureSet",
           function(.Object,
                    manufacturer=new("character"),
                    platform=new("character"),
                    exprs=new("matrix"),
-                   sd=new("matrix"),
-                   npixels=new("matrix"),
                    phenoData = new("AnnotatedDataFrame"),
+                   featureData = new("AnnotatedDataFrame"),
                    experimentData = new("MIAME"),
-                   annotation = new("character")){
+                   annotation = new("character"), ...){
             .Object <- callNextMethod(.Object,
-                                      assayData = assayDataNew(
-                                        exprs=exprs),
-                                      
-##                                        exprs=exprs,
-##                                        sd=sd,
-##                                        npixels=npixels),
-                                      
+                                      assayData = assayDataNew(exprs=exprs),
                                       phenoData = phenoData,
                                       experimentData = experimentData,
-                                      annotation = annotation)
+                                      annotation = annotation,
+                                      featureData = featureData, ...)
             .Object@manufacturer <- manufacturer
             .Object@platform <- platform
             .Object
@@ -26,12 +45,26 @@ setMethod("initialize", "FeatureSet",
 
 setMethod("exprs", "FeatureSet", function(object) assayDataElement(object, "exprs"))
 
+if (is.null(getGeneric("platform")))
+  setGeneric("platform",function(object) standardGeneric("platform"))
+
+if( is.null(getGeneric("platform<-") ))
+  setGeneric("platform<-", function(object, value)
+             standardGeneric("platform<-"))
+
 setMethod("platform", "FeatureSet", function(object) object@platform)
 
 setReplaceMethod("platform", "FeatureSet", function(object, value){
   object@platform <- value
   object
 })
+
+if (is.null(getGeneric("manufacturer")))
+  setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
+
+if( is.null(getGeneric("manufacturer<-") ))
+  setGeneric("manufacturer<-", function(object, value)
+             standardGeneric("manufacturer<-"))
 
 setMethod("manufacturer", "FeatureSet", function(object) object@manufacturer)
 
@@ -44,11 +77,20 @@ setReplaceMethod("manufacturer", "FeatureSet", function(object, value){
 setMethod("length",signature(x="FeatureSet"),
           function(x) ncol(exprs(x))) 
 
+if (is.null(getGeneric("platformDesignName"))){
+  setGeneric("platformDesignName",
+             function(object) standardGeneric("platformDesignName"))}
+
 setMethod("platformDesignName", "FeatureSet", function(object){
 #  cleanPlatformName(object@platform)})
   platform(object)})
 
 ##loading the library for now... this must change
+if (is.null(getGeneric("getPlatformDesign"))){
+  setGeneric("getPlatformDesign",
+             function(object) standardGeneric("getPlatformDesign"))}
+
+
 setMethod("getPlatformDesign", "FeatureSet", function(object){
   pdn <- platformDesignName(object)
   library(pdn,character.only=TRUE)
@@ -68,6 +110,11 @@ probeNames <- function(object, subset=NULL){
           }
 
 ###geneNames - returns geneNames for PMs
+if (is.null(getGeneric("geneNames")))
+  setGeneric("geneNames", function(object)
+             standardGeneric("geneNames"))
+
+
 setMethod("geneNames", "FeatureSet",
           function(object){
             pmIndex <- pmindex(getPlatformDesign(object))
@@ -92,6 +139,11 @@ setMethod("mmindex", "FeatureSet",
 ## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
 ##     it'll return the indexes for a given feature_set_name
 ##     This is used by pm/mm when getting intensities for given feature_set_names
+
+if( is.null(getGeneric("indexFeatureSetName") ))
+  setGeneric("indexFeatureSetName", function(object, featurenames)
+             standardGeneric("indexFeatureSetName"))
+
 setMethod("indexFeatureSetName", "FeatureSet",
           function(object, featurenames){
             tmp <- NULL
@@ -100,19 +152,34 @@ setMethod("indexFeatureSetName", "FeatureSet",
             return(sort(tmp))
           })
 
+if(is.null(getGeneric("ncol")))
+  setGeneric("ncol", function(x) standardGeneric("ncol"))
 setMethod("ncol",signature(x="FeatureSet"),
                     function(x) getPlatformDesign(x)@ncol)
+
+if( is.null(getGeneric("nrow")))
+  setGeneric("nrow", function(x) standardGeneric("nrow"))
 
 setMethod("nrow",signature(x="FeatureSet"),
           function(x) getPlatformDesign(x)@nrow)
 
 ## Histogram
+if( is.null(getGeneric("hist")) )
+  setGeneric("hist", function(x, which=c("both", "pm", "mm"), ...) standardGeneric("hist"))
+
 setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
           plotDensity.FeatureSet(x, which=c("both", "pm", "mm"), ...))
 
 
 ## PM
+if( is.null(getGeneric("pm") ))
+  setGeneric("pm", function(object, genenames=NULL)
+             standardGeneric("pm"))
+if( is.null(getGeneric("pm<-") ))
+  setGeneric("pm<-", function(object, value)
+             standardGeneric("pm<-"))
+
 setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
             index <- pmindex(object)
@@ -137,6 +204,14 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                  })
 
 ## MM
+if( is.null(getGeneric("mm") ))
+  setGeneric("mm", function(object, genenames=NULL)
+             standardGeneric("mm"))
+
+if( is.null(getGeneric("mm<-") ))
+  setGeneric("mm<-", function(object, value)
+             standardGeneric("mm<-"))
+
 setMethod("mm", "FeatureSet", function(object, genenames=NULL){
             index <- mmindex(object)
             if (!is.null(genenames)){
@@ -159,6 +234,10 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
+
+if( is.null(getGeneric("featureIndex") ))
+  setGeneric("featureIndex", function(object, which=c("both","pm","mm"), genenames=NULL)
+             standardGeneric("featureIndex"))
 setMethod("featureIndex", "FeatureSet",
           function(object, which=c("both", "pm", "mm"), genenames=NULL){
             which <- match.arg(which,c("both", "pm", "mm"))
@@ -174,6 +253,10 @@ setMethod("featureIndex", "FeatureSet",
              return(indexes)
            })
 
+
+if( is.null(getGeneric("boxplot")))
+  setGeneric("boxplot", function(x, which=c("both", "pm", "mm"), range=0, ...) standardGeneric("boxplot"))
+
 setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), range=0, ...){
             which <- match.arg(which, c("both", "pm", "mm"))
@@ -185,6 +268,9 @@ setMethod("boxplot", signature(x="FeatureSet"),
 
             boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
           })
+
+if( is.null(getGeneric("image")))
+  setGeneric("image", function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...) standardGeneric("image"))
 
 setMethod("image", signature(x="FeatureSet"),
           function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
@@ -217,14 +303,22 @@ setMethod("image", signature(x="FeatureSet"),
             }
           })
 
+if( is.null(getGeneric("sd")))
+  setGeneric("sd",
+             function(x, ...) standardGeneric("sd"))
 setMethod("sd", "FeatureSet",
           function(x, na.rm=TRUE) return(assayData(x)$sd))
 
+if( is.null(getGeneric("npixels")))
+  setGeneric("npixels",
+             function(object) standardGeneric("npixels"))
 setMethod("npixels", signature(object="FeatureSet"),
           function(object) return(assayData(object)$npixels))
 
 type <- function(object) getPD(object)@type
 
+if( is.null(getGeneric("allele")))
+  setGeneric("allele", function(object) standardGeneric("allele"))
 setMethod("allele", signature(object="FeatureSet"),
           function(object){
             if(type(object)!="SNP"){

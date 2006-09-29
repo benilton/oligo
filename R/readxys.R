@@ -121,7 +121,10 @@ read.xysfiles <- function(filenames,
     if(verbose) cat("Done.\n")
   }
 
-  rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
+##  rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
+  
+  rownames(e) <- 1:nrow(e)
+  
 ##  ad <- assayDataNew(storage.mode="list", exprs=e[,,drop=FALSE])
 
   ArrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
@@ -139,8 +142,8 @@ read.xysfiles <- function(filenames,
              manufacturer = "NimbleGen",
              platform = designname,
              exprs=e[,,drop=FALSE],
-             sd=NULL,
-             npixels=NULL,
+##             sd=NULL,
+##             npixels=NULL,
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
 #  manufacturer(out) <- "NimbleGen"

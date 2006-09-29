@@ -1,5 +1,9 @@
 featureInfo <- function(object) object@featureInfo
 
+if( is.null(getGeneric("names")))
+  setGeneric("names", function(x)
+             standardGeneric("names"))
+
 setMethod("names","platformDesign",
           function(x){
             return(ls(featureInfo(x)))
@@ -22,18 +26,19 @@ as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
   get(val,featureInfo(object))
       
 ##nProbes method
+if( is.null(getGeneric("nProbes")))
+  setGeneric("nProbes", function(object)
+             standardGeneric("nProbes"))
+
 setMethod("nProbes","platformDesign",
           function(object){
             return(length(get("feature_set_name",featureInfo(object))))
           })
 
-##probeNames method
-## setMethod("probeNames", c("platformDesign", "characterOrNULL"),
-##           function(object, subset){
-##             return(get("feature_set_name",featureInfo(object)))
-##           })
-                                   
 ##WE assume feature_type is PM or MM. this might change with other platforms
+if( is.null(getGeneric("pmindex")))
+  setGeneric("pmindex", function(object)
+             standardGeneric("pmindex"))
 setMethod("pmindex", "platformDesign",
           function(object){
             Index=which(get("feature_type",featureInfo(object))=="PM")
@@ -42,6 +47,10 @@ setMethod("pmindex", "platformDesign",
 
 ##mmindex method.. for now we assume there is one MM per PM
 ###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
+
+if( is.null(getGeneric("mmindex")))
+  setGeneric("mmindex", function(object)
+             standardGeneric("mmindex"))
 setMethod("mmindex", "platformDesign",
           function(object){
             Index=which(get("feature_type",featureInfo(object))=="MM")

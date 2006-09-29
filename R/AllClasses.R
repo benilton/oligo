@@ -20,20 +20,16 @@ setClass("FeatureSet",
            manufacturer=character(),
            platform=character()))
 
-##setClassUnion("characterOrNULL", c("character", NULL))
-
 setClass("ExpressionFeatureSet", contains="FeatureSet")
 setClass("SnpFeatureSet", contains="FeatureSet")
 setClass("TilingFeatureSet", contains="FeatureSet")
 setClass("SnpQSet", contains="eSet")
 setClass("SnpCopyNumberSet", contains = "eSet")
 setClass("SnpCallSet", contains = "eSet")
-
-setClass("SnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))
-
+setClass("oligoSnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))
 setClass("SnpCallSetPlus", contains = "SnpCallSet")
 
-## setMethod("initialize", "SnpSet",
+## setMethod("initialize", "oligoSnpSet",
 ##           function(.Object,
 ##                    phenoData = new("AnnotatedDataFrame"),
 ##                    experimentData = new("MIAME"),

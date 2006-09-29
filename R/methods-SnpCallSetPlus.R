@@ -3,9 +3,15 @@ setValidity("SnpCallSetPlus", function(object) {
   })
 
 setMethod("initialize", "SnpCallSetPlus",
-          function(.Object, logRatioAntisense=new("matrix"), logRatioSense=new("matrix"), ...){
-            callNextMethod(.Object, logRatioAntisense=logRatioAntisense, logRatioSense=logRatioSense, ...)
+          function(.Object, logRatioAntisense=new("matrix"), logRatioSense=new("matrix"), featureData=new("AnnotatedDataFrame"), ...){
+            callNextMethod(.Object, logRatioAntisense=logRatioAntisense, logRatioSense=logRatioSense, featureData=featureData, ...)
           })
+
+if( is.null(getGeneric("logRatioAntisense")))
+  setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntisense"))
+
+if( is.null(getGeneric("logRatioSense")))
+  setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))
 
 setMethod("logRatioAntisense", "SnpCallSetPlus",
           function(object) assayDataElement(object, "logRatioAntisense"))
@@ -22,6 +28,9 @@ snpSilhouette <- function(snpIdx, obj){
   if (length(idx) == 2) stop(paste("SNP", snpIdx, "has log-ratios missing on both strands"))
   silhouette(as.integer(factor(calls(obj)[snpIdx,])), dist(tmp))
 }
+
+if( is.null(getGeneric("snpMedianSilhouette")))
+  setGeneric("snpMedianSilhouette", function(object) standardGeneric("snpMedianSilhouette"))
 
 setMethod("snpMedianSilhouette", "SnpCallSetPlus",
           function(object){
