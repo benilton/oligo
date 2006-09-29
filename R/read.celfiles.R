@@ -34,6 +34,7 @@ read.celfiles <- function(filenames,
                           sd=FALSE,
                           npixels=FALSE,
                           phenoData=new("AnnotatedDataFrame"),
+                          featureData=NULL,
                           description=NULL,
                           notes="",
                           verbose = FALSE,
@@ -124,6 +125,10 @@ read.celfiles <- function(filenames,
     stop(paste("I don't know how to handle", ArrayType, "arrays."))
   }
 
+  if (is.null(featureData))
+    featureData <- new("AnnotatedDataFrame",
+                       data=data.frame(idx=1:nrow(tmpExprs), row.names=1:nrow(tmpExprs)),
+                       varMetadata=data.frame(varLabels="idx", row.names="idx"))
   out <- new(TheClass,
              exprs=tmpExprs,
  ##            sd=tmpSD,
@@ -131,6 +136,7 @@ read.celfiles <- function(filenames,
              platform=pkgname,
              manufacturer="Affymetrix",
              phenoData=tmp$phenoData,
+             featureData=featureData,
              experimentData=tmp$description,
              annotation=substr(pkgname, 3, nchar(pkgname)))
   return(out)
