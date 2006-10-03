@@ -114,6 +114,7 @@ read.celfiles <- function(filenames,
     }
   }
 
+  colnames(tmpExprs) <- sapply(strsplit(colnames(tmpExprs), "/"), function(x) x[length(x)])
   ArrayType <- get(pkgname, pos=paste("package:", pkgname, sep=""))@type
   if(ArrayType == "tiling"){
     TheClass <- "TilingFeatureSet"
