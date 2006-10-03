@@ -1,43 +1,19 @@
-##### setMethod("initialize", "FeatureSet",
-#####           function(.Object,
-#####                    manufacturer=new("character"),
-#####                    platform=new("character"),
-#####                    exprs=new("matrix"),
-##### ##                   sd=new("matrix"),
-##### ##                   npixels=new("matrix"),
-#####                    phenoData = new("AnnotatedDataFrame"),
-#####                    experimentData = new("MIAME"),
-#####                    annotation = new("character")){
-#####             .Object@manufacturer <- manufacturer
-#####             .Object@platform <- platform
-#####             .Object <- callNextMethod(.Object,
-#####                                       assayData = assayDataNew(exprs=exprs),
-#####                                       
-##### ##                                        exprs=exprs,
-##### ##                                        sd=sd,
-##### ##                                        npixels=npixels),
-#####                                       
-#####                                       phenoData = phenoData,
-#####                                       experimentData = experimentData,
-#####                                       annotation = annotation)
-#####             .Object
-#####           })
-
 setMethod("initialize", "FeatureSet",
           function(.Object,
+                   assayData = assayDataNew(exprs=exprs, ...),
                    manufacturer=new("character"),
                    platform=new("character"),
                    exprs=new("matrix"),
-                   phenoData = new("AnnotatedDataFrame"),
-                   featureData = new("AnnotatedDataFrame"),
+                   phenoData = annotatedDataFrameFrom  (assayData, byrow=FALSE),
+                   featureData = annotatedDataFrameFrom(assayData, byrow=TRUE),
                    experimentData = new("MIAME"),
                    annotation = new("character"), ...){
             .Object <- callNextMethod(.Object,
-                                      assayData = assayDataNew(exprs=exprs),
+                                      assayData = assayData,
                                       phenoData = phenoData,
                                       experimentData = experimentData,
                                       annotation = annotation,
-                                      featureData = featureData, ...)
+                                      featureData = featureData)
             .Object@manufacturer <- manufacturer
             .Object@platform <- platform
             .Object
@@ -164,8 +140,8 @@ setMethod("nrow",signature(x="FeatureSet"),
           function(x) getPlatformDesign(x)@nrow)
 
 ## Histogram
-if( is.null(getGeneric("hist")) )
-  setGeneric("hist", function(x, which=c("both", "pm", "mm"), ...) standardGeneric("hist"))
+## if( is.null(getGeneric("hist")) )
+##   setGeneric("hist", function(x, which=c("both", "pm", "mm"), ...) standardGeneric("hist"))
 
 setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
@@ -254,8 +230,8 @@ setMethod("featureIndex", "FeatureSet",
            })
 
 
-if( is.null(getGeneric("boxplot")))
-  setGeneric("boxplot", function(x, which=c("both", "pm", "mm"), range=0, ...) standardGeneric("boxplot"))
+## if( is.null(getGeneric("boxplot")))
+##   setGeneric("boxplot", function(x, which=c("both", "pm", "mm"), range=0, ...) standardGeneric("boxplot"))
 
 setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), range=0, ...){
@@ -269,43 +245,66 @@ setMethod("boxplot", signature(x="FeatureSet"),
             boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
           })
 
-if( is.null(getGeneric("image")))
-  setGeneric("image", function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...) standardGeneric("image"))
+imageNGS <- function(x,transfo = log, col = gray(c(0:64)/64),
+                    xlab = "", ylab = "", ...){
 
-setMethod("image", signature(x="FeatureSet"),
-          function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
-            scn <- prod(par("mfrow"))
-            ask <- dev.interactive()
-            which.plot <- 0
+  ## getting rid of areas with now signal
+  xs=getPD(x)$X
+  ys=getPD(x)$Y
+  tmpy=table(ys);ny=max(tmpy)
+  levels=seq(min(ys),max(ys),len=ny)
+  m=matrix(NA,ncol=length(unique(xs)),nrow=length(levels)-1)
+  xIndexes=split(seq(along=xs),xs)
+  yIndexes=sapply(xIndexes,function(i) as.numeric(cut(ys[i],breaks=levels,include.lowest=TRUE)))
+  ## end... now make plots
+  for (i in 1:length(sampleNames(x))) {
+    for(j in seq(along=xIndexes)){
+      m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
+    }
+    image(transfo(m),xlab=xlab,ylab=ylab,col=col,...)
+  }
+}
 
-            x.pos <- (1:nrow(x)) - 1
-            y.pos <- (1:ncol(x)) - 1
+imageAffy <- function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
+  scn <- prod(par("mfrow"))
+  ask <- dev.interactive()
+  which.plot <- 0
+  
+  x.pos <- (1:nrow(x)) - 1
+  y.pos <- (1:ncol(x)) - 1
 
-            correctOrder <- order(getPD(x)$X, getPD(x)$Y)
+  correctOrder <- order(getPD(x)$X, getPD(x)$Y)
             
-            for(i in 1:length(sampleNames(x))){
-              which.plot <- which.plot+1;
-
-              if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)
-                par(ask=TRUE)
+  for(i in 1:length(sampleNames(x))){
+    which.plot <- which.plot+1;
+    
+    if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)
+      par(ask=TRUE)
               
-              m <- matrix(exprs(x)[correctOrder, i], ncol=ncol(x))
+    m <- matrix(exprs(x)[correctOrder, i], ncol=ncol(x))
               
-              if (is.function(transfo))
-                m <- transfo(m)
+    if (is.function(transfo))
+      m <- transfo(m)
 
-              m <- t(as.matrix(rev(as.data.frame(m))))
-              image(m, col=col,
-                    main=sampleNames(x)[i],
-                    xlab=xlab, ylab=ylab,
-                    xaxt='n', yaxt='n', ...)
-              par(ask=FALSE)
+    m <- t(as.matrix(rev(as.data.frame(m))))
+    image(m, col=col,
+          main=sampleNames(x)[i],
+          xlab=xlab, ylab=ylab,
+          xaxt='n', yaxt='n', ...)
+    par(ask=FALSE)
+  }
+}
+setMethod("image", signature(x="FeatureSet"),
+          function(x, ...){
+            if (tolower(manufacturer(x)) == "affymetrix"){
+              imageAffy(x, ...)
+            }else if (tolower(manufacturer(x)) == "nimblegen"){
+              imageNGS(x, ...)
+            }else{
+              stop("I dont know how to handle this array.")
             }
           })
 
-if( is.null(getGeneric("sd")))
-  setGeneric("sd",
-             function(x, ...) standardGeneric("sd"))
 setMethod("sd", "FeatureSet",
           function(x, na.rm=TRUE) return(assayData(x)$sd))
 

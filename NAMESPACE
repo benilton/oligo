@@ -1,5 +1,5 @@
 useDynLib("oligo")
-import(Biobase, affyio, splines)
+import(Biobase, affyio, splines, graphics, stats)
 exportPattern("^[^\\.]")
 
 exportClasses(platformDesign, FeatureSet, ExpressionFeatureSet,
@@ -10,7 +10,7 @@ exportClasses(platformDesign, FeatureSet, ExpressionFeatureSet,
 exportMethods(platform, "platform<-", manufacturer, "manufacturer<-",
               length, platformDesignName, getPlatformDesign, geneNames,
               pmindex, mmindex, indexFeatureSetName, ncol, nrow, hist,
-              pm, "pm<-", mm, "mm<-", featureIndex, boxplot, image, sd,
+              pm, "pm<-", mm, "mm<-", featureIndex, boxplot, sd, image,
               npixels, allele, calls, "calls<-", callsConfidence,
               "callsConfidence<-", logRatioAntisense, logRatioSense,
               snpMedianSilhouette, copyNumber, "copyNumber<-",

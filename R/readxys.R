@@ -59,7 +59,8 @@ stuffForXYSandCELreaders <- function(filenames,
     {
       description <- new("MIAME")
       description@preprocessing$filenames <- filenames
-      description@preprocessing$oligoversion <- library(help="oligo")$info[[2]][2]
+##      description@preprocessing$oligoversion <- library(help="oligo")$info[[2]][2]
+      description@preprocessing$oligoversion <- packageDescription("oligo")$Version
     }
   
   return(list(filenames=filenames,samplenames=samplenames, phenoData=phenoData, description=description))
