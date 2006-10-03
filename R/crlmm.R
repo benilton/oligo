@@ -698,8 +698,8 @@ plotRegions <- function(Ms, callsObject, i, range=4, ...){
   for(k in 1:3){
     centers <- c(center(callsObject, gtypes[k], "antisense")[i],
                  center(callsObject, gtypes[k], "sense")[i])
-    scales <- c(scale(callsObject, gtypes[k], "antisense")[i],
-                scale(callsObject, gtypes[k], "sense")[i])
+    scales <- c(getScale(callsObject, gtypes[k], "antisense")[i],
+                getScale(callsObject, gtypes[k], "sense")[i])
     points(t(centers)+ADD[k],pch="+", col=k)
     lines(ellipse(diag(2),scale=scales, centre=centers+ADD[k]),col=palette()[k], lwd=3, ...)
   }
@@ -715,9 +715,9 @@ center <- function(callsObject, gtype, strand){
   pData(featureData(callsObject))[, objName]
 }
 
-scale <- function(callsObject, gtype, strand){
+getScale <- function(x, gtype, strand){
   objName <- paste("scale", gtype, strand, sep=".")
-  pData(featureData(callsObject))[, objName]
+  pData(featureData(x))[, objName]
 }
 
 f0 <- function(callsObject){
