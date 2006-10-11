@@ -449,28 +449,71 @@ getAffySnpDistance <- function(object,params,f=0,subset=1:(dim(object)[1]),
   return(Dist)
 }
 
+### getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
+###                             verbose=FALSE){
+###   Dist <- Dist[subset,,,,drop=FALSE]
+###   XIndex <- which(subset%in%XIndex)
+###   gc()
+###   res <- array(NA,dim=dim(Dist)[c(1,2)]); gc()
+###   dimnames(res) <- dimnames(Dist)[1:2]
+###   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
+###   Dist[XIndex,maleIndex,2] <- Inf
+### 
+###   ##the following is slow!
+###   if(verbose) cat("Making calls for ",ncol(res)," arrays")
+###   
+###   ##apply is faster but I want to see how far along it is
+###   for(j in 1:ncol(res)){
+###     if(verbose) cat(".")
+###     res[,j] <- apply(Dist[,j,],1, which.min)
+###     gc()
+###   }
+###   if(verbose) cat("Done\n")  
+###   return(res)
+### }
+
+### below suggested by HB
 getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
                             verbose=FALSE){
   Dist <- Dist[subset,,,,drop=FALSE]
   XIndex <- which(subset%in%XIndex)
   gc()
-  res <- array(NA,dim=dim(Dist)[c(1,2)]); gc()
+  ## Here we can even put default value to 3 for the new code. /HB
+  res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); gc()
   dimnames(res) <- dimnames(Dist)[1:2]
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
   Dist[XIndex,maleIndex,2] <- Inf
 
   ##the following is slow!
-  if(verbose) cat("Making calls for ",ncol(res)," arrays")
-  
+  if(verbose) cat("Making calls for ", ncol(res), " arrays");
+
   ##apply is faster but I want to see how far along it is
   for(j in 1:ncol(res)){
-    if(verbose) cat(".")
-    res[,j] <- apply(Dist[,j,],1, which.min)
-    gc()
+    if(verbose) cat(".");
+    ##    D <- Dist[,j,];
+    ##    dimnames(D) <- NULL; # Speeds things up 5 times. /HB 2006-10-06
+    ##    res[,j] <- apply(D, MARGIN=1, FUN=which.min);
+
+    ## But this is 30-40 times faster again, so a speed up
+    ## of about 100-150 times! /HB 2006-10-06
+    D1 <- Dist[,j,1];
+    D2 <- Dist[,j,2];
+    D3 <- Dist[,j,3];
+    d12 <- (D1 < D2);
+    d23 <- (D2 < D3);
+    d13 <- (D1 < D3);
+    d <- rep(as.integer(3), length(D1));
+    d[( d12 & d13)] <- as.integer(1);
+    d[(!d12 & d23)] <- as.integer(2);
+    res[,j] <- d;
+    rm(D1,D2,D3,d);
+    if (j %% 10 == 0)
+      gc();   # SLOW DOWN! /HB
   }
-  if(verbose) cat("Done\n")  
+  if(verbose) cat("Done\n")
   return(res)
-}
+} # getAffySnpCalls()
+
 
 getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
                                  subset=1:nrow(Calls),
