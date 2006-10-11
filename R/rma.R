@@ -71,7 +71,7 @@ rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=T
 ##        annotation = annotation, description = description, notes = notes)
 #return(exprs)
   out <- new("ExpressionSet")
-  assayData(out) <- assayDataNew(storage.mode="list", exprs=exprs, se.exprs=se.exprs)
+  assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
   phenoData(out) <- phenoData(object)
   experimentData(out) <- experimentData(object)
   annotation(out) <- annotation(object)
