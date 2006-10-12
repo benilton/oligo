@@ -261,7 +261,7 @@ imageNGS <- function(x,transfo = log, col = gray(c(0:64)/64),
     for(j in seq(along=xIndexes)){
       m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
     }
-    image(transfo(m),xlab=xlab,ylab=ylab,col=col,...)
+    image(transfo(m),xlab=xlab,ylab=ylab,col=col, main=sampleNames(x)[i], ...)
   }
 }
 
