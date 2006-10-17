@@ -174,6 +174,6 @@ read.affybatch <- function(..., filenames=character(0),
 
 list.celfiles <-   function(...){
   files <- list.files(...)
-  return(files[grep("\.[cC][eE][lL]\.gz$|\.[cC][eE][lL]$", files)])
+  return(files[grep("\\.[cC][eE][lL]\\.gz$|\\.[cC][eE][lL]$", files)])
 }
 

@@ -4,7 +4,7 @@
 
 list.xysfiles <-   function(...){
   files <- list.files(...)
-  return(files[grep("\.[xX][yY][sS]\.gz$|\.[xX][yY][sS]$", files)])
+  return(files[grep("\\.[xX][yY][sS]\\.gz$|\\.[xX][yY][sS]$", files)])
 }
 
 readxysHeader <- function(filename) scan(filename,nlines=1,quiet=TRUE, what=character(0))
