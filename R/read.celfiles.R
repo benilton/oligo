@@ -100,7 +100,6 @@ read.celfiles <- function(filenames,
     ##     input, so the pm/mm methods are faster.
     order_index <- get(pkgname, pos=paste("package:", pkgname, sep=""))$order_index
     tmpExprs <- tmpExprs[order_index,, drop=FALSE]
-##    rownames(tmpExprs) <- as.character(get(pkgname,  pos=paste("package:", pkgname, sep=""))$feature_set_name)
     rownames(tmpExprs) <- 1:nrow(tmpExprs)
 
     if (sd){

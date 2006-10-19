@@ -9,14 +9,6 @@ list.xysfiles <-   function(...){
 
 readxysHeader <- function(filename) scan(filename,nlines=1,quiet=TRUE, what=character(0))
 
-##readonexysfile <- function(filename){
-##  types <- list(X = numeric(0), Y = numeric(0), SIGNAL = numeric(0), COUNT = numeric(0))
-##  header <- readxysHeader(filename)
-##  whatToRead <- types[match(header,names(types))]
-##  out <- scan(filename, sep = "\t", skip = 2, quiet = T, what = whatToRead)
-##  return(out)
-##}
-
 readonexysfile <- function(filename)
   read.delim(filename, comment.char="#")
 
@@ -50,7 +42,6 @@ stuffForXYSandCELreaders <- function(filenames,
     }
     
     pdata <- data.frame(sample=1:n, row.names=samplenames)
-##    phenoData <- new("phenoData",pData=pdata,varLabels=list(sample="arbitrary numbering"))
     phenoData <- new("AnnotatedDataFrame", data=pdata, varMetadata=data.frame(labelDescription="arbitrary numbering", row.names="sample"))
   }
   else samplenames <- rownames(pdata)
@@ -59,7 +50,6 @@ stuffForXYSandCELreaders <- function(filenames,
     {
       description <- new("MIAME")
       description@preprocessing$filenames <- filenames
-##      description@preprocessing$oligoversion <- library(help="oligo")$info[[2]][2]
       description@preprocessing$oligoversion <- packageDescription("oligo")$Version
     }
   
@@ -121,13 +111,8 @@ read.xysfiles <- function(filenames,
     j <- j+nwells
     if(verbose) cat("Done.\n")
   }
-
-##  rownames(e) <- as.character(get(designname)@featureInfo$feature_set_name)
   
   rownames(e) <- 1:nrow(e)
-  
-##  ad <- assayDataNew(storage.mode="list", exprs=e[,,drop=FALSE])
-
   ArrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
   if(ArrayType == "tiling"){
     TheClass <- "TilingFeatureSet"
@@ -143,11 +128,7 @@ read.xysfiles <- function(filenames,
              manufacturer = "NimbleGen",
              platform = designname,
              exprs=e[,,drop=FALSE],
-##             sd=NULL,
-##             npixels=NULL,
              phenoData=tmp$phenoData,
              experimentData=tmp$description)
-#  manufacturer(out) <- "NimbleGen"
-#  platform(out) <- designname
   return(out)
 }

@@ -48,28 +48,18 @@ rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=T
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
   if (destructive){
-  	exprs <-
-  	.Call("rma_c_complete",pm(object,subset),pm(object,subset),probeNames(object,subset),ngenes,body(bg.dens),new.env(),normalize,background,bgversion,
-  	PACKAGE="oligo")
+    exprs <- .Call("rma_c_complete", pm(object,subset), pm(object,subset),
+                   probeNames(object,subset), ngenes, body(bg.dens),
+                   new.env(), normalize, background, bgversion, PACKAGE="oligo")
   } else {
-	exprs <-
-  	.Call("rma_c_complete_copy", pm(object,subset),
-  	pm(object,subset), probeNames(object,subset), ngenes,
-  	body(bg.dens), new.env(), normalize, background, bgversion,
-  	PACKAGE="oligo")
+    exprs <- .Call("rma_c_complete_copy", pm(object,subset),
+                   pm(object,subset), probeNames(object,subset), ngenes,
+                   body(bg.dens), new.env(), normalize, background, bgversion,
+                   PACKAGE="oligo")
   }
   colnames(exprs) <- sampleNames(object)
   se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
   dimnames(se.exprs) <- dimnames(exprs)
-
-##  phenodata <- phenoData(object)
-##  annotation <- annotation(object)
-##  description <- description(object)
-##  notes <- notes(object)
-
-##   new("exprSet", exprs = exprs, se.exprs = se.exprs, phenoData = phenodata,
-##        annotation = annotation, description = description, notes = notes)
-#return(exprs)
   out <- new("ExpressionSet")
   assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
   phenoData(out) <- phenoData(object)

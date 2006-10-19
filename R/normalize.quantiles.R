@@ -33,7 +33,6 @@ normalize.FeatureSet.quantiles <- function(obatch,type=c("separate","pmonly","mm
 
     noNA <- rowSums(is.na(exprs(obatch)[pms,,drop=FALSE])) == 0
     pms <- pms[noNA]
-##    exprs(obatch)[pms,] <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
     pm(obatch) <- normalize.quantiles(exprs(obatch)[pms,,drop=FALSE ],copy=FALSE)
   }
   if((type == "mmonly") | (type == "separate")){

@@ -28,16 +28,3 @@ setClass("SnpCopyNumberSet", contains = "eSet")
 setClass("SnpCallSet", contains = "eSet")
 setClass("oligoSnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))
 setClass("SnpCallSetPlus", contains = "SnpCallSet")
-
-## setMethod("initialize", "oligoSnpSet",
-##           function(.Object,
-##                    phenoData = new("AnnotatedDataFrame"),
-##                    experimentData = new("MIAME"),
-##                    annotation = character(),
-##                    calls = new("matrix"),
-##                    copyNumber = new("matrix")) {
-##             .Object@assayData$calls <- calls
-##             .Object@assayData$copyNumber <- copyNumber
-##             .Object
-##           })
-

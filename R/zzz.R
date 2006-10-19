@@ -1,7 +1,4 @@
 # Loading required libraries
-## .First.lib <- function(libname, pkgname, where) {
-##    library.dynam("oligo", pkgname, libname)
-## }
 
 .onLoad <- function(libname, pkgname) {
   require("methods")
@@ -13,7 +10,7 @@
                 "and therefore its documentation is",
                 "to be improved. Please contact Benilton",
                 "at bcarvalh <AT> jhsph <DOT> edu,",
-                "in case you need further help. v2", sep="\n    "))
+                "in case you need further help.", sep="\n    "))
 }
 
 .onUnload <- function( libpath ) {
