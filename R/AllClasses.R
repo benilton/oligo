@@ -23,6 +23,7 @@ setClass("FeatureSet",
 setClass("ExpressionFeatureSet", contains="FeatureSet")
 setClass("SnpFeatureSet", contains="FeatureSet")
 setClass("TilingFeatureSet", contains="FeatureSet")
+setClass("ExonFeatureSet", contains="FeatureSet")
 setClass("SnpQSet", contains="eSet")
 setClass("SnpCopyNumberSet", contains = "eSet")
 setClass("SnpCallSet", contains = "eSet")

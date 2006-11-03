@@ -72,6 +72,7 @@ read.celfiles <- function(filenames,
     if (is.null(pkgname))
       pkgname <- cleanPlatformName(ref.cdfName)
     library(pkgname, character.only=TRUE)
+    cat("PDEnv loaded.\n")
     if (is.null(arrayType))
       arrayType <- get(pkgname)@type
   }
@@ -121,8 +122,10 @@ read.celfiles <- function(filenames,
     TheClass <- "ExpressionFeatureSet"
   }else if(ArrayType == "SNP"){
     TheClass <- "SnpFeatureSet"
+  }else if(ArrayType == "exon"){
+    TheClass <- "ExonFeatureSet"
   }else{
-    stop(paste("I don't know how to handle", ArrayType, "arrays."))
+    stop(paste("oligo does not know how to handle", ArrayType, "arrays."))
   }
 
   if (is.null(featureData))

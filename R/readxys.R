@@ -13,7 +13,6 @@ readonexysfile <- function(filename)
   read.delim(filename, comment.char="#")
 
 stuffForXYSandCELreaders <- function(filenames,
-##                                     phenoData=new("phenoData"),
                                      phenoData=new("AnnotatedDataFrame"),
                                      description=NULL,
                                      notes="",
@@ -25,6 +24,7 @@ stuffForXYSandCELreaders <- function(filenames,
   n <- nfiles*nwells
   
   ## error if no file name !
+
   if (n == 0)
     stop("No file name given !")
   if(mode(filenames)!="character")
@@ -32,7 +32,9 @@ stuffForXYSandCELreaders <- function(filenames,
   
   pdata <- pData(phenoData)
   if(dim(pdata)[1] != n) {
+
     ##if empty pdata filename are samplenames
+
     cat("Incompatible phenoData object. Created a new one.\n")
     samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
 
@@ -42,7 +44,9 @@ stuffForXYSandCELreaders <- function(filenames,
     }
     
     pdata <- data.frame(sample=1:n, row.names=samplenames)
-    phenoData <- new("AnnotatedDataFrame", data=pdata, varMetadata=data.frame(labelDescription="arbitrary numbering", row.names="sample"))
+    phenoData <- new("AnnotatedDataFrame",
+                     data=pdata,
+                     varMetadata=data.frame(labelDescription="arbitrary numbering", row.names="sample"))
   }
   else samplenames <- rownames(pdata)
   
