@@ -4,18 +4,16 @@ setValidity("SnpCallSet", function(object) {
 
 setMethod("initialize", "SnpCallSet",
           function(.Object,
-                   featureData = new("AnnotatedDataFrame"),
-                   phenoData = new("AnnotatedDataFrame"),
+                   assayData = assayDataNew(calls=calls, callsConfidence=callsConfidence, ...),
+                   featureData = annotatedDataFrameFrom(assayData, byrow=TRUE),
+                   phenoData = annotatedDataFrameFrom(assayData, byrow=FALSE),
                    experimentData = new("MIAME"),
                    annotation = character(),
                    calls = new("matrix"),
                    callsConfidence = new("matrix"),
                    ...) {
             callNextMethod(.Object,
-                           assayData = assayDataNew(
-                             calls = calls,
-                             callsConfidence = callsConfidence,
-                             ...),
+                           assayData = assayData,
                            featureData = featureData,
                            phenoData = phenoData,
                            experimentData = experimentData,

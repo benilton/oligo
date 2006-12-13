@@ -122,6 +122,28 @@ summSnp <- function(object, method=1, subset=NULL, verbose=TRUE,
   return(exprs)
 }
 
+CorrectSequenceLength2 <- function(pms, X, snpLocation){
+  pms <- log2(pms)
+  ssSize <- 2000
+  correctionMatrix <- cbind(1, X)
+  cat("Adjusting for Sequence and Fragment Length")
+  for (loc in sort(unique(snpLocation))){
+    cat(".")
+    set <- snpLocation == loc
+    xx <- correctionMatrix[set,]
+    set.seed(1)
+    idx <- sample(1:sum(set), max(ssSize, sum(set)))
+    xs <- xx[idx,]
+    project <- solve(t(xs)%*%xs)%*%t(xs)
+    rm(xs)
+    coefs <- project%*%pms[set,][idx,]
+    pms[set,] <- pms[set,]-xx%*%coefs+colMeans(pms[set,])
+  }
+  cat("\n")
+  return(2^pms)
+}
+
+
 CorrectSequenceLength <- function(y, X){
   set.seed(1)
   idx <- sample(1:nrow(X), 10000)
@@ -151,10 +173,9 @@ preProcess <- function(oBatch, hapmapNormalized=NULL){
   theLengths[is.na(theLengths)] <- med
   L <- ns(theLengths, df=3)
   rm(med, theLengths)
-  tmp <- CorrectSequenceLength(pms, cbind(SeqMat, L))
-  rm(oBatch)
-  pms <- tmp[[1]]
-  rm(tmp); gc()
+  pmLoc <- as.integer(getPD(oBatch)$snp_location[pmindex(oBatch)])
+  pms <- CorrectSequenceLength2(pms, cbind(SeqMat, L), pmLoc)
+  rm(oBatch); gc()
   if (!is.null(hapmapNormalized)){
     return(normalizeToSample(pms, hapmapNormalized))
   }else{

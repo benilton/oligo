@@ -3,8 +3,26 @@ setValidity("SnpCallSetPlus", function(object) {
   })
 
 setMethod("initialize", "SnpCallSetPlus",
-          function(.Object, logRatioAntisense=new("matrix"), logRatioSense=new("matrix"), featureData=new("AnnotatedDataFrame"), ...){
-            callNextMethod(.Object, logRatioAntisense=logRatioAntisense, logRatioSense=logRatioSense, featureData=featureData, ...)
+          function(.Object,
+                   assayData = assayDataNew(calls=calls,
+                     callsConfidence=callsConfidence,
+                     logRatioAntisense=logRatioAntisense,
+                     logRatioSense=logRatioSense, ...),
+                   featureData = annotatedDataFrameFrom(assayData, byrow=TRUE),
+                   phenoData = annotatedDataFrameFrom(assayData, byrow=FALSE),
+                   experimentData = new("MIAME"),
+                   annotation = character(),
+                   calls = new("matrix"),
+                   callsConfidence = new("matrix"),
+                   logRatioAntisense = new("matrix"),
+                   logRatioSense = new("matrix"),
+                   ...){
+            callNextMethod(.Object,
+                           assayData = assayData,
+                           featureData = featureData,
+                           phenoData = phenoData,
+                           experimentData = experimentData,
+                           annotation = annotation)
           })
 
 if( is.null(getGeneric("logRatioAntisense")))

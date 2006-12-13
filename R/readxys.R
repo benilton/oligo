@@ -102,7 +102,7 @@ read.xysfiles <- function(filenames,
   lookup <- get(designname)@lookup
   j <- 1
   for (i in seq(along=filenames)){
-    if (verbose) cat(i, "reading",filenames[i],"...")
+    if (verbose) cat(".")
 
     ## Read XYS "as is"
     tmpE <- readonexysfile(filenames[i])
@@ -113,7 +113,7 @@ read.xysfiles <- function(filenames,
                                  ncol = nwells,
                                  byrow = TRUE)       
     j <- j+nwells
-    if(verbose) cat("Done.\n")
+    if(verbose) cat(" Done.\n")
   }
   
   rownames(e) <- 1:nrow(e)

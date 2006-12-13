@@ -319,3 +319,7 @@ setMethod("allele", signature(object="FeatureSet"),
             }else{
               getPD(object)$allele
             }})
+
+setMethod("featureNames", "FeatureSet",
+          function(object) as.character(getPD(object)$feature_set_name)
+          )
