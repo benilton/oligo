@@ -1,9 +1,25 @@
+setClass("PDInfo",
+         representation=representation(
+           manufacturer="character",
+           genomebuild="character"))
+
+setClass("DBPDInfo",
+         contains="PDInfo",
+         representation=representation(
+           getdb="function"))
+
+setClass("SNPPDInfo", contains="DBPDInfo")
+## We hope to have ExonPDInfo, TilingPDInfo soon
+
+setClass("AffySNPPDInfo", contains="SNPPDInfo",
+         prototype=list(
+           manufacturer="Affymetrix"))
+
 setClass("platformDesign",
+         contains="PDInfo",
          representation(featureInfo = "environment",
                         featureTypeDescription = "list",
-                        manufacturer = "character",
                         type = "character",
-                        genomebuild = "character",
                         nrow = "numeric",
                         ncol = "numeric",
                         nwells = "numeric",
