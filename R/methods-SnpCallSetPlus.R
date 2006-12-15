@@ -25,11 +25,6 @@ setMethod("initialize", "SnpCallSetPlus",
                            annotation = annotation)
           })
 
-if( is.null(getGeneric("logRatioAntisense")))
-  setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntisense"))
-
-if( is.null(getGeneric("logRatioSense")))
-  setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))
 
 setMethod("logRatioAntisense", "SnpCallSetPlus",
           function(object) assayDataElement(object, "logRatioAntisense"))
@@ -47,8 +42,6 @@ snpSilhouette <- function(snpIdx, obj){
   silhouette(as.integer(factor(calls(obj)[snpIdx,])), dist(tmp))
 }
 
-if( is.null(getGeneric("snpMedianSilhouette")))
-  setGeneric("snpMedianSilhouette", function(object) standardGeneric("snpMedianSilhouette"))
 
 setMethod("snpMedianSilhouette", "SnpCallSetPlus",
           function(object){

@@ -33,13 +33,6 @@ setValidity("SnpQSet",
                                     "antisenseThetaB"))
             )
 
-setGeneric("senseThetaA", function(obj) standardGeneric("senseThetaA"))
-setGeneric("senseThetaB", function(obj) standardGeneric("senseThetaB"))
-setGeneric("antisenseThetaA", function(obj) standardGeneric("antisenseThetaA"))
-setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
-setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
-setGeneric("getM", function(obj) standardGeneric("getM"))
-setGeneric("getA", function(obj) standardGeneric("getA"))
 
 setMethod("senseThetaA", "SnpQSet", function(obj) assayData(obj)$senseThetaA)
 setMethod("senseThetaB", "SnpQSet", function(obj) assayData(obj)$senseThetaB)

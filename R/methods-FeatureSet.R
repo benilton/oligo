@@ -21,12 +21,6 @@ setMethod("initialize", "FeatureSet",
 
 setMethod("exprs", "FeatureSet", function(object) assayDataElement(object, "exprs"))
 
-if (is.null(getGeneric("platform")))
-  setGeneric("platform",function(object) standardGeneric("platform"))
-
-if( is.null(getGeneric("platform<-") ))
-  setGeneric("platform<-", function(object, value)
-             standardGeneric("platform<-"))
 
 setMethod("platform", "FeatureSet", function(object) object@platform)
 
@@ -35,12 +29,7 @@ setReplaceMethod("platform", "FeatureSet", function(object, value){
   object
 })
 
-if (is.null(getGeneric("manufacturer")))
-  setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
 
-if( is.null(getGeneric("manufacturer<-") ))
-  setGeneric("manufacturer<-", function(object, value)
-             standardGeneric("manufacturer<-"))
 
 setMethod("manufacturer", "FeatureSet", function(object) object@manufacturer)
 
@@ -53,18 +42,11 @@ setReplaceMethod("manufacturer", "FeatureSet", function(object, value){
 setMethod("length",signature(x="FeatureSet"),
           function(x) ncol(exprs(x))) 
 
-if (is.null(getGeneric("platformDesignName"))){
-  setGeneric("platformDesignName",
-             function(object) standardGeneric("platformDesignName"))}
 
 setMethod("platformDesignName", "FeatureSet", function(object){
   platform(object)})
 
 ##loading the library for now... this must change
-if (is.null(getGeneric("getPlatformDesign"))){
-  setGeneric("getPlatformDesign",
-             function(object) standardGeneric("getPlatformDesign"))}
-
 
 setMethod("getPlatformDesign", "FeatureSet", function(object){
   pdn <- platformDesignName(object)
@@ -83,10 +65,6 @@ probeNames <- function(object, subset=NULL){
           }
 
 ###geneNames - returns geneNames for PMs
-if (is.null(getGeneric("geneNames")))
-  setGeneric("geneNames", function(object)
-             standardGeneric("geneNames"))
-
 
 setMethod("geneNames", "FeatureSet",
           function(object){
@@ -112,11 +90,6 @@ setMethod("mmindex", "FeatureSet",
 ## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
 ##     it'll return the indexes for a given feature_set_name
 ##     This is used by pm/mm when getting intensities for given feature_set_names
-
-if( is.null(getGeneric("indexFeatureSetName") ))
-  setGeneric("indexFeatureSetName", function(object, featurenames)
-             standardGeneric("indexFeatureSetName"))
-
 setMethod("indexFeatureSetName", "FeatureSet",
           function(object, featurenames){
             tmp <- NULL
@@ -125,20 +98,14 @@ setMethod("indexFeatureSetName", "FeatureSet",
             return(sort(tmp))
           })
 
-if(is.null(getGeneric("ncol")))
-  setGeneric("ncol", function(x) standardGeneric("ncol"))
+
 setMethod("ncol",signature(x="FeatureSet"),
                     function(x) getPlatformDesign(x)@ncol)
 
-if( is.null(getGeneric("nrow")))
-  setGeneric("nrow", function(x) standardGeneric("nrow"))
 
 setMethod("nrow",signature(x="FeatureSet"),
           function(x) getPlatformDesign(x)@nrow)
 
-## Histogram
-## if( is.null(getGeneric("hist")) )
-##   setGeneric("hist", function(x, which=c("both", "pm", "mm"), ...) standardGeneric("hist"))
 
 setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
@@ -146,13 +113,6 @@ setMethod("hist", signature(x="FeatureSet"),
 
 
 ## PM
-if( is.null(getGeneric("pm") ))
-  setGeneric("pm", function(object, genenames=NULL)
-             standardGeneric("pm"))
-if( is.null(getGeneric("pm<-") ))
-  setGeneric("pm<-", function(object, value)
-             standardGeneric("pm<-"))
-
 setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
           function(object, genenames=NULL){
             index <- pmindex(object)
@@ -177,14 +137,6 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                  })
 
 ## MM
-if( is.null(getGeneric("mm") ))
-  setGeneric("mm", function(object, genenames=NULL)
-             standardGeneric("mm"))
-
-if( is.null(getGeneric("mm<-") ))
-  setGeneric("mm<-", function(object, value)
-             standardGeneric("mm<-"))
-
 setMethod("mm", "FeatureSet", function(object, genenames=NULL){
             index <- mmindex(object)
             if (!is.null(genenames)){
@@ -208,9 +160,6 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                  })
 
 
-if( is.null(getGeneric("featureIndex") ))
-  setGeneric("featureIndex", function(object, which=c("both","pm","mm"), genenames=NULL)
-             standardGeneric("featureIndex"))
 setMethod("featureIndex", "FeatureSet",
           function(object, which=c("both", "pm", "mm"), genenames=NULL){
             which <- match.arg(which,c("both", "pm", "mm"))
@@ -302,16 +251,11 @@ setMethod("image", signature(x="FeatureSet"),
 setMethod("sd", "FeatureSet",
           function(x, na.rm=TRUE) return(assayData(x)$sd))
 
-if( is.null(getGeneric("npixels")))
-  setGeneric("npixels",
-             function(object) standardGeneric("npixels"))
 setMethod("npixels", signature(object="FeatureSet"),
           function(object) return(assayData(object)$npixels))
 
 type <- function(object) getPD(object)@type
 
-if( is.null(getGeneric("allele")))
-  setGeneric("allele", function(object) standardGeneric("allele"))
 setMethod("allele", signature(object="FeatureSet"),
           function(object){
             if(type(object)!="SNP"){
