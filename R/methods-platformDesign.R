@@ -5,15 +5,6 @@ setMethod("names","platformDesign",
             return(ls(featureInfo(x)))
           })
 
-##show method
-setMethod("show","platformDesign", function(object){
-  cat("Manufacturer:",object@manufacturer,"\n")
-  cat("Array type:",object@type,"\n")
-  cat("Number of columns:",object@ncol,"\n")
-  cat("Number of rows:",object@nrow,"\n")
-  cat("Number of features:",nProbes(object),"\n")
-})
-
 as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
   return(as.data.frame(as.list(featureInfo(x)),row.names=row.names,optional=optional))
 }
