@@ -20,7 +20,8 @@ exportClasses(FeatureSet,
               oligoSnpSet,
               SnpCallSetPlus)
 
-exportMethods("allele",
+exportMethods("$",
+              "allele",
               "alleleAB",
               "antisenseThetaA",
               "antisenseThetaB",

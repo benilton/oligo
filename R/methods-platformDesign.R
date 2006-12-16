@@ -9,8 +9,10 @@ as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
   return(as.data.frame(as.list(featureInfo(x)),row.names=row.names,optional=optional))
 }
 
-"$.platformDesign" <- function(object, val)
-  get(val,featureInfo(object))
+setMethod("$", "platformDesign",
+          function(x, name) {
+              get(name, featureInfo(x))
+          })
       
 ##nProbes method
 
