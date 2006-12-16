@@ -1,4 +1,5 @@
-featureInfo <- function(object) object@featureInfo
+setMethod("featureInfo", "platformDesign",
+          function(object) object@featureInfo)
 
 setMethod("names","platformDesign",
           function(x){

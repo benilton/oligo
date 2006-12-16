@@ -95,3 +95,5 @@ setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 setGeneric("nProbes", function(object) standardGeneric("nProbes"))
 setGeneric("pmindex", function(object) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object) standardGeneric("mmindex"))
+
+setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))
