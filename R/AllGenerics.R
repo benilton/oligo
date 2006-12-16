@@ -11,6 +11,8 @@ setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
 setGeneric("manufacturer<-",
            function(object, value) standardGeneric("manufacturer<-"))
 
+setGeneric("kind", function(object) standardGeneric("kind"))
+
 setGeneric("platformDesignName",
            function(object) standardGeneric("platformDesignName"))
 
@@ -99,3 +101,6 @@ setGeneric("pmindex", function(object) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object) standardGeneric("mmindex"))
 
 setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))
+
+setGeneric("listFeatureFields", function(object) standardGeneric("listFeatureFields"))
+setGeneric("listFeatureSetFields", function(object) standardGeneric("listFeatureSetFields"))

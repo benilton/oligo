@@ -10,4 +10,87 @@ setMethod("db", "DBPDInfo",
 
 setMethod("nrow", "platformDesign", function(x) x@nrow)
 setMethod("ncol", "platformDesign", function(x) x@ncol)
-setMethod("type", "platformDesign", function(object) object@type)
+setMethod("kind", "platformDesign", function(object) object@type)
+
+
+setMethod("listFeatureFields", "AffySNPPDInfo",
+           function(object) {
+               PM_TABLE <- "pmfeature"
+               dbListFields(db(object), PM_TABLE)
+           })
+
+setMethod("listFeatureSetFields", "AffySNPPDInfo",
+           function(object) {
+               FSET_TABLE <- "featureSet"
+               dbListFields(db(object), PM_TABLE)
+           })
+
+setMethod("nProbes", "AffySNPPDInfo",
+          function(object) {
+              ## FIXME
+              ##    we need to add a tabl_info table that contains row
+              ##    counts and such.  Also should add offsets for allele
+              ##    these could be stored in slots in the AffySNPPDInfo
+              ##    object
+              return(as.integer(555))
+              ## /FIXME
+              sql <- paste("select sum(row_count) from table_info",
+                           "where tbl in (", probeTables, ")")
+              dbGetQuery(db(object), sql)
+          })
+
+setMethod("pmindex", "AffySNPPDInfo",
+          function(object) {
+              dbGetQuery(db(object),
+                         "select fid from pmfeature")[[1]]
+          })
+
+setMethod("mmindex", "AffySNPPDInfo",
+          function(object) {
+              dbGetQuery(db(object),
+                         "select fid from mmfeature")[[1]]
+          })
+
+allPMAllele <- function(map) {
+    sqliteQuickColumn(db(map), "pmfeature", "allele")
+}
+
+
+allPMStrand <- function(map) {
+    sqliteQuickColumn(db(map), "pmfeature", "strand")
+}
+
+pmIdsByAllele1 <- function(map, allele=c("A", "B")) {
+    if (allele == "A")
+      allPMIds(map)[!allPMAllele(map)]
+    else
+      allPMIds(map)[allPMAllele(map)]
+}
+
+pmIdsByAllele2 <- function(map, allele=c("A", "B")) {
+    sql <- "select fid from pmfeature where allele = "
+    if (allele == "A")
+      sql <- paste(sql, "'1'")
+    else
+      sql <- paste(sql, "'0'")
+    ans <- dbGetQuery(db(map), sql)[[1]]
+    ans
+}
+
+pmFeatures <- function(map, featureSetIds) {
+    fsetIds <- paste("'", featureSetIds, "'", sep="", collapse=",")
+    sql <- paste("select man_fsetid, pmfeature.fid, pmfeature.strand,
+pmfeature.allele, pmfeature.x, pmfeature.y from
+pmfeature, featureSet where man_fsetid in (",
+                 fsetIds, ") and featureSet.fsetid = pmfeature.fsetid")
+    dbGetQuery(db(map), sql)
+}
+
+allFeatureSetIds <- function(map) {
+    sqliteQuickColumn(db(map), "featureSet", "man_fsetid")
+}
+
+
+
+
+
