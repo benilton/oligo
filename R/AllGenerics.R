@@ -4,6 +4,8 @@ setGeneric("platform<-", function(object, value) {
     standardGeneric("platform<-")
 })
 
+setGeneric("db", function(object) standardGeneric("db"))
+
 setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
 
 setGeneric("manufacturer<-",
