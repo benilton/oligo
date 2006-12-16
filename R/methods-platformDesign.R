@@ -5,9 +5,14 @@ setMethod("names","platformDesign",
             return(ls(featureInfo(x)))
           })
 
-as.data.frame.platformDesign <- function(x,row.names=NULL,optional=FALSE){
-  return(as.data.frame(as.list(featureInfo(x)),row.names=row.names,optional=optional))
-}
+setAs("platformDesign", "data.frame",
+      function(from) {
+          df <- as.list(featureInfo(x))
+          attributes(df) <- list(class="data.frame",
+                                 names=names(df),
+                                 row.names=1:length(df[[1]]))
+          df
+      })
 
 setMethod("$", "platformDesign",
           function(x, name) {
