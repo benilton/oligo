@@ -26,6 +26,9 @@ setGeneric("indexFeatureSetName",
                standardGeneric("indexFeatureSetName")
            })
 
+setGeneric("featureSetNames",
+           function(object) standardGeneric("featureSetNames"))
+
 ## needed?
 setGeneric("nrow", function(x) standardGeneric("nrow"))
 setGeneric("ncol", function(x) standardGeneric("ncol"))

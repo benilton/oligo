@@ -6,6 +6,13 @@ setMethod("names","platformDesign",
             return(ls(featureInfo(x)))
           })
 
+
+setMethod("featureSetNames", "platformDesign",
+          function(object) {
+              as.character(featureInfo(object)$feature_set_name)
+          })
+
+
 setAs("platformDesign", "data.frame",
       function(from) {
           df <- as.list(featureInfo(x))
