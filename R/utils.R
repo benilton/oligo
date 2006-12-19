@@ -1,5 +1,5 @@
 cleanPlatformName <- function(x)
-  gsub("[_-]","",paste("pd",tolower(x),sep=""))
+  gsub("[_-]", ".", paste("pd.", tolower(x), sep=""))
 
 i2xy <- function(i,obatch){
   xy <- mget(c("X","Y"),envir=featureInfo(getPD(obatch)))
