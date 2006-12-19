@@ -100,6 +100,11 @@ allFeatureSetIds <- function(map) {
 }
 
 
+setMethod("kind", "AffySNPPDInfo",
+          function(object) {
+              "SNP"
+          })
+
 setMethod("featureSetNames", "AffySNPPDInfo",
           function(object) {
               ## FIXME, we may need to remove QC featureSets?
