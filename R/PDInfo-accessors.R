@@ -1,3 +1,13 @@
+setMethod("initialize", "DBPDInfo",
+          function(.Object) {
+              .Object <- callNextMethod()
+              tInfo <- dbGetQuery(db(.Object), "select * from table_info")
+              .Object@tableInfo <- tInfo
+              .Object
+          })
+
+
+
 setMethod("manufacturer", "PDInfo",
           function(object) object@manufacturer)
 
