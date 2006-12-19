@@ -68,7 +68,7 @@ read.celfiles <- function(filenames,
   ## INSTALL IT
 
   ## if pdenv is to be loaded or user specifies alt.pdenv
-  if (pdenv | !is.null(pkgname)){
+  if (pdenv || !is.null(pkgname)){
     if (is.null(pkgname))
       pkgname <- cleanPlatformName(ref.cdfName)
     library(pkgname, character.only=TRUE)
@@ -95,7 +95,7 @@ read.celfiles <- function(filenames,
                    dim.intensity, verbose, PACKAGE="affyio")
   }
   
-  if (pdenv | !is.null(pkgname)){
+  if (pdenv || !is.null(pkgname)){
     ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
     ##     we want PM/MMs to be. So, we need to reorder the cel
     ##     input, so the pm/mm methods are faster.
