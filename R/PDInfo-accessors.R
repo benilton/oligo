@@ -37,20 +37,16 @@ setMethod("listFeatureSetFields", "AffySNPPDInfo",
 
 setMethod("nProbes", "AffySNPPDInfo",
           function(object) {
-              ## FIXME
-              ##    we need to add a tabl_info table that contains row
-              ##    counts and such.  Also should add offsets for allele
-              ##    these could be stored in slots in the AffySNPPDInfo
-              ##    object
-              return(as.integer(555))
-              ## /FIXME
-              sql <- paste("select sum(row_count) from table_info",
-                           "where tbl in (", probeTables, ")")
-              dbGetQuery(db(object), sql)
+              ## Note: does not include QC probes
+              probeTables <- c("mmfeature", "pmfeature")
+              sum(subset(object@tableInfo,
+                         tbl %in% probeTables, row_count))
           })
 
 setMethod("pmindex", "AffySNPPDInfo",
           function(object) {
+              ## might improve by telling RSQLite how
+              ## many rows we will fetch?  same for mmindex.
               dbGetQuery(db(object),
                          "select fid from pmfeature")[[1]]
           })
