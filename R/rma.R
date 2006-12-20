@@ -33,9 +33,11 @@
 ########################################################
 
 ##subset does now work yet
-rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=TRUE,background=TRUE,bgversion=2,...){
-
-    rows <- length(probeNames(object,subset))
+rma <- function(object, subset=NULL, verbose=TRUE, destructive = TRUE,
+                normalize=TRUE, background=TRUE, bgversion=2, ...)
+{
+    pnms <- probeNames(object, subset)
+    rows <- length(pnms)
     cols <- length(object)
 
     if (is.null(subset)){
@@ -44,26 +46,33 @@ rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=T
         ngenes <- length(subset)
     }
 
-                                        #background correction
+    ## background correction
     bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
+    fsetPMs <- pm(object, subset)
     if (destructive){
-        exprs <- .Call("rma_c_complete", pm(object,subset), pm(object,subset),
-                       probeNames(object,subset), ngenes, body(bg.dens),
+        exprs <- .Call("rma_c_complete", fsetPMs, fsetPMs,
+                       pnms, ngenes, body(bg.dens),
                        new.env(), normalize, background, bgversion, PACKAGE="oligo")
     } else {
-        exprs <- .Call("rma_c_complete_copy", pm(object,subset),
-                       pm(object,subset), probeNames(object,subset), ngenes,
+        exprs <- .Call("rma_c_complete_copy", fsetPMs,
+                       fsetPMs, pnms, ngenes,
                        body(bg.dens), new.env(), normalize, background, bgversion,
                        PACKAGE="oligo")
     }
     colnames(exprs) <- sampleNames(object)
-    se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
+    ## to be fixed later, besides which don't believe much in nominal
+    ## se's with medianpolish
+    se.exprs <- array(NA, dim(exprs))
     dimnames(se.exprs) <- dimnames(exprs)
+    ## NOTE: when creating a new ExpressionSet in parts as below, _order
+    ## matters_.  Each replacement function induces a copy.  Hence, it
+    ## is best to put the larger data items in last.
     out <- new("ExpressionSet")
-    assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
-    phenoData(out) <- phenoData(object)
-    experimentData(out) <- experimentData(object)
     annotation(out) <- annotation(object)
+    experimentData(out) <- experimentData(object)
+    phenoData(out) <- phenoData(object)
+    assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
+    ## FIXME: should we call validObject here?
     return(out)
 }

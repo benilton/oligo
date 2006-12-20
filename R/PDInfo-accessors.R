@@ -108,6 +108,21 @@ setMethod("kind", "AffySNPPDInfo",
 setMethod("featureSetNames", "AffySNPPDInfo",
           function(object) {
               ## FIXME, we may need to remove QC featureSets?
-              sql <- "select man_fsetidid from featureSet"
+              sql <- "select man_fsetid from featureSet"
               dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("probeNames", "AffySNPPDInfo",
+          function(object, subset=NULL) {
+              ## FIXME: we need to decide on a convention for ordering the results,
+              ## because it matters.
+              sql <- paste("SELECT man_fsetid FROM featureSet, pmfeature",
+                           "WHERE featureSet.fsetid = pmfeature.fsetid")
+              dbGetQuery(db(object), sql)[[1]]
+          })
+
+## FIXME: this method should be renamed!
+setMethod("geneNames", "AffySNPPDInfo",
+          function(object) {
+              unique(probeNames(object))
           })

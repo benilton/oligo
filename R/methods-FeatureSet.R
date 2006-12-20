@@ -57,15 +57,18 @@ setMethod("getPlatformDesign", "FeatureSet", function(object){
 getPD <- getPlatformDesign
 
 ## probeNames - returns probeNames for PMs ... genenames ignored for now
-##setMethod("probeNames", c("FeatureSet", "characterOrNULL"),
-probeNames <- function(object, subset=NULL){
-            pmIndex <- pmindex(getPlatformDesign(object))
-            pns <- get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))
-            return(as.character(pns[pmIndex]))
-          }
+setMethod("probeNames", "FeatureSet",
+          function(object, subset=NULL) {
+              pdInfo <- getPlatformDesign(object)
+              pmIndex <- pmindex(pdInfo)
+              pns <- get("feature_set_name", envir=featureInfo(pdInfo))
+              return(as.character(pns[pmIndex]))
+          })
 
 ###geneNames - returns geneNames for PMs
 
+## FIXME: so geneNames is just unique(probeNames(x))?
+## why the business with factor?
 setMethod("geneNames", "FeatureSet",
           function(object){
             pmIndex <- pmindex(getPlatformDesign(object))

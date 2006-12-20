@@ -99,6 +99,9 @@ setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
 setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 
+setGeneric("probeNames", signature="object",
+           function(object, subset=NULL) standardGeneric("probeNames"))
+
 setGeneric("nProbes", function(object) standardGeneric("nProbes"))
 setGeneric("pmindex", function(object) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object) standardGeneric("mmindex"))
