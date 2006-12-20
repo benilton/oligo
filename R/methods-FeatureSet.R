@@ -59,10 +59,9 @@ getPD <- getPlatformDesign
 ## probeNames - returns probeNames for PMs ... genenames ignored for now
 setMethod("probeNames", "FeatureSet",
           function(object, subset=NULL) {
-              pdInfo <- getPlatformDesign(object)
-              pmIndex <- pmindex(pdInfo)
-              pns <- get("feature_set_name", envir=featureInfo(pdInfo))
-              return(as.character(pns[pmIndex]))
+              if (!is.null(subset))
+                warning("ignoring subset arg, feature not implemented")
+              probeNames(getPlatformDesign(object))
           })
 
 ###geneNames - returns geneNames for PMs
@@ -71,8 +70,9 @@ setMethod("probeNames", "FeatureSet",
 ## why the business with factor?
 setMethod("geneNames", "FeatureSet",
           function(object){
-            pmIndex <- pmindex(getPlatformDesign(object))
-            return(levels(factor(get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
+              geneNames(getPlatformDesign(object))
+##             pmIndex <- pmindex()
+##             return(levels(factor(get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
           })
 
 
@@ -116,7 +116,9 @@ setMethod("hist", signature(x="FeatureSet"),
 
 
 ## PM
-setMethod("pm", "FeatureSet", ##genenames is ignored for now.. we will get to it
+##genenames is ignored for now.. we will get to it
+## FIXME: Next make all use of PDInfo via methods!
+setMethod("pm", "FeatureSet",
           function(object, genenames=NULL){
             index <- pmindex(object)
             if (!is.null(genenames)){

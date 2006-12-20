@@ -6,6 +6,20 @@ setMethod("names","platformDesign",
             return(ls(featureInfo(x)))
           })
 
+setMethod("probeNames", "platformDesign",
+          function(object, subset=NULL) {
+              pmIndex <- pmindex(object)
+              pns <- get("feature_set_name", envir=featureInfo(object))
+              return(as.character(pns[pmIndex]))
+          })
+
+setMethod("geneNames", "platformDesign",
+          function(object) {
+              pmIndex <- pmindex(object)
+            levels(factor(get("feature_set_name",
+                              envir=featureInfo(object))[pmIndex]))
+          })
+
 
 setMethod("featureSetNames", "platformDesign",
           function(object) {
