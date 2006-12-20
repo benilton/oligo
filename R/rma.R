@@ -35,35 +35,35 @@
 ##subset does now work yet
 rma <- function(object,subset=NULL, verbose=TRUE, destructive = TRUE,normalize=TRUE,background=TRUE,bgversion=2,...){
 
-  rows <- length(probeNames(object,subset))
-  cols <- length(object)
+    rows <- length(probeNames(object,subset))
+    cols <- length(object)
 
-  if (is.null(subset)){
-    ngenes <- length(geneNames(object))
-  } else {
-    ngenes <- length(subset)
-  }
+    if (is.null(subset)){
+        ngenes <- length(geneNames(object))
+    } else {
+        ngenes <- length(subset)
+    }
 
-  #background correction
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
+                                        #background correction
+    bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-  if (destructive){
-    exprs <- .Call("rma_c_complete", pm(object,subset), pm(object,subset),
-                   probeNames(object,subset), ngenes, body(bg.dens),
-                   new.env(), normalize, background, bgversion, PACKAGE="oligo")
-  } else {
-    exprs <- .Call("rma_c_complete_copy", pm(object,subset),
-                   pm(object,subset), probeNames(object,subset), ngenes,
-                   body(bg.dens), new.env(), normalize, background, bgversion,
-                   PACKAGE="oligo")
-  }
-  colnames(exprs) <- sampleNames(object)
-  se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
-  dimnames(se.exprs) <- dimnames(exprs)
-  out <- new("ExpressionSet")
-  assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
-  phenoData(out) <- phenoData(object)
-  experimentData(out) <- experimentData(object)
-  annotation(out) <- annotation(object)
-  return(out)
+    if (destructive){
+        exprs <- .Call("rma_c_complete", pm(object,subset), pm(object,subset),
+                       probeNames(object,subset), ngenes, body(bg.dens),
+                       new.env(), normalize, background, bgversion, PACKAGE="oligo")
+    } else {
+        exprs <- .Call("rma_c_complete_copy", pm(object,subset),
+                       pm(object,subset), probeNames(object,subset), ngenes,
+                       body(bg.dens), new.env(), normalize, background, bgversion,
+                       PACKAGE="oligo")
+    }
+    colnames(exprs) <- sampleNames(object)
+    se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
+    dimnames(se.exprs) <- dimnames(exprs)
+    out <- new("ExpressionSet")
+    assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
+    phenoData(out) <- phenoData(object)
+    experimentData(out) <- experimentData(object)
+    annotation(out) <- annotation(object)
+    return(out)
 }
