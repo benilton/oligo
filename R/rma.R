@@ -49,7 +49,7 @@ rma <- function(object, subset=NULL, verbose=TRUE, destructive = TRUE,
     ## background correction
     bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-    fsetPMs <- pm(object, subset)
+    fsetPMs <- as.matrix(pm(object, subset))
     if (destructive){
         exprs <- .Call("rma_c_complete", fsetPMs, fsetPMs,
                        pnms, ngenes, body(bg.dens),

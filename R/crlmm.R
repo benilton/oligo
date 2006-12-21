@@ -607,7 +607,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
       SIGN <- c(1,0,-1)
       for(k in c(1,3)){
         Index=which(ret$calls[i,]==k)
-        cM[i,Index,] <- cM[i,Index,]+SIGN[k]*(rparams$f0-correction$fs[i,index,])
+        cM[i,Index,] <- cM[i,Index,]+SIGN[k]*(rparams$f0-correction$fs[i,Index,])
       }
     }
     ret$M <- cM

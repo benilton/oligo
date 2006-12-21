@@ -137,12 +137,13 @@ xm <- function(object, index, genenames=NULL) {
         fsn <- featureSetNames(getPD(object), index)
         fsid <- featureIDs(getPD(object), index)
         rn <- paste(fsn,fsid,sep=".")
-        oo <- exprs(object)[index,,drop=FALSE]
+  ##      oo <- exprs(object)[index,,drop=FALSE]
+        oo <- subBufferedMatrix(exprs(object), index)
         rownames(oo) <- rn
         colnames(oo) <- sampleNames(object)
         return(oo)
     }
-    exprs(object)[index, , drop=FALSE]
+    subBufferedMatrix(exprs(object), index)
 }
 
 setMethod("pm", "FeatureSet",
