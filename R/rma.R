@@ -61,18 +61,13 @@ rma <- function(object, subset=NULL, verbose=TRUE, destructive = TRUE,
                        PACKAGE="oligo")
     }
     colnames(exprs) <- sampleNames(object)
-    ## to be fixed later, besides which don't believe much in nominal
-    ## se's with medianpolish
-    se.exprs <- array(NA, dim(exprs))
-    dimnames(se.exprs) <- dimnames(exprs)
-    ## NOTE: when creating a new ExpressionSet in parts as below, _order
-    ## matters_.  Each replacement function induces a copy.  Hence, it
-    ## is best to put the larger data items in last.
-    out <- new("ExpressionSet")
-    annotation(out) <- annotation(object)
-    experimentData(out) <- experimentData(object)
-    phenoData(out) <- phenoData(object)
-    assayData(out) <- assayDataNew(exprs=exprs, se.exprs=se.exprs)
-    ## FIXME: should we call validObject here?
+    ## FIXME: do we want to add se.exprs?
+    ##se.exprs <- array(NA, dim(exprs))
+    ##dimnames(se.exprs) <- dimnames(exprs)
+    out <- new("ExpressionSet",
+               exprs=exprs,
+               phenoData=phenoData(object),
+               experimentData=experimentData(object),
+               annotation=annotation(object))
     return(out)
 }
