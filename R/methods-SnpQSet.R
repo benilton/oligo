@@ -156,7 +156,81 @@ normalizeToSample <- function(toNormalize, Normalized){
   return(toNormalize)
 }
 
+
+correctionsLite <- function(x){
+  pms <- pm(x)
+  set.buffer.dim(pms, 25000, 1)
+  RowMode(pms)
+  ssSize <- 2000
+  correctionMatrix <- sequenceDesignMatrix(pmSequence(x))
+  sql <- "select offset from pmfeature"
+  snpLocation <- dbGetQuery(db(get(annotation(x))), sql)[[1]]
+
+  ## check snpLocation... if too few probes
+  ## at a given location, then change their locations
+  ## to something else
+  theUniqueLocs <- sort(unique(snpLocation))
+  theCounts <- table(snpLocation)
+  bad <- theUniqueLocs[which(theCounts < 1000)]
+  if (length(bad)>0){
+    message("Bad snp location(s): ", bad)
+    good <- theUniqueLocs[-which(theCounts<1000)]
+    for (i in bad)
+      snpLocation[snpLocation == i] <- good[which.min(abs(good - i))]
+  }
+  rm(theUniqueLocs, theCounts, bad, good, i)
+  
+  correctionMatrix <- cbind(1, correctionMatrix)
+
+  ## getting length
+  sql <- "select featureSet.fsetid, fragment_length from featureSet, pmfeature where featureSet.fsetid=pmfeature.fsetid"
+  fragLength <- dbGetQuery(db(get(annotation(x))), sql)
+  pmfsetid <- dbGetQuery(db(get(annotation(x))), "select fsetid from pmfeature")[[1]]
+  idx <- match(pmfsetid, fragLength[[1]])
+  fragLength <- fragLength[idx, 2]
+  rm(idx, pmfsetid)
+  ## done getting length
+
+  fragLength[is.na(fragLength)] <- median(fragLength, na.rm=T)
+  
+  correctionMatrix <- cbind(correctionMatrix, ns(fragLength, df=3))
+  rm(fragLength); gc()
+  
+  ## once length is added... ns(length, df=3)
+  ## fill missing w/ median
+  ewApply(pms, log2)
+  for (loc in sort(unique(snpLocation))){
+    cat(paste("\nPosition ", loc, ".\n", sep="")) 
+    set <- snpLocation == loc
+    xx <- correctionMatrix[set,]
+    set.seed(1)
+    idx <- sample(1:sum(set), min(ssSize, sum(set)))
+    xs <- xx[idx,]
+    project <- solve(t(xs)%*%xs)%*%t(xs)
+    rm(xs)
+    for (i in 1:ncol(pms)){
+      cat(".")
+      coefs <- project%*%pms[set, i][idx]
+      pms[set, i] <- pms[set, i] - xx%*%coefs + mean(pms[set, i])
+    }
+  }
+  ewApply(pms, exp2)
+  return(pms)
+}
+
+exp2 <- function(x) 2^x
+
 preProcess <- function(oBatch, hapmapNormalized=NULL){
+  pms <- correctionsLite(oBatch)
+  if (!is.null(hapmapNormalized)){
+    return(normalizeToSample(pms, hapmapNormalized))
+  }else{
+    return(normalize.BufferedMatrix.quantiles(pms))
+  }
+}  
+
+
+preProcess2 <- function(oBatch, hapmapNormalized=NULL){
   pns <- probeNames(oBatch)
   pms <- pm(oBatch)
   SeqMat <- sequenceDesignMatrix(pmSequence(oBatch))
@@ -174,23 +248,18 @@ preProcess <- function(oBatch, hapmapNormalized=NULL){
   }else{
     return(normalize.quantiles(pms))
   }
-}
+}  
 
-snprma <- function(oBatch){
-  cat("This may take several minutes...")
-  data(list=paste(platform(oBatch), "Ref", sep=""))
+snprma <- function(oBatch, normalizeToHapmap=TRUE){
+  cat("Adjusting for fragment length and sequence...")
+  if (normalizeToHapmap){
+    data(list=paste(platform(oBatch), "Ref", sep=""))
+  }else{
+    reference <- NULL
+  }
   pm(oBatch) <- preProcess(oBatch, reference)
   gc()
-  tmp <- summSnp(oBatch, 3, normalize=FALSE, background=FALSE)
-  cat(" done.\n")
-  new("SnpQSet",
-      senseThetaA=tmp[2,1,,],
-      senseThetaB=tmp[2,2,,],
-      antisenseThetaA=tmp[1,1,,],
-      antisenseThetaB=tmp[1,2,,],
-      phenoData=phenoData(oBatch),
-      experimentData=experimentData(oBatch),
-      annotation=annotation(oBatch))
+  return(rma(oBatch))
 }
 
 justsnprma <- function(files, phenoData=NULL){

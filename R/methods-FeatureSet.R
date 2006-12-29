@@ -21,7 +21,6 @@ setMethod("initialize", "FeatureSet",
 
 setMethod("exprs", "FeatureSet", function(object) assayDataElement(object, "exprs"))
 
-
 setMethod("platform", "FeatureSet", function(object) object@platform)
 
 setReplaceMethod("platform", "FeatureSet", function(object, value){
@@ -38,7 +37,7 @@ setReplaceMethod("manufacturer", "FeatureSet", function(object, value){
   object
 })
 
-###for compatibility with previous package
+## for compatibility with previous package
 setMethod("length",signature(x="FeatureSet"),
           function(x) ncol(exprs(x))) 
 
@@ -64,7 +63,7 @@ setMethod("probeNames", "FeatureSet",
               probeNames(getPlatformDesign(object))
           })
 
-###geneNames - returns geneNames for PMs
+## geneNames - returns geneNames for PMs
 
 ## FIXME: so geneNames is just unique(probeNames(x))?
 ## why the business with factor?
@@ -76,8 +75,8 @@ setMethod("geneNames", "FeatureSet",
           })
 
 
-##pmindex method for FeatureSet
-##WE assume feature_type is PM or MM. this might change with other platforms
+## pmindex method for FeatureSet
+## WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "FeatureSet",
           function(object){
             pmindex(getPlatformDesign(object))
@@ -90,31 +89,33 @@ setMethod("mmindex", "FeatureSet",
             mmindex(getPlatformDesign(object))
           })
 
+## BC: Dec/26 - Removing soon
 ## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
 ##     it'll return the indexes for a given feature_set_name
 ##     This is used by pm/mm when getting intensities for given feature_set_names
-setMethod("indexFeatureSetName", "FeatureSet",
-          function(object, featurenames){
-              indexFeatureSetName(object=getPlatformDesign(object),
-                                  feataurenames=featurenames)
-          })
-
-setMethod("indexFeatureSetName", "platformDesign",
-          function(object, featurenames) {
-            tmp <- NULL
-            for (i in featurenames)
-              tmp <- c(tmp, which(getPlatformDesign(object)$feature_set_name == i))
-            ## why sort?
-            sort(tmp)
-          })
-
-
-setMethod("ncol",signature(x="FeatureSet"),
-                    function(x) getPlatformDesign(x)@ncol)
+## setMethod("indexFeatureSetName", "FeatureSet",
+##           function(object, featurenames){
+##               indexFeatureSetName(object=getPlatformDesign(object),
+##                                   feataurenames=featurenames)
+##           })
+## 
+## setMethod("indexFeatureSetName", "platformDesign",
+##           function(object, featurenames) {
+##             tmp <- NULL
+##             for (i in featurenames)
+##               tmp <- c(tmp, which(getPlatformDesign(object)$feature_set_name == i))
+##             ## why sort?
+##             sort(tmp)
+##           })
 
 
-setMethod("nrow",signature(x="FeatureSet"),
-          function(x) getPlatformDesign(x)@nrow)
+## Not used (BC: Dec/26)
+## setMethod("ncol",signature(x="FeatureSet"),
+##                     function(x) getPlatformDesign(x)@ncol)
+## 
+## 
+## setMethod("nrow",signature(x="FeatureSet"),
+##           function(x) getPlatformDesign(x)@nrow)
 
 
 setMethod("hist", signature(x="FeatureSet"),
@@ -123,10 +124,13 @@ setMethod("hist", signature(x="FeatureSet"),
 
 
 ## PM
-##genenames is ignored for now.. we will get to it
+## genenames is ignored for now.. we will get to it
 ## FIXME: Next make all use of PDInfo via methods!
 ## FIXME: why genenames here and featurenames elsewhere?
-
+##        BC: the only reason for this is that all started
+##            with expression arrays (which used genenames)
+##            but we should stick with featurenames, as this
+##            is more general.
 xm <- function(object, index, genenames=NULL) {
     ## This function is used by the pm and mm methods
     if (!is.null(genenames)){
@@ -137,7 +141,6 @@ xm <- function(object, index, genenames=NULL) {
         fsn <- featureSetNames(getPD(object), index)
         fsid <- featureIDs(getPD(object), index)
         rn <- paste(fsn,fsid,sep=".")
-  ##      oo <- exprs(object)[index,,drop=FALSE]
         oo <- subBufferedMatrix(exprs(object), index)
         rownames(oo) <- rn
         colnames(oo) <- sampleNames(object)
@@ -159,6 +162,16 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
+setReplaceMethod("pm", signature(object="FeatureSet", value="BufferedMatrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   for (i in 1:ncol(tmp))
+                     tmp[pmindex(object), i] <- value[,i]
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
+
+
+
 ## MM
 setMethod("mm", "FeatureSet", function(object, genenames=NULL){
             index <- mmindex(object)
@@ -172,6 +185,13 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
+setReplaceMethod("mm", signature(object="FeatureSet", value="BufferedMatrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   for (i in 1:ncol(tmp))
+                     tmp[mmindex(object),i] <- value[,i]
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
 
 setMethod("featureIndex", "FeatureSet",
           function(object, which=c("both", "pm", "mm"), genenames=NULL){
@@ -261,21 +281,14 @@ setMethod("image", signature(x="FeatureSet"),
             }
           })
 
-setMethod("sd", "FeatureSet",
-          function(x, na.rm=TRUE) return(assayData(x)$sd))
+## BC: Dec/26 - Removing
+## setMethod("sd", "FeatureSet",
+##           function(x, na.rm=TRUE) return(assayData(x)$sd))
+## 
+## setMethod("npixels", signature(object="FeatureSet"),
+##           function(object) return(assayData(object)$npixels))
 
-setMethod("npixels", signature(object="FeatureSet"),
-          function(object) return(assayData(object)$npixels))
-
-type <- function(object) getPD(object)@type
-
-setMethod("allele", signature(object="FeatureSet"),
-          function(object){
-            if(type(object)!="SNP"){
-              stop("This array does not have allele information")
-            }else{
-              getPD(object)$allele
-            }})
+## type <- function(object) getPD(object)@type
 
 setMethod("featureNames", "FeatureSet",
           function(object) as.character(getPD(object)$feature_set_name)

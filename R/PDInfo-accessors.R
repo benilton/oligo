@@ -60,6 +60,7 @@ setMethod("mmindex", "AffySNPPDInfo",
                          "select fid from mmfeature")[[1]]
           })
 
+## FIXME: is sqliteQuickColumn returning everything?
 allPMAllele <- function(map) {
     sqliteQuickColumn(db(map), "pmfeature", "allele")
 }

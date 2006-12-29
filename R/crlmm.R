@@ -190,10 +190,10 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   noABIndex1 <- (rowSums(tmpcall1==2)<3)*(rowSums(tmpcall1==3)>0)*(rowSums(tmpcall1==1)>0)
   noABIndex2 <- (rowSums(tmpcall2==2)<3)*(rowSums(tmpcall2==3)>0)*(rowSums(tmpcall2==1)>0); gc()
   
-  E1[which(noABIndex1==1)] <- -Inf
-  E2[which(noABIndex1==1)] <- -Inf
+  E1[which(noABIndex1 == 1)] <- -Inf
+  E2[which(noABIndex2 == 1)] <- -Inf
 
-  jointprobs<-(pi1+pi2)/2
+  jointprobs <- (pi1+pi2)/2
 
   gc()
   noInfoIndex <- (noABIndex1 == 1) & (noABIndex2 == 1)
@@ -224,7 +224,7 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
       tmpcall[i, j] <- which.max(jointprobs[i, j, ])
-      tmpmax[i, j] <- max(jointprobs[i, j, ])
+      tmpmax[i, j] <- jointprobs[i, j, tmpcalls[i,j]]
     }
   }
   
@@ -426,16 +426,15 @@ getAffySnpDistance <- function(object,params,f=0,subset=1:(dim(object)[1]),
   for(i in 1:2){
     if(verbose) cat(".")
     for(j in 1:3){
-      tmp <- x[,,i]
-      if(j==1) tmp <- tmp-f[subset,,i]
-      if(j==3) tmp <- tmp+f[subset,,i]
-      Dist[,,j,i]=  2*log(params$scales[subset,j,i]) +
+      tmp <- x[,,i]+(j-2)*f[subset,,i]
+      Dist[,,j,i] <- 2*log(params$scales[subset,j,i]) +
         ((tmp-params$centers[subset,j,i])/params$scales[subset,j,i])^2
       if(!is.null(w)) Dist[,,j,i] <-  Dist[,,j,i] - 2*log(w[subset,,j,i])
     }
   }
   dimnames(Dist) <- list(dimnames(x)[[1]],
-                         dimnames(x)[[2]],1:3,dimnames(x)[[3]])
+                         dimnames(x)[[2]], 1:3,
+                         dimnames(x)[[3]])
   if(verbose) cat("Done.\n")
   return(Dist)
 }
@@ -449,7 +448,7 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
   res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); gc()
   dimnames(res) <- dimnames(Dist)[1:2]
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
-  Dist[XIndex,maleIndex,2] <- Inf
+  Dist[XIndex, maleIndex, 2] <- Inf
   
   ##the following is slow!
   if(verbose) cat("Making calls for ", ncol(res), " arrays");
@@ -460,13 +459,13 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
     D2 <- Dist[,j,2];
     D3 <- Dist[,j,3];
     d12 <- (D1 < D2);
-    d23 <- (D2 < D3);
+    d23 <- (D2 < D3); rm(D2);
     d13 <- (D1 < D3);
-    d <- rep(as.integer(3), length(D1));
+    d <- rep(as.integer(3), length(D1)); rm(D1, D3)
     d[( d12 & d13)] <- as.integer(1);
     d[(!d12 & d23)] <- as.integer(2);
     res[,j] <- d;
-    rm(D1,D2,D3,d);
+    rm(d);
     if (j %% 10 == 0)
       gc();   # SLOW DOWN! /HB
   }
@@ -474,16 +473,14 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
   return(res)
 }
 
-getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
-                                 subset=1:nrow(Calls),
-                                 verbose=TRUE){
+getAffySnpConfidence <- function(Dist, Calls, XIndex, maleIndex,
+                                 subset=1:nrow(Calls), verbose=TRUE){
   Dist <- Dist[subset,,,,drop=FALSE]
   Calls <- Calls[subset,,drop=FALSE]
   XIndex <- which(subset%in%XIndex)
     
   res <- array(NA,dim=dim(Dist)[c(1,2)])
   dimnames(res)=list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-##  Dist <- Dist[,,,1]+Dist[,,,2]
   Dist <- rowSums(Dist, dims=3, na.rm=T)
   
   cat("Computing confidence for calls on ",ncol(res)," arrays")
@@ -492,20 +489,19 @@ getAffySnpConfidence <- function(Dist,Calls,XIndex,maleIndex,
   Index <- 1:N
   for(j in 1:ncol(res)){
     if(maleIndex[j]){
-      Index2=Index[-XIndex]
+      Index2 <- Index[-XIndex]
+    }else{
+      Index2 <- Index
     }
-    else{
-      Index2=Index
-    }
-    cat(".")
+    if (verbose) cat(".")
     tmpdist <- cbind(abs(Dist[,j,1]-Dist[,j,2]),abs(Dist[,j,2]-Dist[,j,3]))
-    tmpIndex = split(Index2,Calls[Index2,j])
+    tmpIndex <- split(Index2, Calls[Index2,j])
     res[tmpIndex[[1]],j] <- tmpdist[tmpIndex[[1]],1]
     res[tmpIndex[[3]],j] <- tmpdist[tmpIndex[[3]],2]
     res[tmpIndex[[2]],j] <- apply(tmpdist[tmpIndex[[2]],],1,min)
     rm(tmpIndex, tmpdist); gc()
     if(maleIndex[j]){
-      Index2=Index[XIndex]
+      Index2 <- Index[XIndex]
       res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
     }
   }
@@ -526,9 +522,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   returnParams=TRUE,
                   verbose=TRUE, correctionFile=NULL){
   require(paste("pd", annotation(object), sep=""), character.only=TRUE)
-  if(is.null(correctionFile)) stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
-
-  ##  if(is.null(correction)){
+  if(is.null(correctionFile))
+    stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
 
   if(file.exists(correctionFile)){
     cat("File with correction information - from EM - was found.", "Loading...", sep="\n")
@@ -536,7 +531,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     cat("Done.\n")
   }else{
     if(verbose) cat("M correction not provided. Calculating. Will take several minutes.\n")
-     correction <- fitAffySnpMixture(object,verbose=verbose)
+    correction <- fitAffySnpMixture(object,verbose=verbose)
     save(correction, file=correctionFile)
   }
   if(is.null(object$gender)){
@@ -576,14 +571,6 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     for(k in 1:3)
       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
     rm(LLR)
-
-##     for(i in 1:nrow(myCalls)){
-##       for(k in 1:3){
-##         Index2 <- which(LLR[i,] < minLLRforCalls[k] & myCalls[i,]==k)
-##         myCalls[i,Index2] <- NA
-##       }
-##     }
-##     rm(Index2)
 
     load(correctionFile)
     fs <- correction$fs; rm(correction)
@@ -706,8 +693,8 @@ plotRegions <- function(Ms, callsObject, i, range=4, ...){
   }
   crlmmObj <- paste(annotation(callsObject), "Crlmm", sep="")
   if (!exists(crlmmObj))
-    load(system.file(paste("data/", annotation(nspSet3Calls), "CrlmmInfo.rda", sep=""),
-                     package=paste("pd", annotation(nspSet3Calls), sep="")))
+    load(system.file(paste("data/", annotation(callsObject), "CrlmmInfo.rda", sep=""),
+                     package=paste("pd", annotation(callsObject), sep="")))
   addPriorRegions(i, get(crlmmObj)$params)
 }
 
