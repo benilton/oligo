@@ -1,9 +1,14 @@
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
+## getSnpFragmentLength <- function(object){
+##   annotname <- annotation(object)
+##   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+##   return(annot$Length[match(featureNames(object),annot$SNP)])
+## }
+
 getSnpFragmentLength <- function(object){
-  annotname <- annotation(object)
-  load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-  return(annot$Length[match(featureNames(object),annot$SNP)])
+  sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+  dbGetQuery(db(get(annotation(object))), sql)[[1]]
 }
 
 snpGenderCall <- function(object){
@@ -14,11 +19,17 @@ snpGenderCall <- function(object){
   return(factor(c("female","male")[as.numeric(kfit$cluster==1)+1]))
 }
 
+## getChrXIndex <- function(object){
+##   annotname <- paste(annotation(object),sep="")
+##   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+##   annot <- annot[match(featureNames(object),annot$SNP),]
+##   return(which(annot$Chromosome=="chrX"))
+## }
+
 getChrXIndex <- function(object){
-  annotname <- paste(annotation(object),sep="")
-  load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-  annot <- annot[match(featureNames(object),annot$SNP),]
-  return(which(annot$Chromosome=="chrX"))
+  sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+  chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
+  which(chrs == "X")
 }
 
 ##gender in pData keeps male female
@@ -38,6 +49,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   set.seed(1)
   tmp <- c( (1:I)[-XIndex],((I+1):(2*I))[-XIndex])
   idx <- sort(sample(tmp, subSampleSize))
+  rm(tmp)
 
   pis <- array(0,dim=c(I,J,3,2))
   fs <- array(0,dim=c(I,J,2))
@@ -54,20 +66,25 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   
   if(verbose) cat("Fitting mixture model to ",J," arrays. Epsilon must reach ",eps,".\n",sep="")
   L <- getSnpFragmentLength(object)
+  fix <- which(is.na(L))
+  L[fix] <- median(L, na.rm=T)
+  rm(fix)
   L <- c(L,L)
   for(j in 1:J){
     Y <- c(as.vector(getM(object)[,j,]))
     A <- c(as.vector(getA(object)[,j,]))
+    fix <- which(is.na(Y))
+    Y[fix] <- median(Y, na.rm=T)
+    A[fix] <- median(A, na.rm=T)
+    rm(fix)
 
-    mus <- quantile(Y,c(1,3,5)/6, na.rm=TRUE);mus[2]=0
-    sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1],Y[Y>mus[3]]-mus[3]), na.rm=TRUE),3)
+    mus <- quantile(Y,c(1,3,5)/6);mus[2]=0
+    sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1],Y[Y>mus[3]]-mus[3])),3)
     sigmas[2] <- sigmas[2]/2
     
-    l <- L[idx];L=L-mean(L, na.rm=TRUE);l=l-mean(l, na.rm=TRUE)
-    a <- A[idx];A=A-mean(A, na.rm=TRUE);a=a-mean(a, na.rm=TRUE)
+    l <- L[idx];L=L-mean(L);l=l-mean(l)
+    a <- A[idx];A=A-mean(A);a=a-mean(a)
     y <- Y[idx]
-    ok <- complete.cases(cbind(y,a,l))
-    l <- l[ok]; a <- a[ok]; y <- y[ok]
     
     weights <- apply(cbind(mus, sigmas), 1, function(p) dnorm(y, p[1], p[2]))
     PreviousLogLik <- -Inf
@@ -114,9 +131,6 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     }
 
     gc()
-    fix <- is.na(A)
-    A[fix] <- median(A, na.rm=TRUE)
-    rm(fix)
     bigX <- cbind(1, ns(L, knots=as.numeric(attr(matL, "knots")), Boundary.knots=attr(matL, "Boundary.knots")),
                   ns(A, knots=as.numeric(attr(matA, "knots")), Boundary.knots=attr(matA, "Boundary.knots")))
     rm(matL, matA); gc()
@@ -224,7 +238,7 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
       tmpcall[i, j] <- which.max(jointprobs[i, j, ])
-      tmpmax[i, j] <- jointprobs[i, j, tmpcalls[i,j]]
+      tmpmax[i, j] <- jointprobs[i, j, tmpcall[i,j]]
     }
   }
   
@@ -521,7 +535,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   returnCorrectedM=TRUE,
                   returnParams=TRUE,
                   verbose=TRUE, correctionFile=NULL){
-  require(paste("pd", annotation(object), sep=""), character.only=TRUE)
+  library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
     stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
 

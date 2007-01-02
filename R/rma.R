@@ -1,6 +1,6 @@
 rma <- function(object, background=TRUE, normalize=TRUE){
   pms <- pm(object)
-  set.buffer.dim(pms, 20000, 1)
+  set.buffer.dim(pms, 300000, 1)
   RowMode(pms)
   pnVec <- probeNames(object)
   if (class(get(annotation(object))) == "AffySNPPDInfo"){
@@ -21,7 +21,7 @@ rma <- function(object, background=TRUE, normalize=TRUE){
     background <- normalize <- FALSE
     idx <- order(pnVec)
     pms <- subBufferedMatrix(pms, idx)
-    set.buffer.dim(pms, 20000, 1)
+    set.buffer.dim(pms, 300000, 1)
     RowMode(pms)
     pnVec <- pnVec[idx]
     rm(idx)

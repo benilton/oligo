@@ -129,11 +129,20 @@ setMethod("featureIDs", c("AffySNPPDInfo", "integer"),
 
 setMethod("probeNames", "AffySNPPDInfo",
           function(object, subset=NULL) {
-              ## FIXME: we need to decide on a convention for ordering the results,
-              ## because it matters.
-              sql <- paste("SELECT man_fsetid FROM featureSet, pmfeature",
-                           "WHERE featureSet.fsetid = pmfeature.fsetid")
-              dbGetQuery(db(object), sql)[[1]]
+            ## FIXME: we need to decide on a convention for ordering the results,
+            ## because it matters.
+            ## By Benilton: it must return the names in the order showed in the pmfeature table
+            ##              but it would save some work if the pmfeature was pre-sorted
+            
+            ### sql <- paste("SELECT man_fsetid FROM featureSet, pmfeature",
+            ###              "WHERE featureSet.fsetid = pmfeature.fsetid")
+            ### dbGetQuery(db(object), sql)[[1]]
+
+            sql <- "select man_fsetid from featureSet"
+            pns <- dbGetQuery(db(object), sql)[[1]]
+            sql <- "select fsetid from pmfeature"
+            idx <- dbGetQuery(db(object), sql)[[1]]
+            return(pns[idx])
           })
 
 ## FIXME: this method should be renamed!

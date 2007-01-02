@@ -33,7 +33,7 @@ read.celfiles <- function(filenames,
   if (verbose) cat("Creating objects outside R to store intensities.\n")
   if (verbose) cat("This may take a while... ")
   tmpExprs <- createBufferedMatrix(prod(dim.intensity), length(filenames), directory=tempdir)
-  set.buffer.dim(tmpExprs, 250000, 1)
+  set.buffer.dim(tmpExprs, 300000, 1)
   RowMode(tmpExprs)
   if (verbose) cat("Done.", "Now reading CEL files", sep="\n")
   for (i in 1:length(filenames))

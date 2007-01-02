@@ -159,7 +159,7 @@ normalizeToSample <- function(toNormalize, Normalized){
 
 correctionsLite <- function(x){
   pms <- pm(x)
-  set.buffer.dim(pms, 25000, 1)
+  set.buffer.dim(pms, 300000, 1)
   RowMode(pms)
   ssSize <- 2000
   correctionMatrix <- sequenceDesignMatrix(pmSequence(x))
@@ -177,8 +177,9 @@ correctionsLite <- function(x){
     good <- theUniqueLocs[-which(theCounts<1000)]
     for (i in bad)
       snpLocation[snpLocation == i] <- good[which.min(abs(good - i))]
+    rm(good, i)
   }
-  rm(theUniqueLocs, theCounts, bad, good, i)
+  rm(theUniqueLocs, theCounts, bad)
   
   correctionMatrix <- cbind(1, correctionMatrix)
 
