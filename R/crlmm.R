@@ -481,8 +481,8 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
     D3 <- Dist[,j,3];
     d12 <- (D1 < D2);
     d23 <- (D2 < D3); rm(D2);
-    d13 <- (D1 < D3);
-    d <- rep(as.integer(3), length(D1)); rm(D1, D3)
+    d13 <- (D1 < D3); rm(D3);
+    d <- rep(as.integer(3), length(D1)); rm(D1)
     d[( d12 & d13)] <- as.integer(1);
     d[(!d12 & d23)] <- as.integer(2);
     res[,j] <- d;
