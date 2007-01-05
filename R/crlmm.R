@@ -201,16 +201,23 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); gc()
 
   if(verbose) cat("deciding which strand(s) to use")
-  noABIndex1 <- (rowSums(tmpcall1==2)<3)*(rowSums(tmpcall1==3)>0)*(rowSums(tmpcall1==1)>0)
-  noABIndex2 <- (rowSums(tmpcall2==2)<3)*(rowSums(tmpcall2==3)>0)*(rowSums(tmpcall2==1)>0); gc()
+  tc1 <- tmpcall1 == 1
+  tc2 <- tmpcall1 == 2
+  tc3 <- tmpcall1 == 3
+  noABIndex1 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
+  tc1 <- tmpcall2 == 1
+  tc2 <- tmpcall2 == 2
+  tc3 <- tmpcall2 == 3
+  noABIndex2 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
+  rm(tc1, tc2, tc3); gc()
   
-  E1[which(noABIndex1 == 1)] <- -Inf
-  E2[which(noABIndex2 == 1)] <- -Inf
+  E1[noABIndex1] <- -Inf
+  E2[noABIndex2] <- -Inf
 
   jointprobs <- (pi1+pi2)/2
 
   gc()
-  noInfoIndex <- (noABIndex1 == 1) & (noABIndex2 == 1)
+  noInfoIndex <- intersect(noABIndex1, noABIndex2)
   
   rm(noABIndex1, noABIndex2)
   
