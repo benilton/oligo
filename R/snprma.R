@@ -9,14 +9,25 @@ normalizeToSample <- function(toNormalize, Normalized){
 }
 
 
+getSnpFragmentLength <- function(object){
+  annotname <- annotation(object)
+  annotname <- substr(annotname, 3, nchar(annotname))
+  load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+  return(annot$Length[match(probeNames(object),annot$SNP)])
+}
+
 correctionsLite <- function(x){
   pms <- pm(x)
   set.buffer.dim(pms, 300000, 1)
-  RowMode(pms)
+  ColMode(pms)
   ssSize <- 2000
   correctionMatrix <- sequenceDesignMatrix(pmSequence(x))
-  sql <- "select offset from sequence, pmfeature where sequence.fid = pmfeature.fid"
-  snpLocation <- dbGetQuery(db(get(annotation(x))), sql)[[1]]
+  if (substr(annotation(x), 1,3) == "pd."){
+    sql <- "select offset from sequence, pmfeature where sequence.fid = pmfeature.fid"
+    snpLocation <- dbGetQuery(db(get(annotation(x))), sql)[[1]]
+  }else{
+    snpLocation <- getPD(x)$snp_location[pmindex(x)]
+  }
 
   ## check snpLocation... if too few probes
   ## at a given location, then change their locations
@@ -36,13 +47,17 @@ correctionsLite <- function(x){
   correctionMatrix <- cbind(1, correctionMatrix)
 
   ## getting length
-  sql <- "select featureSet.fsetid, fragment_length from featureSet, pmfeature where featureSet.fsetid=pmfeature.fsetid"
-  fragLength <- dbGetQuery(db(get(annotation(x))), sql)
-  pmfsetid <- dbGetQuery(db(get(annotation(x))), "select fsetid from pmfeature")[[1]]
-  idx <- match(pmfsetid, fragLength[[1]])
-  fragLength <- fragLength[idx, 2]
-  rm(idx, pmfsetid)
-  ## done getting length
+  if (substr(annotation(x), 1, 3) == "pd."){
+    sql <- "select featureSet.fsetid, fragment_length from featureSet, pmfeature where featureSet.fsetid=pmfeature.fsetid"
+    fragLength <- dbGetQuery(db(get(annotation(x))), sql)
+    pmfsetid <- dbGetQuery(db(get(annotation(x))), "select fsetid from pmfeature")[[1]]
+    idx <- match(pmfsetid, fragLength[[1]])
+    fragLength <- fragLength[idx, 2]
+    rm(idx, pmfsetid)
+    ## done getting length
+  }else{
+    fragLength <- getSnpFragmentLength(x)
+  }
 
   fragLength[is.na(fragLength)] <- median(fragLength, na.rm=T)
   
@@ -84,7 +99,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE){
   pms <- correctionsLite(oBatch)
   if (normalizeToHapmap){
     data(list=paste(platform(oBatch), "Ref", sep=""))
-    pms <- normalizeToSample(pms, hapmapNormalized)
+    pms <- normalizeToSample(pms, reference)
   }else{
     pms <- normalize.BufferedMatrix.quantiles(pms)
   }

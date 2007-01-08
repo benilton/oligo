@@ -32,13 +32,14 @@ read.celfiles <- function(filenames,
 
   if (verbose) cat("Creating objects outside R to store intensities.\n")
   if (verbose) cat("This may take a while... ")
-  tmpExprs <- createBufferedMatrix(prod(dim.intensity), length(filenames), directory=tempdir)
+  tmpExprs <- createBufferedMatrix(prod(dim.intensity), 0, directory=tempdir)
   set.buffer.dim(tmpExprs, 300000, 1)
-  RowMode(tmpExprs)
   if (verbose) cat("Done.", "Now reading CEL files", sep="\n")
-  for (i in 1:length(filenames))
+  for (i in 1:length(filenames)){
+    AddColumn(tmpExprs)
     tmpExprs[,i] <- .Call("read_abatch", as.list(filenames[i]), rm.mask, rm.outliers,
                           rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="affyio")
+  }
   if (verbose) cat(" Done.\n")
     
   ## RI: We should check if the pd package is available here. If not try

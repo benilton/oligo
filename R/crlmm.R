@@ -1,15 +1,20 @@
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
-## getSnpFragmentLength <- function(object){
-##   annotname <- annotation(object)
-##   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-##   return(annot$Length[match(featureNames(object),annot$SNP)])
-## }
-
 getSnpFragmentLength <- function(object){
-  sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-  dbGetQuery(db(get(annotation(object))), sql)[[1]]
+  if (substr(annotation(object), 1, 3) == "pd."){
+    sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+    return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
+  }else{
+    annotname <- annotation(object)
+    load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+    return(annot$Length[match(featureNames(object),annot$SNP)])
+  }
 }
+
+## getSnpFragmentLength <- function(object){
+##   sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+##   dbGetQuery(db(get(annotation(object))), sql)[[1]]
+## }
 
 snpGenderCall <- function(object){
   XIndex=getChrXIndex(object)
@@ -27,9 +32,16 @@ snpGenderCall <- function(object){
 ## }
 
 getChrXIndex <- function(object){
-  sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-  chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
-  which(chrs == "X")
+  if (substr(annotation(object), 1, 3) == "pd."){
+    sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+    chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
+    return(which(chrs == "X"))
+  }else{
+    annotname <- paste(annotation(object),sep="")
+    load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+    annot <- annot[match(featureNames(object),annot$SNP),]
+    return(which(annot$Chromosome=="chrX"))
+  }
 }
 
 ##gender in pData keeps male female

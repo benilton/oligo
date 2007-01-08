@@ -25,6 +25,11 @@ rma <- function(object, background=TRUE, normalize=TRUE){
     RowMode(pms)
     pnVec <- pnVec[idx]
     rm(idx)
+  } else if (class(get(annotation(object))) == "platformDesign"){
+    allele <- pmAlleleAB(object)
+    strand <- substr(as.character(getPD(object)$target_strand[pmindex(object)]), 1, 1)
+    pnVec <- paste(pnVec, allele, strand, sep="")
+    rm(allele, strand)
   }
   if (background) pms <- bg.correct.BufferedMatrix(pms, copy=FALSE)
   if (normalize) pms <- normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
