@@ -89,70 +89,14 @@ setMethod("mmindex", "FeatureSet",
             mmindex(getPlatformDesign(object))
           })
 
-## BC: Dec/26 - Removing soon
-## BC: indexFeatureSetName - to simplify the procedure of bringing pms/mms with a given name
-##     it'll return the indexes for a given feature_set_name
-##     This is used by pm/mm when getting intensities for given feature_set_names
-## setMethod("indexFeatureSetName", "FeatureSet",
-##           function(object, featurenames){
-##               indexFeatureSetName(object=getPlatformDesign(object),
-##                                   feataurenames=featurenames)
-##           })
-## 
-## setMethod("indexFeatureSetName", "platformDesign",
-##           function(object, featurenames) {
-##             tmp <- NULL
-##             for (i in featurenames)
-##               tmp <- c(tmp, which(getPlatformDesign(object)$feature_set_name == i))
-##             ## why sort?
-##             sort(tmp)
-##           })
-
-
-## Not used (BC: Dec/26)
-## setMethod("ncol",signature(x="FeatureSet"),
-##                     function(x) getPlatformDesign(x)@ncol)
-## 
-## 
-## setMethod("nrow",signature(x="FeatureSet"),
-##           function(x) getPlatformDesign(x)@nrow)
-
-
 setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
           plotDensity.FeatureSet(x, which=c("both", "pm", "mm"), ...))
 
-
-## PM
-## genenames is ignored for now.. we will get to it
-## FIXME: Next make all use of PDInfo via methods!
-## FIXME: why genenames here and featurenames elsewhere?
-##        BC: the only reason for this is that all started
-##            with expression arrays (which used genenames)
-##            but we should stick with featurenames, as this
-##            is more general.
-xm <- function(object, index, genenames=NULL) {
-    ## This function is used by the pm and mm methods
-    if (!is.null(genenames)){
-        ## FIXME: should have a helper function return pm
-        ## indices by feature set name if that is what is
-        ## desired.
-        index <- intersect(index, indexFeatureSetName(object, genenames))
-        fsn <- featureSetNames(getPD(object), index)
-        fsid <- featureIDs(getPD(object), index)
-        rn <- paste(fsn,fsid,sep=".")
-        oo <- subBufferedMatrix(exprs(object), index)
-        rownames(oo) <- rn
-        colnames(oo) <- sampleNames(object)
-        return(oo)
-    }
-    subBufferedMatrix(exprs(object), index)
-}
-
 setMethod("pm", "FeatureSet",
           function(object, genenames=NULL){
-            index <- pmindex(object)
-            xm(object, index, genenames)
+            if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
+            subBufferedMatrix(exprs(object), pmindex(object))
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),

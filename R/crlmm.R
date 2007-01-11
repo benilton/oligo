@@ -1,20 +1,20 @@
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
-getSnpFragmentLength <- function(object){
-  if (substr(annotation(object), 1, 3) == "pd."){
-    sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-    return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
-  }else{
-    annotname <- annotation(object)
-    load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-    return(annot$Length[match(featureNames(object),annot$SNP)])
-  }
-}
-
 ## getSnpFragmentLength <- function(object){
-##   sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-##   dbGetQuery(db(get(annotation(object))), sql)[[1]]
+##   if (substr(annotation(object), 1, 3) == "pd."){
+##     sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+##     return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
+##   }else{
+##     annotname <- substr(annotation(object), 3, nchar(annotation(object)))
+##     load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+##     return(annot$Length[match(featureNames(object),annot$SNP)])
+##   }
 ## }
+
+getSnpFragmentLength <- function(object){
+  sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+  return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
+}
 
 snpGenderCall <- function(object){
   XIndex=getChrXIndex(object)
@@ -25,23 +25,22 @@ snpGenderCall <- function(object){
 }
 
 ## getChrXIndex <- function(object){
-##   annotname <- paste(annotation(object),sep="")
-##   load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-##   annot <- annot[match(featureNames(object),annot$SNP),]
-##   return(which(annot$Chromosome=="chrX"))
+##   if (substr(annotation(object), 1, 3) == "pd."){
+##     sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+##     chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
+##     return(which(chrs == "X"))
+##   }else{
+##     annotname <- substr(annotation(object), 3, nchar(annotation(object)))
+##     load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
+##     annot <- annot[match(featureNames(object),annot$SNP),]
+##     return(which(annot$Chromosome=="chrX"))
+##   }
 ## }
 
 getChrXIndex <- function(object){
-  if (substr(annotation(object), 1, 3) == "pd."){
-    sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-    chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
-    return(which(chrs == "X"))
-  }else{
-    annotname <- paste(annotation(object),sep="")
-    load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-    annot <- annot[match(featureNames(object),annot$SNP),]
-    return(which(annot$Chromosome=="chrX"))
-  }
+  sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
+  chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
+  return(which(chrs == "X"))
 }
 
 ##gender in pData keeps male female
@@ -499,8 +498,6 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
     d[(!d12 & d23)] <- as.integer(2);
     res[,j] <- d;
     rm(d);
-    if (j %% 10 == 0)
-      gc();   # SLOW DOWN! /HB
   }
   if(verbose) cat("Done\n")
   return(res)
@@ -574,9 +571,13 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   }else{
     maleIndex <- object$gender=="male"
   }
-  
-  load(system.file(paste("data/", annotation(object), "CrlmmInfo.rda", sep=""), package=paste("pd", annotation(object), sep="")))
-  myenv <- get(paste(annotation(object),"Crlmm",sep=""))
+  if (substr(annotation(object), 1, 3) == "pd."){
+    annotname <- annotation(object)
+  }else{
+    annotname <- substr(annotation(object), 3, nchar(annotation(object)))
+  }
+  load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste("pd", annotname, sep="")))
+  myenv <- get(paste(annotname,"Crlmm",sep=""))
   Index <- which(!get("hapmapCallIndex",myenv)  |  get("badCallIndex",myenv) | get("badRegions", myenv))
 
   myCalls <- matrix(NA,dim(object)[1],dim(object)[2])

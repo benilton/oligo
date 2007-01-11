@@ -60,16 +60,6 @@ setMethod("mmindex", "AffySNPPDInfo",
                          "select fid from mmfeature")[[1]]
           })
 
-## FIXME: is sqliteQuickColumn returning everything?
-allPMAllele <- function(map) {
-    sqliteQuickColumn(db(map), "pmfeature", "allele")
-}
-
-
-allPMStrand <- function(map) {
-    sqliteQuickColumn(db(map), "pmfeature", "strand")
-}
-
 pmIdsByAllele1 <- function(map, allele=c("A", "B")) {
     if (allele == "A")
       allPMIds(map)[!allPMAllele(map)]
@@ -85,10 +75,6 @@ pmIdsByAllele2 <- function(map, allele=c("A", "B")) {
       sql <- paste(sql, "'0'")
     ans <- dbGetQuery(db(map), sql)[[1]]
     ans
-}
-
-allFeatureSetIds <- function(map) {
-    sqliteQuickColumn(db(map), "featureSet", "man_fsetid")
 }
 
 
@@ -129,23 +115,13 @@ setMethod("featureIDs", c("AffySNPPDInfo", "integer"),
 
 setMethod("probeNames", "AffySNPPDInfo",
           function(object, subset=NULL) {
-            ## FIXME: we need to decide on a convention for ordering the results,
-            ## because it matters.
-            ## By Benilton: it must return the names in the order showed in the pmfeature table
-            ##              but it would save some work if the pmfeature was pre-sorted
-            
-            ### sql <- paste("SELECT man_fsetid FROM featureSet, pmfeature",
-            ###              "WHERE featureSet.fsetid = pmfeature.fsetid")
-            ### dbGetQuery(db(object), sql)[[1]]
-
-            sql <- "select man_fsetid from featureSet"
-            pns <- dbGetQuery(db(object), sql)[[1]]
-            sql <- "select fsetid from pmfeature"
-            idx <- dbGetQuery(db(object), sql)[[1]]
-            return(pns[idx])
+            sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+            tmp <- dbGetQuery(db(object), sql)
+            tmp[order(tmp$fid), "man_fsetid"]
           })
 
 ## FIXME: this method should be renamed!
+## FIXME: this should query the featureSet table (much faster i think)
 setMethod("geneNames", "AffySNPPDInfo",
           function(object) {
               unique(probeNames(object))
@@ -173,4 +149,34 @@ setMethod("indexFeatureSetName", "AffySNPPDInfo",
               mmIndices <- dbGetQuery(db(object),
                                       sprintf(sql, "mmfeature"))[[1]]
               c(pmIndices, mmIndices)
+          })
+
+setMethod("pmSequence", "AffySNPPDInfo",
+          function(object){
+            sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmPosition", "AffySNPPDInfo",
+          function(object){
+            sql <- "select offset from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmFragmentLength", "AffySNPPDInfo",
+          function(object){
+            sql <- "select fragment_length from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmAllele", "AffySNPPDInfo",
+          function(object){
+            sql <- "select allele from pmfeature order by fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmStrand", "AffySNPPDInfo",
+          function(object){
+            sql <- "select strand from pmfeature order by fid"
+            dbGetQuery(db(object), sql)[[1]]
           })

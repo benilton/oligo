@@ -8,14 +8,6 @@ normalizeToSample <- function(toNormalize, Normalized){
   return(toNormalize)
 }
 
-
-getSnpFragmentLength <- function(object){
-  annotname <- annotation(object)
-  annotname <- substr(annotname, 3, nchar(annotname))
-  load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-  return(annot$Length[match(probeNames(object),annot$SNP)])
-}
-
 correctionsLite <- function(x){
   pms <- pm(x)
   set.buffer.dim(pms, 300000, 1)
@@ -23,8 +15,7 @@ correctionsLite <- function(x){
   ssSize <- 2000
   correctionMatrix <- sequenceDesignMatrix(pmSequence(x))
   if (substr(annotation(x), 1,3) == "pd."){
-    sql <- "select offset from sequence, pmfeature where sequence.fid = pmfeature.fid"
-    snpLocation <- dbGetQuery(db(get(annotation(x))), sql)[[1]]
+    snpLocation <- pmPosition(get(annotation(x)))
   }else{
     snpLocation <- getPD(x)$snp_location[pmindex(x)]
   }
@@ -46,15 +37,8 @@ correctionsLite <- function(x){
   
   correctionMatrix <- cbind(1, correctionMatrix)
 
-  ## getting length
   if (substr(annotation(x), 1, 3) == "pd."){
-    sql <- "select featureSet.fsetid, fragment_length from featureSet, pmfeature where featureSet.fsetid=pmfeature.fsetid"
-    fragLength <- dbGetQuery(db(get(annotation(x))), sql)
-    pmfsetid <- dbGetQuery(db(get(annotation(x))), "select fsetid from pmfeature")[[1]]
-    idx <- match(pmfsetid, fragLength[[1]])
-    fragLength <- fragLength[idx, 2]
-    rm(idx, pmfsetid)
-    ## done getting length
+    fragLength <- pmFragmentLength(get(annotation(x)))
   }else{
     fragLength <- getSnpFragmentLength(x)
   }
@@ -66,7 +50,7 @@ correctionsLite <- function(x){
   
   ewApply(pms, log2)
   for (loc in sort(unique(snpLocation))){
-    cat(paste("\nPosition ", loc, ".\n", sep="")) 
+    cat("Position ", loc)
     set <- snpLocation == loc
     xx <- correctionMatrix[set,]
     set.seed(1)
@@ -79,6 +63,7 @@ correctionsLite <- function(x){
       coefs <- project%*%pms[set, i][idx]
       pms[set, i] <- pms[set, i] - xx%*%coefs + mean(pms[set, i])
     }
+    cat("\n")
   }
   ewApply(pms, exp2)
   return(pms)
@@ -86,24 +71,65 @@ correctionsLite <- function(x){
 
 exp2 <- function(x) 2^x
 
-preProcess <- function(oBatch, hapmapNormalized=NULL){
+snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- correctionsLite(oBatch)
-  if (!is.null(hapmapNormalized)){
-    return(normalizeToSample(pms, hapmapNormalized))
-  }else{
-    return(normalize.BufferedMatrix.quantiles(pms))
-  }
-}  
-
-snprma <- function(oBatch, normalizeToHapmap=TRUE){
-  pms <- correctionsLite(oBatch)
+  set.buffer.dim(pms, 300000, 1)
   if (normalizeToHapmap){
     data(list=paste(platform(oBatch), "Ref", sep=""))
     pms <- normalizeToSample(pms, reference)
   }else{
-    pms <- normalize.BufferedMatrix.quantiles(pms)
+    normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
+    if (saveQuant){
+      reference <- sort(pms[,1])
+      save(reference, file="quantileReference.rda")
+    }
   }
-  pm(oBatch) <- pms
-  rm(pms); gc()
-  return(rma(oBatch))
+
+  ## get rma pars:
+  ## put PMs in right order
+  ## get pnVec
+  ## get length(unique(pnVec))
+  pnVec <- paste(probeNames(oBatch),
+                 c("A", "B")[pmAllele(get(annotation(oBatch)))+1],
+                 c("S", "A")[pmStrand(get(annotation(oBatch)))+1],
+                 sep="")
+  idx <- order(pnVec)
+  pms <- subBufferedMatrix(pms, idx)
+  pnVec <- pnVec[idx]
+  rm(idx); gc()
+
+  ## params OK
+  RowMode(pms)
+  set.buffer.dim(pms, 300000, 1)
+  theExprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
+  colnames(theExprs) <- sampleNames(oBatch)
+  rm(pms, pnVec); gc()
+  theExprs <- sqsFrom(theExprs)
+  annotation(theExprs) <- annotation(oBatch)
+  phenoData(theExprs) <- phenoData(oBatch)
+  experimentData(theExprs) <- experimentData(oBatch)
+  sampleNames(theExprs) <- sampleNames(oBatch)
+
+  return(theExprs)
+}
+
+sqsFrom <- function(pmMat){
+  snps <- rownames(pmMat)
+  snps <- unique(substr(snps, 1, (nchar(snps)-2)))
+  samples <- colnames(pmMat)
+  pns <- paste(rep(snps, each=4),
+               rep(c("AA", "AS", "BA", "BS"),
+                   length(snps)), sep="")
+  tmp <- matrix(NA, ncol=ncol(pmMat), nrow=length(pns))
+  rownames(tmp) <- pns
+  idx <- match(rownames(pmMat), pns)
+  tmp[idx,] <- pmMat
+  rownames(tmp) <- rep(snps, each=4)
+  aTa <- seq(1, nrow(tmp), by=4)
+  tmp <- new("SnpQSet",
+             antisenseThetaA=tmp[aTa,, drop=FALSE],
+             senseThetaA=tmp[(aTa+1),, drop=FALSE],
+             antisenseThetaB=tmp[(aTa+2),, drop=FALSE],
+             senseThetaB=tmp[(aTa+3),, drop=FALSE])
+  return(tmp)
 }

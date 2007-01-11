@@ -1,11 +1,11 @@
-pmSequence <- function(x){
-  if (class(get(annotation(x))) == "AffySNPPDInfo"){
-    seqs <- "select seq from sequence, pmfeature where sequence.fid=pmfeature.fid"
-    return(dbGetQuery(db(get(annotation(x))), seqs)[[1]])
-  }else{
-    return(getPlatformDesign(x)$sequence[pmindex(x)])
-  }
-}
+## pmSequence <- function(x){
+##   if (class(get(annotation(x))) == "AffySNPPDInfo"){
+##     seqs <- "select seq from sequence, pmfeature where sequence.fid=pmfeature.fid"
+##     return(dbGetQuery(db(get(annotation(x))), seqs)[[1]])
+##   }else{
+##     return(getPlatformDesign(x)$sequence[pmindex(x)])
+##   }
+## }
 
 mmSequence <- function(x)  getPlatformDesign(x)$sequence[mmindex(x)]
 

@@ -58,17 +58,10 @@ read.celfiles <- function(filenames,
   pdInfo <- get(pkgname)
   if (is(pdInfo, "platformDesign")) {
     order_index <- pdInfo$order_index
-  } else if (is(pdInfo, "DBPDInfo")) {
-    ## FIXME, need to figure out how to reorder in a useful
-    ## way for the SQLite-based PDInfo stuff
-    order_index <- 1:nrow(tmpExprs)
-  } else {
-    stop("unknown platform info type: ", class(pdInfo))
+    for (i in 1:ncol(tmpExprs))
+      tmpExprs[,i] <- tmpExprs[order_index, i]
   }
-  for (i in 1:ncol(tmpExprs)){
-    tmpExprs[,i] <- tmpExprs[order_index, i]
-  }
-  
+
   rownames(tmpExprs) <- 1:nrow(tmpExprs)
   colnames(tmpExprs) <- basename(filenames)
 
