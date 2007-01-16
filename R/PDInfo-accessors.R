@@ -165,8 +165,10 @@ setMethod("pmPosition", "AffySNPPDInfo",
 
 setMethod("pmFragmentLength", "AffySNPPDInfo",
           function(object){
-            sql <- "select fragment_length from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid order by pmfeature.fid"
-            dbGetQuery(db(object), sql)[[1]]
+            sql <- "select fid, fragment_length from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+            tmp <- dbGetQuery(db(object), sql)
+            idx <- order(tmp[["fid"]])
+            tmp[idx, "fragment_length"]
           })
 
 setMethod("pmAllele", "AffySNPPDInfo",

@@ -49,6 +49,7 @@ correctionsLite <- function(x){
   rm(fragLength); gc()
   
   ewApply(pms, log2)
+  RowMode(pms)
   for (loc in sort(unique(snpLocation))){
     cat("Position ", loc)
     set <- snpLocation == loc
@@ -56,13 +57,9 @@ correctionsLite <- function(x){
     set.seed(1)
     idx <- sample(1:sum(set), min(ssSize, sum(set)))
     xs <- xx[idx,]
-    project <- solve(t(xs)%*%xs)%*%t(xs)
+    tmp <- solve(t(xs)%*%xs, t(xs)%*%pms[set,][idx,])
+    pms[set,] <- pms[set,]-sweep(xx%*%tmp, 2, colMeans(pms[set,]), "+")
     rm(xs)
-    for (i in 1:ncol(pms)){
-      cat(".")
-      coefs <- project%*%pms[set, i][idx]
-      pms[set, i] <- pms[set, i] - xx%*%coefs + mean(pms[set, i])
-    }
     cat("\n")
   }
   ewApply(pms, exp2)
@@ -75,6 +72,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- correctionsLite(oBatch)
   set.buffer.dim(pms, 300000, 1)
   if (normalizeToHapmap){
+    require(paste(annotation(oBatch), ".crlmm.regions", sep=""), character.only=TRUE)
     data(list=paste(platform(oBatch), "Ref", sep=""))
     pms <- normalizeToSample(pms, reference)
   }else{

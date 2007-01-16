@@ -1,16 +1,5 @@
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
-## getSnpFragmentLength <- function(object){
-##   if (substr(annotation(object), 1, 3) == "pd."){
-##     sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-##     return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
-##   }else{
-##     annotname <- substr(annotation(object), 3, nchar(annotation(object)))
-##     load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-##     return(annot$Length[match(featureNames(object),annot$SNP)])
-##   }
-## }
-
 getSnpFragmentLength <- function(object){
   sql <- "SELECT fragment_length FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
   return(dbGetQuery(db(get(annotation(object))), sql)[[1]])
@@ -23,19 +12,6 @@ snpGenderCall <- function(object){
   kfit=kmeans(a,c(min(a),tmp))
   return(factor(c("female","male")[as.numeric(kfit$cluster==1)+1]))
 }
-
-## getChrXIndex <- function(object){
-##   if (substr(annotation(object), 1, 3) == "pd."){
-##     sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
-##     chrs <- dbGetQuery(db(get(annotation(object))), sql)[[1]]
-##     return(which(chrs == "X"))
-##   }else{
-##     annotname <- substr(annotation(object), 3, nchar(annotation(object)))
-##     load(system.file(paste("data/",annotname, ".rda", sep=""), package=paste("pd", annotname, sep="")))
-##     annot <- annot[match(featureNames(object),annot$SNP),]
-##     return(which(annot$Chromosome=="chrX"))
-##   }
-## }
 
 getChrXIndex <- function(object){
   sql <- "SELECT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid"
@@ -81,9 +57,11 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   L[fix] <- median(L, na.rm=T)
   rm(fix)
   L <- c(L,L)
+  l <- L[idx];L=L-mean(L);l=l-mean(l)
+  matL <- ns(l,df1)
   for(j in 1:J){
-    Y <- c(as.vector(getM(object)[,j,]))
-    A <- c(as.vector(getA(object)[,j,]))
+    Y <- c(as.vector(getM(object[,j])))
+    A <- c(as.vector(getA(object[,j])))
     fix <- which(is.na(Y))
     Y[fix] <- median(Y, na.rm=T)
     A[fix] <- median(A, na.rm=T)
@@ -93,7 +71,6 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1],Y[Y>mus[3]]-mus[3])),3)
     sigmas[2] <- sigmas[2]/2
     
-    l <- L[idx];L=L-mean(L);l=l-mean(l)
     a <- A[idx];A=A-mean(A);a=a-mean(a)
     y <- Y[idx]
     
@@ -102,10 +79,8 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     change <- eps+1
     itmax <- 0
     
-    matL <- ns(l,df1)
     matA <- ns(a,df2)
     while (change > eps & itmax < 1000){
-      gc()
       itmax <- itmax+1
       
       ## E
@@ -144,7 +119,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     gc()
     bigX <- cbind(1, ns(L, knots=as.numeric(attr(matL, "knots")), Boundary.knots=attr(matL, "Boundary.knots")),
                   ns(A, knots=as.numeric(attr(matA, "knots")), Boundary.knots=attr(matA, "Boundary.knots")))
-    rm(matL, matA); gc()
+    rm(matA); gc()
 
     pred1 <- bigX%*%coef(fit1)
     pred2 <- rep(fit2,length(Y))
@@ -350,7 +325,6 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
 getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
                               verbose=TRUE){
   if(verbose) cat("Computing priors.\n")
-  require(limma,quietly=TRUE)
   N <- cbind(object$N,object$N)
   Index <- subset[which(rowMeans(N[subset,]>minN)==1)]
   N <- N[Index,]
@@ -576,7 +550,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   }else{
     annotname <- substr(annotation(object), 3, nchar(annotation(object)))
   }
-  load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste("pd", annotname, sep="")))
+  load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste(annotname, ".crlmm.regions", sep="")))
   myenv <- get(paste(annotname,"Crlmm",sep=""))
   Index <- which(!get("hapmapCallIndex",myenv)  |  get("badCallIndex",myenv) | get("badRegions", myenv))
 
@@ -728,7 +702,7 @@ plotRegions <- function(Ms, callsObject, i, range=4, ...){
   crlmmObj <- paste(annotation(callsObject), "Crlmm", sep="")
   if (!exists(crlmmObj))
     load(system.file(paste("data/", annotation(callsObject), "CrlmmInfo.rda", sep=""),
-                     package=paste("pd", annotation(callsObject), sep="")))
+                     package=paste(annotation(callsObject), ".crlmm.regions", sep="")))
   addPriorRegions(i, get(crlmmObj)$params)
 }
 
