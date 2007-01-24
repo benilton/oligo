@@ -19,7 +19,7 @@ setGeneric("platformDesignName",
 setGeneric("getPlatformDesign",
            function(object) standardGeneric("getPlatformDesign"))
 
-setGeneric("geneNames", function(object) standardGeneric("geneNames"))
+## setGeneric("geneNames", function(object) standardGeneric("geneNames"))
 
 setGeneric("indexFeatureSetName",
            function(object, featurenames) {
@@ -33,8 +33,8 @@ setGeneric("featureIDs",
            function(object, ids) standardGeneric("featureIDs"))
 
 ## needed?
-setGeneric("nrow", function(x) standardGeneric("nrow"))
-setGeneric("ncol", function(x) standardGeneric("ncol"))
+## setGeneric("nrow", function(x) standardGeneric("nrow"))
+## setGeneric("ncol", function(x) standardGeneric("ncol"))
 
 setGeneric("pm", function(object, genenames=NULL) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
