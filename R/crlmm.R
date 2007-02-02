@@ -81,7 +81,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     itmax <- 0
     
     matA <- ns(a,df2)
-    while (change > eps & itmax < 1000){
+    while (change > eps & itmax < 100){
       itmax <- itmax+1
       
       ## E
@@ -263,80 +263,98 @@ rowIndepChiSqTest <- function(call1,call2){
   return(tmp)
 }
 
+## getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
+##   require(MASS)
+##   if(!is.matrix(M)) M <- matrix(M,ncol=2)
+##   centers <- scales <- N <- array(NA,dim=c(nrow(M),3))
+##   dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M),c("AA","AB","BB"))
+##   nrows <- nrow(M)
+##   if(verbose) cat("Computing centers and scales for 3 genotypes")
+##   for(k in 1:3){
+##     if(verbose) cat(".")
+##     if(k==1) tmp <- M - f
+##     if(k==2) tmp <- M
+##     if(k==3) tmp <- M + f
+##     tmp[initialcalls!=k] <- NA
+##     tmp[is.na(initialcalls)]<- NA
+## 
+##     ## THIS IS SLOW! /bc
+##     for (i in 1:nrows){
+##       v <- tmp[i,]
+##       v <- v[!is.na(v)]
+##       set.seed(1)
+##       if (length(v) > 2){
+##         centers[i,k] <- hubers(v)$mu
+##       }else{
+##         centers[i,k] <- 0
+##       }
+##       
+##       ##      centers[i,k] <- median(tmp[i,], na.rm=TRUE)
+## 
+##     }
+##     
+##     ##The if below is neede becasue we combine the AA BB for the var estimate
+##     ##which comes later
+##     if(k==2){
+##       ## SLOW
+##       for (i in 1:nrows){
+##         v <- tmp[i,]
+##         v <- v[!is.na(v)]
+##         set.seed(1)
+##         if (length(v)>2){
+##           scales[i,k] <- as.numeric(hubers(v)$s)
+##         }else{
+##           scales[i,k] <- 0.3
+##         }
+##         
+##         ## scales[i,k] <- mad(tmp[i,], na.rm=TRUE)
+## 
+##       }
+##     }
+##     N[,k]=rowSums((!is.na(tmp))); rm(tmp); gc()
+##   }
+##   ##now compute the scales for AA,AB
+##   tmp1 <- M-f
+##   tmp3 <- M+f; rm(M, f); gc()
+##   tmp1[initialcalls!=1] <- NA;tmp1[is.na(initialcalls)]<- NA 
+##   tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA; rm(initialcalls); gc()
+##   tmp1 <- sweep(tmp1,1,centers[,1])
+##   tmp3 <- sweep(tmp3,1,centers[,3])
+##   tmp <- cbind(tmp1,tmp3);
+##   rm(tmp1, tmp3); gc()
+##   for (i in 1:nrows){
+##     ## SLOW
+##     v <- tmp[i,]
+##     v <- v[!is.na(v)]
+##     
+##     ## scales[i,1] <- scales[i,3] <- mad(tmp[i,], na.rm=TRUE)
+## 
+##     set.seed(1)
+##     if (length(v) > 2){
+##       scales[i, c(1,3)] <- as.numeric(hubers(v)$s)
+##     }else{
+##       scales[i, c(1,3)] <- .3
+##     }
+##   }
+##   
+##   if(verbose) cat(" Done\n")
+##   return(list(centers=centers,scales=scales,N=N))
+## }
+
 getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
-  require(MASS)
+  if(verbose) cat("Computing centers and scales for 3 genotypes")
+  tmp <- .Call("R_HuberMatrixRows2",
+               M+(initialcalls-2)*f,
+               as.integer(initialcalls),
+               1.5)
   if(!is.matrix(M)) M <- matrix(M,ncol=2)
   centers <- scales <- N <- array(NA,dim=c(nrow(M),3))
   dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M),c("AA","AB","BB"))
-  nrows <- nrow(M)
-  if(verbose) cat("Computing centers and scales for 3 genotypes")
-  for(k in 1:3){
-    if(verbose) cat(".")
-    if(k==1) tmp <- M - f
-    if(k==2) tmp <- M
-    if(k==3) tmp <- M + f
-    tmp[initialcalls!=k] <- NA
-    tmp[is.na(initialcalls)]<- NA
-
-    ## THIS IS SLOW! /bc
-    for (i in 1:nrows){
-      v <- tmp[i,]
-      v <- v[!is.na(v)]
-      set.seed(1)
-      if (length(v) > 2){
-        centers[i,k] <- hubers(v)$mu
-      }else{
-        centers[i,k] <- 0
-      }
-      
-      ##      centers[i,k] <- median(tmp[i,], na.rm=TRUE)
-
-    }
-    
-    ##The if below is neede becasue we combine the AA BB for the var estimate
-    ##which comes later
-    if(k==2){
-      ## SLOW
-      for (i in 1:nrows){
-        v <- tmp[i,]
-        v <- v[!is.na(v)]
-        set.seed(1)
-        if (length(v)>2){
-          scales[i,k] <- as.numeric(hubers(v)$s)
-        }else{
-          scales[i,k] <- 0.3
-        }
-        
-        ## scales[i,k] <- mad(tmp[i,], na.rm=TRUE)
-
-      }
-    }
-    N[,k]=rowSums((!is.na(tmp))); rm(tmp); gc()
-  }
-  ##now compute the scales for AA,AB
-  tmp1 <- M-f
-  tmp3 <- M+f; rm(M, f); gc()
-  tmp1[initialcalls!=1] <- NA;tmp1[is.na(initialcalls)]<- NA 
-  tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA; rm(initialcalls); gc()
-  tmp1 <- sweep(tmp1,1,centers[,1])
-  tmp3 <- sweep(tmp3,1,centers[,3])
-  tmp <- cbind(tmp1,tmp3);
-  rm(tmp1, tmp3); gc()
-  for (i in 1:nrows){
-    ## SLOW
-    v <- tmp[i,]
-    v <- v[!is.na(v)]
-    
-    ## scales[i,1] <- scales[i,3] <- mad(tmp[i,], na.rm=TRUE)
-
-    set.seed(1)
-    if (length(v) > 2){
-      scales[i, c(1,3)] <- as.numeric(hubers(v)$s)
-    }else{
-      scales[i, c(1,3)] <- .3
-    }
-  }
-  
+  centers[,] <- tmp[[1]]
+  scales[,2] <- tmp[[2]][,2]
+  N[,2] <- tmp[[3]][,2]
+  N[,-2] <- rowSums(tmp[[3]][,-2], na.rm=T)
+  scales[,-2] <- sqrt(rowSums(tmp[[2]][,-2]^2*tmp[[3]][,-2], na.rm=T)/N[,-2])
   if(verbose) cat(" Done\n")
   return(list(centers=centers,scales=scales,N=N))
 }
@@ -496,7 +514,7 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
   res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); gc()
   dimnames(res) <- dimnames(Dist)[1:2]
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
-  Dist[XIndex, maleIndex, 2] <- Inf
+  ##  Dist[XIndex, maleIndex, 2] <- Inf
   
   ##the following is slow!
   if(verbose) cat("Making calls for ", ncol(res), " arrays");
@@ -531,8 +549,7 @@ getAffySnpConfidence <- function(Dist, Calls, XIndex, maleIndex,
   
   cat("Computing confidence for calls on ",ncol(res)," arrays")
   ##apply is faster apply but takes too much memory
-  N <- nrow(Calls)
-  Index <- 1:N
+  Index <- 1:nrow(Calls)
   for(j in 1:ncol(res)){
 ##    if(maleIndex[j]){
 ##      Index2 <- Index[-XIndex]
@@ -545,48 +562,13 @@ getAffySnpConfidence <- function(Dist, Calls, XIndex, maleIndex,
     tmpIndex <- split(Index2, factor(Calls[Index2,j], levels=1:3), drop=FALSE)
     if (length(tmpIndex[[1]])>0) res[tmpIndex[[1]],j] <- tmpdist[tmpIndex[[1]],1]
     if (length(tmpIndex[[3]])>0) res[tmpIndex[[3]],j] <- tmpdist[tmpIndex[[3]],2]
-    if (length(tmpIndex[[2]])>0) res[tmpIndex[[2]],j] <- apply(tmpdist[tmpIndex[[2]],],1,min)
+    if (length(tmpIndex[[2]])>0) res[tmpIndex[[2]],j] <- pmin(tmpdist[tmpIndex[[2]], 1],
+                                                              tmpdist[tmpIndex[[2]], 2])
     rm(tmpIndex, tmpdist); gc()
-    if(maleIndex[j]){
-      Index2 <- Index[XIndex]
-      res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
-    }
-  }
-  cat("Done\n")  
-  return(res)
-}
-
-getAffySnpConfidence2 <- function(Dist, Calls, XIndex, maleIndex,
-                                 subset=1:nrow(Calls), verbose=TRUE){
-  Dist <- Dist[subset,,,,drop=FALSE]
-  Calls <- Calls[subset,,drop=FALSE]
-  XIndex <- which(subset%in%XIndex)
-
-  res <- array(NA,dim=dim(Dist)[c(1,2)])
-  dimnames(res) <- list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-  Dist <- rowMeans(Dist, dims=3, na.rm=T)
-  
-  cat("Computing confidence for calls on ",ncol(res)," arrays")
-
-  N <- nrow(Calls)
-  Index <- 1:N
-  for(j in 1:ncol(res)){
-    if(maleIndex[j]){
-      Index2 <- Index[-XIndex]
-    }else{
-      Index2 <- Index
-    }
-    if (verbose) cat(".")
-    tmpdist <- cbind(abs(Dist[,j,1]-Dist[,j,2]),abs(Dist[,j,2]-Dist[,j,3]))
-    tmpIndex <- split(Index2, factor(Calls[Index2,j], levels=1:3), drop=FALSE)
-    res[tmpIndex[[1]],j] <- tmpdist[tmpIndex[[1]],1]
-    res[tmpIndex[[3]],j] <- tmpdist[tmpIndex[[3]],2]
-    res[tmpIndex[[2]],j] <- apply(tmpdist[tmpIndex[[2]],],1,min)
-    rm(tmpIndex, tmpdist); gc()
-    if(maleIndex[j]){
-      Index2 <- Index[XIndex]
-      res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
-    }
+##     if(maleIndex[j]){
+##       Index2 <- Index[XIndex]
+##       res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
+##     }
   }
   cat("Done\n")  
   return(res)
@@ -600,7 +582,7 @@ replaceAffySnpParams <- function(object,value,subset){
   return(object)
 }
 
-crlmm <- function(object, correction=NULL, recalibrate=FALSE,
+crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(25, 5, 25),
      ##             returnCorrectedM=TRUE,
      ##             returnParams=TRUE,

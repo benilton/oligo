@@ -14,11 +14,7 @@ correctionsLite <- function(x){
   ColMode(pms)
   ssSize <- 2000
   correctionMatrix <- sequenceDesignMatrix(pmSequence(x))
-  if (substr(annotation(x), 1,3) == "pd."){
-    snpLocation <- pmPosition(get(annotation(x)))
-  }else{
-    snpLocation <- getPD(x)$snp_location[pmindex(x)]
-  }
+  snpLocation <- pmPosition(get(annotation(x)))
 
   ## check snpLocation... if too few probes
   ## at a given location, then change their locations
@@ -27,7 +23,6 @@ correctionsLite <- function(x){
   theCounts <- table(snpLocation)
   bad <- theUniqueLocs[which(theCounts < 1000)]
   if (length(bad)>0){
-    message("Bad snp location(s): ", bad)
     good <- theUniqueLocs[-which(theCounts<1000)]
     for (i in bad)
       snpLocation[snpLocation == i] <- good[which.min(abs(good - i))]
@@ -37,12 +32,7 @@ correctionsLite <- function(x){
   
   correctionMatrix <- cbind(1, correctionMatrix)
 
-  if (substr(annotation(x), 1, 3) == "pd."){
-    fragLength <- pmFragmentLength(get(annotation(x)))
-  }else{
-    fragLength <- getSnpFragmentLength(x)
-  }
-
+  fragLength <- pmFragmentLength(get(annotation(x)))
   fragLength[is.na(fragLength)] <- median(fragLength, na.rm=T)
   
   correctionMatrix <- cbind(correctionMatrix, ns(fragLength, df=3))
@@ -70,9 +60,10 @@ exp2 <- function(x) 2^x
 
 snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- correctionsLite(oBatch)
+  annot <- annotation(oBatch)
   set.buffer.dim(pms, 300000, 1)
   if (normalizeToHapmap){
-    require(paste(annotation(oBatch), ".crlmm.regions", sep=""), character.only=TRUE)
+    require(paste(annot, ".crlmm.regions", sep=""), character.only=TRUE)
     data(list=paste(platform(oBatch), "Ref", sep=""))
     pms <- normalizeToSample(pms, reference)
   }else{
@@ -88,8 +79,8 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   ## get pnVec
   ## get length(unique(pnVec))
   pnVec <- paste(probeNames(oBatch),
-                 c("A", "B")[pmAllele(get(annotation(oBatch)))+1],
-                 c("S", "A")[pmStrand(get(annotation(oBatch)))+1],
+                 c("A", "B")[pmAllele(get(annot))+1],
+                 c("S", "A")[pmStrand(get(annot))+1],
                  sep="")
   idx <- order(pnVec)
   pms <- subBufferedMatrix(pms, idx)
@@ -103,11 +94,10 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   colnames(theExprs) <- sampleNames(oBatch)
   rm(pms, pnVec); gc()
   theExprs <- sqsFrom(theExprs)
-  annotation(theExprs) <- annotation(oBatch)
+  annotation(theExprs) <- annot
   phenoData(theExprs) <- phenoData(oBatch)
   experimentData(theExprs) <- experimentData(oBatch)
   sampleNames(theExprs) <- sampleNames(oBatch)
-
   return(theExprs)
 }
 
