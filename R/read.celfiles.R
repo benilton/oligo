@@ -37,7 +37,7 @@ read.celfiles <- function(filenames,
   if (verbose) cat("Done.", "Now reading CEL files", sep="\n")
   for (i in 1:length(filenames)){
     AddColumn(tmpExprs)
-    tmpExprs[,i] <- .Call("read_abatch", filenames[i], rm.mask, rm.outliers,
+    tmpExprs[,i] <- .Call("read_abatch", as.list(filenames[i]), rm.mask, rm.outliers,
                           rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="affyio")
   }
   if (verbose) cat(" Done.\n")
