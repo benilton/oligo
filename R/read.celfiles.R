@@ -44,7 +44,6 @@ read.celfiles <- function(filenames,
     
   ## RI: We should check if the pd package is available here. If not try
   ## to install it
-
   ## load pdInfo
   if (is.null(pkgname))
     pkgname <- cleanPlatformName(ref.cdfName)
