@@ -6,7 +6,7 @@ setMethod("show", "PDInfo", function(object) {
 
 setMethod("show", "platformDesign", function(object) {
     callNextMethod()
-    cat("Array type:", type(object), "\n")
+    cat("Array type:", object@type, "\n")
     cat("Number of rows:", nrow(object), "\n")
     cat("Number of columns:", ncol(object), "\n")
     cat("Number of features:", nProbes(object), "\n")

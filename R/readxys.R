@@ -61,11 +61,12 @@ stuffForXYSandCELreaders <- function(filenames,
 }
 
 read.xysfiles <- function(filenames,
-##                         phenoData=new("phenoData"),
                           phenoData=new("AnnotatedDataFrame"),
-                         description=NULL,
-                         notes="",
-                         verbose = FALSE) {
+                          featureData=NULL,
+                          description=NULL,
+                          notes="",
+                          verbose = FALSE,
+                          tmpdir=tempdir()) {
   
   ## Create space to store the design names
   designnamelist <- NULL
@@ -95,7 +96,9 @@ read.xysfiles <- function(filenames,
 
   ## Allocate memory for the intensities
   ## And giving the correct names for the columns
-  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
+##  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
+
+  e <- createBufferedMatrix(nProbes(get(designname)), length(filenames)*nwells, directory=tmpdir)
   colnames(e) <- tmp$samplenames
 
   ## Loading lookup table to correctly assign the wells
@@ -117,22 +120,28 @@ read.xysfiles <- function(filenames,
   }
   
   rownames(e) <- 1:nrow(e)
-  ArrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
-  if(ArrayType == "tiling"){
-    TheClass <- "TilingFeatureSet"
-  }else if(ArrayType == "expression"){
-    TheClass <- "ExpressionFeatureSet"
-  }else if(ArrayType == "SNP"){
-    TheClass <- "SnpFeatureSet"
-  }else{
-    stop(paste("I don't know how to handle", ArrayType, "arrays."))
-  }
 
-  out <- new(TheClass,
-             manufacturer = "NimbleGen",
-             platform = designname,
-             exprs=e[,,drop=FALSE],
+  arrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
+  theClass <- switch(arrayType,
+                     tiling="TilingFeatureSet",
+                     expression="ExpressionFeatureSet",
+                     SNP="SnpFeatureSet",
+                     exon="ExonFeatureSet",
+                     stop("unknown array type: ", arrayType))
+
+  if (is.null(featureData))
+    featureData <- new("AnnotatedDataFrame",
+                       data=data.frame(idx=1:nrow(e),
+                         row.names=1:nrow(e)),
+                       varMetadata=data.frame(varLabels="idx",
+                         row.names="idx"))
+  out <- new(theClass,
+             exprs=e,
+             platform=designname,
+             manufacturer="NimbleGen",
              phenoData=tmp$phenoData,
-             experimentData=tmp$description)
+             featureData=featureData,
+             experimentData=tmp$description,
+             annotation=designname)
   return(out)
 }

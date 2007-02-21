@@ -11,7 +11,7 @@ read.celfiles <- function(filenames,
                           rm.mask = FALSE,
                           rm.outliers=FALSE,
                           rm.extra=FALSE,
-                          tempdir=getwd()){
+                          tmpdir=getwd()){
 
   ## FIXME: this is not an acceptable function name
   tmp <- stuffForXYSandCELreaders(filenames, phenoData, description, notes,
@@ -32,7 +32,7 @@ read.celfiles <- function(filenames,
 
   if (verbose) cat("Creating objects outside R to store intensities.\n")
   if (verbose) cat("This may take a while... ")
-  tmpExprs <- createBufferedMatrix(prod(dim.intensity), 0, directory=tempdir)
+  tmpExprs <- createBufferedMatrix(prod(dim.intensity), 0, directory=tmpdir)
   set.buffer.dim(tmpExprs, 300000, 1)
   if (verbose) cat("Done.", "Now reading CEL files", sep="\n")
   for (i in 1:length(filenames)){

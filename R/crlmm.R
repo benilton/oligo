@@ -140,6 +140,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     z <- sweep(z, 1, LogLik, "/")
   
     fs[,j,] <- matrix((pred3-pred1)/2,ncol=2)
+    fs[fs < 0] <- 0
     for(k in 1:3){
       pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
     }
