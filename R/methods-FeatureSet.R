@@ -91,7 +91,7 @@ setMethod("mmindex", "FeatureSet",
 
 setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
-          plotDensity.FeatureSet(x, which=c("both", "pm", "mm"), ...))
+          plotDensity(x, which=c("both", "pm", "mm"), ...))
 
 setMethod("pm", "FeatureSet",
           function(object, genenames=NULL){
@@ -158,79 +158,45 @@ setMethod("boxplot", signature(x="FeatureSet"),
             which <- match.arg(which, c("both", "pm", "mm"))
             tmp <- description(x)
             if (is(tmp, "MIAME")) main <- tmp@title
-
             tmp <- unlist(featureIndex(x, which))
             tmp <- tmp[seq(1, length(tmp), len=5000)]
-
             boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
           })
 
-imageNGS <- function(x,transfo = log, col = gray(c(0:64)/64),
-                    xlab = "", ylab = "", ...){
 
-  ## getting rid of areas with now signal
-  xs=getPD(x)$X
-  ys=getPD(x)$Y
-  tmpy=table(ys);ny=max(tmpy)
-  levels=seq(min(ys),max(ys),len=ny)
-  m=matrix(NA,ncol=length(unique(xs)),nrow=length(levels)-1)
-  xIndexes=split(seq(along=xs),xs)
-  yIndexes=sapply(xIndexes,function(i) as.numeric(cut(ys[i],breaks=levels,include.lowest=TRUE)))
-  ## end... now make plots
-  for (i in 1:length(sampleNames(x))) {
-    for(j in seq(along=xIndexes)){
-      m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
-    }
-    image(transfo(m),xlab=xlab,ylab=ylab,col=col, main=sampleNames(x)[i], ...)
-  }
-}
-
-imageAffy <- function(x, transfo=log, col=gray(c(0:64)/64), xlab="", ylab="", ...){
-  scn <- prod(par("mfrow"))
-  ask <- dev.interactive()
-  which.plot <- 0
-  
-  x.pos <- (1:nrow(x)) - 1
-  y.pos <- (1:ncol(x)) - 1
-
-  correctOrder <- order(getPD(x)$X, getPD(x)$Y)
-            
-  for(i in 1:length(sampleNames(x))){
-    which.plot <- which.plot+1;
-    
-    if(trunc((which.plot-1)/scn)==(which.plot-1)/scn && which.plot>1 && ask)
-      par(ask=TRUE)
-              
-    m <- matrix(exprs(x)[correctOrder, i], ncol=ncol(x))
-              
-    if (is.function(transfo))
-      m <- transfo(m)
-
-    m <- t(as.matrix(rev(as.data.frame(m))))
-    image(m, col=col,
-          main=sampleNames(x)[i],
-          xlab=xlab, ylab=ylab,
-          xaxt='n', yaxt='n', ...)
-    par(ask=FALSE)
-  }
-}
 setMethod("image", signature(x="FeatureSet"),
-          function(x, ...){
+          function(x, transfo=log, col=gray((0:64)/64), xlab="", ylab="", ...){
+            par(ask=FALSE)
             if (tolower(manufacturer(x)) == "affymetrix"){
-              imageAffy(x, ...)
+              n <- nrow(x)
+              for(i in 1:length(sampleNames(x))){
+                m <- matrix(as.numeric(as.matrix(exprs(x[,i]))), ncol=sqrt(n))
+                if (is.function(transfo)) m <- transfo(m)
+                m <- t(as.matrix(rev(as.data.frame(m))))
+                image(m, col=col, main=sampleNames(x)[i],
+                      xlab=xlab, ylab=ylab, xaxt='n', yaxt='n', ...)
+              }
             }else if (tolower(manufacturer(x)) == "nimblegen"){
-              imageNGS(x, ...)
+              ## getting rid of areas with now signal
+              xs=getPD(x)$X
+              ys=getPD(x)$Y
+              tmpy=table(ys);ny=max(tmpy)
+              levels=seq(min(ys),max(ys),len=ny)
+              m=matrix(NA,ncol=length(unique(xs)),nrow=length(levels)-1)
+              xIndexes=split(seq(along=xs),xs)
+              yIndexes=sapply(xIndexes,function(i) as.numeric(cut(ys[i],breaks=levels,include.lowest=TRUE)))
+              ## end... now make plots
+              for (i in 1:length(sampleNames(x))) {
+                for(j in seq(along=xIndexes)){
+                  m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
+                }
+                image(transfo(m),xlab=xlab,ylab=ylab,col=col, main=sampleNames(x)[i], ...)
+              }
             }else{
               stop("I dont know how to handle this array.")
             }
+            par(ask=FALSE)
           })
-
-## BC: Dec/26 - Removing
-## setMethod("sd", "FeatureSet",
-##           function(x, na.rm=TRUE) return(assayData(x)$sd))
-## 
-## setMethod("npixels", signature(object="FeatureSet"),
-##           function(object) return(assayData(object)$npixels))
 
 ## type <- function(object) getPD(object)@type
 
@@ -242,44 +208,52 @@ setMethod("featureNames", "FeatureSet",
 setMethod("[", "FeatureSet", function(x, i, j, ..., drop = FALSE) {
   if (missing(drop)) drop <- FALSE
   if (missing(i) && missing(j)) {
-      if (length(list(...))!=0)
-        stop("specify genes or samples to subset; use '",
-             substitute(x), "$", names(list(...))[[1]],
-             "' to access phenoData variables")
-      return(x)
+    if (length(list(...))!=0)
+      stop("specify genes or samples to subset; use '",
+           substitute(x), "$", names(list(...))[[1]],
+           "' to access phenoData variables")
+    return(x)
   }
   if (!missing(j))
     phenoData(x) <- phenoData(x)[j,, ..., drop = drop]
   if (!missing(i))
     featureData(x) <- featureData(x)[i,,..., drop=drop]
-  ## assayData; implemented here to avoid function call
   orig <- assayData(x)
-  storage.mode <- assayDataStorageMode(orig)
-  assayData(x) <-
-    switch(storage.mode,
-           environment =,
-           lockedEnvironment = {
-             aData <- new.env(parent=emptyenv())
-             if (missing(i))                     # j must be present
-               for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],,j)
-             else {                              # j may or may not be present
-               if (missing(j))
-                 for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i)
-               else
-                 for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i, j)
-             }
-             if ("lockedEnvironment" == storage.mode) assayDataEnvLock(aData)
-             aData
-           },
-           list = {
-             if (missing(i))                     # j must be present
-               lapply(orig, function(obj) obj[, j, ..., drop = drop])
-             else {                              # j may or may not be present
-               if (missing(j))
-                 lapply(orig, function(obj) obj[i,, ..., drop = drop])
-               else
-                 lapply(orig, function(obj) obj[i, j, ..., drop = drop])
-             }
-           })
-  x
+  aData <- new.env(parent=emptyenv())
+  if (missing(i))                     # j must be present
+    for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],,j)
+  else {                              # j may or may not be present
+    if (missing(j))
+      for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i)
+    else
+      for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i, j)
+  }
+  lockEnvironment(aData, bindings=TRUE)
+  assayData(x) <- aData
+  return(x)
 })
+
+setMethod("plotDensity", "FeatureSet", function(object, col=1:6, log=TRUE,
+                                                which=c("both","pm","mm"),
+                                                ylab="density",
+                                                xlab="log intensity",
+                                                type="l",
+                                                ...){
+  which <- match.arg(which,c("both","pm","mm"))
+  Index <- unlist(featureIndex(object,which))
+  object <- subBufferedMatrix(exprs(object), Index)
+  if(log){
+    ewApply(object, log2)
+    if(is.null(xlab)) xlab <- "log intensity"
+  }
+  else xlab <- "intensity"
+  n <- ncol(object)
+  x.density <- list()
+  for (i in 1:n) x.density[[i]] <- density(object[,i])
+  all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
+  all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
+  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+  invisible(list(all.x=all.x, all.y=all.y))
+})
+
+

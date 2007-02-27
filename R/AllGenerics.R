@@ -32,10 +32,6 @@ setGeneric("featureSetNames",
 setGeneric("featureIDs",
            function(object, ids) standardGeneric("featureIDs"))
 
-## needed?
-## setGeneric("nrow", function(x) standardGeneric("nrow"))
-## setGeneric("ncol", function(x) standardGeneric("ncol"))
-
 setGeneric("pm", function(object, genenames=NULL) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
 
@@ -51,12 +47,6 @@ setGeneric("npixels",
            function(object) standardGeneric("npixels"))
 
 setGeneric("allele", function(object) standardGeneric("allele"))
-
-## ## Histogram
-## setGeneric("hist",
-##            function(x, which=c("both", "pm", "mm"), ...) {
-##                standardGeneric("hist")
-##            })
 
 setGeneric("calls<-", function(object, value) standardGeneric("calls<-"))
 
@@ -118,3 +108,8 @@ setGeneric("pmFragmentLength", function(object) standardGeneric("pmFragmentLengt
 setGeneric("pmSequence", function(object) standardGeneric("pmSequence"))
 setGeneric("pmAllele", function(object) standardGeneric("pmAllele"))
 setGeneric("pmStrand", function(object) standardGeneric("pmStrand"))
+
+setGeneric("plotDensity", function(object, ...) standardGeneric("plotDensity"))
+setGeneric("hist", function(x, ...) standardGeneric("hist"))
+setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
+setGeneric("image", function(x, ...) standardGeneric("image"))

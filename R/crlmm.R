@@ -140,12 +140,12 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     z <- sweep(z, 1, LogLik, "/")
   
     fs[,j,] <- matrix((pred3-pred1)/2,ncol=2)
-    fs[fs < 0] <- 0
     for(k in 1:3){
       pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
     }
     snr[j] <- median(fs[,j,])^2/(sigmas[1]^2+sigmas[2]^2)
   }
+##  fs[fs < 0] <- 0
   if(verbose) cat("Done.\n")
   return(list(f0=median(fs),fs=fs, pis=pis, snr=snr))
 }
@@ -344,18 +344,15 @@ rowIndepChiSqTest <- function(call1,call2){
 
 getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
   if(verbose) cat("Computing centers and scales for 3 genotypes")
-  tmp <- .Call("R_HuberMatrixRows2",
-               M+(initialcalls-2)*f,
-               as.integer(initialcalls),
-               1.5)
-  if(!is.matrix(M)) M <- matrix(M,ncol=2)
-  centers <- scales <- N <- array(NA,dim=c(nrow(M),3))
-  dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M),c("AA","AB","BB"))
+  tmp <- .Call("R_HuberMatrixRows2", M+(initialcalls-2)*f,
+               as.integer(initialcalls), 1.5)
+  centers <- scales <- N <- array(NA, dim=c(nrow(M),3))
+  dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M), c("AA","AB","BB"))
   centers[,] <- tmp[[1]]
   scales[,2] <- tmp[[2]][,2]
   N[,2] <- tmp[[3]][,2]
   N[,-2] <- rowSums(tmp[[3]][,-2], na.rm=T)
-  scales[,-2] <- sqrt(rowSums(tmp[[2]][,-2]^2*tmp[[3]][,-2], na.rm=T)/N[,-2])
+  scales[,-2] <- sqrt(rowSums(tmp[[2]][,-2]^2*(tmp[[3]][,-2]-1), na.rm=T)/(N[,-2]-2))
   if(verbose) cat(" Done\n")
   return(list(centers=centers,scales=scales,N=N))
 }
@@ -423,7 +420,7 @@ updateAffySnpParams <- function(object, priors, missingStrandIndex, minN=3,
   ##First variances
   for(i in 1:2){
     for(j in 1:2){ ##1 and 3 are the same
-      if(j==2) N <- object$N[,2] else N<-rowSums(object$N[,c(1,3)],na.rm=TRUE)
+      if(j==2) N <- object$N[,2] else N <- rowSums(object$N[,c(1,3)],na.rm=TRUE)
       s <- object$scales[,j,i]
       if (is.null(d0s))
         d0s <- priors$d0s[3*(i-1)+j]
@@ -467,6 +464,7 @@ updateAffySnpParams <- function(object, priors, missingStrandIndex, minN=3,
       if(verbose & i%%5000==0)  cat(".")
       mus=mu[i,]; Ns=N[i,]
       mus[Ns<minN]<-0
+      mus[is.na(mus)] <- 0
       return(solve(Vinv+diag(NSinv[,i]))%*%(NSinv[,i]*mus))
     }))
     return(tmp)
@@ -585,8 +583,6 @@ replaceAffySnpParams <- function(object,value,subset){
 
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(25, 5, 25),
-     ##             returnCorrectedM=TRUE,
-     ##             returnParams=TRUE,
                   verbose=TRUE, correctionFile=NULL){
   library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
@@ -608,11 +604,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   }else{
     maleIndex <- object$gender=="male"
   }
-  if (substr(annotation(object), 1, 3) == "pd."){
-    annotname <- annotation(object)
-  }else{
-    annotname <- substr(annotation(object), 3, nchar(annotation(object)))
-  }
+  annotname <- annotation(object)
   load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste(annotname, ".crlmm.regions", sep="")))
   myenv <- get(paste(annotname,"Crlmm",sep=""))
 
@@ -633,13 +625,15 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
   rm(Index)
   myDist <- getAffySnpDistance(object, params, fs)
+  cM <- getM(object)
+  save(cM, params, file="beforeRec.rda"); rm(cM)
   rm(params)
   rm(fs); gc()
   XIndex <- getChrXIndex(object)
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose)
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
   rm(myDist)
-  
+
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
     for(k in 1:3)
@@ -658,36 +652,13 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
     rm(myDist)
+    save(rparams, file="afterRec.rda")
   }
   ret <- list(calls=myCalls,llr=LLR)
-##   rm(LLR, myCalls)
-   load(correctionFile)
-##   if(returnCorrectedM){
-##     cM <-getM(object)
-##     for(i in 1:nrow(cM)){
-##       SIGN <- c(1,0,-1)
-##       for(k in c(1,3)){
-##         Index=which(ret$calls[i,]==k)
-##         cM[i,Index,] <- cM[i,Index,]+SIGN[k]*(rparams$f0-correction$fs[i,Index,])
-##       }
-##     }
-##     ret$M <- cM
-##     rm(cM, Index)
-##   }
-##   
+  load(correctionFile)
   snr <- correction$snr
   rm(correction)
-  
-##   if(returnParams){
-##     rparams <- as.data.frame(rparams)
-##     fD <- new("AnnotatedDataFrame",
-##               data=rparams,
-##               varMetadata=data.frame(labelDescription=colnames(rparams),
-##                 row.names=colnames(rparams)))
-##   }else{
-##    fD <- new("AnnotatedDataFrame")
-##  }
-  
+
   ## correction$snr
   ## maleIndex
   gender <- rep("female", length(maleIndex))
@@ -711,15 +682,11 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                                      row.names=c("crlmmSNR"))))
   }    
   return(new("SnpCallSet",
-  ##           featureData=fD,
              phenoData=addPhenoData,
              experimentData=experimentData(object),
              annotation=annotation(object),
              calls=ret$calls,
              callsConfidence=ret$llr))
-         ##,
-         ##             logRatioAntisense=ret$M[,,"antisense"],
-         ##             logRatioSense=ret$M[,,"sense"]))
 }
 
 
@@ -733,55 +700,4 @@ addRegions <- function(i,params,...){
     points(t(params$centers[i,k,idx])+ADD[k],pch="+",col=k)
     lines(ellipse(diag(2),scale=params$scales[i,k,idx],centre=params$centers[i,k,idx]+ADD[k]),col=k,...)
   }
-}
-
-addPriorRegions <- function(i,params,...){
-  require(ellipse)
-  ADD <- params$f0*c(1,0,-1)
-  for(k in 1:3){
-    points(t(params$centers[i,k,])+ADD[k],pch="+",col="gray")
-    lines(ellipse(diag(2),scale=params$scales[i,k,],centre=params$centers[i,k,]+ADD[k]),col="gray",...)
-  }
-}
-
-plotRegions <- function(Ms, callsObject, i, range=4, ...){
-  lim <- c(-1,1)*range
-  require(ellipse)
-  m <- Ms[i,,]
-  colNA <- which(is.na(m[1,]))
-  if (length(colNA) == 1){
-    cat("Missing strand")
-    m[, colNA] <- m[, -colNA]
-  }
-  plot(m, xlim=lim, ylim=lim, xlab=expression(theta[A]), ylab=expression(theta[B]),
-       col=palette()[calls(callsObject)[i,]])
-  ADD <- f0(callsObject)*c(1,0,-1)
-  gtypes <- c("AA", "AB", "BB")
-  for(k in 1:3){
-    centers <- c(center(callsObject, gtypes[k], "antisense")[i],
-                 center(callsObject, gtypes[k], "sense")[i])
-    scales <- c(getScale(callsObject, gtypes[k], "antisense")[i],
-                getScale(callsObject, gtypes[k], "sense")[i])
-    points(t(centers)+ADD[k],pch="+", col=k)
-    lines(ellipse(diag(2),scale=scales, centre=centers+ADD[k]),col=palette()[k], lwd=3, ...)
-  }
-  crlmmObj <- paste(annotation(callsObject), "Crlmm", sep="")
-  if (!exists(crlmmObj))
-    load(system.file(paste("data/", annotation(callsObject), "CrlmmInfo.rda", sep=""),
-                     package=paste(annotation(callsObject), ".crlmm.regions", sep="")))
-  addPriorRegions(i, get(crlmmObj)$params)
-}
-
-center <- function(callsObject, gtype, strand){
-  objName <- paste("centers", gtype, strand, sep=".")
-  pData(featureData(callsObject))[, objName]
-}
-
-getScale <- function(x, gtype, strand){
-  objName <- paste("scale", gtype, strand, sep=".")
-  pData(featureData(x))[, objName]
-}
-
-f0 <- function(callsObject){
-  pData(featureData(callsObject))[1, "f0"]
 }
