@@ -94,9 +94,9 @@ setMethod("featureSetNames", c("AffySNPPDInfo", "integer"),
           function(object, ids) {
               idvals <- paste(as.integer(ids), collapse=",")
               ## FIXME, we may need to remove QC featureSets?
-              sql <- pasete("SELECT fid, man_fsetid FROM featureSet, %s WHERE",
-                            "fid IN (", idvals, ")",
-                            "AND featureSet.fsetid = %s.fsetid")
+              sql <- paste("SELECT fid, man_fsetid FROM featureSet, %s WHERE",
+                           "fid IN (", idvals, ")",
+                           "AND featureSet.fsetid = %s.fsetid")
               pmAns <- dbGetQuery(db(object),
                                   sprintf(sql, "pmfeature", "pmfeature"))
               mmAns <- dbGetQuery(db(object),
