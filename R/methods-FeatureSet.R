@@ -117,9 +117,15 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="BufferedMatrix"),
 
 
 ## MM
-setMethod("mm", "FeatureSet", function(object, genenames=NULL){
-            index <- mmindex(object)
-            xm(object, index, genenames)
+## setMethod("mm", "FeatureSet", function(object, genenames=NULL){
+##             index <- mmindex(object)
+##             xm(object, index, genenames)
+##           })
+
+setMethod("mm", "FeatureSet",
+          function(object, genenames=NULL){
+            if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
+            subBufferedMatrix(exprs(object), mmindex(object))
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
