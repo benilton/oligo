@@ -28,8 +28,6 @@ setReplaceMethod("platform", "FeatureSet", function(object, value){
   object
 })
 
-
-
 setMethod("manufacturer", "FeatureSet", function(object) object@manufacturer)
 
 setReplaceMethod("manufacturer", "FeatureSet", function(object, value){
@@ -118,10 +116,6 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="BufferedMatrix"),
 
 ## MM
 ## setMethod("mm", "FeatureSet", function(object, genenames=NULL){
-##             index <- mmindex(object)
-##             xm(object, index, genenames)
-##           })
-
 setMethod("mm", "FeatureSet",
           function(object, genenames=NULL){
             if (!is.null(genenames)) message("genenames ignored (not implemented yet)")

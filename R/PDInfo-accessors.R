@@ -1,18 +1,16 @@
 setMethod("initialize", "DBPDInfo",
           function(.Object) {
-              .Object <- callNextMethod()
-              tInfo <- dbGetQuery(db(.Object), "select * from table_info")
-              .Object@tableInfo <- tInfo
-              .Object
+            .Object <- callNextMethod()
+            tInfo <- dbGetQuery(db(.Object), "select * from table_info")
+            .Object@tableInfo <- tInfo
+            .Object
           })
-
-
 
 setMethod("manufacturer", "PDInfo",
           function(object) object@manufacturer)
 
 setMethod("genomeBuild", "PDInfo",
-                    function(object) object@genomebuild)
+          function(object) object@genomebuild)
 
 setMethod("db", "DBPDInfo",
           function(object) object@getdb())
@@ -27,44 +25,42 @@ setMethod("kind", "platformDesign", function(object) object@type)
 
 
 setMethod("listFeatureFields", "AffySNPPDInfo",
-           function(object) {
-               PM_TABLE <- "pmfeature"
-               dbListFields(db(object), PM_TABLE)
-           })
+          function(object) {
+            PM_TABLE <- "pmfeature"
+            dbListFields(db(object), PM_TABLE)
+          })
 
 setMethod("listFeatureSetFields", "AffySNPPDInfo",
-           function(object) {
-               FSET_TABLE <- "featureSet"
-               dbListFields(db(object), PM_TABLE)
-           })
+          function(object) {
+            FSET_TABLE <- "featureSet"
+            dbListFields(db(object), PM_TABLE)
+          })
 
 setMethod("nProbes", "AffySNPPDInfo",
           function(object) {
-              ## Note: does not include QC probes
-              probeTables <- c("mmfeature", "pmfeature")
-              sum(subset(object@tableInfo,
-                         tbl %in% probeTables, row_count))
+            ## Note: does not include QC probes
+            probeTables <- c("mmfeature", "pmfeature")
+            sum(subset(object@tableInfo,
+                       tbl %in% probeTables, row_count))
           })
 
 setMethod("pmindex", "AffySNPPDInfo",
           function(object) {
-              ## might improve by telling RSQLite how
-              ## many rows we will fetch?  same for mmindex.
-              dbGetQuery(db(object),
-                         "select fid from pmfeature")[[1]]
+            ## might improve by telling RSQLite how
+            ## many rows we will fetch?  same for mmindex.
+            dbGetQuery(db(object),
+                       "select fid from pmfeature")[[1]]
           })
 
 setMethod("mmindex", "AffySNPPDInfo",
           function(object) {
-              dbGetQuery(db(object),
-                         "select fid from mmfeature")[[1]]
+            dbGetQuery(db(object),
+                       "select fid from mmfeature")[[1]]
           })
 
 pmIdsByAllele1 <- function(map, allele=c("A", "B")) {
-    if (allele == "A")
-      allPMIds(map)[!allPMAllele(map)]
-    else
-      allPMIds(map)[allPMAllele(map)]
+    if (allele == "A") allPMIds(map)[!allPMAllele(map)]
+    else allPMIds(map)[allPMAllele(map)]
 }
 
 pmIdsByAllele2 <- function(map, allele=c("A", "B")) {
@@ -76,7 +72,6 @@ pmIdsByAllele2 <- function(map, allele=c("A", "B")) {
     ans <- dbGetQuery(db(map), sql)[[1]]
     ans
 }
-
 
 setMethod("kind", "AffySNPPDInfo",
           function(object) {
@@ -92,26 +87,25 @@ setMethod("featureSetNames", c("AffySNPPDInfo", "missing"),
 
 setMethod("featureSetNames", c("AffySNPPDInfo", "integer"),
           function(object, ids) {
-              idvals <- paste(as.integer(ids), collapse=",")
-              ## FIXME, we may need to remove QC featureSets?
-              sql <- paste("SELECT fid, man_fsetid FROM featureSet, %s WHERE",
-                           "fid IN (", idvals, ")",
-                           "AND featureSet.fsetid = %s.fsetid")
-              pmAns <- dbGetQuery(db(object),
-                                  sprintf(sql, "pmfeature", "pmfeature"))
-              mmAns <- dbGetQuery(db(object),
-                                  sprintf(sql, "mmfeature", "mmfeature"))
-              ansIds <- c(pmAns[[1]], mmAns[[1]])
-              idOrd <- match(ansIds, ids)
-              nms <- c(pmAns[[2]], mmAns[[2]])
-              nms[idOrd]
+            idvals <- paste(as.integer(ids), collapse=",")
+            ## FIXME, we may need to remove QC featureSets?
+            sql <- paste("SELECT fid, man_fsetid FROM featureSet, %s WHERE",
+                         "fid IN (", idvals, ")",
+                         "AND featureSet.fsetid = %s.fsetid")
+            pmAns <- dbGetQuery(db(object),
+                                sprintf(sql, "pmfeature", "pmfeature"))
+            mmAns <- dbGetQuery(db(object),
+                                sprintf(sql, "mmfeature", "mmfeature"))
+            ansIds <- c(pmAns[[1]], mmAns[[1]])
+            idOrd <- match(ansIds, ids)
+            nms <- c(pmAns[[2]], mmAns[[2]])
+            nms[idOrd]
           })
 
 setMethod("featureIDs", c("AffySNPPDInfo", "integer"),
           function(object, ids) {
               ids
           })
-
 
 setMethod("probeNames", "AffySNPPDInfo",
           function(object, subset=NULL) {
@@ -128,27 +122,27 @@ setMethod("geneNames", "AffySNPPDInfo",
           })
 
 pmFeatures <- function(map, featureSetIds) {
-    fsetIds <- paste("'", featureSetIds, "'", sep="", collapse=",")
-    sql <- paste("select man_fsetid, pmfeature.fid, pmfeature.strand,
+  fsetIds <- paste("'", featureSetIds, "'", sep="", collapse=",")
+  sql <- paste("select man_fsetid, pmfeature.fid, pmfeature.strand,
 pmfeature.allele, pmfeature.x, pmfeature.y from
 pmfeature, featureSet where man_fsetid in (",
                  fsetIds, ") and featureSet.fsetid = pmfeature.fsetid")
-    dbGetQuery(db(map), sql)
+  dbGetQuery(db(map), sql)
 }
 
 setMethod("indexFeatureSetName", "AffySNPPDInfo",
           function(object, featurenames) {
-              ## FIXME: is this what we want?  What about the order?
-              fSetNms <- paste("'", featurenames, "'", sep="", collapse=",")
-              sql <- paste("SELECT fid from featureSet, %s WHERE",
-                           "man_fsetid IN (", fSetNms, ") AND",
-                           "featureSet.fsetid = %s.fsetid")
+            ## FIXME: is this what we want?  What about the order?
+            fSetNms <- paste("'", featurenames, "'", sep="", collapse=",")
+            sql <- paste("SELECT fid from featureSet, %s WHERE",
+                         "man_fsetid IN (", fSetNms, ") AND",
+                         "featureSet.fsetid = %s.fsetid")
 
-              pmIndices <- dbGetQuery(db(object),
-                                      sprintf(sql, "pmfeature"))[[1]]
-              mmIndices <- dbGetQuery(db(object),
-                                      sprintf(sql, "mmfeature"))[[1]]
-              c(pmIndices, mmIndices)
+            pmIndices <- dbGetQuery(db(object),
+                                    sprintf(sql, "pmfeature"))[[1]]
+            mmIndices <- dbGetQuery(db(object),
+                                    sprintf(sql, "mmfeature"))[[1]]
+            c(pmIndices, mmIndices)
           })
 
 setMethod("pmSequence", "AffySNPPDInfo",

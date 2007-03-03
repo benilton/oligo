@@ -1,13 +1,11 @@
 read.celfiles <- function(filenames,
                           pkgname=NULL,
-                          sd=FALSE,
-                          npixels=FALSE,
                           phenoData=new("AnnotatedDataFrame"),
                           featureData=NULL,
                           description=NULL,
                           notes="",
                           verbose = FALSE,
-                          compress= FALSE,
+##                          compress= FALSE,
                           rm.mask = FALSE,
                           rm.outliers=FALSE,
                           rm.extra=FALSE,
@@ -22,7 +20,8 @@ read.celfiles <- function(filenames,
     stop("no file name given")
   
   ## read the first file to see what we have
-  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="affyio")
+  ##  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="affyio")
+  headdetails <- read.celfile.header(filenames[1])
   
   ##now we use the length
   dim.intensity <- headdetails[[2]]
@@ -86,34 +85,6 @@ read.celfiles <- function(filenames,
              experimentData=tmp$description,
              annotation=pkgname)
   out
-}
-
-read.affybatch <- function(..., filenames=character(0),
-                           phenoData=new("AnnotatedDataFrame"),
-                           description=NULL,
-                           notes="",
-                           compress = getOption("BioC")$affy$compress.cel,
-                           rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE,
-                           verbose = FALSE) {
-    .Deprecated("read.celfiles")
-
-    auxnames <- as.list(substitute(list(...)))[-1]
-    filenames <- .Primitive("c")(filenames, auxnames)
-
-    n <- length(filenames)
-
-    ## error if no file name !
-    if (n == 0)
-      stop("No file name given !")
-
-    read.celfiles(filenames,
-                  phenoData=phenoData,
-                  description=description,
-                  notes=notes,
-                  verbose = verbose,
-                  rm.mask = rm.mask,
-                  rm.outliers= rm.outliers,
-                  rm.extra=rm.extra)
 }
 
 list.celfiles <-   function(...){

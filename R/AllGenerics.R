@@ -1,8 +1,6 @@
 setGeneric("platform", function(object) standardGeneric("platform"))
 
-setGeneric("platform<-", function(object, value) {
-    standardGeneric("platform<-")
-})
+setGeneric("platform<-", function(object, value) standardGeneric("platform<-"))
 
 setGeneric("db", function(object) standardGeneric("db"))
 
