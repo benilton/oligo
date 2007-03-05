@@ -5,10 +5,12 @@ rma <- function(object, background=TRUE, normalize=TRUE){
   pms <- subBufferedMatrix(pms, idx)
   pnVec <- pnVec[idx]
   rm(idx); gc()
+  ColMode(pms)
+  set.buffer.dim(pms, nrow(pms), 1)
   if (background) bg.correct.BufferedMatrix(pms, copy=FALSE)
   if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
-  set.buffer.dim(pms, 300000, 1)
   RowMode(pms)
+  set.buffer.dim(pms, nrow(pms), 1)
   exprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
   rownames(exprs) <- unique(pnVec)
   colnames(exprs) <- sampleNames(object)

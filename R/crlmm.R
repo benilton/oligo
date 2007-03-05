@@ -145,7 +145,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     }
     snr[j] <- median(fs[,j,])^2/(sigmas[1]^2+sigmas[2]^2)
   }
-##  fs[fs < 0] <- 0
+  fs[fs < 0] <- 0
   if(verbose) cat("Done.\n")
   return(list(f0=median(fs),fs=fs, pis=pis, snr=snr))
 }
@@ -625,8 +625,6 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
   rm(Index)
   myDist <- getAffySnpDistance(object, params, fs)
-  cM <- getM(object)
-  save(cM, params, file="beforeRec.rda"); rm(cM)
   rm(params)
   rm(fs); gc()
   XIndex <- getChrXIndex(object)
@@ -652,7 +650,6 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
     rm(myDist)
-    save(rparams, file="afterRec.rda")
   }
   ret <- list(calls=myCalls,llr=LLR)
   load(correctionFile)

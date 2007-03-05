@@ -17,8 +17,7 @@ exportClasses(FeatureSet,
               SnpQSet,
               SnpCopyNumberSet,
               SnpCallSet,
-              oligoSnpSet,
-              SnpCallSetPlus)
+              oligoSnpSet)
 
 exportMethods("$",
               "allele",
@@ -55,8 +54,6 @@ exportMethods("$",
               "length",
               "listFeatureFields",
               "listFeatureSetFields",
-              "logRatioAntisense",
-              "logRatioSense",
               "manufacturer",
               "manufacturer<-",
               "mm",
@@ -81,5 +78,4 @@ exportMethods("$",
               "senseThetaA",
               "senseThetaB",
               "show",
-              "snpBasePair",
-              "snpMedianSilhouette")
+              "snpBasePair")

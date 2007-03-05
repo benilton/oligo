@@ -94,7 +94,10 @@ setMethod("hist", signature(x="FeatureSet"),
 setMethod("pm", "FeatureSet",
           function(object, genenames=NULL){
             if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
-            subBufferedMatrix(exprs(object), pmindex(object))
+            tmp <- subBufferedMatrix(exprs(object), pmindex(object))
+            RowMode(tmp)
+            set.buffer.dim(tmp, nrow(tmp), 1)
+            return(tmp)
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
