@@ -1,9 +1,6 @@
 normalizeToSample <- function(toNormalize, Normalized){
-  ncols <- ncol(toNormalize)
-  for (i in 1:ncols){
-    idx <- order(toNormalize[, i])
-    toNormalize[, i] <- Normalized[idx]
-  }
+  for (i in 1:ncol(toNormalize))
+    toNormalize[, i] <- Normalized[rank(toNormalize[, i])]
   return(toNormalize)
 }
 
@@ -45,8 +42,11 @@ correctionsLite <- function(x){
     set.seed(1)
     idx <- sample(1:sum(set), min(ssSize, sum(set)))
     xs <- xx[idx,]
-    tmp <- solve(t(xs)%*%xs, t(xs)%*%pms[set,][idx,])
-    pms[set,] <- pms[set,]-sweep(xx%*%tmp, 2, colMeans(pms[set,]), "+")
+    xsTxs <- t(xs)%*%xs
+    for (i in 1:ncol(pms)){
+      tmp <- solve(xsTxs, t(xs)%*%pms[set, i][idx])
+      pms[set, i] <- pms[set, i]-xx%*%tmp+mean(pms[set, i])
+    }
     rm(xs)
   }
   cat(" done.\n")
@@ -60,11 +60,12 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- correctionsLite(oBatch)
   annot <- annotation(oBatch)
   ColMode(pms)
-  set.buffer.dim(pms, nrow(pms), 1)
+  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
   cat("Normalizing...")
   if (normalizeToHapmap){
     require(paste(annot, ".crlmm.regions", sep=""), character.only=TRUE, quietly=TRUE)
     data(list=paste(platform(oBatch), "Ref", sep=""))
+    reference <- sort(reference)
     pms <- normalizeToSample(pms, sort(reference))
   }else{
     normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
@@ -85,7 +86,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
                  sep="")
   idx <- order(pnVec)
   pms <- subBufferedMatrix(pms, idx)
-  set.buffer.dim(pms, nrow(pms), 1)
+  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
   pnVec <- pnVec[idx]
   rm(idx); gc()
 

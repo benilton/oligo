@@ -6,11 +6,11 @@ rma <- function(object, background=TRUE, normalize=TRUE){
   pnVec <- pnVec[idx]
   rm(idx); gc()
   ColMode(pms)
-  set.buffer.dim(pms, nrow(pms), 1)
+  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
   if (background) bg.correct.BufferedMatrix(pms, copy=FALSE)
   if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
   RowMode(pms)
-  set.buffer.dim(pms, nrow(pms), 1)
+  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
   exprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
   rownames(exprs) <- unique(pnVec)
   colnames(exprs) <- sampleNames(object)

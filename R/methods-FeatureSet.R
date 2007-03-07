@@ -171,9 +171,12 @@ setMethod("image", signature(x="FeatureSet"),
           function(x, transfo=log, col=gray((0:64)/64), xlab="", ylab="", ...){
             par(ask=FALSE)
             if (tolower(manufacturer(x)) == "affymetrix"){
-              n <- nrow(x)
+              nr <- nrow(getPD(x))
+              nc <- ncol(getPD(x))
               for(i in 1:length(sampleNames(x))){
-                m <- matrix(as.numeric(as.matrix(exprs(x[,i]))), ncol=sqrt(n))
+                tmp <- as.numeric(as.matrix(exprs(x[,i])))
+                if (is(getPD(x), "platformDesign")) tmp <- tmp[getPD(x)$order_index]
+                m <- matrix(tmp, ncol=nc, nrow=nr); rm(tmp); gc()
                 if (is.function(transfo)) m <- transfo(m)
                 m <- t(as.matrix(rev(as.data.frame(m))))
                 image(m, col=col, main=sampleNames(x)[i],

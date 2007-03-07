@@ -1,5 +1,5 @@
 Package: oligo
-Version: 0.99.84
+Version: 0.99.85
 Title: Oligonucleotide Arrays
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber 
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
