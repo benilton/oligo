@@ -7,7 +7,7 @@
 ##   }
 ## }
 
-mmSequence <- function(x)  getPlatformDesign(x)$sequence[mmindex(x)]
+## mmSequence <- function(x)  getPlatformDesign(x)$sequence[mmindex(x)]
 
 sequenceDesignMatrix <- function(seqs){
   if(length(unique(sapply(seqs,nchar)))!=1) stop("Sequences must be of same length.")

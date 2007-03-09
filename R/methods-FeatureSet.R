@@ -265,3 +265,8 @@ setMethod("plotDensity", "FeatureSet", function(object, col=1:6, log=TRUE,
 })
 
 
+setMethod("pmSequence", "FeatureSet",
+          function(object) pmSequence(get(annotation(object))))
+
+setMethod("mmSequence", "FeatureSet",
+          function(object) mmSequence(get(annotation(object))))

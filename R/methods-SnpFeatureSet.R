@@ -9,5 +9,3 @@ setMethod("pmAlleleAB", "SnpFeatureSet", function(object) getPD(object)$alleleAB
 setMethod("allele", signature(object="SnpFeatureSet"),
           function(object) getPD(object)$allele)
 
-setMethod("pmSequence", "SnpFeatureSet",
-          function(object) pmSequence(get(annotation(object))))

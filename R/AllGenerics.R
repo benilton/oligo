@@ -104,6 +104,7 @@ setGeneric("listFeatureSetFields", function(object) standardGeneric("listFeature
 
 setGeneric("pmFragmentLength", function(object) standardGeneric("pmFragmentLength"))
 setGeneric("pmSequence", function(object) standardGeneric("pmSequence"))
+setGeneric("mmSequence", function(object) standardGeneric("mmSequence"))
 setGeneric("pmAllele", function(object) standardGeneric("pmAllele"))
 setGeneric("pmStrand", function(object) standardGeneric("pmStrand"))
 

@@ -84,3 +84,14 @@ setMethod("mmindex", "platformDesign",
             Index=which(get("feature_type",featureInfo(object))=="MM")
             return(Index)
           })
+
+
+setMethod("pmSequence", "platformDesign",
+          function(object)
+          get("sequence", featureInfo(object))[pmindex(object)]
+)
+
+setMethod("mmSequence", "platformDesign",
+          function(object)
+          get("sequence", featureInfo(object))[mmindex(object)]
+)
