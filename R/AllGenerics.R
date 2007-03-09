@@ -111,3 +111,6 @@ setGeneric("plotDensity", function(object, ...) standardGeneric("plotDensity"))
 setGeneric("hist", function(x, ...) standardGeneric("hist"))
 setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
 setGeneric("image", function(x, ...) standardGeneric("image"))
+
+setGeneric("nrow", function(x) standardGeneric("nrow"))
+setGeneric("ncol", function(x) standardGeneric("ncol"))

@@ -168,41 +168,43 @@ setMethod("boxplot", signature(x="FeatureSet"),
 
 
 setMethod("image", signature(x="FeatureSet"),
-          function(x, transfo=log, col=gray((0:64)/64), xlab="", ylab="", ...){
-            par(ask=FALSE)
-            if (tolower(manufacturer(x)) == "affymetrix"){
-              nr <- nrow(getPD(x))
-              nc <- ncol(getPD(x))
-              for(i in 1:length(sampleNames(x))){
-                tmp <- as.numeric(as.matrix(exprs(x[,i])))
-                if (is(getPD(x), "platformDesign")) tmp <- tmp[getPD(x)$order_index]
-                m <- matrix(tmp, ncol=nc, nrow=nr); rm(tmp); gc()
-                if (is.function(transfo)) m <- transfo(m)
-                m <- t(as.matrix(rev(as.data.frame(m))))
-                image(m, col=col, main=sampleNames(x)[i],
-                      xlab=xlab, ylab=ylab, xaxt='n', yaxt='n', ...)
-              }
-            }else if (tolower(manufacturer(x)) == "nimblegen"){
-              ## getting rid of areas with now signal
-              xs=getPD(x)$X
-              ys=getPD(x)$Y
-              tmpy=table(ys);ny=max(tmpy)
-              levels=seq(min(ys),max(ys),len=ny)
-              m=matrix(NA,ncol=length(unique(xs)),nrow=length(levels)-1)
-              xIndexes=split(seq(along=xs),xs)
-              yIndexes=sapply(xIndexes,function(i) as.numeric(cut(ys[i],breaks=levels,include.lowest=TRUE)))
-              ## end... now make plots
-              for (i in 1:length(sampleNames(x))) {
-                for(j in seq(along=xIndexes)){
-                  m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
-                }
-                image(transfo(m),xlab=xlab,ylab=ylab,col=col, main=sampleNames(x)[i], ...)
-              }
-            }else{
-              stop("I dont know how to handle this array.")
-            }
-            par(ask=FALSE)
-          })
+          function(x, transfo=log, col=gray((0:64)/64),
+                   xlab="", ylab="", ...){
+  par(ask=TRUE)
+  if (tolower(manufacturer(x)) == "affymetrix"){
+    nr <- nrow(getPD(x))
+    nc <- ncol(getPD(x))
+    for(i in 1:ncol(x)){
+      m <- as.numeric(exprs(x)[,i])
+      if (is(getPD(x), "platformDesign")) m <- m[getPD(x)$order_index]
+      if (is.function(transfo)) m <- transfo(m)
+      m <- matrix(m, ncol=nc, nrow=nr)
+      m <- t(m)[nc:1,]
+      image(m, col=col, main=sampleNames(x)[i],
+            xlab=xlab, ylab=ylab, xaxt='n', yaxt='n', ...)
+    }
+  }else if (tolower(manufacturer(x)) == "nimblegen"){
+    ## getting rid of areas with now signal
+    xs=getPD(x)$X
+    ys=getPD(x)$Y
+    tmpy=table(ys);ny=max(tmpy)
+    levels=seq(min(ys),max(ys),len=ny)
+    m=matrix(NA,ncol=length(unique(xs)),nrow=length(levels)-1)
+    xIndexes=split(seq(along=xs),xs)
+    yIndexes=sapply(xIndexes,function(i) as.numeric(cut(ys[i],breaks=levels,include.lowest=TRUE)))
+    if (is.function(transfo)) m <- transfo(m)
+    ## end... now make plots
+    for (i in 1:length(sampleNames(x))) {
+      for(j in seq(along=xIndexes)){
+        m[yIndexes[[j]],j]=exprs(x)[xIndexes[[j]],i]
+      }
+      image(m,xlab=xlab,ylab=ylab,col=col, main=sampleNames(x)[i], ...)
+    }
+  }else{
+    stop("I dont know how to handle this array.")
+  }
+  par(ask=FALSE)
+})
 
 ## type <- function(object) getPD(object)@type
 

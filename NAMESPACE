@@ -1,5 +1,5 @@
 useDynLib("oligo")
-import(Biobase, affyio, splines, graphics, stats)
+import(Biobase, affyio, splines, graphics, stats, methods)
 exportPattern("^[^\\.]")
 
 ## PDInfo classes
@@ -79,3 +79,4 @@ exportMethods("$",
               "senseThetaB",
               "show",
               "snpBasePair")
+
