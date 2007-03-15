@@ -170,7 +170,7 @@ setMethod("boxplot", signature(x="FeatureSet"),
 setMethod("image", signature(x="FeatureSet"),
           function(x, transfo=log, col=gray((0:64)/64),
                    xlab="", ylab="", ...){
-  par(ask=TRUE)
+  if(ncol(x) > 1) par(ask=TRUE) else par(ask=FALSE)
   if (tolower(manufacturer(x)) == "affymetrix"){
     if (is(getPD(x), "platformDesign")){
       nr <- nrow(getPD(x))

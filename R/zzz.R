@@ -13,6 +13,6 @@
                 "in case you need further help.", sep="\n    "))
 }
 
-.onUnload <- function( libpath ) {
-  library.dynam.unload("oligo", libpath )
+.onUnload <- function( libpath ){
+  library.dynam.unload("oligo", libpath)
 }
