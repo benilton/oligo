@@ -172,8 +172,12 @@ setMethod("image", signature(x="FeatureSet"),
                    xlab="", ylab="", ...){
   par(ask=TRUE)
   if (tolower(manufacturer(x)) == "affymetrix"){
-    nr <- nrow(getPD(x))
-    nc <- ncol(getPD(x))
+    if (is(getPD(x), "platformDesign")){
+      nr <- nrow(getPD(x))
+      nc <- ncol(getPD(x))
+    }else{
+      nr <- nc <- sqrt(nrow(exprs(x)))
+    }
     for(i in 1:ncol(x)){
       m <- as.numeric(exprs(x)[,i])
       if (is(getPD(x), "platformDesign")) m <- m[getPD(x)$order_index]
