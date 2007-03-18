@@ -5,12 +5,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  message(paste("\nWelcome to the oligo Package!\n",
-                "This package is under development,",
-                "and therefore its documentation is",
-                "to be improved. Please contact Benilton",
-                "at bcarvalh <AT> jhsph <DOT> edu,",
-                "in case you need further help.", sep="\n    "))
+  message("This is the oligo package")
 }
 
 .onUnload <- function( libpath ){

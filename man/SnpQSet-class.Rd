@@ -1,16 +1,16 @@
-\name{FeatureSet-class}
+\name{SnpQSet-class}
 \docType{class}
-\alias{FeatureSet-class}
+\alias{SnpQSet-class}
 
-\title{Classes for Feature level data}
-\description{Virtual class to store feature level data.}
+\title{Class "SnpQSet"}
+\description{Class to store Snp (Quantifications) Summaries}
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("FeatureSet", assayData, manufacturer, platform, exprs, phenoData, featureData, experimentData, annotation, ...)}.
+  Objects can be created by calls of the form \code{new("SnpQSet",
+  assayData, senseThetaA, senseThetaB, antisenseThetaA, antisenseThetaB,
+  phenoData, featureData, experimentData, annotation)}.
 }
 \section{Slots}{
 	 \describe{
-    \item{\code{manufacturer}:}{Object of class \code{"character"}  }
-    \item{\code{platform}:}{Object of class \code{"character"}  }
     \item{\code{assayData}:}{Object of class \code{"AssayData"}  }
     \item{\code{phenoData}:}{Object of class \code{"AnnotatedDataFrame"}  }
     \item{\code{featureData}:}{Object of class \code{"AnnotatedDataFrame"}  }
@@ -25,7 +25,7 @@ Class \code{"\linkS4class{VersionedBiobase}"}, by class "eSet", distance 2.
 Class \code{"\linkS4class{Versioned}"}, by class "eSet", distance 3.
 }
 \section{Methods}{
-No methods defined with class "FeatureSet" in the signature.
+No methods defined with class "SnpQSet" in the signature.
 }
 \references{}
 \author{}

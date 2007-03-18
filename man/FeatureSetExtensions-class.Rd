@@ -1,11 +1,14 @@
-\name{FeatureSet-class}
+\name{ExonFeatureSet-class}
 \docType{class}
-\alias{FeatureSet-class}
+\alias{ExpressionFeatureSet-class}
+\alias{ExonFeatureSet-class}
+\alias{SnpFeatureSet-class}
+\alias{TilingFeatureSet-class}
 
-\title{Classes for Feature level data}
-\description{Virtual class to store feature level data.}
+\title{"FeatureSet" Extensions}
+\description{Classes to store data from Expression/Exon/SNP/Tiling arrays at the feature level.}
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("FeatureSet", assayData, manufacturer, platform, exprs, phenoData, featureData, experimentData, annotation, ...)}.
+Objects can be created by calls of the form \code{new("ExonFeatureSet", assayData, manufacturer, platform, exprs, phenoData, featureData, experimentData, annotation, ...)}.
 }
 \section{Slots}{
 	 \describe{
@@ -20,16 +23,18 @@ Objects can be created by calls of the form \code{new("FeatureSet", assayData, m
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{eSet}"}, directly.
-Class \code{"\linkS4class{VersionedBiobase}"}, by class "eSet", distance 2.
-Class \code{"\linkS4class{Versioned}"}, by class "eSet", distance 3.
+Class \code{"\linkS4class{FeatureSet}"}, directly.
+Class \code{"\linkS4class{eSet}"}, by class "FeatureSet", distance 2.
+Class \code{"\linkS4class{VersionedBiobase}"}, by class "FeatureSet", distance 3.
+Class \code{"\linkS4class{Versioned}"}, by class "FeatureSet", distance 4.
 }
 \section{Methods}{
-No methods defined with class "FeatureSet" in the signature.
+No methods defined with class "ExonFeatureSet" in the signature.
 }
 \references{}
 \author{}
 \note{}
+
 
 \seealso{
 }

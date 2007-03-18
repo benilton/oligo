@@ -1,31 +1,32 @@
-\name{Obtain the ATCG content of a gene}
+\name{basecontent}
 \alias{basecontent}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Boxplot}
+\title{Sequence Base Contents}
 \description{
-  This function accepts a character vector representing the nucleotide
-  sequences and computes the frequencies of each base (A, C, G, T).
+  Function to compute the amounts of each nucleotide in a sequence.
 }
 \usage{
 basecontent(seq)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{seq}{character vector.}
+  \item{seq}{character vector of length \code{n} containg a valid
+    sequence (A/T/C/G)}
 }
 \details{
-  The base frequencies are calculated separately for each element of
-  'x'. The elements of 'x' can be in upper case, lower case or mixed.
 }
 \value{
-  A matrix with 4 columns and 'length(x)' rows. The columns are names
-  'A', 'C', 'T', 'G', and the values in each column are the counts of
-  the corresponding bases in the elements of 'x'.
+  \code{matrix} with \code{n} rows and 4 columns with the counts for
+  each base.
 }
-\note{Based on MPbasecontent in matchprobes}
+\references{}
+\author{}
+\note{
+}
+\seealso{}
 \examples{
-seqs <- c("AATCG", "gTCa", "aaaTTTT")
-basecontent(seqs)
+sequences <- c("ATATATCCCCG", "TTTCCGAGC")
+basecontent(sequences)
 }
-\keyword{methods}% at least one, from doc/KEYWORDS
 
+\keyword{manip}

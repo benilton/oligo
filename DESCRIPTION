@@ -17,7 +17,6 @@ Collate: AllClasses.R
          methods-SnpCallSet.R
          methods-SnpCopyNumberSet.R
          read.celfiles.R
-         rma.R
          zzz.R
          readxys.R
          sequence.R

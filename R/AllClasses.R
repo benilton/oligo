@@ -31,7 +31,8 @@ setClass("platformDesign",
 
 setClass("FeatureSet",
          representation(manufacturer="character",
-                        platform="character"),
+                        platform="character",
+                        "VIRTUAL"),
          contains="eSet",
          prototype=list(
            manufacturer=character(),

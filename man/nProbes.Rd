@@ -1,15 +1,28 @@
 \name{nProbes}
 \alias{nProbes}
+\alias{nProbes,platformDesign-method}
+\alias{nProbes,AffySNPPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Number of probes on the array}
+\title{Count number of probes}
 \description{
-  The number of probes on the array.
+  Counts the number of probes in a \code{platformDesign} object.
 }
 \usage{
 nProbes(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{a \code{platformDesign} object.}
+  \item{object}{\code{platformDesign} object}
 }
-\keyword{methods}% at least one, from doc/KEYWORDS
+\details{
+}
+\value{
+}
+\references{}
+\author{}
+\note{}
+\seealso{}
+\examples{
+}
+
+\keyword{manip}

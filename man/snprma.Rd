@@ -1,31 +1,29 @@
 \name{snprma}
 \alias{snprma}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Robust multi-array average for SNP arrays}
+\title{Preprocessing SNP Arrays}
 \description{
-  Performs robust multi-array average (RMA) method for SNP Arrays.
+  This function preprocess SNP arrays.
 }
 \usage{
-snprma(oBatch)
+snprma(oBatch, normalizeToHapmap = TRUE, saveQuant = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{oBatch}{SnpFeatureSet object}
+  \item{oBatch}{\code{SnpFeatureSet} object}
+  \item{normalizeToHapmap}{internal}
+  \item{saveQuant}{internal}
 }
 \details{
-  This is an implementation of RMA for SNP arrays. It first preprocess
-  the data, correcting for fragment length and average intensities and
-  then summarizes at the SNP/Allele/Strand level.
 }
 \value{
-  SnpQSet object.
+  A \code{SnpQSet} object.
 }
-\author{Benilton S Carvalho, Rafael A Irizarry}
-\seealso{\code{\link{rma}}}
+\references{}
+\author{}
+\note{}
+\seealso{}
 \examples{
-## DO NOT RUN
-## snpData <- read.celfiles(list.celfiles())
-## snpQSet <- snprma(snpData)
 }
-\keyword{methods}% at least one, from doc/KEYWORDS
 
+\keyword{manip}

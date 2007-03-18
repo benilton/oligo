@@ -1,26 +1,31 @@
 \name{getPlatformDesign}
 \alias{getPlatformDesign}
 \alias{getPD}
+\alias{getPlatformDesign,FeatureSet-method}
 
-\title{Platform Design accessor}
+\title{Retrieve Platform Design object}
 \description{
-  Accessor to the platform design object.
+  Retrieve platform design object.
 }
 \usage{
 getPlatformDesign(object)
 getPD(object)
 }
-
+%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{FeatureSet object.}
+  \item{object}{\code{FeatureSet} object}
+}
+\details{
 }
 \value{
-  The function returns the platform design object associated to the
-  FeatureSet object.
+  \code{platformDesign} or \code{PDInfo} object.
 }
+\references{}
+\author{}
+\note{}
+\seealso{}
 \examples{
-## Do not  run:
-## FeatureSetObject <- read.celfiles(list.celfiles())
-## getPD(FeatureSetObject)
 }
-\keyword{methods}% at least one, from doc/KEYWORDS
+
+\keyword{manip}
+

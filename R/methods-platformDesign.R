@@ -21,31 +21,31 @@ setMethod("geneNames", "platformDesign",
           })
 
 
-setMethod("featureSetNames", c("platformDesign", "missing"),
-          function(object, ids) {
-              as.character(featureInfo(object)$feature_set_name)
-          })
+## setMethod("featureSetNames", c("platformDesign", "missing"),
+##           function(object, ids) {
+##               as.character(featureInfo(object)$feature_set_name)
+##           })
+## 
+## ## FIXME: do we need both of these?  Is the type of ids for
+## ## platformDesign objects known?
+## setMethod("featureSetNames", c("platformDesign", "numeric"),
+##           function(object, ids) {
+##               as.character(featureInfo(object)$feature_set_name[ids])
+##           })
+## 
+## setMethod("featureSetNames", c("platformDesign", "character"),
+##           function(object, ids) {
+##               as.character(featureInfo(object)$feature_set_name[ids])
+##           })
 
-## FIXME: do we need both of these?  Is the type of ids for
-## platformDesign objects known?
-setMethod("featureSetNames", c("platformDesign", "numeric"),
-          function(object, ids) {
-              as.character(featureInfo(object)$feature_set_name[ids])
-          })
 
-setMethod("featureSetNames", c("platformDesign", "character"),
-          function(object, ids) {
-              as.character(featureInfo(object)$feature_set_name[ids])
-          })
-
-
-setMethod("featureIDs", c("platformDesign"),
-          function(object, ids) {
-              if (!missing(ids) && length(ids) > 0)
-                featureInfo(object)$feature_ID[ids]
-              else
-                featureInfo(object)$feature_ID
-          })
+## setMethod("featureIDs", c("platformDesign"),
+##           function(object, ids) {
+##               if (!missing(ids) && length(ids) > 0)
+##                 featureInfo(object)$feature_ID[ids]
+##               else
+##                 featureInfo(object)$feature_ID
+##           })
 
 
 setAs("platformDesign", "data.frame",

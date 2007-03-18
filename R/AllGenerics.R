@@ -19,16 +19,16 @@ setGeneric("getPlatformDesign",
 
 ## setGeneric("geneNames", function(object) standardGeneric("geneNames"))
 
-setGeneric("indexFeatureSetName",
-           function(object, featurenames) {
-               standardGeneric("indexFeatureSetName")
-           })
+## setGeneric("indexFeatureSetName",
+##            function(object, featurenames) {
+##                standardGeneric("indexFeatureSetName")
+##            })
 
-setGeneric("featureSetNames",
-           function(object, ids) standardGeneric("featureSetNames"))
+## setGeneric("featureSetNames",
+##            function(object, ids) standardGeneric("featureSetNames"))
 
-setGeneric("featureIDs",
-           function(object, ids) standardGeneric("featureIDs"))
+## setGeneric("featureIDs",
+##            function(object, ids) standardGeneric("featureIDs"))
 
 setGeneric("pm", function(object, genenames=NULL) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
@@ -41,10 +41,10 @@ setGeneric("featureIndex",
                standardGeneric("featureIndex")
            })
 
-setGeneric("npixels",
-           function(object) standardGeneric("npixels"))
+## setGeneric("npixels",
+##            function(object) standardGeneric("npixels"))
 
-setGeneric("allele", function(object) standardGeneric("allele"))
+## setGeneric("allele", function(object) standardGeneric("allele"))
 
 setGeneric("calls<-", function(object, value) standardGeneric("calls<-"))
 
@@ -72,10 +72,8 @@ setGeneric("cnConfidence<-",
 
 setGeneric("copyNumber", function(object) standardGeneric("copyNumber"))
 setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
-setGeneric("snpBasePair", function(object) standardGeneric("snpBasePair"))
-setGeneric("pmSnpBasePair", function(object) standardGeneric("pmSnpBasePair"))
-setGeneric("alleleAB", function(object) standardGeneric("alleleAB"))
-setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
+## setGeneric("alleleAB", function(object) standardGeneric("alleleAB"))
+## setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
 setGeneric("senseThetaA", function(obj) standardGeneric("senseThetaA"))
 setGeneric("senseThetaB", function(obj) standardGeneric("senseThetaB"))
 setGeneric("antisenseThetaA", function(obj) standardGeneric("antisenseThetaA"))
@@ -90,8 +88,7 @@ setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
 setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 
-setGeneric("probeNames", signature="object",
-           function(object, subset=NULL) standardGeneric("probeNames"))
+setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
 
 setGeneric("nProbes", function(object) standardGeneric("nProbes"))
 setGeneric("pmindex", function(object) standardGeneric("pmindex"))
@@ -115,3 +112,5 @@ setGeneric("image", function(x, ...) standardGeneric("image"))
 
 setGeneric("nrow", function(x) standardGeneric("nrow"))
 setGeneric("ncol", function(x) standardGeneric("ncol"))
+
+setGeneric("rma", function(object, ...) standardGeneric("rma"))

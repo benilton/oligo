@@ -1,21 +1,32 @@
 \name{probeNames}
 \alias{probeNames}
+\alias{probeNames,FeatureSet-method}
+\alias{probeNames,AffySNPPDInfo-method}
+\alias{probeNames,platformDesign-method}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Feature Set Names}
+\title{Accessor to feature names}
 \description{
-  The function returns the feature set names for all PM probes.
+  Accessor to PM feature names.
 }
 \usage{
-probeNames(object, subset)
+probeNames(object, subset = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{A \code{FeatureSet} object.}
-  \item{subset}{a \code{characterOrNULL} object. The subset to be used (not implemented yet)}
+  \item{object}{\code{FeatureSet}, \code{AffySNPPDInfo} or
+    \code{platformDesign} object.}
+  \item{subset}{not implemented yet.}
+}
+\details{
 }
 \value{
-  A character vector with the feature set names. Restricted to PM only.
 }
-\section{Warning}{This function returns the feature set names
-  \bold{only} for PM probes.}
-\keyword{manip}% at least one, from doc/KEYWORDS
+\references{}
+\author{}
+\note{}
+\seealso{}
+\examples{
+}
+
+\keyword{manip}

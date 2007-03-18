@@ -1,29 +1,27 @@
-\name{rma}
-\alias{rma}
-\alias{rma,FeatureSet-method}
+\name{genomeBuild}
+\alias{genomeBuild}
+\alias{genomeBuild,TilingFeatureSet-method}
+\alias{genomeBuild,PDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{RMA}
+\title{Genome Build Information}
 \description{
-  RMA
+  Returns the genome build information
 }
 \usage{
-rma(object, ...)
+genomeBuild(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{\code{FeatureSet} object}
-  \item{\dots}{the dots}
+  \item{object}{\code{TilingFeatureSet} or \code{PDInfo} object.}
 }
 \details{
-  *NOT* recommended for SNP arrays, see \code{\link{snprma}}.
 }
 \value{
-  \code{ExpressionSet} object.
 }
 \references{}
 \author{}
 \note{}
-\seealso{\code{\link{snprma}}}
+\seealso{}
 \examples{
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

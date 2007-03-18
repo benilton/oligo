@@ -688,13 +688,13 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 
 
 ###this one just for us
-addRegions <- function(i,params,...){
-  require(ellipse)
-  ADD <- params$f0*c(1,0,-1)
-  idx <- which(!apply(is.na(params$centers[i,,]), 2, all))
-  if (length(idx) == 1) idx <- rep(idx, 2)
-  for(k in 1:3){
-    points(t(params$centers[i,k,idx])+ADD[k],pch="+",col=k)
-    lines(ellipse(diag(2),scale=params$scales[i,k,idx],centre=params$centers[i,k,idx]+ADD[k]),col=k,...)
-  }
-}
+### addRegions <- function(i,params,...){
+###   require(ellipse)
+###   ADD <- params$f0*c(1,0,-1)
+###   idx <- which(!apply(is.na(params$centers[i,,]), 2, all))
+###   if (length(idx) == 1) idx <- rep(idx, 2)
+###   for(k in 1:3){
+###     points(t(params$centers[i,k,idx])+ADD[k],pch="+",col=k)
+###     lines(ellipse(diag(2),scale=params$scales[i,k,idx],centre=params$centers[i,k,idx]+ADD[k]),col=k,...)
+###   }
+### }

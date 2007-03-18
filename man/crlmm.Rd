@@ -1,48 +1,44 @@
 \name{crlmm}
 \alias{crlmm}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Corrected Robust Linear Model with Maximum-Likelihood-Based Distance Classifier}
+\title{Genotype Calls}
 \description{
-  The procedure calls genotypes using CRLMM.
+  Performs genotype calls via CRLMM (Corrected Robust Linear Model with
+  Maximum-likelihood based distances).
 }
 \usage{
-crlmm(object, correction = NULL, recalibrate = TRUE, minLLRforCalls = c(50, 40, 50), returnCorrectedM = FALSE, returnParams = FALSE, verbose = TRUE)
+crlmm(object, correction = NULL, recalibrate = TRUE, minLLRforCalls = c(25, 5, 25), verbose = TRUE, correctionFile = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{\code{SnpQSet} object;}
-  \item{correction}{List with correction parameters. See Details.}
-  \item{recalibrate}{Logical flag determining if recalibration should be
-  performed}
-  \item{minLLRforCalls}{vector, with 3 elements, specifying the min LLR
-    to be used for calls}
-  \item{returnCorrectedM}{Logical flag specifying if corrected
-    log-ratios are to be returned.}
-  \item{returnParams}{Logical flag specifying if parameters are to be returned.}
-  \item{verbose}{Logical flag for verbosity.}
+  \item{object}{\code{SnpQSet} object}
+  \item{correction}{The output of the EM algorithm}
+  \item{recalibrate}{Logical - should recalibration be performed?}
+  \item{minLLRforCalls}{Minimum thresholds for genotype calls.}
+  \item{verbose}{Logical.}
+  \item{correctionFile}{A filename.}
 }
-\details{
-  The \code{correction} argument is a list with the following elements:
-  \code{f0} (scalar), \code{fs} (numeric vector), \code{pis} (numeric
-  matrix) and \code{snr}.
-}
+
+\details{The \code{correctionFile} is a string (eg, "outputEM.rda")
+  pointing to a filename. If the file does not exist, \code{crlmm} will
+  save a file with that name containing the results of the EM
+  algorithm. If the file exists, its content is loaded and used by
+  CRLMM. The \code{correctionFile} is meant to save time if \code{crlmm}
+  is be run multiple times, as the EM algorithm does not need to be run
+  everytime.}
+
 \value{
-  Returns a list with two elements:
-  \item{calls}{matrix with calls (1 - AA; 2 - AB; 3 - BB)}
-  \item{llr}{matrix with log-likelihood ratios}
+  \code{SnpCallSet} object.
 }
-\references{Benilton Carvalho, Terence P. Speed, and Rafael A. Irizarry,
-"EXPLORATION, NORMALIZATION, AND GENOTYPE CALLS OF HIGH DENSITY
-OLIGONUCLEOTIDE SNP ARRAY DATA" (July 2006). Johns Hopkins University,
-Dept. of Biostatistics Working Papers. Working Paper 111.}
-\author{Benilton S. Carvalho, Rafael A. Irizarry, Shin Lin}
-\seealso{\code{\link{snprma}}, \code{\link{justsnprma}}}
+
+\references{}
+\author{}
+\note{}
+
+\seealso{}
 \examples{
-## DO NOT RUN
-##
-## files <- list.celfiles()
-## snpFSet <- read.celfiles(files)
-## snpQSet <- snprma(snpFSet)
-## theCalls <- crlmm(snpQSet)
 }
-\keyword{methods}% at least one, from doc/KEYWORDS
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{classif}
+

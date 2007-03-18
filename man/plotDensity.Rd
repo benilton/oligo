@@ -1,37 +1,28 @@
-\name{Plot Densities}
+\name{plotDensity}
 \alias{plotDensity}
-\alias{plotDensity.FeatureSet}
-%- \alias{hist}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Plot Densities}
+\title{Plot density of intensities.}
 \description{
-  Plots the non-parametric density estimates using values contained in
-  the columns of a matrix.
+  Plot density of intensities.
 }
 \usage{
-plotDensity(mat, ylab = "density", xlab = "x", type = "l", col = 1:6,
-...)
-plotDensity.FeatureSet(x, col = 1:6, log=TRUE, which=c("both","pm","mm"),
-ylab = "density", xlab = NULL, ...)
-%- hist(x, which=c("both","pm","mm"), ...)
+plotDensity(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{mat}{A matrix containing the values to make densities in the
-    columns.}
-  \item{x}{An \code{FeatureSet} object}
-  \item{log}{logical value. If \code{TRUE} the log of the intensities in the
-    \code{FeatureSet} are plotted.}
-  \item{ylab}{A title for the y axis.}
-  \item{xlab}{A title for the x axis.}
-  \item{type}{the type of the plot.}
-  \item{col}{The colors to use fot the different arrays.}
-  \item{which}{Feature type to be plotted.}
-  \item{\dots}{graphical parameters can be given as arguments to \code{plot}}
+  \item{object}{\code{FeatureSet} object}
+  \item{\dots}{parameters to be passed to plot.}
 }
+\details{
+}
+\value{
+}
+\references{}
+\author{}
+\note{}
+\seealso{\code{\link{hist}}}
 \examples{
-## Do not run
-## FeatureSetObject <- read.celfiles(list.celfiles())
-## plotDensity(exprs(FeatureSetObject))
 }
-\keyword{hplot}% at least one, from doc/KEYWORDS
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{hplot}

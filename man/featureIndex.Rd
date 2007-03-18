@@ -1,20 +1,29 @@
 \name{featureIndex}
 \alias{featureIndex}
+\alias{featureIndex,FeatureSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Indexes of features on the array}
+\title{Indexes for features in the expression matrix}
 \description{
-  Returns the indexes of features on the array.
+  Indexes for features (PM/MM/both) in the expression matrix.
 }
 \usage{
-featureIndex(object, which=c("both","pm","mm"), genenames=NULL)
+featureIndex(object, which = c("both", "pm", "mm"), genenames = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{An \code{FeatureSet} object.}
-  \item{which}{A string defining what type of probes should have the
-    indexes returned.}
-  \item{genenames}{A character vector descbribing what feature sets the
-    results should be restricted to.}
+  \item{object}{\code{FeatureSet} object}
+  \item{which}{subset of interest: "both", "pm" or "mm"?}
+  \item{genenames}{not implemented yet.}
 }
-\seealso{\code{\link{pmindex}}, \code{\link{mmindex}}}
-\keyword{manip}% at least one, from doc/KEYWORDS
+\details{
+}
+\value{
+}
+\references{}
+\author{}
+\note{}
+\seealso{}
+\examples{
+}
+
+\keyword{manip}

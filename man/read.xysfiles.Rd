@@ -1,25 +1,21 @@
-\name{read.celfiles}
-\alias{read.celfiles}
+\name{read.xysfiles}
+\alias{read.xysfiles}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Parser to CEL files}
+\title{Parser to XYS files}
 \description{
-  Reads CEL files.
+  NimbleGen provides XYS files which are read by this function.
 }
 \usage{
-read.celfiles(filenames, pkgname = NULL, phenoData = new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes = "", verbose = FALSE, rm.mask = FALSE, rm.outliers = FALSE, rm.extra = FALSE, tmpdir = getwd())
+read.xysfiles(filenames, phenoData = new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes = "", verbose = FALSE, tmpdir = tempdir())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{filenames}{a \code{character} vector with the CEL filenames.}
-  \item{pkgname}{alternative data package to be loaded.}
+  \item{filenames}{\code{character} vector with filenames.}
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}
   \item{description}{\code{description}}
   \item{notes}{\code{notes}}
-  \item{verbose}{\code{logical}}
-  \item{rm.mask}{\code{logical}}
-  \item{rm.outliers}{\code{logical}}
-  \item{rm.extra}{\code{logical}}
+  \item{verbose}{\code{verbose}}
   \item{tmpdir}{path to the directory that will store the temporary
     files.}
 }

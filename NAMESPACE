@@ -1,6 +1,7 @@
 useDynLib("oligo")
 import(Biobase, affyio, splines, graphics, stats, methods)
-exportPattern("^[^\\.]")
+
+## exportPattern("^[^\\.]")
 
 ## PDInfo classes
 exportClasses(PDInfo,
@@ -17,11 +18,10 @@ exportClasses(FeatureSet,
               SnpQSet,
               SnpCopyNumberSet,
               SnpCallSet,
-              oligoSnpSet)
+              oligoSnpSet,
+              ExonFeatureSet)
 
 exportMethods("$",
-              "allele",
-              "alleleAB",
               "antisenseThetaA",
               "antisenseThetaB",
               "boxplot",
@@ -32,15 +32,12 @@ exportMethods("$",
               "chromosome",
               "cnConfidence",
               "cnConfidence<-",
-              "coerce",
               "copyNumber",
               "copyNumber<-",
               "db",
               "exprs",
-              "featureIDs",
               "featureIndex",
               "featureInfo",
-              "featureSetNames",
               "geneNames",
               "genomeBuild",
               "getA",
@@ -48,7 +45,6 @@ exportMethods("$",
               "getPlatformDesign",
               "hist",
               "image",
-              "indexFeatureSetName",
               "initialize",
               "kind",
               "length",
@@ -69,16 +65,31 @@ exportMethods("$",
               "platformDesignName",
               "pm",
               "pm<-",
-              "pmAlleleAB",
+              "pmAllele",
               "pmChr",
               "pmindex",
               "pmPosition",
               "pmSequence",
-              "pmSnpBasePair",
               "position",
               "probeNames",
+              "rma",
               "senseThetaA",
               "senseThetaB",
-              "show",
-              "snpBasePair")
+              "show")
 
+## Exported functions
+
+export("basecontent",
+       "read.celfiles",
+       "read.xysfiles",
+       "sequenceDesignMatrix",
+       "list.celfiles",
+       "list.xysfiles")
+
+## Exported functions for CRLMM
+
+export("crlmm",
+       "snprma")
+
+     
+       

@@ -1,32 +1,30 @@
-\name{rma}
-\alias{rma}
-\alias{rma,FeatureSet-method}
+\name{hist}
+\alias{hist}
+\alias{hist,FeatureSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{RMA}
+\title{Density estimate}
 \description{
-  RMA
+  Plot the density estimates for each sample
 }
 \usage{
-rma(object, ...)
+hist(x, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{\code{FeatureSet} object}
-  \item{\dots}{the dots}
+  \item{x}{\code{FeatureSet} object}
+  \item{\dots}{arguments to be passed to \code{lines}}
 }
 \details{
-  *NOT* recommended for SNP arrays, see \code{\link{snprma}}.
 }
 \value{
-  \code{ExpressionSet} object.
 }
 \references{}
 \author{}
 \note{}
-\seealso{\code{\link{snprma}}}
+\seealso{}
 \examples{
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{manip}
+\keyword{hplot}
 
