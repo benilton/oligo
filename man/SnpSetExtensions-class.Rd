@@ -34,7 +34,7 @@ No methods defined with class "SnpCallSet" in the signature.
 \author{}
 \note{}
 
-\seealso{
+\seealso{\link{Biobase}{eSet}, \link{Biobase}{VersionedBiobase}, \link{Biobase}{Versioned}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

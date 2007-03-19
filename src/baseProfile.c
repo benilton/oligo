@@ -11,7 +11,7 @@ SEXP gcrma_getSeq2(SEXP psequence, SEXP x, SEXP length) {
     SEXP outMatrix;
     char *pseq;
     int k,i;
-    R_len_t nx,K,seql;
+    R_len_t K,seql;
     K=INTEGER(x)[0];
     pseq=STR(psequence);
     seql=INTEGER(length)[0];

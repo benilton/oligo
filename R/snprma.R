@@ -29,7 +29,7 @@ correctionsLite <- function(x){
   fragLength[is.na(fragLength)] <- median(fragLength, na.rm=T)
   
   correctionMatrix <- cbind(correctionMatrix, ns(fragLength, df=3))
-  rm(fragLength); gc()
+  rm(fragLength); ## gc()
   
   pms <- pm(x)
   ewApply(pms, log2)
@@ -88,13 +88,13 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- subBufferedMatrix(pms, idx)
   set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
   pnVec <- pnVec[idx]
-  rm(idx); gc()
+  rm(idx); ## gc()
 
   ## params OK
   RowMode(pms)
   theExprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
   colnames(theExprs) <- sampleNames(oBatch)
-  rm(pms, pnVec); gc()
+  rm(pms, pnVec); ## gc()
   theExprs <- sqsFrom(theExprs)
   annotation(theExprs) <- annot
   phenoData(theExprs) <- phenoData(oBatch)

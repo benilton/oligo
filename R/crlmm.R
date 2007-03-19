@@ -117,15 +117,15 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
       weights[y <= 0, 3] <- 0
     }
 
-    gc()
+    ## gc()
     bigX <- cbind(1, ns(L, knots=as.numeric(attr(matL, "knots")), Boundary.knots=attr(matL, "Boundary.knots")),
                   ns(A, knots=as.numeric(attr(matA, "knots")), Boundary.knots=attr(matA, "Boundary.knots")))
-    rm(matA); gc()
+    rm(matA); ## gc()
 
     pred1 <- bigX%*%coef(fit1)
     pred2 <- rep(fit2,length(Y))
     pred3 <- bigX%*%coef(fit3)
-    rm(bigX); gc()
+    rm(bigX); ## gc()
 
     weights <- matrix(0,length(Y),3)
     weights[,1] <- dnorm(Y,pred1,sigmas[1])
@@ -158,25 +158,25 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
                                    verbose=FALSE){
   if(is.null(subset)) subset <- 1:(dim(object$pis)[1])
   pi1 <- object$pis[subset,,,1]
-  pi2 <- object$pis[subset,,,2]; rm(object); gc()
+  pi2 <- object$pis[subset,,,2]; rm(object); ## gc()
 
   ## fixing SNPs that have probes only on one strand:
   idx <- is.na(pi1[,1,1])
   pi1[idx,,] <- pi2[idx,,]
   idx <- is.na(pi2[,1,1])
   pi2[idx,,] <- pi1[idx,,]
-  rm(idx); gc()
+  rm(idx); ## gc()
   
   if(verbose) cat("Picking good starting value: ")
   if(verbose) cat("Computing entropy, ")
   E1 <- rowEntropy(pi1)
-  E2 <- rowEntropy(pi2); gc()
+  E2 <- rowEntropy(pi2); ## gc()
   
   tmpN <- dim(pi1)
   tmpcall1 <- tmpcall2 <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
   rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
   colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
-  gc()
+  ## gc()
   if(verbose) cat("calculating calls, ")
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
@@ -186,7 +186,7 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   }
   
   if(verbose) cat("determining non-concordant calls, ")
-  concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); gc()
+  concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); ## gc()
 
   if(verbose) cat("deciding which strand(s) to use")
   tc1 <- tmpcall1 == 1
@@ -197,14 +197,14 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   tc2 <- tmpcall2 == 2
   tc3 <- tmpcall2 == 3
   noABIndex2 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
-  rm(tc1, tc2, tc3); gc()
+  rm(tc1, tc2, tc3); ## gc()
   
   E1[noABIndex1] <- -Inf
   E2[noABIndex2] <- -Inf
 
   jointprobs <- (pi1+pi2)/2
 
-  gc()
+  ## gc()
   noInfoIndex <- intersect(noABIndex1, noABIndex2)
   
   rm(noABIndex1, noABIndex2)
@@ -220,15 +220,15 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   rm(notBoth, E1bE2)
   jointprobs[i1,,] <- pi1[i1,,]
   jointprobs[i2,,] <- pi2[i2,,]
-  rm(i1, i2, pi1, pi2); gc()
+  rm(i1, i2, pi1, pi2); ## gc()
 
   tmpN <- dim(jointprobs)
   tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
   rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
   colnames(tmpcall) <- colnames(tmpmax) <- dimnames(jointprobs)[[2]]
-  gc()
+  ## gc()
 
-  if(verbose) cat(" finalizing"); gc()
+  if(verbose) cat(" finalizing"); ## gc()
 
   for (i in 1:tmpN[1]){
     for (j in 1:tmpN[2]){
@@ -312,17 +312,17 @@ rowIndepChiSqTest <- function(call1,call2){
 ## 
 ##       }
 ##     }
-##     N[,k]=rowSums((!is.na(tmp))); rm(tmp); gc()
+##     N[,k]=rowSums((!is.na(tmp))); rm(tmp); ## gc()
 ##   }
 ##   ##now compute the scales for AA,AB
 ##   tmp1 <- M-f
-##   tmp3 <- M+f; rm(M, f); gc()
+##   tmp3 <- M+f; rm(M, f); ## gc()
 ##   tmp1[initialcalls!=1] <- NA;tmp1[is.na(initialcalls)]<- NA 
-##   tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA; rm(initialcalls); gc()
+##   tmp3[initialcalls!=3] <- NA;tmp3[is.na(initialcalls)]<- NA; rm(initialcalls); ## gc()
 ##   tmp1 <- sweep(tmp1,1,centers[,1])
 ##   tmp3 <- sweep(tmp3,1,centers[,3])
 ##   tmp <- cbind(tmp1,tmp3);
-##   rm(tmp1, tmp3); gc()
+##   rm(tmp1, tmp3); ## gc()
 ##   for (i in 1:nrows){
 ##     ## SLOW
 ##     v <- tmp[i,]
@@ -366,7 +366,7 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
                                                                c("AA","AB","BB"), c("antisense","sense"))
   if(verbose) cat("Computing centers and scales:\n")
   for(s in 1:2){
-    gc()
+    ## gc()
     if(verbose) cat(c("\tantisense","\tsense....")[s],": ",sep="")
     tmp <- getGenotypeRegionParams(getM(object)[subset,,s],
                                    initialcalls[subset,],
@@ -396,9 +396,9 @@ getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
   V <- cov(mus,use="pairwise.complete")
   
   ##prior for sigma
-  zgs <- log(sigmas^2); rm(sigmas); gc()
+  zgs <- log(sigmas^2); rm(sigmas); ## gc()
   dgs <- N-1
-  egs <- zgs-digamma(dgs/2)+log(dgs/2); rm(zgs); gc()
+  egs <- zgs-digamma(dgs/2)+log(dgs/2); rm(zgs); ## gc()
   n <- length(Index)
   d0s <- 2*trigammaInverse(colMeans(n*(egs-colMeans(egs, na.rm=TRUE))^2/(n-1)-trigamma(dgs/2), na.rm=TRUE))
   s20 <- exp(colMeans(egs, na.rm=TRUE)+digamma(d0s/2)-log(d0s/2))
@@ -508,9 +508,9 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
                             verbose=FALSE){
   Dist <- Dist[subset,,,,drop=FALSE]
   XIndex <- which(subset%in%XIndex)
-  gc()
+  ## gc()
   ## Here we can even put default value to 3 for the new code. /HB
-  res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); gc()
+  res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); ## gc()
   dimnames(res) <- dimnames(Dist)[1:2]
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
   ##  Dist[XIndex, maleIndex, 2] <- Inf
@@ -563,7 +563,7 @@ getAffySnpConfidence <- function(Dist, Calls, XIndex, maleIndex,
     if (length(tmpIndex[[3]])>0) res[tmpIndex[[3]],j] <- tmpdist[tmpIndex[[3]],2]
     if (length(tmpIndex[[2]])>0) res[tmpIndex[[2]],j] <- pmin(tmpdist[tmpIndex[[2]], 1],
                                                               tmpdist[tmpIndex[[2]], 2])
-    rm(tmpIndex, tmpdist); gc()
+    rm(tmpIndex, tmpdist); ## gc()
 ##     if(maleIndex[j]){
 ##       Index2 <- Index[XIndex]
 ##       res[Index2,j] <- abs(Dist[Index2,j,1]-Dist[Index2,j,3])
@@ -618,7 +618,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   fs <- correction$fs; rm(correction)
   rparams <- getAffySnpGenotypeRegionParams(object, myCalls, fs,
                                             subset=Index,verbose=verbose)
-  rm(myCalls); gc()
+  rm(myCalls); ## gc()
   oneStrand <- apply(is.na(getM(object[,1])[,1,]), 1,
                      function(v) ifelse(length(ll <- which(v))==0, 0, ll))
   rparams <- updateAffySnpParams(rparams, get("priors",myenv), oneStrand, verbose=TRUE)
@@ -626,7 +626,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   rm(Index)
   myDist <- getAffySnpDistance(object, params, fs)
   rm(params)
-  rm(fs); gc()
+  rm(fs); ## gc()
   XIndex <- getChrXIndex(object)
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose)
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
@@ -643,7 +643,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     rparams <- getAffySnpGenotypeRegionParams(object, myCalls,
                                               fs, verbose=verbose)
     rm(myCalls)
-    gc()
+    ## gc()
     rparams <- updateAffySnpParams(rparams, get("priors", myenv), oneStrand)
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
     rm(fs)

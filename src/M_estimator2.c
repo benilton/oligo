@@ -23,7 +23,7 @@
  *************************************************************************/
 
 double  median_nocopy(double *x, int length){
-  int i;
+  //  int i;
   int half;
   double med;
   double *buffer = x;  //Calloc(length,double);
@@ -84,7 +84,7 @@ static double weights_huber(double u, double k){
  ** Compute the median absolute value of a data vector
  **
  *************************************************************************/
-
+/*
 static double med_abs(double *x, int length){
   int i;
   double med_abs;
@@ -98,7 +98,7 @@ static double med_abs(double *x, int length){
 
   return(med_abs);
 }
-
+*/
 
 static double med_abs_indices(double *x, int length, int *indices, int which_index, int length_index){
   int i,j;
@@ -125,7 +125,7 @@ static double med_abs_indices(double *x, int length, int *indices, int which_ind
 
 
 static void huber_rows2(double *data, double *m1, double *m2, int *m3, int *class, int rows, int cols, double k){
-  int i, j, rep, n1, n2, n3, l;
+  int i, j, rep, n1, n2, n3;
   double mean1, mean2, mean3, scale1, scale2, scale3, sum_weights1, sum_weights2, sum_weights3;
   int done1, done2, done3;
 
