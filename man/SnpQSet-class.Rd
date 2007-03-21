@@ -31,7 +31,7 @@ No methods defined with class "SnpQSet" in the signature.
 \author{}
 \note{}
 
-\seealso{\link{Biobase}{eSet}, \link{Biobase}{VersionedBiobase}, \link{Biobase}{Versioned}
+\seealso{\link[Biobase]{eSet-class}, \link[Biobase]{VersionedBiobase-class}, \link[Biobase]{Versioned-class}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

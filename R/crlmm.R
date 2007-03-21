@@ -656,6 +656,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   snr <- correction$snr
   rm(correction)
 
+  
   ## correction$snr
   ## maleIndex
   gender <- rep("female", length(maleIndex))
