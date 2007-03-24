@@ -23,9 +23,9 @@ Objects can be created by calls of the form \code{new("SnpCallSet", assayData, f
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{eSet}"}, directly.
-Class \code{"\linkS4class{VersionedBiobase}"}, by class "eSet", distance 2.
-Class \code{"\linkS4class{Versioned}"}, by class "eSet", distance 3.
+Class \code{\linkS4class{eSet}}, directly.
+Class \code{\linkS4class{VersionedBiobase}}, by class "eSet", distance 2.
+Class \code{\linkS4class{Versioned}}, by class "eSet", distance 3.
 }
 \section{Methods}{
 No methods defined with class "SnpCallSet" in the signature.
@@ -34,7 +34,7 @@ No methods defined with class "SnpCallSet" in the signature.
 \author{}
 \note{}
 
-\seealso{\linkS4class[Biobase]{eSet}, \linkS4class[Biobase]{VersionedBiobase}, \linkS4class[Biobase]{Versioned}}
+\seealso{\linkS4class{eSet}, \linkS4class{VersionedBiobase}, \linkS4class{Versioned}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 }
