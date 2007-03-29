@@ -36,7 +36,7 @@ No methods defined with class "ExonFeatureSet" in the signature.
 \note{}
 
 
-\seealso{\linkS4class{eSet}, \linkS4class{VersionedBiobase}, \linkS4class{Versioned}}
+\seealso{\code{\linkS4class{eSet}}, \code{\linkS4class{VersionedBiobase}}, \code{\linkS4class{Versioned}}}
 
 \examples{
 ##---- Should be DIRECTLY executable !! ----
