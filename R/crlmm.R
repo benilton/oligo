@@ -1,3 +1,8 @@
+### WARNING: IF ROBUST TO DIMNAMES,
+###          REMOVE AND SAVE LOTS
+###          OF MEMORY... ADD DIMNAMES
+###          AT THE END
+
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
 getSnpFragmentLength <- function(object){
