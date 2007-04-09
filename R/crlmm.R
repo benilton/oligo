@@ -353,6 +353,7 @@ getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
   N[,2] <- tmp[[3]][,2]
   N[,-2] <- rowSums(tmp[[3]][,-2], na.rm=T)
   scales[,-2] <- sqrt(rowSums(tmp[[2]][,-2]^2*(tmp[[3]][,-2]-1), na.rm=T)/(N[,-2]-2))
+  scales[is.na(centers)] <- NA
   if(verbose) cat(" Done\n")
   return(list(centers=centers,scales=scales,N=N))
 }
@@ -388,6 +389,7 @@ getAffySnpPriors <-  function(object,minN=20,subset=1:(dim(object$centers)[1]),
   N <- N[Index,]
   mus <- cbind(object$centers[Index,,1],object$centers[Index,,2])
   sigmas <- cbind(object$scales[Index,,1],object$scales[Index,,2])
+  sigmas[is.na(mus)] <- NA
   maxsigmas <- c(quantile(sigmas[,c(1,3,4,6)],.99, na.rm=TRUE),
                  quantile(sigmas[,c(2,5)],.99, na.rm=TRUE))
   
@@ -625,37 +627,53 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
   rm(Index)
   myDist <- getAffySnpDistance(object, params, fs)
+  myDist[,,-2,] <- 1.5*myDist[,,-2,]
   rm(params)
   rm(fs); ## gc()
   XIndex <- getChrXIndex(object)
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose)
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
   rm(myDist)
-
+  load(correctionFile)
+  fs <- correction$fs; snr <- correction$snr; rm(correction)
+  pacc <- .predictAccuracy(annotation(object),
+                           rep(sqrt(snr), each=nrow(LLR)),
+                           as.numeric(sqrt(LLR)),
+                           as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
+                           .fp(fs), .fm(fs), as.integer(myCalls), chunksize=5000)
+  pacc <- matrix(pacc, ncol=ncol(myCalls))
+  minPforCalls <- c(.5, .1, .5)
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
     for(k in 1:3)
-      myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
-    rm(LLR)
+      myCalls[myCalls == k & pacc < minPforCalls[k]] <- NA
+    rm(pacc)
 
-    load(correctionFile)
-    fs <- correction$fs; rm(correction)
+##     for(k in 1:3)
+##       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
+##     rm(LLR)
+
     rparams <- getAffySnpGenotypeRegionParams(object, myCalls,
                                               fs, verbose=verbose)
     rm(myCalls)
     ## gc()
     rparams <- updateAffySnpParams(rparams, get("priors", myenv), oneStrand)
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
-    rm(fs)
+    myDist[,,-2,] <- 1.5*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
-    rm(myDist)
+    pacc <- .predictAccuracy(annotation(object),
+                             rep(sqrt(snr), each=nrow(LLR)),
+                             as.numeric(sqrt(LLR)),
+                             as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
+                             .fp(fs), .fm(fs), as.integer(myCalls), chunksize=5000)
+    rm(fs, myDist)
+    pacc <- matrix(pacc, ncol=ncol(myCalls))
   }
-  ret <- list(calls=myCalls,llr=LLR)
+##  ret <- list(calls=myCalls,llr=LLR)
   load(correctionFile)
   snr <- correction$snr
   rm(correction)
-
   
   ## correction$snr
   ## maleIndex
@@ -683,8 +701,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              phenoData=addPhenoData,
              experimentData=experimentData(object),
              annotation=annotation(object),
-             calls=ret$calls,
-             callsConfidence=ret$llr))
+             calls=myCalls,
+             callsConfidence=pacc))
 }
 
 
@@ -699,3 +717,53 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###     lines(ellipse(diag(2),scale=params$scales[i,k,idx],centre=params$centers[i,k,idx]+ADD[k]),col=k,...)
 ###   }
 ### }
+
+.predictAccuracy <- function(type, snr, llr, avg, fp, fm, the.calls, chunksize=5000){
+  load(paste(system.file(package=paste(type, ".crlmm.regions", sep=""), "data/"), type, ".spline.params.rda", sep=""))
+  htz <- the.calls == 2
+  idx <- which(htz)
+  sets <- split(idx, rep(1:length(idx), each=chunksize, length.out=length(idx)))
+  outhtz <- NULL
+  for (i in 1:length(sets)){
+    outhtz <- c(outhtz,
+                cbind(1, ns(snr[sets[[i]]], df=3, knots=spline.params$htz$knots[1,],
+                            Boundary.knots=spline.params$htz$boundary[1,]),
+                      ns(llr[sets[[i]]], df=3, knots=spline.params$htz$knots[2,],
+                         Boundary.knots=spline.params$htz$boundary[2,]),
+                      ns(avg[sets[[i]]], df=3, knots=spline.params$htz$knots[3,],
+                         Boundary.knots=spline.params$htz$boundary[3,]),
+                      ns(fp[sets[[i]]], df=3, knots=spline.params$htz$knots[4,],
+                         Boundary.knots=spline.params$htz$boundary[4,]),
+                      ns(fm[sets[[i]]], df=3, knots=spline.params$htz$knots[5,],
+                         Boundary.knots=spline.params$htz$boundary[5,]))%*%spline.params$htz$coefs)
+  }
+  pred <- rep(0, length(snr))
+  pred[htz] <- outhtz; rm(outhtz)
+  idx <- which(!htz)
+  sets <- split(idx, rep(1:length(idx), each=chunksize, length.out=length(idx)))
+  outhmz <- NULL
+  for (i in 1:length(sets)){
+    outhmz <- c(outhmz,
+                cbind(1, ns(snr[sets[[i]]], df=3, knots=spline.params$hmz$knots[1,],
+                            Boundary.knots=spline.params$hmz$boundary[1,]),
+                      ns(llr[sets[[i]]], df=3, knots=spline.params$hmz$knots[2,],
+                         Boundary.knots=spline.params$hmz$boundary[2,]),
+                      ns(avg[sets[[i]]], df=3, knots=spline.params$hmz$knots[3,],
+                         Boundary.knots=spline.params$hmz$boundary[3,]),
+                      ns(fp[sets[[i]]], df=3, knots=spline.params$hmz$knots[4,],
+                         Boundary.knots=spline.params$hmz$boundary[4,]),
+                      ns(fm[sets[[i]]], df=3, knots=spline.params$hmz$knots[5,],
+                         Boundary.knots=spline.params$hmz$boundary[5,]))%*%spline.params$hmz$coefs)
+  }
+  pred[!htz] <- outhmz
+  rm(outhmz, spline.params)
+  1/(1+exp(-pred))
+}
+
+.fp <- function(ff)
+  as.numeric(rowSums(ff, dims=2, na.rm=T))
+
+.fm <- function(ff){
+  ff[,,2] <- -ff[,,2]
+  as.numeric(rowSums(ff, dims=2, na.rm=T))
+}

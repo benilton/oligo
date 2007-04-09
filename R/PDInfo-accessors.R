@@ -15,6 +15,8 @@ setMethod("genomeBuild", "PDInfo",
 setMethod("db", "DBPDInfo",
           function(object) object@getdb())
 
+setMethod("geometry", "PDInfo",
+          function(object) object@geometry)
 
 setMethod("nrow", "platformDesign", function(x) x@nrow)
 setMethod("ncol", "platformDesign", function(x) x@ncol)

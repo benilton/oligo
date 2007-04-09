@@ -114,3 +114,5 @@ setGeneric("nrow", function(x) standardGeneric("nrow"))
 setGeneric("ncol", function(x) standardGeneric("ncol"))
 
 setGeneric("rma", function(object, ...) standardGeneric("rma"))
+
+setGeneric("geometry", function(object) standardGeneric("geometry"))

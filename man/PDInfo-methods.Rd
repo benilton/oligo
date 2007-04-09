@@ -5,6 +5,8 @@
 \alias{listFeatureSetFields,PDInfo-method}
 \alias{listFeatureFields,AffySNPPDInfo-method}
 \alias{listFeatureSetFields,AffySNPPDInfo-method}
+\alias{geometry}
+\alias{geometry,PDInfo-method}
 
 \title{List fields in the (pm/mm)feature table}
 \description{

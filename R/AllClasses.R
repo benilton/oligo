@@ -7,7 +7,8 @@ setClass("DBPDInfo",
          contains="PDInfo",
          representation=representation(
            getdb="function",
-           tableInfo="data.frame"))
+           tableInfo="data.frame",
+           geometry="integer"))
 
 setClass("SNPPDInfo", contains="DBPDInfo")
 ## We hope to have ExonPDInfo, TilingPDInfo soon
