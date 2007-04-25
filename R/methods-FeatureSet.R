@@ -289,7 +289,7 @@ setMethod("rma", "FeatureSet",
             if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
             RowMode(pms)
             set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
-            exprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
+            exprs <- median.polish.summarize(pms, length(unique(pnVec)), pnVec)
             rownames(exprs) <- unique(pnVec)
             colnames(exprs) <- sampleNames(object)
             rm(pms, pnVec); gc()

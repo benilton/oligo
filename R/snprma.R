@@ -92,7 +92,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
 
   ## params OK
   RowMode(pms)
-  theExprs <- median.polish.summarize.BufferedMatrix(pms, length(unique(pnVec)), pnVec)
+  theExprs <- median.polish.summarize(pms, length(unique(pnVec)), pnVec)
   colnames(theExprs) <- sampleNames(oBatch)
   rm(pms, pnVec); ## gc()
   theExprs <- sqsFrom(theExprs)

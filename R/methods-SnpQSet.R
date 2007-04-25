@@ -47,6 +47,7 @@ setMethod("getM", "SnpQSet",
             tmp[,,2] <- senseThetaA(obj)-senseThetaB(obj)
             return(tmp)
           })
+
 setMethod("getA", "SnpQSet",
           function(obj){
             tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)), ncol(antisenseThetaA(obj)), 2),

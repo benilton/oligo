@@ -48,14 +48,14 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   fs <- array(0,dim=c(I,J,2))
   snr <- array(0,dim=J)
 
-  dimnames(fs)<-list(featureNames(object),
-                     sampleNames(object),
-                     c("antisense","sense"))
-  dimnames(pis)<-list(featureNames(object),
-                      sampleNames(object),
-                      c("AA","AB","BB"),
-                      c("antisense","sense"))
-  names(snr) <- sampleNames(object)
+#####  dimnames(fs)<-list(featureNames(object),
+#####                     sampleNames(object),
+#####                     c("antisense","sense"))
+#####  dimnames(pis)<-list(featureNames(object),
+#####                      sampleNames(object),
+#####                      c("AA","AB","BB"),
+#####                      c("antisense","sense"))
+#####  names(snr) <- sampleNames(object)
   
   if(verbose) cat("Fitting mixture model to ",J," arrays. Epsilon must reach ",eps,".\n",sep="")
   L <- getSnpFragmentLength(object)
@@ -179,8 +179,8 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   
   tmpN <- dim(pi1)
   tmpcall1 <- tmpcall2 <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
-  rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
-  colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
+#####  rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
+#####  colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
   ## gc()
   if(verbose) cat("calculating calls, ")
   for (i in 1:tmpN[1]){
@@ -224,13 +224,14 @@ getInitialAffySnpCalls <- function(object,subset=NULL,
   i2 <- notBoth & !E1bE2
   rm(notBoth, E1bE2)
   jointprobs[i1,,] <- pi1[i1,,]
+  rm(i1, pi1)
   jointprobs[i2,,] <- pi2[i2,,]
-  rm(i1, i2, pi1, pi2); ## gc()
+  rm(i2, pi2); ## gc()
 
   tmpN <- dim(jointprobs)
   tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
-  rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
-  colnames(tmpcall) <- colnames(tmpmax) <- dimnames(jointprobs)[[2]]
+#####   rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
+#####   colnames(tmpcall) <- colnames(tmpmax) <- dimnames(jointprobs)[[2]]
   ## gc()
 
   if(verbose) cat(" finalizing"); ## gc()
@@ -351,16 +352,24 @@ getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
   if(verbose) cat("Computing centers and scales for 3 genotypes")
   tmp <- .Call("R_HuberMatrixRows2", M+(initialcalls-2)*f,
                as.integer(initialcalls), 1.5)
-  centers <- scales <- N <- array(NA, dim=c(nrow(M),3))
-  dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M), c("AA","AB","BB"))
-  centers[,] <- tmp[[1]]
-  scales[,2] <- tmp[[2]][,2]
-  N[,2] <- tmp[[3]][,2]
-  N[,-2] <- rowSums(tmp[[3]][,-2], na.rm=T)
-  scales[,-2] <- sqrt(rowSums(tmp[[2]][,-2]^2*(tmp[[3]][,-2]-1), na.rm=T)/(N[,-2]-2))
-  scales[is.na(centers)] <- NA
+#####  centers <- scales <- N <- array(NA, dim=c(nrow(M),3))
+#####  scales <- N <- array(NA, dim=c(nrow(M),3))
+#####  dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M), c("AA","AB","BB"))
+#####  centers[,] <- tmp[[1]]
+
+  tmpN <- tmp[[3]]; tmp[[3]] <- NULL
+  tmpN[tmpN <= 1] <- NA
+  tmpS <- tmp[[2]]; tmp[[2]] <- NULL
+  tmpS[is.na(tmpN)] <- NA
+  tmpV <- sqrt(rowSums((tmpN[,-2]-1)*tmpS[,-2]^2, na.rm=T)/rowSums(tmpN[,-2]-1, na.rm=T))
+  tmpV[!is.finite(tmpV)] <- NA
+  tmpS[,-2] <- tmpV
+  rm(tmpV)
+  tmpC <- tmp[[1]]; rm(tmp)
+  tmpC[is.na(tmpN)] <- NA
+  tmpN[is.na(tmpN)] <- 0
   if(verbose) cat(" Done\n")
-  return(list(centers=centers,scales=scales,N=N))
+  return(list(centers=tmpC, scales=tmpS, N=tmpN))
 }
 
 getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
@@ -368,8 +377,8 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
                                          verbose=FALSE){
   if(is.null(f)) f=fitAffySnpMixture(object,verbose=verbose)$fs
   N <- scales <- centers <- array(NA,dim=c(length(subset),3,2))
-  dimnames(N) <- dimnames(scales) <- dimnames(centers) <- list(featureNames(object)[subset],
-                                                               c("AA","AB","BB"), c("antisense","sense"))
+#####  dimnames(N) <- dimnames(scales) <- dimnames(centers) <- list(featureNames(object)[subset],
+#####                                                               c("AA","AB","BB"), c("antisense","sense"))
   if(verbose) cat("Computing centers and scales:\n")
   for(s in 1:2){
     ## gc()
@@ -382,7 +391,7 @@ getAffySnpGenotypeRegionParams<-function(object,initialcalls,f=NULL,
     scales[,,s] <- tmp$scales
     N[,,s] <- tmp$N
   }
-  N <- apply(N, 1:2, max, na.rm=TRUE)
+  N <- apply(N, 1:2, max, na.rm=TRUE) ## returns -Inf if c(NA, NA)
   return(list(centers=centers,scales=scales,N=N,f0=median(f, na.rm=TRUE)))
 }
 
@@ -427,20 +436,20 @@ updateAffySnpParams <- function(object, priors, missingStrandIndex, minN=3,
   ##First variances
   for(i in 1:2){
     for(j in 1:2){ ##1 and 3 are the same
-      if(j==2) N <- object$N[,2] else N <- rowSums(object$N[,c(1,3)],na.rm=TRUE)
+      if(j==2) N <- object$N[,2] else N <- rowSums(object$N[,-2],na.rm=TRUE)
       s <- object$scales[,j,i]
       if (is.null(d0s))
         d0s <- priors$d0s[3*(i-1)+j]
       s20 <- priors$s20[3*(i-1)+j] ##notice the ad-hoc choice of 3
       Index <- N>minN & !is.na(s)
-      N<-N[Index];s <- s[Index]
+      N <- N[Index]; s <- s[Index]
       object$scales[Index,j,i] <- sqrt (  ( (N-1)*s^2 + d0s*s20 ) / (d0s+N-1) )
       object$scales[!Index & missingStrandIndex != i,j,i] <- sqrt(s20)
     }
   }
   object$scales[,3,] <- object$scales[,1,] ##AA=BB 
   object$scales[,2,][object$scales[,2,]>maxHeteSigma] <- maxHeteSigma
-  object$scales[,c(1,3),][object$scales[,c(1,3),]>maxHomoSigma] <- maxHomoSigma
+  object$scales[,-2,][object$scales[,-2,]>maxHomoSigma] <- maxHomoSigma
   if(verbose) cat(".")
 
   ##Means
@@ -470,7 +479,7 @@ updateAffySnpParams <- function(object, priors, missingStrandIndex, minN=3,
     tmp <- t(sapply(1:nrow(mu),function(i){
       if(verbose & i%%5000==0)  cat(".")
       mus=mu[i,]; Ns=N[i,]
-      mus[Ns<minN]<-0
+      mus[Ns<minN] <- 0
       mus[is.na(mus)] <- 0
       return(solve(Vinv+diag(NSinv[,i]))%*%(NSinv[,i]*mus))
     }))
@@ -504,9 +513,9 @@ getAffySnpDistance <- function(object,params,f=0,subset=1:(dim(object)[1]),
       if(!is.null(w)) Dist[,,j,i] <-  Dist[,,j,i] - 2*log(w[subset,,j,i])
     }
   }
-  dimnames(Dist) <- list(dimnames(x)[[1]],
-                         dimnames(x)[[2]], 1:3,
-                         dimnames(x)[[3]])
+#####   dimnames(Dist) <- list(dimnames(x)[[1]],
+#####                          dimnames(x)[[2]], 1:3,
+#####                          dimnames(x)[[3]])
   if(verbose) cat("Done.\n")
   return(Dist)
 }
@@ -514,11 +523,11 @@ getAffySnpDistance <- function(object,params,f=0,subset=1:(dim(object)[1]),
 getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
                             verbose=FALSE){
   Dist <- Dist[subset,,,,drop=FALSE]
-  XIndex <- which(subset%in%XIndex)
+####  XIndex <- which(subset%in%XIndex)
   ## gc()
   ## Here we can even put default value to 3 for the new code. /HB
   res <- array(as.integer(-1),dim=dim(Dist)[c(1,2)]); ## gc()
-  dimnames(res) <- dimnames(Dist)[1:2]
+#####  dimnames(res) <- dimnames(Dist)[1:2]
   Dist <- rowSums(Dist, na.rm=TRUE, dims=3)
   ##  Dist[XIndex, maleIndex, 2] <- Inf
   
@@ -534,8 +543,8 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
     d23 <- (D2 < D3); rm(D2);
     d13 <- (D1 < D3); rm(D3);
     d <- rep(as.integer(3), length(D1)); rm(D1)
-    d[( d12 & d13)] <- as.integer(1);
-    d[(!d12 & d23)] <- as.integer(2);
+    d[( d12 & d13)] <- as.integer(1); rm(d13)
+    d[(!d12 & d23)] <- as.integer(2); rm(d12, d23)
     res[,j] <- d;
     rm(d);
   }
@@ -545,24 +554,25 @@ getAffySnpCalls <- function(Dist,XIndex,maleIndex,subset=1:(dim(Dist)[1]),
 
 getAffySnpConfidence <- function(Dist, Calls, XIndex, maleIndex,
                                  subset=1:nrow(Calls), verbose=TRUE){
-  Dist <- Dist[subset,,,,drop=FALSE]
+  Dist <- rowSums(Dist[subset,,,,drop=FALSE], dims=3, na.rm=T)
   Calls <- Calls[subset,,drop=FALSE]
-  XIndex <- which(subset%in%XIndex)
+####  XIndex <- which(subset%in%XIndex)
 
   res <- array(NA,dim=dim(Dist)[c(1,2)])
-  dimnames(res) <- list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
-  Dist <- rowSums(Dist, dims=3, na.rm=T)
+#####  dimnames(res) <- list(dimnames(Dist)[[1]],dimnames(Dist)[[2]])
+#####  Dist <- rowSums(Dist, dims=3, na.rm=T)
   
   cat("Computing confidence for calls on ",ncol(res)," arrays")
   ##apply is faster apply but takes too much memory
-  Index <- 1:nrow(Calls)
+####  Index <- 1:nrow(Calls)
+  Index2 <- 1:nrow(Calls)
   for(j in 1:ncol(res)){
 ##    if(maleIndex[j]){
 ##      Index2 <- Index[-XIndex]
 ##    }else{
 ##      Index2 <- Index
 ##    }
-    Index2 <- Index
+##    Index2 <- Index
     if (verbose) cat(".")
     tmpdist <- cbind(abs(Dist[,j,1]-Dist[,j,2]),abs(Dist[,j,2]-Dist[,j,3]))
     tmpIndex <- split(Index2, factor(Calls[Index2,j], levels=1:3), drop=FALSE)
@@ -613,7 +623,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   }
   annotname <- annotation(object)
   load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste(annotname, ".crlmm.regions", sep="")))
-  myenv <- get(paste(annotname,"Crlmm",sep=""))
+  myenv <- get(paste(annotname,"Crlmm",sep="")); rm(list=paste(annotname,"Crlmm",sep=""))
+  thePriors <- get("priors", myenv)
 
   ## Index <- which(!get("hapmapCallIndex",myenv)  |  get("badCallIndex",myenv) | get("badRegions", myenv))
 
@@ -628,8 +639,9 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   rm(myCalls); ## gc()
   oneStrand <- apply(is.na(getM(object[,1])[,1,]), 1,
                      function(v) ifelse(length(ll <- which(v))==0, 0, ll))
-  rparams <- updateAffySnpParams(rparams, get("priors",myenv), oneStrand, verbose=TRUE)
+  rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=TRUE)
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
+  rm(myenv)
   rm(Index)
   myDist <- getAffySnpDistance(object, params, fs)
   myDist[,,-2,] <- 1.5*myDist[,,-2,]
@@ -645,7 +657,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                            rep(sqrt(snr), each=nrow(LLR)),
                            as.numeric(sqrt(LLR)),
                            as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-                           .fp(fs), .fm(fs), as.integer(myCalls), chunksize=5000)
+                           .fp(fs), .fm(fs), as.integer(myCalls), chunksize=2500)
   pacc <- matrix(pacc, ncol=ncol(myCalls))
   minPforCalls <- c(.5, .1, .5)
   if(recalibrate){
@@ -662,7 +674,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                                               fs, verbose=verbose)
     rm(myCalls)
     ## gc()
-    rparams <- updateAffySnpParams(rparams, get("priors", myenv), oneStrand)
+
+    rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
     myDist[,,-2,] <- 1.5*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
@@ -671,7 +684,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                              rep(sqrt(snr), each=nrow(LLR)),
                              as.numeric(sqrt(LLR)),
                              as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-                             .fp(fs), .fm(fs), as.integer(myCalls), chunksize=5000)
+                             .fp(fs), .fm(fs), as.integer(myCalls), chunksize=2500)
     rm(fs, myDist)
     pacc <- matrix(pacc, ncol=ncol(myCalls))
   }
@@ -707,7 +720,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              experimentData=experimentData(object),
              annotation=annotation(object),
              calls=myCalls,
-             callsConfidence=pacc))
+             callsConfidence=pacc,
+             LLR=LLR))
 }
 
 
@@ -723,7 +737,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-.predictAccuracy <- function(type, snr, llr, avg, fp, fm, the.calls, chunksize=5000){
+.predictAccuracy <- function(type, snr, llr, avg, fp, fm, the.calls, chunksize=2500){
   load(paste(system.file(package=paste(type, ".crlmm.regions", sep=""), "data/"), type, ".spline.params.rda", sep=""))
   htz <- the.calls == 2
   idx <- which(htz)
