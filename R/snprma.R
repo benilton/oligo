@@ -60,7 +60,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   pms <- correctionsLite(oBatch)
   annot <- annotation(oBatch)
   ColMode(pms)
-  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
+  set.buffer.dim(pms, 50000, 1)
   cat("Normalizing...")
   if (normalizeToHapmap){
     require(paste(annot, ".crlmm.regions", sep=""), character.only=TRUE, quietly=TRUE)
@@ -86,7 +86,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
                  sep="")
   idx <- order(pnVec)
   pms <- subBufferedMatrix(pms, idx)
-  set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
+  set.buffer.dim(pms, 50000, 1)
   pnVec <- pnVec[idx]
   rm(idx); ## gc()
 

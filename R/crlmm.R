@@ -599,7 +599,7 @@ replaceAffySnpParams <- function(object,value,subset){
 }
 
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
-                  minLLRforCalls=c(25, 5, 25),
+                  minPforCalls=c(.5, .1, .5),
                   verbose=TRUE, correctionFile=NULL){
   library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
@@ -622,7 +622,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     maleIndex <- object$gender=="male"
   }
   annotname <- annotation(object)
-  load(system.file(paste("data/", annotname, "CrlmmInfo.rda", sep=""), package=paste(annotname, ".crlmm.regions", sep="")))
+  load(system.file(paste("extdata/", annotname, "CrlmmInfo.rda", sep=""), package=annotname))
   myenv <- get(paste(annotname,"Crlmm",sep="")); rm(list=paste(annotname,"Crlmm",sep=""))
   thePriors <- get("priors", myenv)
 
@@ -659,7 +659,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                            as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
                            .fp(fs), .fm(fs), as.integer(myCalls), chunksize=2500)
   pacc <- matrix(pacc, ncol=ncol(myCalls))
-  minPforCalls <- c(.5, .1, .5)
+##  minPforCalls <- c(.5, .1, .5)
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
     for(k in 1:3)
@@ -738,7 +738,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ### }
 
 .predictAccuracy <- function(type, snr, llr, avg, fp, fm, the.calls, chunksize=2500){
-  load(paste(system.file(package=paste(type, ".crlmm.regions", sep=""), "data/"), type, ".spline.params.rda", sep=""))
+  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
   htz <- the.calls == 2
   idx <- which(htz)
   sets <- split(idx, rep(1:length(idx), each=chunksize, length.out=length(idx)))

@@ -96,7 +96,7 @@ setMethod("pm", "FeatureSet",
             if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
             tmp <- subBufferedMatrix(exprs(object), pmindex(object))
             RowMode(tmp)
-            set.buffer.dim(tmp, nrow(tmp), 1)
+            set.buffer.dim(tmp, 50000, 1)
             return(tmp)
           })
 
@@ -284,11 +284,10 @@ setMethod("rma", "FeatureSet",
             pnVec <- pnVec[idx]
             rm(idx); gc()
             ColMode(pms)
-            set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
+            set.buffer.dim(pms, 50000, 1)
             if (background) bg.correct.BufferedMatrix(pms, copy=FALSE)
             if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
             RowMode(pms)
-            set.buffer.dim(pms, as.integer(nrow(pms)/10), 1)
             exprs <- median.polish.summarize(pms, length(unique(pnVec)), pnVec)
             rownames(exprs) <- unique(pnVec)
             colnames(exprs) <- sampleNames(object)
