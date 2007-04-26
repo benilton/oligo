@@ -721,7 +721,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              annotation=annotation(object),
              calls=myCalls,
              callsConfidence=pacc,
-             LLR=LLR))
+             LLR=LLR,
+             featureData=featureData(object)))
 }
 
 

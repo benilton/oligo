@@ -237,28 +237,74 @@ below:
 R> calls(crlmmOut)[1:5, 1:2]
 \end{Sinput}
 \begin{Soutput}
-  CEU_NA06985_XBA.CEL.gz CEU_NA06991_XBA.CEL.gz
-1                      2                      3
-2                      1                      1
-3                      1                      2
-4                      2                      1
-5                      1                      1
+              CEU_NA06985_XBA.CEL.gz CEU_NA06991_XBA.CEL.gz
+SNP_A-1507972                      2                      3
+SNP_A-1510136                      1                      1
+SNP_A-1511055                      1                      2
+SNP_A-1518245                      2                      1
+SNP_A-1641749                      1                      1
 \end{Soutput}
 \begin{Sinput}
 R> callsConfidence(crlmmOut)[1:5, 1:2]
 \end{Sinput}
 \begin{Soutput}
-  CEU_NA06985_XBA.CEL.gz CEU_NA06991_XBA.CEL.gz
-1              0.9994679              0.9999017
-2              0.9989516              0.9984237
-3              0.9931806              0.9999105
-4              0.9988607              0.9998467
-5              0.9998194              0.9997692
+              CEU_NA06985_XBA.CEL.gz CEU_NA06991_XBA.CEL.gz
+SNP_A-1507972              0.9994679              0.9999017
+SNP_A-1510136              0.9989516              0.9984237
+SNP_A-1511055              0.9931806              0.9999105
+SNP_A-1518245              0.9988607              0.9998467
+SNP_A-1641749              0.9998194              0.9997692
 \end{Soutput}
 \end{Schunk}
 
 The genotype calls are represented by 1 (AA), 2 (AB) and 3 (BB). The
 confidence is the log-likelihood ratio of the two most likely calls.
+
+\subsection{Exploring the Annotation Package}
+
+The user who is willing to make deeper investigation using the
+annotations provided for each SNP array can use SQL queries to access
+more other information that might not be directly exposed.
+
+The example below demonstrates how to see the available tables, fields
+and extract chromosome, physical location and cytoband for the first
+five SNP's (probes querying specific SNP's have names starting with
+the string ``SNP'').
+
+\begin{Schunk}
+\begin{Sinput}
+R> annot <- annotation(rawData)
+R> conn <- db(get(annot))
+R> dbListTables(conn)
+\end{Sinput}
+\begin{Soutput}
+ [1] "featureSet"   "mmfeature"    "pm_mm"       
+ [4] "pmfeature"    "qcmmfeature"  "qcpm_qcmm"   
+ [7] "qcpmfeature"  "sequence"     "sqlite_stat1"
+[10] "table_info"  
+\end{Soutput}
+\begin{Sinput}
+R> dbListFields(conn, "featureSet")
+\end{Sinput}
+\begin{Soutput}
+ [1] "fsetid"          "man_fsetid"      "affy_snp_id"    
+ [4] "dbsnp_rs_id"     "chrom"           "physical_pos"   
+ [7] "strand"          "allele_a"        "allele_b"       
+[10] "fragment_length"
+\end{Soutput}
+\begin{Sinput}
+R> sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
+R> dbGetQuery(conn, sql)
+\end{Sinput}
+\begin{Soutput}
+     man_fsetid chrom physical_pos
+1 SNP_A-1650338     2    168433267
+2 SNP_A-1716667    19     40749462
+3 SNP_A-1712945    19     53411226
+4 SNP_A-1711654    21     31501701
+5 SNP_A-1717655     1     15312743
+\end{Soutput}
+\end{Schunk}
  
 \section{Details}
 
@@ -286,7 +332,7 @@ other attached packages:
              annotate  pd.mapping50k.xba240 
              "1.14.1"               "0.1.5" 
         hapmap100kxba                 oligo 
-                "1.0"               "1.0.2" 
+                "1.0"               "1.0.4" 
 BufferedMatrixMethods        BufferedMatrix 
               "1.0.0"               "1.0.0" 
               RSQLite                   DBI 
@@ -296,6 +342,5 @@ BufferedMatrixMethods        BufferedMatrix
 \end{Soutput}
 \end{Schunk}
 
-\bibliography{oligoVignette}
 
 \end{document}

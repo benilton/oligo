@@ -197,6 +197,26 @@ callsConfidence(crlmmOut)[1:5,1:2]
 
 The genotype calls are represented by 1 (AA), 2 (AB) and 3 (BB). The
 confidence is the log-likelihood ratio of the two most likely calls.
+
+\subsection{Exploring the Annotation Package}
+
+The user who is willing to make deeper investigation using the
+annotations provided for each SNP array can use SQL queries to access
+more other information that might not be directly exposed.
+
+The example below demonstrates how to see the available tables, fields
+and extract chromosome, physical location and cytoband for the first
+five SNP's (probes querying specific SNP's have names starting with
+the string ``SNP'').
+
+<<>>=
+annot <- annotation(rawData)
+conn <- db(get(annot))
+dbListTables(conn)
+dbListFields(conn, "featureSet")
+sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
+dbGetQuery(conn, sql)
+@ 
  
 \section{Details}
 
@@ -206,6 +226,5 @@ This document was written using:
 sessionInfo()
 @ 
 
-\bibliography{oligoVignette}
 
 \end{document}
