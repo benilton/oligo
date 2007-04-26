@@ -7,14 +7,14 @@
   Maximum-likelihood based distances).
 }
 \usage{
-crlmm(object, correction = NULL, recalibrate = TRUE, minLLRforCalls = c(25, 5, 25), verbose = TRUE, correctionFile = NULL)
+crlmm(object, correction = NULL, recalibrate = TRUE, minPforCalls = c(.5, .1, .5), verbose = TRUE, correctionFile = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{\code{SnpQSet} object}
   \item{correction}{The output of the EM algorithm}
   \item{recalibrate}{Logical - should recalibration be performed?}
-  \item{minLLRforCalls}{Minimum thresholds for genotype calls.}
+  \item{minPforCalls}{Minimum thresholds for genotype calls.}
   \item{verbose}{Logical.}
   \item{correctionFile}{A filename.}
 }

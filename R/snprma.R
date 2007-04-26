@@ -63,8 +63,8 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
   set.buffer.dim(pms, 50000, 1)
   cat("Normalizing...")
   if (normalizeToHapmap){
-    require(paste(annot, ".crlmm.regions", sep=""), character.only=TRUE, quietly=TRUE)
-    data(list=paste(platform(oBatch), "Ref", sep=""))
+    require(annot, character.only=TRUE, quietly=TRUE)
+    load(system.file("extdata", paste(annot, "Ref.rda", sep=""), package=annot))
     reference <- sort(reference)
     pms <- normalizeToSample(pms, sort(reference))
   }else{
@@ -74,6 +74,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
       save(reference, file="quantileReference.rda")
     }
   }
+  rm(reference)
   cat(" done.\n")
 
   ## get rma pars:
