@@ -71,6 +71,7 @@ exportMethods("$",
               "pmindex",
               "pmPosition",
               "pmSequence",
+              "pmStrand",
               "position",
               "probeNames",
               "rma",
@@ -86,12 +87,11 @@ export("basecontent",
        "read.xysfiles",
        "sequenceDesignMatrix",
        "list.celfiles",
-       "list.xysfiles")
+       "list.xysfiles",
+       "getPD")
 
 ## Exported functions for CRLMM
 
 export("crlmm",
-       "snprma")
-
-     
-       
+       "snprma",
+       "justSNPRMA")

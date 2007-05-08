@@ -614,6 +614,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     correction <- fitAffySnpMixture(object,verbose=verbose)
     save(correction, file=correctionFile)
   }
+  snr <- correction$snr
+
   if(is.null(object$gender)){
     if(verbose) cat("Gender not provided... using data to predict.\n")
     warning("Gender not provided... using data to predict.")
@@ -652,23 +654,25 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
   rm(myDist)
   load(correctionFile)
-  fs <- correction$fs; snr <- correction$snr; rm(correction)
-  pacc <- .predictAccuracy(annotation(object),
-                           rep(sqrt(snr), each=nrow(LLR)),
-                           as.numeric(sqrt(LLR)),
-                           as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-                           .fp(fs), .fm(fs), as.integer(myCalls), chunksize=2500)
-  pacc <- matrix(pacc, ncol=ncol(myCalls))
+  fs <- correction$fs; rm(correction)
+##  fs <- correction$fs; snr <- correction$snr; rm(correction)
+##   pacc <- .predictAccuracy(annotation(object),
+##                            rep(sqrt(snr), each=nrow(LLR)),
+##                            as.numeric(sqrt(LLR)),
+##                            as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
+##                            as.integer(myCalls), chunksize=2500)
+##   pacc <- matrix(pacc, ncol=ncol(myCalls))
 ##  minPforCalls <- c(.5, .1, .5)
+  minLLRforCalls <- c(25, 5, 25)
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
-    for(k in 1:3)
-      myCalls[myCalls == k & pacc < minPforCalls[k]] <- NA
-    rm(pacc)
-
 ##     for(k in 1:3)
-##       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
-##     rm(LLR)
+##       myCalls[myCalls == k & pacc < minPforCalls[k]] <- NA
+##     rm(pacc)
+
+    for(k in 1:3)
+      myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
+    rm(LLR)
 
     rparams <- getAffySnpGenotypeRegionParams(object, myCalls,
                                               fs, verbose=verbose)
@@ -680,18 +684,16 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     myDist[,,-2,] <- 1.5*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
-    pacc <- .predictAccuracy(annotation(object),
-                             rep(sqrt(snr), each=nrow(LLR)),
-                             as.numeric(sqrt(LLR)),
-                             as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-                             .fp(fs), .fm(fs), as.integer(myCalls), chunksize=2500)
-    rm(fs, myDist)
-    pacc <- matrix(pacc, ncol=ncol(myCalls))
+##     pacc <- .predictAccuracy(annotation(object),
+##                              rep(sqrt(snr), each=nrow(LLR)),
+##                              as.numeric(sqrt(LLR)),
+##                              as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
+##                              as.integer(myCalls), chunksize=2500)
+##    rm(fs, myDist)
+    rm(myDist)
+##    pacc <- matrix(pacc, ncol=ncol(myCalls))
   }
 ##  ret <- list(calls=myCalls,llr=LLR)
-  load(correctionFile)
-  snr <- correction$snr
-  rm(correction)
   
   ## correction$snr
   ## maleIndex
@@ -720,8 +722,9 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              experimentData=experimentData(object),
              annotation=annotation(object),
              calls=myCalls,
-             callsConfidence=pacc,
-             LLR=LLR,
+             callsConfidence=LLR,
+##             callsConfidence=pacc,
+##             LLR=LLR,
              featureData=featureData(object)))
 }
 
@@ -738,7 +741,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-.predictAccuracy <- function(type, snr, llr, avg, fp, fm, the.calls, chunksize=2500){
+.predictAccuracy <- function(type, snr, llr, avg, the.calls, chunksize=2500){
   load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
   htz <- the.calls == 2
   idx <- which(htz)
@@ -751,11 +754,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                       ns(llr[sets[[i]]], df=3, knots=spline.params$htz$knots[2,],
                          Boundary.knots=spline.params$htz$boundary[2,]),
                       ns(avg[sets[[i]]], df=3, knots=spline.params$htz$knots[3,],
-                         Boundary.knots=spline.params$htz$boundary[3,]),
-                      ns(fp[sets[[i]]], df=3, knots=spline.params$htz$knots[4,],
-                         Boundary.knots=spline.params$htz$boundary[4,]),
-                      ns(fm[sets[[i]]], df=3, knots=spline.params$htz$knots[5,],
-                         Boundary.knots=spline.params$htz$boundary[5,]))%*%spline.params$htz$coefs)
+                         Boundary.knots=spline.params$htz$boundary[3,]))%*%spline.params$htz$coefs)
   }
   pred <- rep(0, length(snr))
   pred[htz] <- outhtz; rm(outhtz)
@@ -769,21 +768,9 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                       ns(llr[sets[[i]]], df=3, knots=spline.params$hmz$knots[2,],
                          Boundary.knots=spline.params$hmz$boundary[2,]),
                       ns(avg[sets[[i]]], df=3, knots=spline.params$hmz$knots[3,],
-                         Boundary.knots=spline.params$hmz$boundary[3,]),
-                      ns(fp[sets[[i]]], df=3, knots=spline.params$hmz$knots[4,],
-                         Boundary.knots=spline.params$hmz$boundary[4,]),
-                      ns(fm[sets[[i]]], df=3, knots=spline.params$hmz$knots[5,],
-                         Boundary.knots=spline.params$hmz$boundary[5,]))%*%spline.params$hmz$coefs)
+                         Boundary.knots=spline.params$hmz$boundary[3,]))%*%spline.params$hmz$coefs)
   }
   pred[!htz] <- outhmz
   rm(outhmz, spline.params)
   1/(1+exp(-pred))
-}
-
-.fp <- function(ff)
-  as.numeric(rowSums(ff, dims=2, na.rm=T))
-
-.fm <- function(ff){
-  ff[,,2] <- -ff[,,2]
-  as.numeric(rowSums(ff, dims=2, na.rm=T))
 }

@@ -60,9 +60,6 @@ setMethod("mmindex", "AffySNPPDInfo",
                        "select fid from mmfeature")[[1]]
           })
 
-setMethod("pmAllele", "AffySNPPDInfo", function(object)
-          dbGetQuery(db(object), "select allele from pmfeature")[[1]])
-          
 setMethod("kind", "AffySNPPDInfo",
           function(object) {
               "SNP"

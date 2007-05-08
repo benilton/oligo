@@ -41,13 +41,13 @@ correctionsLite <- function(x){
     xx <- correctionMatrix[set,]
     set.seed(1)
     idx <- sample(1:sum(set), min(ssSize, sum(set)))
-    xs <- xx[idx,]
-    xsTxs <- t(xs)%*%xs
+    xs <- t(xx[idx,])
+    xsTxs <- xs%*%t(xs)
     for (i in 1:ncol(pms)){
-      tmp <- solve(xsTxs, t(xs)%*%pms[set, i][idx])
+      tmp <- solve(xsTxs, xs%*%pms[set, i][idx])
       pms[set, i] <- pms[set, i]-xx%*%tmp+mean(pms[set, i])
     }
-    rm(xs)
+    rm(xs, xsTxs, tmp, idx, xx, set)
   }
   cat(" done.\n")
   ewApply(pms, exp2)
@@ -66,7 +66,7 @@ snprma <- function(oBatch, normalizeToHapmap=TRUE, saveQuant=FALSE){
     require(annot, character.only=TRUE, quietly=TRUE)
     load(system.file("extdata", paste(annot, "Ref.rda", sep=""), package=annot))
     reference <- sort(reference)
-    pms <- normalizeToSample(pms, sort(reference))
+    pms <- normalizeToSample(pms, reference)
   }else{
     normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
     if (saveQuant){

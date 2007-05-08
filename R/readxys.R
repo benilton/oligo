@@ -96,9 +96,9 @@ read.xysfiles <- function(filenames,
 
   ## Allocate memory for the intensities
   ## And giving the correct names for the columns
-##  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
+  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
 
-  e <- createBufferedMatrix(nProbes(get(designname)), length(filenames)*nwells, directory=tmpdir)
+##  e <- createBufferedMatrix(nProbes(get(designname)), length(filenames)*nwells, directory=tmpdir)
   colnames(e) <- tmp$samplenames
 
   ## Loading lookup table to correctly assign the wells
