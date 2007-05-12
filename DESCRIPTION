@@ -27,5 +27,5 @@ Collate: AllClasses.R
          show-methods.R
          snprma.R
 	 justSNPRMA.R
-SaveImage: Yes
+LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing
