@@ -123,7 +123,7 @@ justSNPRMA <- function(filenames, tmpdir=getwd(), memory.bound=FALSE,
   ## put PMs in right order
   ## get pnVec
   ## get length(unique(pnVec))
-  
+
   pnVec <- paste(probeNames(get(pkgname)),
                  c("A", "B")[pmAllele(get(pkgname))+1],
                  c("S", "A")[pmStrand(get(pkgname))+1],
@@ -135,12 +135,12 @@ justSNPRMA <- function(filenames, tmpdir=getwd(), memory.bound=FALSE,
   rm(idx); ## gc()
 
   RowMode(tmpExprs)
-  theExprs <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
-  colnames(theExprs) <- basename(filenames)
+  theSumm <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
   rm(tmpExprs, pnVec); ## gc()
-  theExprs <- sqsFrom(theExprs)
-  if (!is.null(phenoData)) phenoData(theExprs) <- phenoData
-  annotation(theExprs) <- pkgname
-  sampleNames(theExprs) <- basename(filenames)
-  return(theExprs)
+  colnames(theSumm) <- basename(filenames)
+  theSumm <- sqsFrom(theSumm)
+  if (!is.null(phenoData)) phenoData(theSumm) <- phenoData
+  annotation(theSumm) <- pkgname
+  sampleNames(theSumm) <- basename(filenames)
+  return(theSumm)
 }

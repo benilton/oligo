@@ -350,8 +350,14 @@ rowIndepChiSqTest <- function(call1,call2){
 
 getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
   if(verbose) cat("Computing centers and scales for 3 genotypes")
-  tmp <- .Call("R_HuberMatrixRows2", M+(initialcalls-2)*f,
-               as.integer(initialcalls), 1.5)
+  
+##   tmp <- .Call("R_HuberMatrixRows2", M+(initialcalls-2)*f,
+##                as.integer(initialcalls), 1.5)
+  
+  tmp <- .Call("R_trimmed_stats", M+(initialcalls-2)*f,
+               as.integer(initialcalls), 0.025)
+
+
 #####  centers <- scales <- N <- array(NA, dim=c(nrow(M),3))
 #####  scales <- N <- array(NA, dim=c(nrow(M),3))
 #####  dimnames(centers) <- dimnames(scales) <- dimnames(N) <- list(rownames(M), c("AA","AB","BB"))
@@ -599,7 +605,7 @@ replaceAffySnpParams <- function(object,value,subset){
 }
 
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
-                  minPforCalls=c(.5, .1, .5),
+                  minLLRforCalls=c(5, 1, 5),
                   verbose=TRUE, correctionFile=NULL){
   library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
@@ -643,8 +649,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                      function(v) ifelse(length(ll <- which(v))==0, 0, ll))
   rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=TRUE)
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
-  rm(myenv)
-  rm(Index)
+##  save(rparams, params, file=paste(annotation(object), "-ParamsBeforeRec-", spl, ".rda", sep=""))
+  rm(myenv, Index)
   myDist <- getAffySnpDistance(object, params, fs)
   myDist[,,-2,] <- 1.5*myDist[,,-2,]
   rm(params)
@@ -663,7 +669,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ##                            as.integer(myCalls), chunksize=2500)
 ##   pacc <- matrix(pacc, ncol=ncol(myCalls))
 ##  minPforCalls <- c(.5, .1, .5)
-  minLLRforCalls <- c(25, 5, 25)
+##  minLLRforCalls <- c(25, 5, 25)
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
 ##     for(k in 1:3)
@@ -673,28 +679,31 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     for(k in 1:3)
       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
     rm(LLR)
-
+    myCalls[, snr < 3.675] <- NA
+    
     rparams <- getAffySnpGenotypeRegionParams(object, myCalls,
                                               fs, verbose=verbose)
     rm(myCalls)
     ## gc()
 
     rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
+##    save(rparams, file=paste(annotation(object), "-ParamsAfterRec-", spl, "-.rda", sep=""))
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
     myDist[,,-2,] <- 1.5*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
-##     pacc <- .predictAccuracy(annotation(object),
-##                              rep(sqrt(snr), each=nrow(LLR)),
-##                              as.numeric(sqrt(LLR)),
-##                              as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-##                              as.integer(myCalls), chunksize=2500)
-##    rm(fs, myDist)
-    rm(myDist)
-##    pacc <- matrix(pacc, ncol=ncol(myCalls))
+    dst <- matrix(rep(computeSnpDst(params=rparams), ncol(myCalls)), ncol=ncol(myCalls))
+    pacc <- .predictAccuracy(annotation(object),
+                             rep(sqrt(snr), each=nrow(LLR)),
+                             as.numeric(sqrt(LLR)),
+                             as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
+                             as.integer(myCalls == 2), as.numeric(dst), chunksize=2500)
+    rm(fs, myDist)
+    ##rm(myDist)
+    pacc <- matrix(pacc, ncol=ncol(myCalls))
   }
 ##  ret <- list(calls=myCalls,llr=LLR)
-  
+
   ## correction$snr
   ## maleIndex
   gender <- rep("female", length(maleIndex))
@@ -723,6 +732,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              annotation=annotation(object),
              calls=myCalls,
              callsConfidence=LLR,
+             pAcc=pacc,
 ##             callsConfidence=pacc,
 ##             LLR=LLR,
              featureData=featureData(object)))
@@ -741,36 +751,30 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-.predictAccuracy <- function(type, snr, llr, avg, the.calls, chunksize=2500){
+.predictAccuracy <- function(type, snr, llr, avg, htz, dst, chunksize=2500){
   load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
-  htz <- the.calls == 2
-  idx <- which(htz)
-  sets <- split(idx, rep(1:length(idx), each=chunksize, length.out=length(idx)))
-  outhtz <- NULL
-  for (i in 1:length(sets)){
-    outhtz <- c(outhtz,
-                cbind(1, ns(snr[sets[[i]]], df=3, knots=spline.params$htz$knots[1,],
-                            Boundary.knots=spline.params$htz$boundary[1,]),
-                      ns(llr[sets[[i]]], df=3, knots=spline.params$htz$knots[2,],
-                         Boundary.knots=spline.params$htz$boundary[2,]),
-                      ns(avg[sets[[i]]], df=3, knots=spline.params$htz$knots[3,],
-                         Boundary.knots=spline.params$htz$boundary[3,]))%*%spline.params$htz$coefs)
+  llr.sp <- pmin(llr, 10)
+  snr.sp <- pmin(snr, 2.5)
+  dst.sp <- pmin(dst, 10)
+  p <- as.numeric(cbind(1, llr, llr.sp, htz, avg, avg^2,
+                        snr, snr.sp, dst, dst.sp,
+                        llr*htz, llr.sp*htz)%*%coefs)
+  rm(llr.sp, snr.sp, dst.sp)
+  1/(1+exp(-p))
+}
+
+computeSnpDst <- function(params, annotation=NULL){
+  if (!is.null(annotation)){
+    load(paste(system.file("extdata/", package=annotation),
+               annotation, "CrlmmInfo.rda", sep=""))
+    params <- get(paste(annotation, "Crlmm", sep=""))[["params"]]
+    rm(list=paste(annotation, "Crlmm", sep=""))
   }
-  pred <- rep(0, length(snr))
-  pred[htz] <- outhtz; rm(outhtz)
-  idx <- which(!htz)
-  sets <- split(idx, rep(1:length(idx), each=chunksize, length.out=length(idx)))
-  outhmz <- NULL
-  for (i in 1:length(sets)){
-    outhmz <- c(outhmz,
-                cbind(1, ns(snr[sets[[i]]], df=3, knots=spline.params$hmz$knots[1,],
-                            Boundary.knots=spline.params$hmz$boundary[1,]),
-                      ns(llr[sets[[i]]], df=3, knots=spline.params$hmz$knots[2,],
-                         Boundary.knots=spline.params$hmz$boundary[2,]),
-                      ns(avg[sets[[i]]], df=3, knots=spline.params$hmz$knots[3,],
-                         Boundary.knots=spline.params$hmz$boundary[3,]))%*%spline.params$hmz$coefs)
-  }
-  pred[!htz] <- outhmz
-  rm(outhmz, spline.params)
-  1/(1+exp(-pred))
+  cAA <- params$centers[,1,]+params$f0
+  cAB <- params$centers[,2,]
+  cBB <- params$centers[,3,]-params$f0
+  vAA <- params$scales[,1,]^2
+  vAB <- params$scales[,2,]^2
+  vBB <- params$scales[,3,]^2
+  sqrt(rowSums(((cAA-cAB)^2+(cAB-cBB)^2)/(vAA+vAB+vBB), na.rm=TRUE))
 }

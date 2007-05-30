@@ -279,29 +279,53 @@ setMethod("pmSequence", "FeatureSet",
 setMethod("mmSequence", "FeatureSet",
           function(object) mmSequence(get(annotation(object))))
 
+## setMethod("rma", "FeatureSet",
+##           function(object, background=TRUE, normalize=TRUE){
+##             stop("RMA temporarily broken...")
+##             pms <- pm(object)
+##             pnVec <- probeNames(object)
+##             idx <- order(pnVec)
+##             pms <- subBufferedMatrix(pms, idx)
+##             pnVec <- pnVec[idx]
+##             rm(idx); gc()
+##             ColMode(pms)
+##             set.buffer.dim(pms, 50000, 1)
+##             if (background) bg.correct.BufferedMatrix(pms, copy=FALSE)
+##             if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
+##             RowMode(pms)
+##             exprs <- median.polish.summarize(pms, length(unique(pnVec)), pnVec)
+##             rownames(exprs) <- unique(pnVec)
+##             colnames(exprs) <- sampleNames(object)
+##             rm(pms, pnVec); gc()
+##             out <- new("ExpressionSet",
+##                        exprs=exprs,
+##                        phenoData=phenoData(object),
+##                        experimentData=experimentData(object),
+##                        annotation=annotation(object))
+##             sampleNames(out) <- sampleNames(object)
+##             return(out)
+##           })
+
 setMethod("rma", "FeatureSet",
-          function(object, background=TRUE, normalize=TRUE){
-            stop("RMA temporarily broken...")
-            pms <- pm(object)
-            pnVec <- probeNames(object)
-            idx <- order(pnVec)
-            pms <- subBufferedMatrix(pms, idx)
-            pnVec <- pnVec[idx]
-            rm(idx); gc()
-            ColMode(pms)
-            set.buffer.dim(pms, 50000, 1)
-            if (background) bg.correct.BufferedMatrix(pms, copy=FALSE)
-            if (normalize) normalize.BufferedMatrix.quantiles(pms, copy=FALSE)
-            RowMode(pms)
-            exprs <- median.polish.summarize(pms, length(unique(pnVec)), pnVec)
-            rownames(exprs) <- unique(pnVec)
+          function(object, background=TRUE, normalize=TRUE, subset=NULL){
+            if (class(object) == "SnpFeatureSet") stop("Use justSNPRMA instead.")
+            pms <- pm(object, subset)
+            pnVec <- probeNames(object, subset)
+            ngenes <- length(unique(pnVec))
+            bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
+
+            exprs <-.Call("rma_c_complete_copy", pms, pms,
+                          pnVec, ngenes,  body(bg.dens),
+                          new.env(), normalize,
+                          background, 2, PACKAGE="oligo")
+
             colnames(exprs) <- sampleNames(object)
-            rm(pms, pnVec); gc()
+
             out <- new("ExpressionSet",
-                       exprs=exprs,
-                       phenoData=phenoData(object),
-                       experimentData=experimentData(object),
-                       annotation=annotation(object))
-            sampleNames(out) <- sampleNames(object)
+                       phenoData = phenoData(object),
+                       annotation = annotation(object),
+                       experimentData = experimentData(object),
+                       exprs = exprs)
             return(out)
           })
+
