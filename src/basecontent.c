@@ -18,7 +18,7 @@ char errmess[256];
 SEXP basecontent(SEXP x)
 {
   SEXP rv, rownames, colnames, dimnames, dim;
-  char *seq;
+  const char *seq;
   int i, j, n, ia, ic, ig, it;
 
   if( !isString(x) )

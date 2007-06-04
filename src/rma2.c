@@ -119,7 +119,7 @@
 
 
 
-void do_RMA(double *PM, char **ProbeNames, int *rows, int * cols,double *results,char **outNames,int nps);
+void do_RMA(double *PM, const char **ProbeNames, int *rows, int * cols,double *results,char **outNames,int nps);
 
 
 /************************************************************************************
@@ -141,12 +141,12 @@ void do_RMA(double *PM, char **ProbeNames, int *rows, int * cols,double *results
  **
  ************************************************************************************/
 
-void do_RMA(double *PM, char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps){
+void do_RMA(double *PM, const char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps){
   int j = 0;
   int i = 0;
   int k = 0;
   int size;
-  char *first;
+  const char *first;
   int first_ind;
   int max_nrows = 1000;
 
@@ -231,7 +231,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   double *outexpr;
   double *PM,*MM;
   char **outnames;
-  char **ProbeNames;
+  const char **ProbeNames;
   int i,nprobesets;
   
 
@@ -260,7 +260,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
     qnorm_c(PM,&rows,&cols);
   }
 
-  ProbeNames = Calloc(rows,char *);
+  ProbeNames = Calloc(rows,const char *);
 
   for (i =0; i < rows; i++)
     ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));

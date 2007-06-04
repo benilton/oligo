@@ -48,8 +48,7 @@ static void trimmed_stats(double *data, double *m1, double *m2, double *m3, int 
   int i, j, n1, n2, n3;
   double *datvec=Calloc(cols,double);
   int *classvec=Calloc(cols,int);
-  double tmp_trim;
-  //  tmp_trim=trim[0];
+
   for (i=0; i < rows; i++){
     n1=0;
     n2=0;
