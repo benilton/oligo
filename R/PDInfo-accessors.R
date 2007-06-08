@@ -12,7 +12,7 @@ setMethod("manufacturer", "PDInfo",
 setMethod("genomeBuild", "PDInfo",
           function(object) object@genomebuild)
 
-setMethod("db", "DBPDInfo",
+setMethod("db", signature(object="DBPDInfo"),
           function(object) object@getdb())
 
 setMethod("geometry", "PDInfo",

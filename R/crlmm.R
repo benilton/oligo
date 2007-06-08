@@ -606,7 +606,7 @@ replaceAffySnpParams <- function(object,value,subset){
 
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(5, 1, 5),
-                  verbose=TRUE, correctionFile=NULL){
+                  verbose=TRUE, correctionFile=NULL, spl=1){
   library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
     stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
@@ -694,9 +694,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
     dst <- matrix(rep(computeSnpDst(params=rparams), ncol(myCalls)), ncol=ncol(myCalls))
     pacc <- .predictAccuracy(annotation(object),
-                             rep(sqrt(snr), each=nrow(LLR)),
+                             rep(snr, each=nrow(LLR)),
                              as.numeric(sqrt(LLR)),
-                             as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
                              as.integer(myCalls == 2), as.numeric(dst), chunksize=2500)
     rm(fs, myDist)
     ##rm(myDist)
@@ -751,13 +750,12 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-.predictAccuracy <- function(type, snr, llr, avg, htz, dst, chunksize=2500){
+.predictAccuracy <- function(type, snr, llr, htz, dst, chunksize=2500){
   load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
-  llr.sp <- pmin(llr, 10)
-  snr.sp <- pmin(snr, 2.5)
-  dst.sp <- pmin(dst, 10)
-  p <- as.numeric(cbind(1, llr, llr.sp, htz, avg, avg^2,
-                        snr, snr.sp, dst, dst.sp,
+  llr.sp <- pmin(llr-br.llr, 0)
+  snr.sp <- pmin(snr, br.snr)
+  dst.sp <- pmin(dst, br.dst)
+  p <- as.numeric(cbind(1, llr, llr.sp, htz, snr.sp, dst.sp,
                         llr*htz, llr.sp*htz)%*%coefs)
   rm(llr.sp, snr.sp, dst.sp)
   1/(1+exp(-p))

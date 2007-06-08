@@ -15,7 +15,6 @@
 \newcommand{\Rclass}[1]{{\textit{#1}}}
 \newcommand{\oligo}{\Rpackage{oligo }}
 
-\usepackage{/home/bst/student/bcarvalh/bin/R-devel/share/texmf/Sweave}
 \begin{document}
 \title{Classes Used in the Oligo Package}
 \date{March, 2007}

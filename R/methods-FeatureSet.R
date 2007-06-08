@@ -91,6 +91,10 @@ setMethod("hist", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), ...)
           plotDensity(x, which=c("both", "pm", "mm"), ...))
 
+setMethod("hist", signature(x="ExpressionSet"),
+          function(x, which=c("both", "pm", "mm"), ...)
+          plotDensity(x, which=c("both", "pm", "mm"), ...))
+
 setMethod("pm", "FeatureSet",
           function(object, genenames=NULL){
             if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
@@ -162,10 +166,18 @@ setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which=c("both", "pm", "mm"), range=0, ...){
             which <- match.arg(which, c("both", "pm", "mm"))
             tmp <- description(x)
-            if (is(tmp, "MIAME")) main <- tmp@title
             tmp <- unlist(featureIndex(x, which))
             tmp <- tmp[seq(1, length(tmp), len=5000)]
-            boxplot(data.frame(log2(exprs(x)[tmp, ])), main=main, range=range, ...)
+            cols <- 1:length(sampleNames(x))
+            boxplot(data.frame(log2(exprs(x)[tmp, ])),  col=cols, range=range, ...)
+          })
+
+setMethod("boxplot", signature(x="ExpressionSet"),
+          function(x, which=c("both", "pm", "mm"), range=0, ...){
+            e <- data.frame(exprs(x))
+            tmp <- seq(1, nrow(e), len=5000)
+            cols <- 1:length(sampleNames(x))
+            boxplot(e[tmp, ],  col=cols, range=range, ...)
           })
 
 
@@ -272,6 +284,22 @@ setMethod("plotDensity", "FeatureSet", function(object, col=1:6, log=TRUE,
   invisible(list(all.x=all.x, all.y=all.y))
 })
 
+setMethod("plotDensity", "ExpressionSet", function(object, col=1:6, log=TRUE,
+                                                which=c("both","pm","mm"),
+                                                ylab="density",
+                                                xlab="log intensity",
+                                                type="l",
+                                                ...){
+  object <- exprs(object)
+  n <- ncol(object)
+  x.density <- list()
+  for (i in 1:n) x.density[[i]] <- density(object[,i])
+  all.x <- do.call("cbind", lapply(x.density, function(x) x$x))
+  all.y <- do.call("cbind", lapply(x.density, function(x) x$y))
+  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+  invisible(list(all.x=all.x, all.y=all.y))
+})
+
 
 setMethod("pmSequence", "FeatureSet",
           function(object) pmSequence(get(annotation(object))))
@@ -317,7 +345,7 @@ setMethod("rma", "FeatureSet",
             exprs <-.Call("rma_c_complete_copy", pms, pms,
                           pnVec, ngenes,  body(bg.dens),
                           new.env(), normalize,
-                          background, 2, PACKAGE="oligo")
+                          background, as.integer(2), PACKAGE="oligo")
 
             colnames(exprs) <- sampleNames(object)
 

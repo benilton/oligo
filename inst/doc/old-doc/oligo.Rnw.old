@@ -73,15 +73,34 @@ library(hapmap100kxba)
 pathCelFiles <- system.file("celFiles", package="hapmap100kxba")
 fullFilenames <- list.celfiles(path=pathCelFiles, full.names=TRUE)
 temporaryDir <- tempdir()
-preProcessedData <- justSNPRMA(fullFilenames, tmpdir=temporaryDir)
+rawData <- read.celfiles(fullFilenames, tmpdir=temporaryDir)
 @ 
 
-The SNPRMA approach described in \cite{Carvalho2006} is implemented in the
-\Rmethod{justSNPRMA} methods (see Figure \ref{snprma}), which
-preprocessess the CEL files in a more effective way in terms of memory
-management. It returns a \Rclass{SnpQSet} object without creating a
-\Rclass{SnpFeatureSet object}. The \Rclass{SnpQSet} object contains
-the summarized data.
+The \Robject{rawData} object is of class \Rclass{SnpFeatureSet}, which
+extends \Rclass{eSet}. Methods like \Rmethod{exprs()} and
+\Rmethod{pm()} are defined and, again, return \Rclass{BufferedMatrix}
+objects.
+
+The \Rclass{phenoData} slot includes covariates about the
+samples. Genotyping and copy number analyses often make use of gender
+information in order to provide more precise inferences. The code
+below exemplifies the creation of the \Rclass{phenoData} object.
+
+<<setPD>>=
+aboutSamples <- data.frame(gender=c("female", "female", "male"))
+rownames(aboutSamples) <- sampleNames(rawData)
+aboutVars <- data.frame(labelDescription="male/female")
+rownames(aboutVars) <- "gender"
+phenoData(rawData) <- new("AnnotatedDataFrame",
+                          data=aboutSamples,
+                          varMetadata=aboutVars)
+@ 
+
+Preprocessing SNP arrays can be done by using the \Rfunction{snprma()}
+method, described in \cite{Carvalho2006}. Once it is completed, an
+\Rclass{SnpQSet} object is returned, which is the summarized data of the
+\Robject{rawData} object above. An overview of the method is presented
+at Figure \ref{snprma}.
 
 \begin{figure}[h]
   \centering
@@ -89,7 +108,6 @@ the summarized data.
   \caption{SNPRMA overview}
   \label{snprma}
 \end{figure}
-
 
 For each SNP there are four numbers $(\theta_{A-}, \theta_{B-},
 \theta_{A+}, \theta_{B+})$, which are proportional to the
@@ -111,6 +129,7 @@ can be obtained via \Rmethod{getA()} and \Rmethod{getM} methods, which
 return high-dimensional arrays with dimensions corresponding to SNP's,
 samples and strands, respectively.
 <<snprma, cache=TRUE>>=
+preProcessedData <- snprma(rawData)
 theA <- getA(preProcessedData)
 theM <- getM(preProcessedData)
 dim(theA)
@@ -158,21 +177,6 @@ Increasing the sample size is one of the possible solutions, although
 the preferred one is to have \Robject{gender} already defined in the
 \Rclass{phenoData} slot.
 
-The \Rclass{phenoData} slot includes covariates about the
-samples. Genotyping and copy number analyses often make use of gender
-information in order to provide more precise inferences. The code
-below exemplifies the creation of the \Rclass{phenoData} object.
-
-<<setPD>>=
-aboutSamples <- data.frame(gender=c("female", "female", "male"))
-rownames(aboutSamples) <- sampleNames(preProcessedData)
-aboutVars <- data.frame(labelDescription="male/female")
-rownames(aboutVars) <- "gender"
-phenoData(preProcessedData) <- new("AnnotatedDataFrame",
-                                   data=aboutSamples,
-                                   varMetadata=aboutVars)
-@ 
-
 <<crlmm, cache=TRUE>>=
 crlmmOut <- crlmm(preProcessedData,
                   correctionFile="exampleCorrection.rda",
@@ -206,9 +210,8 @@ five SNP's (probes querying specific SNP's have names starting with
 the string ``SNP'').
 
 <<>>=
-annot <- annotation(preProcessedData)
-require(annot, character.only=TRUE)
-conn <- oligo:::db(get(annot))
+annot <- annotation(rawData)
+conn <- db(get(annot))
 dbListTables(conn)
 dbListFields(conn, "featureSet")
 sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
