@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{Oligo Vignette}
-%\VignetteDepends{oligo}
+%\VignetteDepends{oligo, hapmap100kxba, geneplotter}
 %\VignetteKeywords{Expression, SNP, Affymetrix, NimbleGen, Oligonucleotide Arrays}
 %\VignettePackage{oligo}
 \documentclass{article}
@@ -68,8 +68,8 @@ network. The \Robject{tmpdir} in the \Rfunction{read.celfiles()} sets
 the directory where the temporary files are going to be stored.
 
 <<getRawData>>=
-library(oligo)
-library(hapmap100kxba)
+library("oligo")
+library("hapmap100kxba")
 pathCelFiles <- system.file("celFiles", package="hapmap100kxba")
 fullFilenames <- list.celfiles(path=pathCelFiles, full.names=TRUE)
 temporaryDir <- tempdir()
@@ -121,7 +121,7 @@ These measures can be used, for example, to create an MA-plot and are
 later used for genotyping. The example below generates an MA-plot for
 the first sample using only the antisense strand data:
 <<maplot, fig=TRUE>>=
-library(geneplotter)
+library("geneplotter")
 smoothScatter(theA[,1,1], theM[,1,1], main="MA-plot (Antisense)",
               xlab="Average Intensity", ylab="Log-ratio (A/B)")
 @ 
