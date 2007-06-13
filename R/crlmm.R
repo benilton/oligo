@@ -696,7 +696,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     pacc <- .predictAccuracy(annotation(object),
                              rep(snr, each=nrow(LLR)),
                              as.numeric(sqrt(LLR)),
-                             as.integer(myCalls == 2), as.numeric(dst), chunksize=2500)
+                             as.integer(myCalls == 2),
+                             as.numeric(dst), chunksize=2500)
     rm(fs, myDist)
     ##rm(myDist)
     pacc <- matrix(pacc, ncol=ncol(myCalls))
@@ -750,17 +751,6 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-.predictAccuracy <- function(type, snr, llr, htz, dst, chunksize=2500){
-  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
-  llr.sp <- pmin(llr-br.llr, 0)
-  snr.sp <- pmin(snr, br.snr)
-  dst.sp <- pmin(dst, br.dst)
-  p <- as.numeric(cbind(1, llr, llr.sp, htz, snr.sp, dst.sp,
-                        llr*htz, llr.sp*htz)%*%coefs)
-  rm(llr.sp, snr.sp, dst.sp)
-  1/(1+exp(-p))
-}
-
 computeSnpDst <- function(params, annotation=NULL){
   if (!is.null(annotation)){
     load(paste(system.file("extdata/", package=annotation),
@@ -775,4 +765,29 @@ computeSnpDst <- function(params, annotation=NULL){
   vAB <- params$scales[,2,]^2
   vBB <- params$scales[,3,]^2
   sqrt(rowSums(((cAA-cAB)^2+(cAB-cBB)^2)/(vAA+vAB+vBB), na.rm=TRUE))
+}
+
+computeIntercept <- function(type, snr){
+  if (type == "pd.mapping50k.xba240" | type == "pd.mapping50k.hind240"){
+    lb.snr <- 3
+    ub.snr <- 5
+  }else{
+    lb.snr <- 3
+    ub.snr <- 5
+  }
+  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
+  delta <- 6
+  b <- delta/(log(ub.snr)-log(lb.snr))
+  p1 <- (coefs[1]-delta)*(snr <= ub.snr)
+  p2 <- (snr > lb.snr)*(snr < ub.snr)*(log(snr)-log(lb.snr))*b
+  p3 <- coefs[1]*(snr >= ub.snr)
+  p1+p2+p3
+}
+
+.predictAccuracy <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
+  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
+  llr.sp <- pmax(llr-br.llr, 0)
+  p <- as.numeric(cbind(1, llr, llr.sp, htz, pmin(snr, br.snr),
+                        pmin(dst, br.dst), llr*htz, llr.sp*htz)%*%coefs)
+  1/(1+exp(-p))
 }
