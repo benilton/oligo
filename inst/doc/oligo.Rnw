@@ -214,6 +214,9 @@ dbListFields(conn, "featureSet")
 sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
 dbGetQuery(conn, sql)
 @ 
+
+\bibliography{oligoVignette}{}
+\bibliographystyle{plain}
  
 \section{Details}
 
