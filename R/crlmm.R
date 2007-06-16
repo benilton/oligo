@@ -775,7 +775,7 @@ computeIntercept <- function(type, snr){
     lb.snr <- 3
     ub.snr <- 5
   }
-  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
+  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
   delta <- 6
   b <- delta/(log(ub.snr)-log(lb.snr))
   p1 <- (coefs[1]-delta)*(snr <= ub.snr)
@@ -784,10 +784,25 @@ computeIntercept <- function(type, snr){
   p1+p2+p3
 }
 
-.predictAccuracy <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
-  load(paste(system.file(package=type, "extdata/"), type, ".spline.params.rda", sep=""))
+.predictAccuracy2 <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
+  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
   llr.sp <- pmax(llr-br.llr, 0)
-  p <- as.numeric(cbind(1, llr, llr.sp, htz, pmin(snr, br.snr),
-                        pmin(dst, br.dst), llr*htz, llr.sp*htz)%*%coefs)
+  p <- as.numeric(cbind(1, llr, llr.sp, htz, pmin(dst, br.dst),
+                        llr*htz, llr.sp*htz)%*%coefs)
+  snr.thresh <- 2.5
+  p.thresh <- .999
+  idx <- log2(snr) < snr.thresh
+  tmp <- log(p.thresh/(1-p.thresh))
+  p[idx] <- pmin(tmp, p[idx])
+  p[idx] <- p[idx] + 5.4*(log2(snr[idx])-snr.thresh)
+  1/(1+exp(-p))
+}
+
+.predictAccuracy <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
+  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
+  llr.sp <- pmax(llr-br.llr, 0)
+  p <- as.numeric(cbind(llr, llr.sp, htz, pmin(dst, br.dst),
+                        llr*htz, llr.sp*htz)%*%coefs[-1])
+  p <- p+computeIntercept(type, snr)
   1/(1+exp(-p))
 }
