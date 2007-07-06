@@ -3,7 +3,7 @@ Version: 1.1.5
 Title: Oligonucleotide Arrays
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarr <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
-Depends: methods, R (>= 2.6.0), Biobase (>= 1.13.58), affyio (>= 1.3.4),
+Depends: methods, R (>= 2.5.0), Biobase (>= 1.13.58), affyio (>= 1.3.4),
          splines, RSQLite, BufferedMatrix (>= 0.99.00), BufferedMatrixMethods (>= 0.99.0),
 	 preprocessCore
 LinkingTo: preprocessCore

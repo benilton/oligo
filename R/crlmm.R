@@ -606,7 +606,7 @@ replaceAffySnpParams <- function(object,value,subset){
 
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(5, 1, 5),
-                  verbose=TRUE, correctionFile=NULL, spl=1){
+                  verbose=TRUE, correctionFile=NULL, prefix="tmp.crlmm.", balance=1.5){
   library(annotation(object), character.only=TRUE)
   if(is.null(correctionFile))
     stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
@@ -649,11 +649,11 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                      function(v) ifelse(length(ll <- which(v))==0, 0, ll))
   rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=TRUE)
   params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
-##  save(rparams, params, file=paste(annotation(object), "-ParamsBeforeRec-", spl, ".rda", sep=""))
+  save(rparams, params, file=paste(prefix, "ParamsBeforeRec.rda", sep=""))
   rm(myenv, Index)
   myDist <- getAffySnpDistance(object, params, fs)
-  myDist[,,-2,] <- 1.5*myDist[,,-2,]
-  rm(params)
+  myDist[,,-2,] <- balance*myDist[,,-2,]
+##  rm(params)
   rm(fs); ## gc()
   XIndex <- getChrXIndex(object)
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose)
@@ -661,21 +661,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   rm(myDist)
   load(correctionFile)
   fs <- correction$fs; rm(correction)
-##  fs <- correction$fs; snr <- correction$snr; rm(correction)
-##   pacc <- .predictAccuracy(annotation(object),
-##                            rep(sqrt(snr), each=nrow(LLR)),
-##                            as.numeric(sqrt(LLR)),
-##                            as.numeric(rowMeans(getA(object), dims=2, na.rm=TRUE)),
-##                            as.integer(myCalls), chunksize=2500)
-##   pacc <- matrix(pacc, ncol=ncol(myCalls))
-##  minPforCalls <- c(.5, .1, .5)
-##  minLLRforCalls <- c(25, 5, 25)
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
-##     for(k in 1:3)
-##       myCalls[myCalls == k & pacc < minPforCalls[k]] <- NA
-##     rm(pacc)
-
     for(k in 1:3)
       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
     rm(LLR)
@@ -687,22 +674,14 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     ## gc()
 
     rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
-##    save(rparams, file=paste(annotation(object), "-ParamsAfterRec-", spl, "-.rda", sep=""))
+    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
-    myDist[,,-2,] <- 1.5*myDist[,,-2,]
+    myDist[,,-2,] <- balance*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
-    dst <- matrix(rep(computeSnpDst(params=rparams), ncol(myCalls)), ncol=ncol(myCalls))
-    pacc <- .predictAccuracy(annotation(object),
-                             rep(snr, each=nrow(LLR)),
-                             as.numeric(sqrt(LLR)),
-                             as.integer(myCalls == 2),
-                             as.numeric(dst), chunksize=2500)
     rm(fs, myDist)
-    ##rm(myDist)
-    pacc <- matrix(pacc, ncol=ncol(myCalls))
+    pacc <- LLR2conf(myCalls, LLR, snr, annotation(object))
   }
-##  ret <- list(calls=myCalls,llr=LLR)
 
   ## correction$snr
   ## maleIndex
@@ -733,8 +712,6 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              calls=myCalls,
              callsConfidence=LLR,
              pAcc=pacc,
-##             callsConfidence=pacc,
-##             LLR=LLR,
              featureData=featureData(object)))
 }
 
@@ -751,58 +728,29 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 ###   }
 ### }
 
-computeSnpDst <- function(params, annotation=NULL){
-  if (!is.null(annotation)){
-    load(paste(system.file("extdata/", package=annotation),
-               annotation, "CrlmmInfo.rda", sep=""))
-    params <- get(paste(annotation, "Crlmm", sep=""))[["params"]]
-    rm(list=paste(annotation, "Crlmm", sep=""))
-  }
-  cAA <- params$centers[,1,]+params$f0
-  cAB <- params$centers[,2,]
-  cBB <- params$centers[,3,]-params$f0
-  vAA <- params$scales[,1,]^2
-  vAB <- params$scales[,2,]^2
-  vBB <- params$scales[,3,]^2
-  sqrt(rowSums(((cAA-cAB)^2+(cAB-cBB)^2)/(vAA+vAB+vBB), na.rm=TRUE))
-}
+LLR2conf <-function(theCalls, LLR, SNR, annot){
+  load(paste(system.file("extdata", package=annot), "/", annot, ".spline.params.rda", sep=""))
 
-computeIntercept <- function(type, snr){
-  if (type == "pd.mapping50k.xba240" | type == "pd.mapping50k.hind240"){
-    lb.snr <- 3
-    ub.snr <- 5
-  }else{
-    lb.snr <- 3
-    ub.snr <- 5
-  }
-  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
-  delta <- 6
-  b <- delta/(log(ub.snr)-log(lb.snr))
-  p1 <- (coefs[1]-delta)*(snr <= ub.snr)
-  p2 <- (snr > lb.snr)*(snr < ub.snr)*(log(snr)-log(lb.snr))*b
-  p3 <- coefs[1]*(snr >= ub.snr)
-  p1+p2+p3
-}
+  Het <- as.vector(theCalls==2)
+  dst <- rep(Dst, ncol(theCalls))
+  LLR <- as.vector(sqrt(LLR))
 
-.predictAccuracy2 <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
-  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
-  llr.sp <- pmax(llr-br.llr, 0)
-  p <- as.numeric(cbind(1, llr, llr.sp, htz, pmin(dst, br.dst),
-                        llr*htz, llr.sp*htz)%*%coefs)
-  snr.thresh <- 2.5
-  p.thresh <- .999
-  idx <- log2(snr) < snr.thresh
-  tmp <- log(p.thresh/(1-p.thresh))
-  p[idx] <- pmin(tmp, p[idx])
-  p[idx] <- p[idx] + 5.4*(log2(snr[idx])-snr.thresh)
-  1/(1+exp(-p))
-}
+  conf <- vector("numeric", length(LLR))
+  tmp <- pmin(LLR[!Het], HmzK3)
+  conf[!Het] <- lm1$coef[1]+lm1$coef[2]*tmp+lm1$coef[3]*(tmp-HmzK2)*I(tmp>HmzK2)
 
-.predictAccuracy <- function(type, snr, llr, htz, dst, avg, chunksize=2500){
-  load(paste(system.file("extdata", package=type), "/", type, ".spline.params.rda", sep=""))
-  llr.sp <- pmax(llr-br.llr, 0)
-  p <- as.numeric(cbind(llr, llr.sp, htz, pmin(dst, br.dst),
-                        llr*htz, llr.sp*htz)%*%coefs[-1])
-  p <- p+computeIntercept(type, snr)
-  1/(1+exp(-p))
+  tmp <- pmin(LLR[Het], HtzK3)
+  conf[Het] <- lm2$coef[1]+lm2$coef[2]*tmp+lm2$coef[3]*(tmp-HtzK2)*I(tmp>HtzK2)
+
+  conf <- matrix(conf, ncol=ncol(theCalls))
+
+  X <- pmin(log(SNR), SNRK)
+  SNRfix <- SNRlm$coef[1]+SNRlm$coef[2]*X
+  conf <- sweep(conf, 2, SNRfix, FUN="+")
+
+  conf <- 1/(1+exp(-conf))
+  conf[,SNR<=3] <- 1/3
+  conf[conf<1/3] <- 1/3
+
+  return(conf)
 }
