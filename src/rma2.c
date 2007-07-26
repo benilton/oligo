@@ -276,7 +276,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   outexpr = NUMERIC_POINTER(outvec);
  	    
   /* printf("Calculating Expression\n"); */
-  Rprintf("Calculating Expression\n");
+  /*  Rprintf("Calculating Expression\n");*/
 
 
   do_RMA(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets);

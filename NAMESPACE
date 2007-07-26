@@ -1,5 +1,5 @@
 useDynLib("oligo")
-import(Biobase, affyio, splines, graphics, stats, methods)
+import(Biobase, affyio, splines, graphics, stats, methods, affxparser)
 
 ## exportPattern("^[^\\.]")
 
@@ -7,15 +7,19 @@ import(Biobase, affyio, splines, graphics, stats, methods)
 exportClasses(PDInfo,
               DBPDInfo,
               SNPPDInfo,
+              SNPCNVPDInfo,
               AffySNPPDInfo,
+              AffySNPCNVPDInfo,
               platformDesign)
 
 ## FeatureSet classes
 exportClasses(FeatureSet,
               ExpressionFeatureSet,
               SnpFeatureSet,
+              SnpCnvFeatureSet,
               TilingFeatureSet,
               SnpQSet,
+              SnpCnvQSet,
               SnpCopyNumberSet,
               SnpCallSet,
               oligoSnpSet,
@@ -94,4 +98,5 @@ export("basecontent",
 
 export("crlmm",
        "snprma",
-       "justSNPRMA")
+       "justSNPRMA",
+       "justCRLMM")

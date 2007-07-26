@@ -65,6 +65,11 @@ setMethod("kind", "AffySNPPDInfo",
               "SNP"
           })
 
+setMethod("kind", "AffySNPCNVPDInfo",
+          function(object) {
+              "SNPCNV"
+          })
+
 ## setMethod("featureSetNames", c("AffySNPPDInfo", "missing"),
 ##           function(object, ids) {
 ##               sql <- "select man_fsetid from featureSet"

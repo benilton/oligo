@@ -11,11 +11,14 @@ setClass("DBPDInfo",
            geometry="integer"))
 
 setClass("SNPPDInfo", contains="DBPDInfo")
+setClass("SNPCNVPDInfo", contains="SNPPDInfo")
 ## We hope to have ExonPDInfo, TilingPDInfo soon
 
 setClass("AffySNPPDInfo", contains="SNPPDInfo",
          prototype=list(
            manufacturer="Affymetrix"))
+
+setClass("AffySNPCNVPDInfo", contains="AffySNPPDInfo")
 
 setClass("platformDesign",
          contains="PDInfo",
@@ -39,11 +42,15 @@ setClass("FeatureSet",
            manufacturer=character(),
            platform=character()))
 
+setClass("QuantificationSet", representation("VIRTUAL"), contains="eSet")
+
 setClass("ExpressionFeatureSet", contains="FeatureSet")
 setClass("SnpFeatureSet", contains="FeatureSet")
+setClass("SnpCnvFeatureSet", contains="SnpFeatureSet")
 setClass("TilingFeatureSet", contains="FeatureSet")
 setClass("ExonFeatureSet", contains="FeatureSet")
-setClass("SnpQSet", contains="eSet")
+setClass("SnpQSet", contains="QuantificationSet")
+setClass("SnpCnvQSet", contains="QuantificationSet")
 setClass("SnpCopyNumberSet", contains = "eSet")
 setClass("SnpCallSet", contains = "eSet")
 setClass("oligoSnpSet", contains=c("SnpCopyNumberSet", "SnpCallSet"))

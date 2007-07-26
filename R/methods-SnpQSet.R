@@ -38,10 +38,14 @@ setMethod("senseThetaA", "SnpQSet", function(obj) assayData(obj)$senseThetaA)
 setMethod("senseThetaB", "SnpQSet", function(obj) assayData(obj)$senseThetaB)
 setMethod("antisenseThetaA", "SnpQSet", function(obj) assayData(obj)$antisenseThetaA)
 setMethod("antisenseThetaB", "SnpQSet", function(obj) assayData(obj)$antisenseThetaB)
+
+
 setMethod("getM", "SnpQSet",
           function(obj){
-            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)), ncol(antisenseThetaA(obj)), 2),
-                         dimnames=list(rownames(antisenseThetaA(obj)), colnames(antisenseThetaA(obj)),
+            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)),
+                               ncol(antisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(antisenseThetaA(obj)),
+                           colnames(antisenseThetaA(obj)),
                            c("antisense", "sense")))
             tmp[,,1] <- antisenseThetaA(obj)-antisenseThetaB(obj)
             tmp[,,2] <- senseThetaA(obj)-senseThetaB(obj)
@@ -50,10 +54,25 @@ setMethod("getM", "SnpQSet",
 
 setMethod("getA", "SnpQSet",
           function(obj){
-            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)), ncol(antisenseThetaA(obj)), 2),
-                         dimnames=list(rownames(antisenseThetaA(obj)), colnames(antisenseThetaA(obj)),
+            tmp <- array(NA, dim=c(nrow(antisenseThetaA(obj)),
+                               ncol(antisenseThetaA(obj)), 2),
+                         dimnames=list(rownames(antisenseThetaA(obj)),
+                           colnames(antisenseThetaA(obj)),
                            c("antisense", "sense")))
             tmp[,,1] <- .5*(antisenseThetaA(obj)+antisenseThetaB(obj))
             tmp[,,2] <- .5*(senseThetaA(obj)+senseThetaB(obj))
             return(tmp)
           })
+
+##
+
+setMethod("thetaA", "SnpCnvQSet", function(obj) assayDataElement(obj, "thetaA"))
+setMethod("thetaB", "SnpCnvQSet", function(obj) assayDataElement(obj, "thetaB"))
+
+setMethod("getM", "SnpCnvQSet",
+          function(obj) thetaA(obj)-thetaB(obj)
+          )
+
+setMethod("getA", "SnpCnvQSet",
+          function(obj) (.5*thetaA(obj)+.5*thetaB(obj))
+          )

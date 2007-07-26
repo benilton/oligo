@@ -8,7 +8,8 @@ read.celfiles <- function(filenames,
                           rm.mask = FALSE,
                           rm.outliers=FALSE,
                           rm.extra=FALSE,
-                          tmpdir=getwd()){
+                          tmpdir=getwd(),
+                          memory.bound=FALSE){
 
   ## FIXME: this is not an acceptable function name
   tmp <- stuffForXYSandCELreaders(filenames, phenoData, description, notes,
@@ -17,41 +18,55 @@ read.celfiles <- function(filenames,
   n <- length(filenames)
   if (n == 0)
     stop("no file name given")
+
+  chips <- sapply(filenames, function(x) readCelHeader(x)$chiptype)
+  if (length(unique(chips)) > 1){
+    print(table(chips))
+    stop("All the CEL files must be of the same type.")
+  }
+  headdetails <- readCelHeader(filenames[1])
+  dim.intensity <- c(headdetails$rows, headdetails$cols)
+  ref.cdfName <- chips[1]
+
   
   ## read the first file to see what we have
-  ##  headdetails <- .Call("ReadHeader", filenames[1], compress, PACKAGE="affyio")
-  headdetails <- read.celfile.header(filenames[1])
+##  headdetails <- read.celfile.header(filenames[1])
   
   ##now we use the length
-  dim.intensity <- headdetails[[2]]
+##  dim.intensity <- headdetails[[2]]
   
   ##and the cdfname as ref
-  ref.cdfName <- headdetails[[1]]
+##  ref.cdfName <- headdetails[[1]]
 
-  if (verbose) cat("Creating objects outside R to store intensities.\n")
-  if (verbose) cat("This may take a while... ")
+  if (!memory.bound){
+##    tmpExprs <- .Call("read_abatch", filenames, rm.mask, rm.outliers,
+##                      rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="affyio")
 
-  tmpExprs <- .Call("read_abatch", filenames, rm.mask, rm.outliers,
-                    rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="affyio")
+    tmpExprs <- readCelIntensities(filenames)
+    
+  }else{
+    tmpExprs <- createBufferedMatrix(prod(dim.intensity), 0, directory=tmpdir)
+    set.buffer.dim(tmpExprs, 100, 1)
+    for (i in 1:length(filenames)){
+      AddColumn(tmpExprs)
+##       tmpExprs[,i] <- .Call("read_abatch", filenames[i], FALSE, FALSE, FALSE,
+##                             headdetails$cdfName, headdetails[["CEL dimensions"]],
+##                             FALSE, PACKAGE="affyio")
 
-##   tmpExprs <- createBufferedMatrix(prod(dim.intensity), 0, directory=tmpdir)
-##   set.buffer.dim(tmpExprs, 50000, 1)
-##   if (verbose) cat("Done.", "Now reading CEL files", sep="\n")
-##   for (i in 1:length(filenames)){
-##     AddColumn(tmpExprs)
-##     tmpExprs[,i] <- .Call("read_abatch", filenames[i], rm.mask, rm.outliers,
-##                           rm.extra, ref.cdfName, dim.intensity, verbose, PACKAGE="affyio")
-##   }
-  
-  if (verbose) cat(" Done.\n")
+      tmpExprs[, i] <- readCel(filenames[i], readHeader=FALSE, readOutliers=FALSE, readMasked = FALSE)$intensities
+    }
+  }
     
   ## RI: We should check if the pd package is available here. If not try
   ## to install it
   ## load pdInfo
   if (is.null(pkgname))
     pkgname <- cleanPlatformName(ref.cdfName)
-  library(pkgname, character.only=TRUE)
-  message("Platform design info loaded.")
+  if (require(pkgname, character.only=TRUE)){
+    message("Platform design info loaded.")
+  }else{
+    stop("Must install the ", pkgname, " package.")
+  }
   arrayType <- kind(get(pkgname))
 
   ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
@@ -71,8 +86,12 @@ read.celfiles <- function(filenames,
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
                      SNP="SnpFeatureSet",
+                     SNPCNV="SnpCnvFeatureSet",
                      exon="ExonFeatureSet",
                      stop("unknown array type: ", arrayType))
+
+  if (theClass %in% c("SnpFeatureSet", "SnpCnvFeatureSet") & is.matrix(tmpExprs))
+    tmpExprs <- as.BufferedMatrix(tmpExprs, 5000, 1, directory=tmpdir)
 
   if (is.null(featureData))
     featureData <- new("AnnotatedDataFrame",

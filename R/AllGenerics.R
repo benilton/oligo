@@ -78,7 +78,11 @@ setGeneric("senseThetaA", function(obj) standardGeneric("senseThetaA"))
 setGeneric("senseThetaB", function(obj) standardGeneric("senseThetaB"))
 setGeneric("antisenseThetaA", function(obj) standardGeneric("antisenseThetaA"))
 setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
-setGeneric("antisenseThetaB", function(obj) standardGeneric("antisenseThetaB"))
+
+setGeneric("thetaA", function(obj) standardGeneric("thetaA"))
+setGeneric("thetaB", function(obj) standardGeneric("thetaB"))
+
+
 setGeneric("getM", function(obj) standardGeneric("getM"))
 setGeneric("getA", function(obj) standardGeneric("getA"))
 
