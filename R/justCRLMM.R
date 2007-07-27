@@ -24,10 +24,10 @@ liteNormalization <- function(filenames, destDir, pkgname){
   cat("\n")
 }
 
-justCRLMM <- function(filenames, tmpdir=getwd(), batch_size=40000,
+justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
                       balance=1.5, phenoData=NULL){
-
+  tmpdir <- tempfile("crlmm.tmp", getwd())
   if (is.null(phenoData))
     stop("phenoData must be provided and must contain a variable called 'gender'.")
 
@@ -156,7 +156,7 @@ justCRLMM <- function(filenames, tmpdir=getwd(), batch_size=40000,
     cat(sprintf("Finalizing: %06.2f percent done.", i/length(snps)*100))
   }
   cat("\n")
-  unlink(tmpdir, TRUE)
+  warning("Please check the contents and remove the directory: ", tmpdir)
   snr <- exp(colMeans(log(theSNR)))
   pacc <- LLR2conf(finalCalls, finalConfs, snr, pkgname)
   out <- new("SnpCallSet", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,  annotation=pkgname)
