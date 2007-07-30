@@ -206,9 +206,7 @@ five SNP's (probes querying specific SNP's have names starting with
 the string ``SNP'').
 
 <<>>=
-annot <- annotation(preProcessedData)
-require(annot, character.only=TRUE)
-conn <- oligo:::db(get(annot))
+conn <- db(preProcessedData)
 dbListTables(conn)
 dbListFields(conn, "featureSet")
 sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
