@@ -29,3 +29,6 @@ setReplaceMethod("calls", signature(object="SnpCallSet", value="matrix"),
 setMethod("callsConfidence", "SnpCallSet", function(object) assayDataElement(object, "callsConfidence"))
 setReplaceMethod("callsConfidence", signature(object="SnpCallSet", value="matrix"),
                  function(object, value) assayDataElementReplace(object, "callsConfidence", value))
+
+setMethod("db", "SnpCallSet",
+          function(object) db(get(annotation(object))))

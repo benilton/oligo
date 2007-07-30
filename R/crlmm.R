@@ -630,14 +630,14 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     stop("Provide correctionFile.\nIf the correctionFile is not found, it will be created and it will contain the EM results.")
 
   if(file.exists(correctionFile)){
-    cat("File with correction information - from EM - was found.", "Loading...", sep="\n")
+    if (verbose) cat("File with correction information - from EM - was found.", "Loading...", sep="\n")
     load(correctionFile)
-    cat("Done.\n")
   }else{
     if(verbose) cat("M correction not provided. Calculating. Will take several minutes.\n")
     correction <- fitAffySnpMixture(object,verbose=verbose)
     save(correction, file=correctionFile)
   }
+  if (verbose) cat("Done.\n")
   snr <- correction$snr
 
   if(is.null(object$gender)){
@@ -666,13 +666,13 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
   if (class(object) == "SnpQSet"){
     oneStrand <- apply(is.na(getM(object[,1])[,1,]), 1,
                        function(v) ifelse(length(ll <- which(v))==0, 0, ll))
-    rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=TRUE)
+    rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=verbose)
     params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
   }else{
-    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=TRUE)
+    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=verbose)
     params  <- replaceAffySnpParamsSingle(get("params",myenv), rparams, Index)
   }
-  save(rparams, params, file=paste(prefix, "ParamsBeforeRec.rda", sep=""))
+##  save(rparams, params, file=paste(prefix, "ParamsBeforeRec.rda", sep=""))
   rm(myenv, Index)
 
   if (class(object) == "SnpQSet"){
@@ -708,7 +708,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     }else{
       rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=TRUE)
     }
-    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
+##    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
     myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
     myDist[,,-2,] <- balance*myDist[,,-2,]
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
@@ -744,8 +744,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
              experimentData=experimentData(object),
              annotation=annotation(object),
              calls=myCalls,
-             callsConfidence=LLR,
-             pAcc=pacc,
+             callsConfidence=pacc,
+             LLR=LLR,
              featureData=featureData(object)))
 }
 

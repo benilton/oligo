@@ -1,5 +1,6 @@
-justSNPRMA <- function(filenames, tmpdir=getwd(), memory.bound=FALSE,
-                       verbose=TRUE, phenoData=NULL, normalizeToHapmap=TRUE){
+justSNPRMA <- function(filenames, tmpdir=getwd(),
+                       verbose=TRUE, phenoData=NULL,
+                       normalizeToHapmap=TRUE){
 
   if (verbose){
     message("Using ", getwd(), " to store temporary files.")

@@ -27,3 +27,6 @@ setReplaceMethod("copyNumber", signature(object="SnpCopyNumberSet", value="matri
 setMethod("cnConfidence", "SnpCopyNumberSet", function(object) assayDataElement(object, "cnConfidence"))
 setReplaceMethod("cnConfidence", signature(object="SnpCopyNumberSet", value="matrix"),
                  function(object, value) assayDataElementReplace(object, "cnConfidence", value))
+
+setMethod("db", "SnpCopyNumberSet",
+          function(object) db(get(annotation(object))))

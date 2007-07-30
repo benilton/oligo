@@ -76,3 +76,9 @@ setMethod("getM", "SnpCnvQSet",
 setMethod("getA", "SnpCnvQSet",
           function(obj) (.5*thetaA(obj)+.5*thetaB(obj))
           )
+
+setMethod("db", "SnpQSet",
+          function(object) db(get(annotation(object))))
+
+setMethod("db", "SnpCnvQSet",
+          function(object) db(get(annotation(object))))
