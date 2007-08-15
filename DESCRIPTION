@@ -1,13 +1,13 @@
 Package: oligo
-Version: 1.1.10
+Version: 1.1.12
 Title: Oligonucleotide Arrays
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarr <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: methods, R (>= 2.5.0), Biobase (>= 1.13.58), affyio (>= 1.3.4),
          splines, RSQLite, BufferedMatrix (>= 0.99.00), BufferedMatrixMethods (>= 0.99.0),
-	 preprocessCore, AnnotationDbi
+	 preprocessCore, AnnotationDbi, affxparser
 LinkingTo: preprocessCore
-Suggests: hapmap100kxba, pd.mapping50k.xba240, geneplotter, affxparser
+Suggests: hapmap100kxba, pd.mapping50k.xba240, geneplotter
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
 License: LGPL version 2 or newer
 Collate: AllClasses.R
@@ -16,6 +16,7 @@ Collate: AllClasses.R
          PDInfo-accessors.R
          methods-platformDesign.R
          methods-FeatureSet.R
+         methods-SnpCnvFeatureSet.R
          methods-TilingFeatureSet.R
          methods-SnpCallSet.R
          methods-SnpCopyNumberSet.R

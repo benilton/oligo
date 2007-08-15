@@ -30,7 +30,7 @@ setGeneric("getPlatformDesign",
 ## setGeneric("featureIDs",
 ##            function(object, ids) standardGeneric("featureIDs"))
 
-setGeneric("pm", function(object, genenames=NULL) standardGeneric("pm"))
+setGeneric("pm", function(object, genenames=NULL, ...) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
 
 setGeneric("mm", function(object, genenames=NULL) standardGeneric("mm"))
@@ -95,7 +95,7 @@ setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
 
 setGeneric("nProbes", function(object) standardGeneric("nProbes"))
-setGeneric("pmindex", function(object) standardGeneric("pmindex"))
+setGeneric("pmindex", function(object, ...) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object) standardGeneric("mmindex"))
 
 setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))

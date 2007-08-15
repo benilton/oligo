@@ -679,7 +679,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     myDist <- getAffySnpDistance(object, params, fs)
     myDist[,,-2,] <- balance*myDist[,,-2,]
   }else{
-    myDist <- oligo:::getAffySnpDistanceSingle(object, params, fs)
+    myDist <- getAffySnpDistanceSingle(object, params, fs)
     myDist[,,-2] <- balance*myDist[,,-2]
   }
 
@@ -704,15 +704,22 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     ## gc()
 
     if (class(object) == "SnpQSet"){
-      rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
+      rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=verbose)
     }else{
-      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=TRUE)
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=verbose)
     }
 ##    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
-    myDist <- getAffySnpDistance(object,rparams, fs, verbose=verbose)
-    myDist[,,-2,] <- balance*myDist[,,-2,]
-    myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose)
-    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose)
+
+    if (class(object) == "SnpQSet"){
+      myDist <- getAffySnpDistance(object, rparams, fs, verbose=verbose)
+      myDist[,,-2,] <- balance*myDist[,,-2,]
+    }else{
+      myDist <- getAffySnpDistanceSingle(object, rparams, fs, verbose=verbose)
+      myDist[,,-2] <- balance*myDist[,,-2]
+    }
+
+    myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose, sqsClass = class(object))
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass = class(object))
     rm(fs, myDist)
     pacc <- LLR2conf(myCalls, LLR, snr, annotation(object))
   }
@@ -738,15 +745,15 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                         varMetadata= rbind(varMetadata(object),
                           data.frame(labelDescription=c("crlmmSNR"),
                                      row.names=c("crlmmSNR"))))
-  }    
+  }
+
   return(new("SnpCallSet",
              phenoData=addPhenoData,
              experimentData=experimentData(object),
              annotation=annotation(object),
              calls=myCalls,
              callsConfidence=pacc,
-             LLR=LLR,
-             featureData=featureData(object)))
+             LLR=LLR))
 }
 
 
