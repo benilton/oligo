@@ -52,8 +52,9 @@ snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
     if (verbose) message("Normalizing to Hapmap.")
     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
     reference <- sort(reference)
-    for (i in 1:ncol(tmpExprs))
-      tmpExprs[, i] <- reference[rank(tmpExprs[, i])]
+##     for (i in 1:ncol(tmpExprs))
+##       tmpExprs[, i] <- reference[rank(tmpExprs[, i])]
+    tmpExprs <- normalize.quantiles.use.target(tmpExprs, reference)
   } else {
     normalize.BufferedMatrix.quantiles(tmpExprs, copy=FALSE)
     reference <- sort(tmpExprs[,1])
