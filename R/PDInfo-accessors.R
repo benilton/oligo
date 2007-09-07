@@ -1,5 +1,5 @@
 setMethod("initialize", "DBPDInfo",
-          function(.Object) {
+          function(.Object, ...) {
             .Object <- callNextMethod()
             tInfo <- dbGetQuery(db(.Object), "select * from table_info")
             .Object@tableInfo <- tInfo
