@@ -1,6 +1,7 @@
 \name{hist}
 \alias{hist}
 \alias{hist,FeatureSet-method}
+\alias{hist,ExpressionSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Density estimate}
 \description{

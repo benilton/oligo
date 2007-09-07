@@ -25,6 +25,11 @@
 \alias{[,FeatureSet-method}
 \alias{db}
 \alias{db,DBPDInfo-method}
+\alias{db,SnpCallSet-method}
+\alias{db,SnpCopyNumberSet-method}
+\alias{db,SnpQSet-method}
+\alias{db,SnpCnvQSet-method}
+\alias{db,SnpFeatureSet-method}
 \alias{exprs,FeatureSet-method}
 
 %- Also NEED an '\alias' for EACH other topic documented here.

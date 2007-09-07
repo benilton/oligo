@@ -3,6 +3,7 @@
 \alias{pm}
 \alias{mm,FeatureSet-method}
 \alias{pm,FeatureSet-method}
+\alias{pm,SnpCnvFeatureSet-method}
 \alias{mm<-}
 \alias{pm<-}
 \alias{mm<-,FeatureSet,matrix-method}
@@ -16,7 +17,7 @@
 }
 \usage{
 mm(object, genenames = NULL)
-pm(object, genenames = NULL)
+pm(object, genenames = NULL, ...)
 mm(object)<-value
 pm(object)<-value
 }
@@ -25,6 +26,7 @@ pm(object)<-value
   \item{object}{\code{FeatureSet} object }
   \item{genenames}{not implemented yet}
   \item{value}{\code{matrix} or \code{BufferedMatrix} object}
+  \item{...}{extra arguments}
 }
 \details{
   The intensity matrix is stored as a \code{BufferedMatrix} object. This

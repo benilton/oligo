@@ -3,8 +3,10 @@
 \alias{pmindex}
 \alias{mmindex,AffySNPPDInfo-method}
 \alias{pmindex,AffySNPPDInfo-method}
+\alias{pmindex,AffySNPCNVPDInfo-method}
 \alias{mmindex,FeatureSet-method}
 \alias{pmindex,FeatureSet-method}
+\alias{pmindex,SnpCnvFeatureSet-method}
 \alias{mmindex,platformDesign-method}
 \alias{pmindex,platformDesign-method}
 
@@ -16,12 +18,13 @@
 }
 \usage{
 mmindex(object)
-pmindex(object)
+pmindex(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{\code{AffySNPPDInfo}, \code{FeatureSet} or
     \code{platformDesign} object}
+  \item{...}{extra arguments}
 }
 \details{
 }

@@ -7,7 +7,10 @@
   Reads CEL files.
 }
 \usage{
-read.celfiles(filenames, pkgname = NULL, phenoData = new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes = "", verbose = FALSE, rm.mask = FALSE, rm.outliers = FALSE, rm.extra = FALSE, tmpdir = getwd())
+read.celfiles(filenames, pkgname = NULL, phenoData =
+new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes
+= "", verbose = FALSE, rm.mask = FALSE, rm.outliers = FALSE, rm.extra =
+FALSE, tmpdir = getwd(), memory.bound = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,6 +26,10 @@ read.celfiles(filenames, pkgname = NULL, phenoData = new("AnnotatedDataFrame"), 
   \item{rm.extra}{\code{logical}}
   \item{tmpdir}{path to the directory that will store the temporary
     files.}
+  \item{memory.bound}{Logical flag. If \code{TRUE},
+    \code{BufferedMatrix} objects will be used; matrices are going to be
+    used otherwise. If SNP arrays are being used, this will be
+    \code{TRUE} regardless.}
 }
 \details{
   \code{tmpdir} should be a local directory where temporary files

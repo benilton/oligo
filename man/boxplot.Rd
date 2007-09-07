@@ -1,6 +1,7 @@
 \name{boxplot}
 \alias{boxplot}
 \alias{boxplot,FeatureSet-method}
+\alias{boxplot,ExpressionSet-method}
 \title{Boxplot}
 \description{
   Boxplot for observed (log-)intensities in a FeatureSet-like object

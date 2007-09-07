@@ -4,26 +4,26 @@ import(Biobase, affyio, splines, graphics, stats, methods, affxparser)
 ## exportPattern("^[^\\.]")
 
 ## PDInfo classes
-exportClasses(PDInfo,
-              DBPDInfo,
-              SNPPDInfo,
-              SNPCNVPDInfo,
-              AffySNPPDInfo,
-              AffySNPCNVPDInfo,
-              platformDesign)
+### exportClasses(PDInfo,
+###               DBPDInfo,
+###               SNPPDInfo,
+###               SNPCNVPDInfo,
+###               AffySNPPDInfo,
+###               AffySNPCNVPDInfo,
+###               platformDesign)
 
 ## FeatureSet classes
-exportClasses(FeatureSet,
-              ExpressionFeatureSet,
-              SnpFeatureSet,
-              SnpCnvFeatureSet,
-              TilingFeatureSet,
-              SnpQSet,
-              SnpCnvQSet,
-              SnpCopyNumberSet,
-              SnpCallSet,
-              oligoSnpSet,
-              ExonFeatureSet)
+### exportClasses(FeatureSet,
+###               ExpressionFeatureSet,
+###               SnpFeatureSet,
+###               SnpCnvFeatureSet,
+###               TilingFeatureSet,
+###               SnpQSet,
+###               SnpCnvQSet,
+###               SnpCopyNumberSet,
+###               SnpCallSet,
+###               oligoSnpSet,
+###               ExonFeatureSet)
 
 exportMethods("$",
               "antisenseThetaA",

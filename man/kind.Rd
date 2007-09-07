@@ -2,6 +2,7 @@
 \alias{kind}
 \alias{kind,platformDesign-method}
 \alias{kind,AffySNPPDInfo-method}
+\alias{kind,AffySNPCNVPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Array type}
 \description{

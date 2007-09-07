@@ -3,6 +3,8 @@
 \alias{getM}
 \alias{getA,SnpQSet-method}
 \alias{getM,SnpQSet-method}
+\alias{getA,SnpCnvQSet-method}
+\alias{getM,SnpCnvQSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Compute average log-intensities / log-ratios}
 \description{
@@ -36,7 +38,11 @@ getM(obj)
   
 }
 \value{
-  A 3-dimensional array (SNP's x Samples x Strand) with the requested measure.
+  A 3-dimensional array (SNP's x Samples x Strand) with the requested
+  measure.
+
+  If a Genomewide array (like Affy SNP 6.0) is used, the strand
+  dimension described above is dropped.
 }
 
 \references{}

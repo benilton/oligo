@@ -6,13 +6,13 @@
   This function preprocess SNP arrays.
 }
 \usage{
-snprma(oBatch, normalizeToHapmap = TRUE, saveQuant = FALSE)
+snprma(object, verbose = TRUE, normalizeToHapmap = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{oBatch}{\code{SnpFeatureSet} object}
+  \item{object}{\code{SnpFeatureSet} object}
+  \item{verbose}{Verbosity flag. \code{logical}}
   \item{normalizeToHapmap}{internal}
-  \item{saveQuant}{internal}
 }
 \details{
 }
