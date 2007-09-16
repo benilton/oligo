@@ -53,7 +53,7 @@ setMethod("getPlatformDesign", "FeatureSet", function(object){
 
 getPD <- getPlatformDesign
 
-## probeNames - returns probeNames for PMs ... genenames ignored for now
+## probeNames - returns probeNames for PMs ... subset ignored for now
 setMethod("probeNames", "FeatureSet",
           function(object, subset=NULL) {
               if (!is.null(subset))
@@ -68,23 +68,21 @@ setMethod("probeNames", "FeatureSet",
 setMethod("geneNames", "FeatureSet",
           function(object){
               geneNames(getPlatformDesign(object))
-##             pmIndex <- pmindex()
-##             return(levels(factor(get("feature_set_name",envir=featureInfo(getPlatformDesign(object)))[pmIndex])))
           })
 
 
 ## pmindex method for FeatureSet
 ## WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "FeatureSet",
-          function(object){
-            pmindex(getPlatformDesign(object))
+          function(object, subset=NULL){
+            pmindex(getPlatformDesign(object), subset=subset)
           })
 
 ##mmindex method for FeatureSet
 ##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("mmindex", "FeatureSet",
-          function(object){
-            mmindex(getPlatformDesign(object))
+          function(object, subset=NULL){
+            mmindex(getPlatformDesign(object), subset=subset)
           })
 
 setMethod("hist", signature(x="FeatureSet"),
@@ -96,13 +94,8 @@ setMethod("hist", signature(x="ExpressionSet"),
           plotDensity(x, which=c("both", "pm", "mm"), ...))
 
 setMethod("pm", "FeatureSet",
-          function(object, genenames=NULL){
-            if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
-##             tmp <- subBufferedMatrix(exprs(object), pmindex(object))
-##             RowMode(tmp)
-##             set.buffer.dim(tmp, 50000, 1)
-            exprs(object)[pmindex(object),,drop=FALSE]
-##            return(tmp)
+          function(object, subset=NULL){
+            exprs(object)[pmindex(object, subset=subset),,drop=FALSE]
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
@@ -112,23 +105,21 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("pm", signature(object="FeatureSet", value="BufferedMatrix"),
-                 function(object, value){
-                   tmp <- exprs(object)
-                   for (i in 1:ncol(tmp))
-                     tmp[pmindex(object), i] <- value[,i]
-                   assayDataElementReplace(object, "exprs", tmp)
-                 })
+## setReplaceMethod("pm", signature(object="FeatureSet", value="BufferedMatrix"),
+##                  function(object, value){
+##                    tmp <- exprs(object)
+##                    for (i in 1:ncol(tmp))
+##                      tmp[pmindex(object), i] <- value[,i]
+##                    assayDataElementReplace(object, "exprs", tmp)
+##                  })
 
 
 
 ## MM
-## setMethod("mm", "FeatureSet", function(object, genenames=NULL){
+## setMethod("mm", "FeatureSet", function(object, subset=NULL){
 setMethod("mm", "FeatureSet",
-          function(object, genenames=NULL){
-            if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
-##            subBufferedMatrix(exprs(object), mmindex(object))
-            exprs(object)[mmindex(object),]
+          function(object, subset=NULL){
+            exprs(object)[mmindex(object, subset=subset),]
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
@@ -138,25 +129,25 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("mm", signature(object="FeatureSet", value="BufferedMatrix"),
-                 function(object, value){
-                   tmp <- exprs(object)
-                   for (i in 1:ncol(tmp))
-                     tmp[mmindex(object),i] <- value[,i]
-                   assayDataElementReplace(object, "exprs", tmp)
-                 })
+## setReplaceMethod("mm", signature(object="FeatureSet", value="BufferedMatrix"),
+##                  function(object, value){
+##                    tmp <- exprs(object)
+##                    for (i in 1:ncol(tmp))
+##                      tmp[mmindex(object),i] <- value[,i]
+##                    assayDataElementReplace(object, "exprs", tmp)
+##                  })
 
 setMethod("featureIndex", "FeatureSet",
-          function(object, which=c("both", "pm", "mm"), genenames=NULL){
+          function(object, which=c("both", "pm", "mm"), subset=NULL){
             which <- match.arg(which,c("both", "pm", "mm"))
             if (which=="both"){
-              pmIndex <- pmindex(getPlatformDesign(object))
-              mmIndex <- mmindex(getPlatformDesign(object))
+              pmIndex <- pmindex(getPlatformDesign(object), subset=subset)
+              mmIndex <- mmindex(getPlatformDesign(object), subset=subset)
               indexes <- sort(c(pmIndex,mmIndex))
             } else if (which=="pm"){
-              indexes <- sort(pmindex(getPlatformDesign(object)))
+              indexes <- sort(pmindex(getPlatformDesign(object), subset=subset))
             } else if (which=="mm"){
-              indexes <- sort(mmindex(getPlatformDesign(object)))
+              indexes <- sort(mmindex(getPlatformDesign(object), subset=subset))
             }
              return(indexes)
            })
@@ -231,34 +222,6 @@ setMethod("featureNames", "FeatureSet",
           )
 
 
-## setMethod("[", "FeatureSet", function(x, i, j, ..., drop = FALSE) {
-##   if (missing(drop)) drop <- FALSE
-##   if (missing(i) && missing(j)) {
-##     if (length(list(...))!=0)
-##       stop("specify genes or samples to subset; use '",
-##            substitute(x), "$", names(list(...))[[1]],
-##            "' to access phenoData variables")
-##     return(x)
-##   }
-##   if (!missing(j))
-##     phenoData(x) <- phenoData(x)[j,, ..., drop = drop]
-##   if (!missing(i))
-##     featureData(x) <- featureData(x)[i,,..., drop=drop]
-##   orig <- assayData(x)
-##   aData <- new.env(parent=emptyenv())
-##   if (missing(i))                     # j must be present
-##     for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],,j)
-##   else {                              # j may or may not be present
-##     if (missing(j))
-##       for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i)
-##     else
-##       for(nm in ls(orig)) aData[[nm]] <- subBufferedMatrix(orig[[nm]],i, j)
-##   }
-##   lockEnvironment(aData, bindings=TRUE)
-##   assayData(x) <- aData
-##   return(x)
-## })
-
 setMethod("plotDensity", "FeatureSet", function(object, col=1:6, log=TRUE,
                                                 which=c("both","pm","mm"),
                                                 ylab="density",
@@ -268,9 +231,7 @@ setMethod("plotDensity", "FeatureSet", function(object, col=1:6, log=TRUE,
   which <- match.arg(which,c("both","pm","mm"))
   Index <- unlist(featureIndex(object,which))
   object <- exprs(object)[Index,, drop=FALSE]
-##  object <- subBufferedMatrix(exprs(object), Index)
   if(log){
-##    ewApply(object, log2)
     object <- log2(object)
     if(is.null(xlab)) xlab <- "log intensity"
   }
@@ -357,3 +318,17 @@ setMethod("rma", "FeatureSet",
             return(out)
           })
 
+setMethod("MAplot", "FeatureSet",
+          function(object, arrays=1:ncol(object), lowessPlot=FALSE){
+            par(ask=TRUE)
+            ref <- rowMedians(log2(exprs(object)))
+            for (i in arrays){
+              tmp <- log2(exprs(object[,i]))
+              plot((tmp+ref)/2, tmp-ref, pch=".",
+                   xlab="A", ylab="M",
+                   main=sampleNames(object)[i])
+              if (lowessPlot)
+                lines(lowess((tmp+ref)/2, tmp-ref), col="red")
+            }
+            par(ask=FALSE)
+          })

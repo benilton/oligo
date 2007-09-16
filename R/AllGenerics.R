@@ -30,14 +30,14 @@ setGeneric("getPlatformDesign",
 ## setGeneric("featureIDs",
 ##            function(object, ids) standardGeneric("featureIDs"))
 
-setGeneric("pm", function(object, genenames=NULL, ...) standardGeneric("pm"))
+setGeneric("pm", function(object, subset=NULL, ...) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
 
-setGeneric("mm", function(object, genenames=NULL) standardGeneric("mm"))
+setGeneric("mm", function(object, subset=NULL) standardGeneric("mm"))
 setGeneric("mm<-", function(object, value) standardGeneric("mm<-"))
 
 setGeneric("featureIndex",
-           function(object, which=c("both","pm","mm"), genenames=NULL) {
+           function(object, which=c("both","pm","mm"), subset=NULL) {
                standardGeneric("featureIndex")
            })
 
@@ -96,7 +96,7 @@ setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNam
 
 setGeneric("nProbes", function(object) standardGeneric("nProbes"))
 setGeneric("pmindex", function(object, ...) standardGeneric("pmindex"))
-setGeneric("mmindex", function(object) standardGeneric("mmindex"))
+setGeneric("mmindex", function(object, ...) standardGeneric("mmindex"))
 
 setGeneric("featureInfo", function(object) standardGeneric("featureInfo"))
 
@@ -120,3 +120,5 @@ setGeneric("ncol", function(x) standardGeneric("ncol"))
 setGeneric("rma", function(object, ...) standardGeneric("rma"))
 
 setGeneric("geometry", function(object) standardGeneric("geometry"))
+
+setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))

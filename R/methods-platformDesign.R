@@ -71,8 +71,12 @@ setMethod("nProbes","platformDesign",
 
 ##WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "platformDesign",
-          function(object){
-            Index=which(get("feature_type",featureInfo(object))=="PM")
+          function(object, subset=NULL){
+            Index <- which(get("feature_type", featureInfo(object))=="PM")
+            if (!is.null(subset))
+              Index <- intersect(which(get("feature_set_name",
+                                           featureInfo(object)) %in% subset),
+                                 Index)
             return(Index)        
           })
 
@@ -80,8 +84,12 @@ setMethod("pmindex", "platformDesign",
 ###NOTE: THIS WILL CHANGE CAUSE feature type will be a vector
 
 setMethod("mmindex", "platformDesign",
-          function(object){
+          function(object, subset=NULL){
             Index=which(get("feature_type",featureInfo(object))=="MM")
+            if (!is.null(subset))
+              Index <- intersect(which(get("feature_set_name",
+                                           featureInfo(object)) %in% subset),
+                                 Index)
             return(Index)
           })
 

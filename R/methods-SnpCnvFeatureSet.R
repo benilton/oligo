@@ -17,8 +17,8 @@ setMethod("pmindex", "SnpCnvFeatureSet",
           })
 
 setMethod("pm", "SnpCnvFeatureSet",
-          function(object, genenames=NULL, probes.type="snp"){
-            if (!is.null(genenames)) message("genenames ignored (not implemented yet)")
+          function(object, subset=NULL, probes.type="snp"){
+            if (!is.null(subset)) message("subset ignored (not implemented yet)")
             tmp <- subBufferedMatrix(exprs(object), pmindex(object, probes.type=probes.type))
             RowMode(tmp)
             set.buffer.dim(tmp, 50000, 1)

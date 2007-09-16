@@ -20,7 +20,8 @@ Objects can be created by calls of the form \code{new("FeatureSet", assayData, m
   }
 }
 \section{Extends}{
-Class \code{\linkS4class{eSet}}, directly.
+  
+Class \code{\link[Biobase:class.eSet]{eSet}}, directly.
 Class \code{\linkS4class{VersionedBiobase}}, by class "eSet", distance 2.
 Class \code{\linkS4class{Versioned}}, by class "eSet", distance 3.
 }
@@ -31,7 +32,7 @@ No methods defined with class "FeatureSet" in the signature.
 \author{}
 \note{}
 
-\seealso{\code{\linkS4class{eSet}}, \code{\linkS4class{VersionedBiobase}}, \code{\linkS4class{Versioned}}}
+\seealso{\code{\link[Biobase:class.eSet]{eSet}}, \code{\linkS4class{VersionedBiobase}}, \code{\linkS4class{Versioned}}}
 
 \examples{
 ##---- Should be DIRECTLY executable !! ----
