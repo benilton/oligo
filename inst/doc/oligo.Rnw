@@ -30,12 +30,10 @@ options(prompt="R> ")
 
 The \oligo package is designed to support all microarray designs
 provided by Affymetrix and NimbleGen: expression, tiling, SNP and exon
-arrays. With the increase in the density of the current technologies,
-\oligo uses the resources offered by the \Rpackage{BufferedMatrix}
-packages to handle the feature-level information. As of now,
-chip-specific packages are built via \Rpackage{makePlatformDesign} and
-transitioning to the \Rpackage{pdInfoBuilder} package, which creates
-the data packages for the Affymetrix SNP arrays.
+arrays. As of now, chip-specific packages are built via
+\Rpackage{makePlatformDesign} and transitioning to the
+\Rpackage{pdInfoBuilder} package, which creates the data packages for
+the Affymetrix SNP arrays.
 
 \section{Analyzing Affymetrix SNP Arrays}
 
@@ -48,24 +46,8 @@ Genotyping can be performed using \oligo and you will need:
 \item CEL files.
 \end{itemize}
 
-Figure \ref{workflow} shows the general workflow for genotyping using
-the \oligo package. 
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=.5]{workflow.png}
-  \caption{Genotyping workflow using the \oligo package.}
-  \label{workflow}
-\end{figure}
-
 We will start by loading the \oligo package and importing the CEL
-files available on the \Rpackage{sampleDataAffy100K}. The intensity
-matrix will be a \Rclass{BufferedMatrix} object and this will require
-the use of temporary files in order to reduce the RAM usage. Although
-the temporary files can be stored anywhere, a better approach will be
-to use a local directory rather than using a directory on the
-network. The \Robject{tmpdir} in the \Rfunction{read.celfiles()} sets
-the directory where the temporary files are going to be stored.
+files available on the \Rpackage{hapmap100kxba} package. 
 
 <<getRawData>>=
 library("oligo")
@@ -74,29 +56,47 @@ pathCelFiles <- system.file("celFiles", package="hapmap100kxba")
 fullFilenames <- list.celfiles(path=pathCelFiles, full.names=TRUE)
 @ 
 
-The SNPRMA approach described in \cite{Carvalho2006} is implemented in the
-\Rmethod{justSNPRMA} methods (see Figure \ref{snprma}), which
-preprocessess the CEL files in a more effective way in terms of memory
-management. It returns a \Rclass{SnpQSet} object without creating a
-\Rclass{SnpFeatureSet object}. The \Rclass{SnpQSet} object contains
-the summarized data.
+The density of the SNP arrays increased in a way that it is not
+interesting to store the intensity matrix in memory; efficient methods
+to handle this situations have been developed and batches of SNPs are
+analyzed one at a time.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=.5]{snprma.png}
-  \caption{SNPRMA overview}
-  \label{snprma}
-\end{figure}
+The genotyping algorithm implemented in \oligo is described in
+\cite{Carvalho2006}. The whole process can be described in three steps:
 
+\begin{enumerate}
+\item Normalization against a reference distribution;
+\item Summarization via SNPRMA;
+\item Genotype calling via CRLMM.
+\end{enumerate}
 
-For each SNP there are four numbers $(\theta_{A-}, \theta_{B-},
-\theta_{A+}, \theta_{B+})$, which are proportional to the
-log-intensities in each of these combinations of allele and strand
-($-$: antisense; $+$: sense). They are represented by four matrices:
-\Robject{antisenseThetaA}, \Robject{antisenseThetaB},
+The normalization step is done by equalizing the observed intensities
+accordingly to a reference distribution, based on the 270 Hapmap
+samples. These samples are available to the public at
+http://www.hapmap.org. The normalization step will remove systematic
+biases, which are not due to biological factors.
+
+The SNPRMA algorithm is responsible for summarizing the data. The design
+of the SNP arrays is such that up to the 250K density, there are probes
+for both alleles on both strands. On the SNP 6.0 platform, given a SNP,
+there are probes only on one strand.
+
+Therefore, for the designs up to 250K, SNPRMA will create summaries at
+the SNP-Allele-Strand-level. For each SNP there are four numbers
+$(\theta_{A-}, \theta_{B-}, \theta_{A+}, \theta_{B+})$, which are
+proportional to the log-intensities in each of these combinations of
+allele and strand ($-$: antisense; $+$: sense). They are represented by
+four matrices: \Robject{antisenseThetaA}, \Robject{antisenseThetaB},
 \Robject{senseThetaA} and \Robject{senseThetaB}, which are the
-components of the \Rclass{SnpQSet} object. One can extract these
-objects using accessors of the same name.
+components of the \Rclass{SnpQSet} object. One can extract these objects
+using accessors of the same name.
+
+For the SNP 6.0 array, a similar approach is taken, but the summaries
+are given at the SNP-Allele-level and there will be only $(\theta_A,
+\theta_B)$ estimates for each SNP. An object of class
+\Rclass{SnpCnvQSet} is returned and contains two matrices:
+\Robject{thetaA} and \Robject{thetaB}. Accessors with the same name are
+provided.
 
 Average intensities and log-ratios are defined as across allele and
 within strand, ie:
@@ -104,37 +104,18 @@ within strand, ie:
   A_{s} & = & \frac{\theta_{A, s}+\theta_{B, s}}{2} \\
   M_{s} & = & \theta_{A, s} - \theta_{B, s},
 \end{eqnarray}
-where $s$ defines the strand (antisense or sense). These quantities
-can be obtained via \Rmethod{getA()} and \Rmethod{getM} methods, which
+where $s$ defines the strand (antisense or sense). These quantities can
+be obtained via \Rmethod{getA()} and \Rmethod{getM} methods, which
 return high-dimensional arrays with dimensions corresponding to SNP's,
-samples and strands, respectively.
+samples and strands, respectively. These measures are later used for
+genotyping.
 
-SNPRMA EXAMPLE
-
-These measures can be used, for example, to create an MA-plot and are
-later used for genotyping. The example below generates an MA-plot for
-the first sample using only the antisense strand data:
-
-MAPLOT EXAMPLE
-
-The CRLMM algorithm \cite{Carvalho2006} can be applied on a
-\Rclass{SnpQSet} object in order to produce genotype calls. It involves
-running a mixture of regressions via EM algorithm to adjust for average
-intensity and fragment length in the log-ratio scale. These adjustments
-may take long time to run, depending on the combination of number of
-samples and computer resources available. To save time in subsequent
-analyses, we must specify the name of the file that will store the
-results obtained with the EM algorithm using the
-\Robject{correctionFile} argument. If the file passed to
-\Robject{correctionFile} does not exist, it is created, otherwise it is
-loaded. Figure \ref{crlmm} presents a diagram of the CRLMM algorithm:
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=.5]{crlmm.png}
-  \caption{CRLMM Algorithm diagram}
-  \label{crlmm}
-\end{figure}
+The CRLMM algorithm can be applied on a \Rclass{SnpQSet} or
+\Rclass{SnpCnvQSet} object in order to produce genotype calls. It
+involves running a mixture of regressions via EM algorithm to adjust for
+average intensity and fragment length in the log-ratio scale. These
+adjustments may take long time to run, depending on the combination of
+number of samples and computer resources available.
 
 \textbf{A word of warning}: the \Rmethod{crlmm()} method searches for a
 variable \Robject{gender} in the \Rclass{phenoData} slot of the
@@ -160,8 +141,8 @@ rownames(aboutSamples) <- basename(fullFilenames)
 aboutVars <- data.frame(labelDescription="male/female")
 rownames(aboutVars) <- "gender"
 pd <- new("AnnotatedDataFrame",
-data=aboutSamples,
-varMetadata=aboutVars)
+          data=aboutSamples,
+          varMetadata=aboutVars)
 @ 
 
 <<crlmm, cache=TRUE>>=

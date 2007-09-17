@@ -12,7 +12,7 @@ crlmm(object, correction = NULL, recalibrate = TRUE, minLLRforCalls =
 c(5, 1, 5), verbose = TRUE,  correctionFile = NULL, prefix =
 "tmp.crlmm.", balance = 1.5)
 justCRLMM(filenames, batch_size = 40000, minLLRforCalls = c(5, 1, 5),
-recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose=TRUE)
+recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

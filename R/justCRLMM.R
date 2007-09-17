@@ -143,12 +143,14 @@ justCRLMM <- function(filenames, batch_size=40000,
       cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))
     }
   }
-  if (verbose) cat("\n")
   finalCalls <- finalConfs <- NULL
 
-  txt <- sprintf("Finalizing: %06.2f percent done.", 0)
-  del <- paste(rep("\b", nchar(txt)), collapse="")
-  if (verbose) cat(txt)
+  if (verbose){
+    cat("\n")
+    txt <- sprintf("Finalizing: %06.2f percent done.", 0)
+    del <- paste(rep("\b", nchar(txt)), collapse="")
+    cat(txt)
+  }
   
   for (i in 1:length(snps)){
     load(paste(randomName, i, sep="."))
