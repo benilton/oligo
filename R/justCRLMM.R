@@ -49,7 +49,7 @@ justCRLMM <- function(filenames, batch_size=40000,
   rm(chips)
   require(pkgname, character.only=TRUE)
   
-  liteNormalization(filenames, destDir=tmpdir, pkgname=pkgname)
+  liteNormalization(filenames, destDir=tmpdir, pkgname=pkgname, verbose=verbose)
   filenames <- paste(tmpdir, "/normalized-", basename(filenames), sep="")
   
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
