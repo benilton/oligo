@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{Oligo Vignette}
-%\VignetteDepends{oligo, hapmap100kxba, geneplotter}
+%\VignetteDepends{oligo, hapmap100kxba, pd.mapping50k.xba240}
 %\VignetteKeywords{Expression, SNP, Affymetrix, NimbleGen, Oligonucleotide Arrays}
 %\VignettePackage{oligo}
 \documentclass{article}
@@ -72,8 +72,6 @@ library("oligo")
 library("hapmap100kxba")
 pathCelFiles <- system.file("celFiles", package="hapmap100kxba")
 fullFilenames <- list.celfiles(path=pathCelFiles, full.names=TRUE)
-temporaryDir <- tempdir()
-preProcessedData <- justSNPRMA(fullFilenames, tmpdir=temporaryDir)
 @ 
 
 The SNPRMA approach described in \cite{Carvalho2006} is implemented in the
@@ -110,21 +108,14 @@ where $s$ defines the strand (antisense or sense). These quantities
 can be obtained via \Rmethod{getA()} and \Rmethod{getM} methods, which
 return high-dimensional arrays with dimensions corresponding to SNP's,
 samples and strands, respectively.
-<<snprma, cache=TRUE>>=
-theA <- getA(preProcessedData)
-theM <- getM(preProcessedData)
-dim(theA)
-str(theM)
-@ 
+
+SNPRMA EXAMPLE
 
 These measures can be used, for example, to create an MA-plot and are
 later used for genotyping. The example below generates an MA-plot for
 the first sample using only the antisense strand data:
-<<maplot, fig=TRUE>>=
-library("geneplotter")
-smoothScatter(theA[,1,1], theM[,1,1], main="MA-plot (Antisense)",
-              xlab="Average Intensity", ylab="Log-ratio (A/B)")
-@ 
+
+MAPLOT EXAMPLE
 
 The CRLMM algorithm \cite{Carvalho2006} can be applied on a
 \Rclass{SnpQSet} object in order to produce genotype calls. It involves
@@ -165,18 +156,16 @@ below exemplifies the creation of the \Rclass{phenoData} object.
 
 <<setPD>>=
 aboutSamples <- data.frame(gender=c("female", "female", "male"))
-rownames(aboutSamples) <- sampleNames(preProcessedData)
+rownames(aboutSamples) <- basename(fullFilenames)
 aboutVars <- data.frame(labelDescription="male/female")
 rownames(aboutVars) <- "gender"
-phenoData(preProcessedData) <- new("AnnotatedDataFrame",
-                                   data=aboutSamples,
-                                   varMetadata=aboutVars)
+pd <- new("AnnotatedDataFrame",
+data=aboutSamples,
+varMetadata=aboutVars)
 @ 
 
 <<crlmm, cache=TRUE>>=
-crlmmOut <- crlmm(preProcessedData,
-                  correctionFile="exampleCorrection.rda",
-                  verbose=FALSE)
+crlmmOut <- justCRLMM(fullFilenames, phenoData=pd, verbose=FALSE)
 @ 
 
 The \Robject{crlmmOut} object above belongs to the \Rclass{SnpCallSet}
@@ -206,7 +195,7 @@ five SNP's (probes querying specific SNP's have names starting with
 the string ``SNP'').
 
 <<>>=
-conn <- db(preProcessedData)
+conn <- db(crlmmOut)
 dbListTables(conn)
 dbListFields(conn, "featureSet")
 sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"

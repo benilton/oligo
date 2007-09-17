@@ -1,4 +1,4 @@
-liteNormalization <- function(filenames, destDir, pkgname){
+liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
   dir.create(destDir)
   fid <- dbGetQuery(db(get(pkgname)), "SELECT fid FROM pmfeature")[[1]]
   fid <- sort(fid)
@@ -6,7 +6,7 @@ liteNormalization <- function(filenames, destDir, pkgname){
   reference <- sort(reference)
 
   txt <- sprintf("Normalization: %06.2f percent done.", 0)
-  cat(txt)
+  if (verbose) cat(txt)
   del <- paste(rep("\b", nchar(txt)), collapse="", sep="")
   for (ff in filenames){
     header <- readCelHeader(ff)
@@ -14,19 +14,21 @@ liteNormalization <- function(filenames, destDir, pkgname){
                                                          readMasked = FALSE, reorder=TRUE)$intensities,
                                                  ncol=1),
                                           reference, copy=FALSE)[,1]
-    fout <- file.path(destDir, "/normalized-", ff, fsep="")
+    fout <- file.path(destDir, "/normalized-", basename(ff), fsep="")
     suppressWarnings(createCel(fout, header=header))
     updateCel(fout, indices=fid, intensities=new)
     rm(new, fout)
-    cat(del)
-    cat(sprintf("Normalization: %06.2f percent done.", which(filenames == ff)/length(filenames)*100))
+    if (verbose){
+      cat(del)
+      cat(sprintf("Normalization: %06.2f percent done.", which(filenames == ff)/length(filenames)*100))
+    }
   }
-  cat("\n")
+  if (verbose) cat("\n")
 }
 
 justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
-                      balance=1.5, phenoData=NULL){
+                      balance=1.5, phenoData=NULL, verbose=TRUE){
   tmpdir <- tempfile("crlmm.tmp", getwd())
   if (is.null(phenoData))
     stop("phenoData must be provided and must contain a variable called 'gender'.")
@@ -48,7 +50,7 @@ justCRLMM <- function(filenames, batch_size=40000,
   require(pkgname, character.only=TRUE)
   
   liteNormalization(filenames, destDir=tmpdir, pkgname=pkgname)
-  filenames <- paste(tmpdir, "/normalized-", filenames, sep="")
+  filenames <- paste(tmpdir, "/normalized-", basename(filenames), sep="")
   
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
@@ -58,7 +60,7 @@ justCRLMM <- function(filenames, batch_size=40000,
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
   suffix <- ") AND pmfeature.fsetid = featureSet.fsetid ORDER BY fid"
   txt <- sprintf("Genotyping: %06.2f percent done.", 0)
-  cat(txt)
+  if (verbose) cat(txt)
   del <- paste(rep("\b", nchar(txt)), collapse="")
   theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
   allSnps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
@@ -136,15 +138,17 @@ justCRLMM <- function(filenames, batch_size=40000,
     }
     save(myCalls, LLR, file=paste(randomName, i, sep="."))
     rm(correction, Index, k, LLR, myCalls, myenv, oneStrand, params, rparams, snpsIn, sqs, XIndex)
-    cat(del)
-    cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))
+    if (verbose){
+      cat(del)
+      cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))
+    }
   }
-  cat("\n")
+  if (verbose) cat("\n")
   finalCalls <- finalConfs <- NULL
 
   txt <- sprintf("Finalizing: %06.2f percent done.", 0)
   del <- paste(rep("\b", nchar(txt)), collapse="")
-  cat(txt)
+  if (verbose) cat(txt)
   
   for (i in 1:length(snps)){
     load(paste(randomName, i, sep="."))
@@ -152,10 +156,12 @@ justCRLMM <- function(filenames, batch_size=40000,
     rm(myCalls)
     finalConfs <- rbind(finalConfs, LLR)
 ##    rm(pacc)
-    cat(del)
-    cat(sprintf("Finalizing: %06.2f percent done.", i/length(snps)*100))
+    if (verbose){
+      cat(del)
+      cat(sprintf("Finalizing: %06.2f percent done.", i/length(snps)*100))
+    }
   }
-  cat("\n")
+  if (verbose) cat("\n")
   warning("Please check the contents and remove the directory: ", tmpdir)
   snr <- exp(colMeans(log(theSNR)))
   pacc <- LLR2conf(finalCalls, finalConfs, snr, pkgname)

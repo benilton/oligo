@@ -16,15 +16,15 @@
   Accessor to the PM/MM matrices.
 }
 \usage{
-mm(object, genenames = NULL)
-pm(object, genenames = NULL, ...)
+mm(object, subset = NULL)
+pm(object, subset = NULL, ...)
 mm(object)<-value
 pm(object)<-value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{\code{FeatureSet} object }
-  \item{genenames}{not implemented yet}
+  \item{subset}{not implemented yet}
   \item{value}{\code{matrix} or \code{BufferedMatrix} object}
   \item{...}{extra arguments}
 }

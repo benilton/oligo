@@ -17,14 +17,17 @@ justSNPRMA <- function(filenames, tmpdir=getwd(),
   pkgname <- cleanPlatformName(headdetails[["cdfName"]])
   require(pkgname, character.only=TRUE, quietly=TRUE)
   fid <- dbGetQuery(db(get(pkgname)), "SELECT fid FROM pmfeature")[[1]]
-  tmpExprs <- createBufferedMatrix(length(fid), 0, directory=tmpdir)
-  set.buffer.dim(tmpExprs, 50000, 1)
-  for (i in 1:length(filenames)){
-    AddColumn(tmpExprs)
-    tmpExprs[,i] <- .Call("read_abatch", filenames[i], FALSE, FALSE, FALSE,
-                          headdetails$cdfName, headdetails[["CEL dimensions"]],
-                          FALSE, PACKAGE="affyio")[fid]
-  }
+##   tmpExprs <- createBufferedMatrix(length(fid), 0, directory=tmpdir)
+##   set.buffer.dim(tmpExprs, 50000, 1)
+##   for (i in 1:length(filenames)){
+##     AddColumn(tmpExprs)
+##     tmpExprs[,i] <- .Call("read_abatch", filenames[i], FALSE, FALSE, FALSE,
+##                           headdetails$cdfName, headdetails[["CEL dimensions"]],
+##                           FALSE, PACKAGE="affyio")[fid]
+##   }
+  tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
+                    headdetails$cdfName, headdetails[["CEL dimensions"]],
+                    FALSE, PACKAGE="affyio")[fid,]
   rm(headdetails, i); gc(); gc()
 
   ########################
@@ -38,7 +41,8 @@ justSNPRMA <- function(filenames, tmpdir=getwd(),
     for (i in 1:ncol(tmpExprs))
       tmpExprs[, i] <- reference[rank(tmpExprs[, i])]
   } else {
-    normalize.BufferedMatrix.quantiles(tmpExprs, copy=FALSE)
+##    normalize.BufferedMatrix.quantiles(tmpExprs, copy=FALSE)
+    tmpExprs <- normalize.quantiles(tmpExprs)
     reference <- sort(tmpExprs[,1])
     save(reference, file=paste(pkgname, ".quantileReference.rda", sep=""))
   }
@@ -60,13 +64,23 @@ justSNPRMA <- function(filenames, tmpdir=getwd(),
                  c("S", "A")[pmStrand(get(pkgname))+1],
                  sep="")
   idx <- order(pnVec)
-  tmpExprs <- subBufferedMatrix(tmpExprs, idx)
-  set.buffer.dim(tmpExprs, 50000, 1)
+##  tmpExprs <- subBufferedMatrix(tmpExprs, idx)
+##  set.buffer.dim(tmpExprs, 50000, 1)
+  tmpExprs <- tmpExprs[idx,]
   pnVec <- pnVec[idx]
   rm(idx); ## gc()
 
-  RowMode(tmpExprs)
-  theSumm <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
+##   RowMode(tmpExprs)
+##   theSumm <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
+
+  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
+
+  theSumm <-.Call("rma_c_complete_copy", tmpExprs, tmpExprs,,
+                  pnVec, length(unique(pnVec)), body(bg.dens),
+                  new.env(), FALSE, FALSE,
+                  as.integer(2), PACKAGE="oligo")
+
+  
   rm(tmpExprs, pnVec); ## gc()
   colnames(theSumm) <- basename(filenames)
   theSumm <- sqsFrom(theSumm)

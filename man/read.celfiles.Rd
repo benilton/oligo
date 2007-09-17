@@ -7,10 +7,10 @@
   Reads CEL files.
 }
 \usage{
-read.celfiles(filenames, pkgname = NULL, phenoData =
-new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes
-= "", verbose = FALSE, rm.mask = FALSE, rm.outliers = FALSE, rm.extra =
-FALSE, tmpdir = getwd(), memory.bound = FALSE)
+
+read.celfiles(filenames, pkgname = NULL, phenoData = NULL, featureData =
+NULL, experimentData = NULL, notes = "", verbose = TRUE)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,25 +18,9 @@ FALSE, tmpdir = getwd(), memory.bound = FALSE)
   \item{pkgname}{alternative data package to be loaded.}
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}
-  \item{description}{\code{description}}
+  \item{experimentData}{\code{experimentData}}
   \item{notes}{\code{notes}}
   \item{verbose}{\code{logical}}
-  \item{rm.mask}{\code{logical}}
-  \item{rm.outliers}{\code{logical}}
-  \item{rm.extra}{\code{logical}}
-  \item{tmpdir}{path to the directory that will store the temporary
-    files.}
-  \item{memory.bound}{Logical flag. If \code{TRUE},
-    \code{BufferedMatrix} objects will be used; matrices are going to be
-    used otherwise. If SNP arrays are being used, this will be
-    \code{TRUE} regardless.}
-}
-\details{
-  \code{tmpdir} should be a local directory where temporary files
-  (created by \code{BufferedMatrix} package) are going to be stored. If
-  this points to a network drive, the process will be very slow. If it
-  points to a directory where the user does not have 'write'
-  permissions, the user will get errors.
 }
 \value{
   \item{\code{ExpressionFeatureSet}}{if Expresssion arrays}

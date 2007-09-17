@@ -17,7 +17,7 @@
   intensity matrix for subsetting.
 }
 \usage{
-mmindex(object)
+mmindex(object, ...)
 pmindex(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
