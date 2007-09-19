@@ -26,7 +26,7 @@ Objects can be created by calls of the form \code{new("ExonFeatureSet", assayDat
 Class \code{\linkS4class{FeatureSet}}, directly.
 Class \code{\link[Biobase:class.eSet]{eSet}}, by class "FeatureSet", distance 2.
 Class \code{\link[Biobase:class.VersionedBiobase]{VersionedBiobase}}, by class "FeatureSet", distance 3.
-Class \code{\linkS4class{Versioned}}, by class "FeatureSet", distance 4.
+Class \code{link[Biobase:class.Versioned]{Versioned}}, by class "FeatureSet", distance 4.
 }
 \section{Methods}{
 No methods defined with class "ExonFeatureSet" in the signature.
@@ -36,7 +36,7 @@ No methods defined with class "ExonFeatureSet" in the signature.
 \note{}
 
 
-\seealso{\code{\link[Biobase:class.eSet]{eSet}}, \code{\link[Biobase:class.VersionedBiobase]{VersionedBiobase}}, \code{\linkS4class{Versioned}}}
+\seealso{\code{\link[Biobase:class.eSet]{eSet}}, \code{\link[Biobase:class.VersionedBiobase]{VersionedBiobase}}, \code{link[Biobase:class.Versioned]{Versioned}}}
 
 \examples{
 ##---- Should be DIRECTLY executable !! ----
