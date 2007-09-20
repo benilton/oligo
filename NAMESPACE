@@ -1,5 +1,5 @@
 useDynLib("oligo")
-import(Biobase, affyio, splines, graphics, stats, methods, affxparser)
+import(Biobase, splines, graphics, stats, methods, affxparser)
 
 ## exportPattern("^[^\\.]")
 

@@ -26,7 +26,7 @@ liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
   if (verbose) cat("\n")
 }
 
-justCRLMM <- function(filenames, batch_size=40000,
+justCRLMM <- function(filenames, batch_size=100000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
                       balance=1.5, phenoData=NULL, verbose=TRUE){
   tmpdir <- tempfile("crlmm.tmp", getwd())
@@ -46,9 +46,14 @@ justCRLMM <- function(filenames, batch_size=40000,
     stop("All the CEL files must be of the same type.")
   }
   pkgname <- cleanPlatformName(chips[1])
+  snpcnv <- pkgname == "pd.genomewidesnp.6"
   rm(chips)
   require(pkgname, character.only=TRUE)
-  
+
+  sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
+  snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
+  rm(sql.tmp)
+
   liteNormalization(filenames, destDir=tmpdir, pkgname=pkgname, verbose=verbose)
   filenames <- paste(tmpdir, "/normalized-", basename(filenames), sep="")
   
@@ -56,22 +61,30 @@ justCRLMM <- function(filenames, batch_size=40000,
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
+  theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
 
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
   suffix <- ") AND pmfeature.fsetid = featureSet.fsetid ORDER BY fid"
+  allSnps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
+
   txt <- sprintf("Genotyping: %06.2f percent done.", 0)
   if (verbose) cat(txt)
   del <- paste(rep("\b", nchar(txt)), collapse="")
-  theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
-  allSnps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
 
   for (i in 1:length(snps)){
     mid <- paste("'", snps[[i]],"'",  collapse=", ", sep="")
     sql <- paste(prefix, mid, suffix)
     tmp <- dbGetQuery(db(get(pkgname)), sql)
-    pnVec <- paste(tmp[["man_fsetid"]],
-                   c("A", "B")[tmp[["allele"]]+1],
-                   c("S", "A")[tmp[["strand"]]+1], sep="")
+    if (!snpcnv){
+      pnVec <- paste(tmp[["man_fsetid"]],
+                     c("A", "B")[tmp[["allele"]]+1],
+                     c("S", "A")[tmp[["strand"]]+1], sep="")
+    }else{
+      pnVec <- paste(tmp[["man_fsetid"]],
+                     c("A", "B")[tmp[["allele"]]+1],
+                     sep="")
+    }
+    
     idx <- order(pnVec)
     tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
     ngenes <- length(unique(pnVec))
@@ -79,16 +92,21 @@ justCRLMM <- function(filenames, batch_size=40000,
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]], reorder=TRUE)
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    sqs <-sqsFrom(.Call("rma_c_complete_copy", pms, pms,
-                        pnVec[idx], ngenes,  body(bg.dens),
-                        new.env(), FALSE, FALSE,
-                        as.integer(2), PACKAGE="oligo"))
+    theSumm <- .Call("rma_c_complete_copy", pms, pms,
+                     pnVec[idx], ngenes,  body(bg.dens),
+                     new.env(), FALSE, FALSE,
+                     as.integer(2), PACKAGE="oligo")
+    if (!snpcnv){
+      sqs <- sqsFrom(theSumm)
+    }else{
+      sqs <- sqsFrom.SnpCnv(theSumm)
+    }
+
     annotation(sqs) <- pkgname
     phenoData(sqs) <- phenoData
     rm(pms, mid, sql, tmp, pnVec, idx, ngenes)
 
     ### TRYING CRLMM HERE
-
     correction <- fitAffySnpMixture(sqs, verbose=FALSE)
     theSNR[i, ] <- correction$snr
 
@@ -97,26 +115,37 @@ justCRLMM <- function(filenames, batch_size=40000,
     thePriors <- get("priors", myenv)
     snpsIn <- match(featureNames(sqs), allSnps)
     myenv$hapmapCallIndex <- myenv$hapmapCallIndex[snpsIn]
-    myenv$params$centers <- myenv$params$centers[snpsIn,,]
-    myenv$params$scales <- myenv$params$scales[snpsIn,,]
+    if (!snpcnv){
+      myenv$params$centers <- myenv$params$centers[snpsIn,,]
+      myenv$params$scales <- myenv$params$scales[snpsIn,,]
+    }else{
+      myenv$params$centers <- myenv$params$centers[snpsIn,]
+      myenv$params$scales <- myenv$params$scales[snpsIn,]
+    }
     myenv$params$N <- myenv$params$N[snpsIn,]
 
     Index <- which(!get("hapmapCallIndex",myenv))
     myCalls <- matrix(NA,dim(sqs)[1],dim(sqs)[2])
-    myCalls[Index,] <- getInitialAffySnpCalls(correction,Index,verbose=FALSE)
+    myCalls[Index,] <- getInitialAffySnpCalls(correction,Index,verbose=FALSE, sqsClass=class(sqs))
     rparams <- getAffySnpGenotypeRegionParams(sqs, myCalls, correction$fs,
-                                              subset=Index,verbose=FALSE)
-    
-    oneStrand <- apply(is.na(getM(sqs[,1])[,1,]), 1,
-                       function(v) ifelse(length(ll <- which(v))==0, 0, ll))
-    rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=FALSE)
-    params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
-    myDist <- getAffySnpDistance(sqs, params, correction$fs)
-    myDist[,,-2,] <- balance*myDist[,,-2,]
+                                              subset=Index,verbose=FALSE, sqsClass=class(sqs))
+    if (!snpcnv){
+      oneStrand <- apply(is.na(getM(sqs[,1])[,1,]), 1,
+                         function(v) ifelse(length(ll <- which(v))==0, 0, ll))
+      rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=FALSE)
+      params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
+      myDist <- getAffySnpDistance(sqs, params, correction$fs)
+      myDist[,,-2,] <- balance*myDist[,,-2,]
+    }else{
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE)
+      params  <- replaceAffySnpParamsSingle(get("params",myenv), rparams, Index)
+      myDist <- getAffySnpDistanceSingle(sqs, params, correction$fs)
+      myDist[,,-2] <- balance*myDist[,,-2]
+    }
         
-    XIndex <- getChrXIndex(sqs)
-    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=FALSE)
-    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE)
+    XIndex <- which(snps[i] %in% snps.chrX)
+    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
 
     if(recalibrate){
       for(k in 1:3)
@@ -125,19 +154,26 @@ justCRLMM <- function(filenames, batch_size=40000,
       myCalls[, theSNR[i,] < 3.675] <- NA
       
       rparams <- getAffySnpGenotypeRegionParams(sqs, myCalls,
-                                                correction$fs, verbose=FALSE)
+                                                correction$fs, verbose=FALSE, sqsClass=class(sqs))
       rm(myCalls)
-      
-      rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
-      myDist <- getAffySnpDistance(sqs, rparams, correction$fs, verbose=FALSE)
-      myDist[,,-2,] <- balance*myDist[,,-2,]
-      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE)
-      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE)
+
+      if (!snpcnv){
+        rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
+        myDist <- getAffySnpDistance(sqs, rparams, correction$fs, verbose=FALSE)
+        myDist[,,-2,] <- balance*myDist[,,-2,]
+        rm(oneStrand)
+      }else{
+        rparams <- updateAffySnpParamsSingle(rparams, thePriors)
+        myDist <- getAffySnpDistanceSingle(sqs, rparams, correction$fs, verbose=FALSE)
+        myDist[,,-2] <- balance*myDist[,,-2]
+      }
+      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE, sqsClass=class(sqs))
+      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
       rm(myDist)
 ##      pacc <- LLR2conf(myCalls, LLR, theSNR[i,], annotation(sqs))
     }
     save(myCalls, LLR, file=paste(randomName, i, sep="."))
-    rm(correction, Index, k, LLR, myCalls, myenv, oneStrand, params, rparams, snpsIn, sqs, XIndex)
+    rm(correction, Index, k, LLR, myCalls, myenv, params, rparams, snpsIn, sqs, XIndex)
     if (verbose){
       cat(del)
       cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))

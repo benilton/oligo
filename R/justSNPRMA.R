@@ -1,35 +1,21 @@
-justSNPRMA <- function(filenames, tmpdir=getwd(),
+justSNPRMA <- function(filenames,
                        verbose=TRUE, phenoData=NULL,
                        normalizeToHapmap=TRUE){
 
-  if (verbose){
-    message("Using ", getwd(), " to store temporary files.")
-    message("Make sure this is a local directory.")
-    message("Otherwise, performance will be decreased.")
-  }
-  
   ###################
   ## GET PM MATRIX ##
   ###################
 
   if (verbose) message("Reading CEL files.")
-  headdetails <- read.celfile.header(filenames[1])
-  pkgname <- cleanPlatformName(headdetails[["cdfName"]])
+  headdetails <- readCelHeader(filenames[1])
+  pkgname <- cleanPlatformName(headdetails[["chiptype"]])
   require(pkgname, character.only=TRUE, quietly=TRUE)
   fid <- dbGetQuery(db(get(pkgname)), "SELECT fid FROM pmfeature")[[1]]
-##   tmpExprs <- createBufferedMatrix(length(fid), 0, directory=tmpdir)
-##   set.buffer.dim(tmpExprs, 50000, 1)
-##   for (i in 1:length(filenames)){
-##     AddColumn(tmpExprs)
-##     tmpExprs[,i] <- .Call("read_abatch", filenames[i], FALSE, FALSE, FALSE,
-##                           headdetails$cdfName, headdetails[["CEL dimensions"]],
-##                           FALSE, PACKAGE="affyio")[fid]
-##   }
-  tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
-                    headdetails$cdfName, headdetails[["CEL dimensions"]],
-                    FALSE, PACKAGE="affyio")[fid,]
-  rm(headdetails, i); gc(); gc()
+  tmpExprs <- readCelIntensities(filenames, indices=fid)
+  dimnames(tmpExprs) <- NULL
+  rm(headdetails); gc(); gc()
 
+  
   ########################
   ##### NORMALIZATION ####
   ########################
@@ -38,15 +24,15 @@ justSNPRMA <- function(filenames, tmpdir=getwd(),
     if (verbose) message("Normalizing to Hapmap.")
     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
     reference <- sort(reference)
-    for (i in 1:ncol(tmpExprs))
-      tmpExprs[, i] <- reference[rank(tmpExprs[, i])]
+    tmpExprs <- normalize.quantiles.use.target(tmpExprs, reference, copy=FALSE)
   } else {
-##    normalize.BufferedMatrix.quantiles(tmpExprs, copy=FALSE)
     tmpExprs <- normalize.quantiles(tmpExprs)
     reference <- sort(tmpExprs[,1])
     save(reference, file=paste(pkgname, ".quantileReference.rda", sep=""))
   }
   rm(reference); gc(); gc()
+
+  snpcnv <- pkgname == "pd.genomewidesnp.6"
 
   ########################
   #### SUMMARIZATION  ####
@@ -59,31 +45,38 @@ justSNPRMA <- function(filenames, tmpdir=getwd(),
   ## get pnVec
   ## get length(unique(pnVec))
 
-  pnVec <- paste(probeNames(get(pkgname)),
-                 c("A", "B")[pmAllele(get(pkgname))+1],
-                 c("S", "A")[pmStrand(get(pkgname))+1],
-                 sep="")
+  if (!snpcnv){
+    pnVec <- paste(probeNames(get(pkgname)),
+                   c("A", "B")[pmAllele(get(pkgname))+1],
+                   c("S", "A")[pmStrand(get(pkgname))+1],
+                   sep="")
+  }else{
+    pnVec <- paste(probeNames(get(pkgname)),
+                   c("A", "B")[pmAllele(get(pkgname))+1],
+                   sep="")
+  }
+
   idx <- order(pnVec)
-##  tmpExprs <- subBufferedMatrix(tmpExprs, idx)
-##  set.buffer.dim(tmpExprs, 50000, 1)
   tmpExprs <- tmpExprs[idx,]
   pnVec <- pnVec[idx]
-  rm(idx); ## gc()
-
-##   RowMode(tmpExprs)
-##   theSumm <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
+  rm(idx)
 
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-  theSumm <-.Call("rma_c_complete_copy", tmpExprs, tmpExprs,,
+  theSumm <-.Call("rma_c_complete_copy", tmpExprs, tmpExprs,
                   pnVec, length(unique(pnVec)), body(bg.dens),
                   new.env(), FALSE, FALSE,
                   as.integer(2), PACKAGE="oligo")
 
   
-  rm(tmpExprs, pnVec); ## gc()
+  rm(tmpExprs, pnVec)
   colnames(theSumm) <- basename(filenames)
-  theSumm <- sqsFrom(theSumm)
+  if (!snpcnv){
+    theSumm <- sqsFrom(theSumm)
+  }else{
+    theSumm <- sqsFrom.SnpCnv(theSumm)
+  }
+
   if (!is.null(phenoData)) phenoData(theSumm) <- phenoData
   annotation(theSumm) <- pkgname
   sampleNames(theSumm) <- basename(filenames)

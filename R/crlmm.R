@@ -705,18 +705,14 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
 
     if (class(object) == "SnpQSet"){
       rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=verbose)
-    }else{
-      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=verbose)
-    }
-##    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
-
-    if (class(object) == "SnpQSet"){
       myDist <- getAffySnpDistance(object, rparams, fs, verbose=verbose)
       myDist[,,-2,] <- balance*myDist[,,-2,]
     }else{
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=verbose)
       myDist <- getAffySnpDistanceSingle(object, rparams, fs, verbose=verbose)
       myDist[,,-2] <- balance*myDist[,,-2]
     }
+##    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
 
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose, sqsClass = class(object))
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass = class(object))

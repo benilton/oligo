@@ -1,4 +1,4 @@
-updateAffySnpParamsSingle <- function(object, priors, missingStrandIndex, minN=3,
+updateAffySnpParamsSingle <- function(object, priors,  minN=3,
                                 maxHomoSigma=priors$maxsigma[1],
                                 maxHeteSigma=priors$maxsigma[2],
                                 subset=1:(dim(object$centers)[1]),
