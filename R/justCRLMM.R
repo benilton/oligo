@@ -26,7 +26,7 @@ liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
   if (verbose) cat("\n")
 }
 
-justCRLMM <- function(filenames, batch_size=100000,
+justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
                       balance=1.5, phenoData=NULL, verbose=TRUE){
   tmpdir <- tempfile("crlmm.tmp", getwd())
