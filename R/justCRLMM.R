@@ -53,7 +53,7 @@ justCRLMM <- function(filenames, batch_size=40000,
   sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
   snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
   rm(sql.tmp)
-
+  sns <- basename(filenames)
   liteNormalization(filenames, destDir=tmpdir, pkgname=pkgname, verbose=verbose)
   filenames <- paste(tmpdir, "/normalized-", basename(filenames), sep="")
   
@@ -237,7 +237,7 @@ justCRLMM <- function(filenames, batch_size=40000,
 ##  out <- new("SnpCallSet", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,  annotation=pkgname)
 ##  annotation(finalSQS) <- annotation(out)
   featureNames(out) <- allSnps
-  sampleNames(out)  <- basename(filenames)
+  sampleNames(out)  <- sns
   phenoData(out)    <- phenoData
   out$crlmmSNR <- snr
 
