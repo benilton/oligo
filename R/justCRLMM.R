@@ -96,6 +96,7 @@ justCRLMM <- function(filenames, batch_size=40000,
                      pnVec[idx], ngenes,  body(bg.dens),
                      new.env(), FALSE, FALSE,
                      as.integer(2), PACKAGE="oligo")
+    save(theSumm, file=paste(randomName, i, "summ", sep="."))
     if (!snpcnv){
       sqs <- sqsFrom(theSumm)
     }else{
@@ -179,7 +180,7 @@ justCRLMM <- function(filenames, batch_size=40000,
       cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))
     }
   }
-  finalCalls <- finalConfs <- NULL
+  finalCalls <- finalConfs <- finalSumm <- NULL
 
   if (verbose){
     cat("\n")
@@ -193,20 +194,54 @@ justCRLMM <- function(filenames, batch_size=40000,
     finalCalls <- rbind(finalCalls, myCalls)
     rm(myCalls)
     finalConfs <- rbind(finalConfs, LLR)
-##    rm(pacc)
+    rm(LLR)
+
+    load(paste(randomName, i, "summ", sep="."))
+    finalSumm <- rbind(finalSumm, theSumm)
+    rm(theSumm)
     if (verbose){
       cat(del)
       cat(sprintf("Finalizing: %06.2f percent done.", i/length(snps)*100))
     }
   }
+
+  if (!snpcnv){
+    finalSQS <- sqsFrom(finalSumm)
+    ata <- antisenseThetaA(finalSQS)
+    atb <- antisenseThetaB(finalSQS)
+    sta <- senseThetaA(finalSQS)
+    stb <- senseThetaB(finalSQS)
+  }else{
+    finalSQS <- sqsFrom.SnpCnv(finalSumm)
+    ta <- thetaA(finalSQS)
+    tb <- thetaB(finalSQS)
+  }
+  rm(finalSQS)
+  
   if (verbose) cat("\n")
   warning("Please check the contents and remove the directory: ", tmpdir)
   snr <- exp(colMeans(log(theSNR)))
   pacc <- LLR2conf(finalCalls, finalConfs, snr, pkgname)
-  out <- new("SnpCallSet", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,  annotation=pkgname)
-  out$crlmmSNR <- snr
+  if (!snpcnv){
+    out <- new("SnpCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
+               antisenseThetaA=ata, antisenseThetaB=atb, senseThetaA=sta, senseThetaB=stb)
+    rm(ata, atb, sta, stb)
+  }else{
+    out <- new("SnpCnvCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
+               thetaA=ta, thetaB=tb)
+    rm(ta, tb)
+  }
+
+  annotation(out) <- pkgname
+  
+##  out <- new("SnpCallSet", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,  annotation=pkgname)
+##  annotation(finalSQS) <- annotation(out)
   featureNames(out) <- allSnps
-  sampleNames(out) <- basename(filenames)
-  phenoData(out) <- phenoData
+  sampleNames(out)  <- basename(filenames)
+  phenoData(out)    <- phenoData
+  out$crlmmSNR <- snr
+
   return(out)
+
+##  return(list(calls=out, sqs=finalSQS))
 }
