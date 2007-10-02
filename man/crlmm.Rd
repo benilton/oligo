@@ -12,7 +12,8 @@ crlmm(object, correction = NULL, recalibrate = TRUE, minLLRforCalls =
 c(5, 1, 5), verbose = TRUE,  correctionFile = NULL, prefix =
 "tmp.crlmm.", balance = 1.5)
 justCRLMM(filenames, batch_size = 40000, minLLRforCalls = c(5, 1, 5),
-recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE)
+recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE,
+pkgname = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,6 +30,7 @@ recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE)
   \item{verbose}{Logical.}
   \item{correctionFile}{A filename.}
   \item{phenoData}{\code{phenoData} object or \code{NULL}}
+  \item{pkgname}{alt. pdInfo package to be used}
 }
 
 \details{The \code{correctionFile} is a string (eg, "outputEM.rda")
@@ -44,7 +46,7 @@ recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE)
 }
 
 \value{
-  \code{SnpCallSet} object.
+  \code{SnpCallSetPlus} object.
 }
 
 \references{}

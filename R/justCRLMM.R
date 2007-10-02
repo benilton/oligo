@@ -28,7 +28,7 @@ liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
 
 justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
-                      balance=1.5, phenoData=NULL, verbose=TRUE){
+                      balance=1.5, phenoData=NULL, verbose=TRUE, pkgname=NULL){
   tmpdir <- tempfile("crlmm.tmp", getwd())
   if (is.null(phenoData))
     stop("phenoData must be provided and must contain a variable called 'gender'.")
@@ -45,7 +45,8 @@ justCRLMM <- function(filenames, batch_size=40000,
     print(table(chips))
     stop("All the CEL files must be of the same type.")
   }
-  pkgname <- cleanPlatformName(chips[1])
+  if (is.null(pkgname))
+    pkgname <- cleanPlatformName(chips[1])
   snpcnv <- pkgname == "pd.genomewidesnp.6"
   rm(chips)
   require(pkgname, character.only=TRUE)
