@@ -29,7 +29,8 @@ liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
 justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
                       balance=1.5, phenoData=NULL, verbose=TRUE, pkgname=NULL){
-  tmpdir <- tempfile("crlmm.tmp", getwd())
+##  tmpdir <- tempfile("crlmm.tmp", getwd())
+  tmpdir <- tempfile("crlmm.tmp", tempdir())
   if (is.null(phenoData))
     stop("phenoData must be provided and must contain a variable called 'gender'.")
 
