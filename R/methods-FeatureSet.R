@@ -301,6 +301,9 @@ setMethod("rma", "FeatureSet",
             pms <- pm(object, subset)
             pnVec <- probeNames(object, subset)
             ngenes <- length(unique(pnVec))
+            idx <- order(pnVec)
+            pms <- pms[idx,, drop=FALSE]
+            pnVec <- pnVec[idx]
             bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
             exprs <-.Call("rma_c_complete_copy", pms, pms,

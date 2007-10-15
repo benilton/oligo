@@ -9,6 +9,10 @@
 \alias{pmindex,SnpCnvFeatureSet-method}
 \alias{mmindex,platformDesign-method}
 \alias{pmindex,platformDesign-method}
+\alias{pmindex,ExpressionPDInfo-method}
+\alias{pmindex,TilingPDInfo-method}
+\alias{mmindex,ExpressionPDInfo-method}
+\alias{mmindex,TilingPDInfo-method}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Extract PM or MM indexes}

@@ -7,6 +7,8 @@
 \alias{pmSequence,platformDesign-method}
 \alias{mmSequence,AffySNPPDInfo-method}
 \alias{pmSequence,AffySNPPDInfo-method}
+\alias{pmSequence,ExpressionPDInfo-method}
+\alias{pmSequence,TilingPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Probe Sequeces}
 \description{

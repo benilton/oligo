@@ -25,19 +25,6 @@ setMethod("ncol", "platformDesign", function(x) x@ncol)
 ## track it down, so we're using kind for now.
 setMethod("kind", "platformDesign", function(object) object@type)
 
-
-setMethod("listFeatureFields", "AffySNPPDInfo",
-          function(object) {
-            PM_TABLE <- "pmfeature"
-            dbListFields(db(object), PM_TABLE)
-          })
-
-setMethod("listFeatureSetFields", "AffySNPPDInfo",
-          function(object) {
-            FSET_TABLE <- "featureSet"
-            dbListFields(db(object), PM_TABLE)
-          })
-
 setMethod("nProbes", "AffySNPPDInfo",
           function(object) {
             ## Note: does not include QC probes
@@ -47,7 +34,7 @@ setMethod("nProbes", "AffySNPPDInfo",
           })
 
 setMethod("pmindex", "AffySNPPDInfo",
-          function(object) {
+          function(object, subset=NULL) {
             ## might improve by telling RSQLite how
             ## many rows we will fetch?  same for mmindex.
             dbGetQuery(db(object),
@@ -70,32 +57,15 @@ setMethod("kind", "AffySNPCNVPDInfo",
               "SNPCNV"
           })
 
-## setMethod("featureSetNames", c("AffySNPPDInfo", "missing"),
-##           function(object, ids) {
-##               sql <- "select man_fsetid from featureSet"
-##               dbGetQuery(db(object), sql)[[1]]
-##           })
-## 
-## setMethod("featureSetNames", c("AffySNPPDInfo", "integer"),
-##           function(object, ids) {
-##             idvals <- paste(as.integer(ids), collapse=",")
-##             sql <- paste("SELECT fid, man_fsetid FROM featureSet, %s WHERE",
-##                          "fid IN (", idvals, ")",
-##                          "AND featureSet.fsetid = %s.fsetid")
-##             pmAns <- dbGetQuery(db(object),
-##                                 sprintf(sql, "pmfeature", "pmfeature"))
-##             mmAns <- dbGetQuery(db(object),
-##                                 sprintf(sql, "mmfeature", "mmfeature"))
-##             ansIds <- c(pmAns[[1]], mmAns[[1]])
-##             idOrd <- match(ansIds, ids)
-##             nms <- c(pmAns[[2]], mmAns[[2]])
-##             nms[idOrd]
-##           })
+setMethod("kind", "ExpressionPDInfo",
+          function(object) {
+            "expression"
+          })
 
-## setMethod("featureIDs", c("AffySNPPDInfo", "integer"),
-##           function(object, ids) {
-##               ids
-##           })
+setMethod("kind", "TilingPDInfo",
+          function(object) {
+            "tiling"
+          })
 
 setMethod("probeNames", "AffySNPPDInfo",
           function(object, subset=NULL) {
@@ -110,30 +80,6 @@ setMethod("geneNames", "AffySNPPDInfo",
           function(object) {
               unique(probeNames(object))
           })
-
-## pmFeatures <- function(map, featureSetIds) {
-##   fsetIds <- paste("'", featureSetIds, "'", sep="", collapse=",")
-##   sql <- paste("select man_fsetid, pmfeature.fid, pmfeature.strand,
-## pmfeature.allele, pmfeature.x, pmfeature.y from
-## pmfeature, featureSet where man_fsetid in (",
-##                  fsetIds, ") and featureSet.fsetid = pmfeature.fsetid")
-##   dbGetQuery(db(map), sql)
-## }
-
-## setMethod("indexFeatureSetName", "AffySNPPDInfo",
-##           function(object, featurenames) {
-##             ## FIXME: is this what we want?  What about the order?
-##             fSetNms <- paste("'", featurenames, "'", sep="", collapse=",")
-##             sql <- paste("SELECT fid from featureSet, %s WHERE",
-##                          "man_fsetid IN (", fSetNms, ") AND",
-##                          "featureSet.fsetid = %s.fsetid")
-## 
-##             pmIndices <- dbGetQuery(db(object),
-##                                     sprintf(sql, "pmfeature"))[[1]]
-##             mmIndices <- dbGetQuery(db(object),
-##                                     sprintf(sql, "mmfeature"))[[1]]
-##             c(pmIndices, mmIndices)
-##           })
 
 setMethod("pmSequence", "AffySNPPDInfo",
           function(object){
@@ -166,3 +112,105 @@ setMethod("pmStrand", "AffySNPPDInfo",
             sql <- "select strand from pmfeature order by fid"
             dbGetQuery(db(object), sql)[[1]]
           })
+
+### For Expression
+
+setMethod("nProbes", "ExpressionPDInfo",
+          function(object) {
+            ## Note: does not include QC probes
+            probeTables <- c("mmfeature", "pmfeature")
+            sum(subset(object@tableInfo,
+                       tbl %in% probeTables, row_count))
+          })
+
+setMethod("pmindex", "ExpressionPDInfo",
+          function(object, subset=NULL) {
+            ## might improve by telling RSQLite how
+            ## many rows we will fetch?  same for mmindex.
+            dbGetQuery(db(object),
+                       "select fid from pmfeature")[[1]]
+          })
+
+setMethod("mmindex", "ExpressionPDInfo",
+          function(object) {
+            dbGetQuery(db(object),
+                       "select fid from mmfeature")[[1]]
+          })
+
+setMethod("probeNames", "ExpressionPDInfo",
+          function(object, subset=NULL) {
+            sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+            tmp <- dbGetQuery(db(object), sql)
+            tmp[order(tmp$fid), "man_fsetid"]
+          })
+
+## FIXME: this method should be renamed!
+## FIXME: this should query the featureSet table (much faster i think)
+setMethod("geneNames", "ExpressionPDInfo",
+          function(object) {
+              unique(probeNames(object))
+          })
+
+setMethod("pmSequence", "ExpressionPDInfo",
+          function(object){
+            sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmPosition", "ExpressionPDInfo",
+          function(object){
+            sql <- "select position from pmfeature order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+
+### For Tiling
+
+setMethod("nProbes", "TilingPDInfo",
+          function(object) {
+            ## Note: does not include QC probes
+            probeTables <- c("mmfeature", "pmfeature")
+            sum(subset(object@tableInfo,
+                       tbl %in% probeTables, row_count))
+          })
+
+setMethod("pmindex", "TilingPDInfo",
+          function(object, subset=NULL) {
+            ## might improve by telling RSQLite how
+            ## many rows we will fetch?  same for mmindex.
+            dbGetQuery(db(object),
+                       "select fid from pmfeature")[[1]]
+          })
+
+setMethod("mmindex", "TilingPDInfo",
+          function(object) {
+            dbGetQuery(db(object),
+                       "select fid from mmfeature")[[1]]
+          })
+
+setMethod("probeNames", "TilingPDInfo",
+          function(object, subset=NULL) {
+            sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+            tmp <- dbGetQuery(db(object), sql)
+            tmp[order(tmp$fid), "man_fsetid"]
+          })
+
+## FIXME: this method should be renamed!
+## FIXME: this should query the featureSet table (much faster i think)
+setMethod("geneNames", "TilingPDInfo",
+          function(object) {
+              unique(probeNames(object))
+          })
+
+setMethod("pmSequence", "TilingPDInfo",
+          function(object){
+            sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+
+setMethod("pmPosition", "TilingPDInfo",
+          function(object){
+            sql <- "select position from pmfeature order by pmfeature.fid"
+            dbGetQuery(db(object), sql)[[1]]
+          })
+

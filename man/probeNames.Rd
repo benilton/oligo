@@ -3,6 +3,8 @@
 \alias{probeNames,FeatureSet-method}
 \alias{probeNames,AffySNPPDInfo-method}
 \alias{probeNames,platformDesign-method}
+\alias{probeNames,ExpressionPDInfo-method}
+\alias{probeNames,TilingPDInfo-method}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Accessor to feature names}

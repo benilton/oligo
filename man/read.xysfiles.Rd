@@ -6,37 +6,32 @@
   NimbleGen provides XYS files which are read by this function.
 }
 \usage{
-read.xysfiles(filenames, phenoData = new("AnnotatedDataFrame"), featureData = NULL, description = NULL, notes = "", verbose = FALSE, tmpdir = tempdir())
+read.xysfiles(filenames, pkgname = NULL, phenoData = NULL, featureData = NULL, experimentData = NULL, notes = NULL, verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filenames}{\code{character} vector with filenames.}
+  \item{pkgname}{\code{character} vector with alternative PD Info
+    package name}
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}
-  \item{description}{\code{description}}
+  \item{experimentData}{\code{experimentData}}
   \item{notes}{\code{notes}}
   \item{verbose}{\code{verbose}}
-  \item{tmpdir}{path to the directory that will store the temporary
-    files.}
 }
 \details{
-  \code{tmpdir} should be a local directory where temporary files
-  (created by \code{BufferedMatrix} package) are going to be stored. If
-  this points to a network drive, the process will be very slow. If it
-  points to a directory where the user does not have 'write'
-  permissions, the user will get errors.
+  The function will read the XYS files provided by NimbleGen Systems and
+  return an object of class FeatureSet.
 }
 \value{
   \item{\code{ExpressionFeatureSet}}{if Expresssion arrays}
-  \item{\code{ExonFeatureSet}}{if Exon arrays}
-  \item{\code{SnpFeatureSet}}{if SNP arrays}
   \item{\code{TilingFeatureSet}}{if Tiling arrays}
 }
 
 \references{}
 \author{}
 \note{}
-\seealso{\code{\link{read.xysfiles}} for NimbleGen arrays}
+\seealso{\code{\link{read.celfiles}} for Affymetrix arrays}
 \examples{
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

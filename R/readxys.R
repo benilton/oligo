@@ -61,12 +61,12 @@ stuffForXYSandCELreaders <- function(filenames,
 }
 
 read.xysfiles <- function(filenames,
-                          phenoData=new("AnnotatedDataFrame"),
+                          pkgname=NULL,
+                          phenoData=NULL,
                           featureData=NULL,
-                          description=NULL,
-                          notes="",
-                          verbose = FALSE,
-                          tmpdir=tempdir()) {
+                          experimentData=NULL,
+                          notes=NULL,
+                          verbose = FALSE) {
   
   ## Create space to store the design names
   designnamelist <- NULL
@@ -86,42 +86,34 @@ read.xysfiles <- function(filenames,
     stop("XYS Files do not refer to the same design!")
     
   ## Load PDenv for the XYS files
-  designname=cleanPlatformName(designnamelist[1])
-  library(designname,character.only=TRUE)
+  if (is.null(pkgname))
+    pkgname <- cleanPlatformName(designname)
+  if (require(pkgname, character.only=TRUE)){
+    if (verbose)
+      message("Platform design info loaded.")
+  }else{
+    stop("Must install the ", pkgname, " package.")
+  }
 
-  ## Get the number of wells
-  nwells <- get(designname)@nwells
-
-  tmp <- stuffForXYSandCELreaders(filenames, phenoData, description, notes, verbose, nwells, designname)
-
-  ## Allocate memory for the intensities
-  ## And giving the correct names for the columns
-  e <- matrix(NA, nrow = nProbes(get(designname)), ncol = (length(filenames)*nwells))
-
-##  e <- createBufferedMatrix(nProbes(get(designname)), length(filenames)*nwells, directory=tmpdir)
-  colnames(e) <- tmp$samplenames
-
-  ## Loading lookup table to correctly assign the wells
-  lookup <- get(designname)@lookup
-  j <- 1
+  tmpExprs <- NULL
   for (i in seq(along=filenames)){
     if (verbose) cat(".")
 
     ## Read XYS "as is"
     tmpE <- readonexysfile(filenames[i])
-    tmpE$index <- tmpE$X + (tmpE$Y-1)*get(designname)@ncol
-
-    ndforder <- match(lookup$index,tmpE$index)
-    e[,j:(j+nwells-1)] <- matrix(tmpE$SIGNAL[ndforder],
-                                 ncol = nwells,
-                                 byrow = TRUE)       
-    j <- j+nwells
+    if (length(filenames) > 1){
+      tmpExprs <- cbind(tmpExprs, tmpE$SIGNAL)
+    }else{
+      tmpExprs <- matrix(tmpE$SIGNAL, ncol=1)
+    }
     if(verbose) cat(" Done.\n")
   }
-  
-  rownames(e) <- 1:nrow(e)
+  tmpE$index <- tmpE$X + (tmpE$Y-1)*geometry(get(pkgname))[2]
+  idx <- order(tmpE$index)
+  tmpExprs <- tmpExprs[idx,, drop=FALSE]
+  rm(tmpE, idx)
 
-  arrayType <- get(designname, pos=paste("package:", designname, sep=""))@type
+  arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
@@ -129,19 +121,31 @@ read.xysfiles <- function(filenames,
                      exon="ExonFeatureSet",
                      stop("unknown array type: ", arrayType))
 
-  if (is.null(featureData))
-    featureData <- new("AnnotatedDataFrame",
-                       data=data.frame(idx=1:nrow(e),
-                         row.names=1:nrow(e)),
-                       varMetadata=data.frame(varLabels="idx",
-                         row.names="idx"))
   out <- new(theClass,
-             exprs=e,
-             platform=designname,
+             exprs=tmpExprs,
+             platform=pkgname,
              manufacturer="NimbleGen",
-             phenoData=tmp$phenoData,
-             featureData=featureData,
-             experimentData=tmp$description,
-             annotation=designname)
-  return(out)
+             annotation=pkgname)
+
+  if (is.null(featureData)){
+    featureData(out) <- annotatedDataFrameFrom(assayData(out), byrow=TRUE)
+  }else{
+    featureData(out) <- featureData
+  }
+  if (is.null(phenoData)){
+    phenoData(out) <- annotatedDataFrameFrom(assayData(out), byrow=FALSE)
+  }else{
+    phenoData(out) <- phenoData
+  }
+  if (is.null(experimentData)){
+    ed <- new("MIAME")
+    preproc(ed)$filenames <- filenames
+    preproc(ed)$oligoversion <- packageDescription("oligo")$Version
+    if (!is.null(notes)) notes(ed) <- notes
+    experimentData(out) <- ed
+  }else{
+    ed <- experimentData
+    experimentData(out) <- ed
+  }
+  out
 }

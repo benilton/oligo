@@ -3,6 +3,8 @@
 \alias{kind,platformDesign-method}
 \alias{kind,AffySNPPDInfo-method}
 \alias{kind,AffySNPCNVPDInfo-method}
+\alias{kind,ExpressionPDInfo-method}
+\alias{kind,TilingPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Array type}
 \description{

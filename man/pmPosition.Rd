@@ -4,6 +4,8 @@
 \alias{pmPosition,TilingFeatureSet-method}
 \alias{position}
 \alias{position,TilingFeatureSet-method}
+\alias{pmPosition,ExpressionPDInfo-method}
+\alias{pmPosition,TilingPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Accessor to position information}
 \description{

@@ -19,6 +19,8 @@
 \alias{platformDesignName}
 \alias{platformDesignName,FeatureSet-method}
 \alias{geneNames,AffySNPPDInfo-method}
+\alias{geneNames,ExpressionPDInfo-method}
+\alias{geneNames,TilingPDInfo-method}
 \alias{geneNames,platformDesign-method}
 \alias{geneNames,FeatureSet-method}
 \alias{$,platformDesign-method}

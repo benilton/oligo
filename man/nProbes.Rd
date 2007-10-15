@@ -2,6 +2,8 @@
 \alias{nProbes}
 \alias{nProbes,platformDesign-method}
 \alias{nProbes,AffySNPPDInfo-method}
+\alias{nProbes,ExpressionPDInfo-method}
+\alias{nProbes,TilingPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Count number of probes}
 \description{
