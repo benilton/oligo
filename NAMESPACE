@@ -1,30 +1,6 @@
 useDynLib("oligo")
 import(Biobase, splines, graphics, stats, methods, affxparser)
 
-## exportPattern("^[^\\.]")
-
-## PDInfo classes
-### exportClasses(PDInfo,
-###               DBPDInfo,
-###               SNPPDInfo,
-###               SNPCNVPDInfo,
-###               AffySNPPDInfo,
-###               AffySNPCNVPDInfo,
-###               platformDesign)
-
-## FeatureSet classes
-### exportClasses(FeatureSet,
-###               ExpressionFeatureSet,
-###               SnpFeatureSet,
-###               SnpCnvFeatureSet,
-###               TilingFeatureSet,
-###               SnpQSet,
-###               SnpCnvQSet,
-###               SnpCopyNumberSet,
-###               SnpCallSet,
-###               oligoSnpSet,
-###               ExonFeatureSet)
-
 exportMethods("$",
               "antisenseThetaA",
               "antisenseThetaB",

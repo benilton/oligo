@@ -47,6 +47,11 @@ setMethod("mmindex", "AffySNPPDInfo",
                        "select fid from mmfeature")[[1]]
           })
 
+setMethod("kind", "AffyExpressionPDInfo",
+          function(object) {
+              "expression"
+          })
+
 setMethod("kind", "AffySNPPDInfo",
           function(object) {
               "SNP"
