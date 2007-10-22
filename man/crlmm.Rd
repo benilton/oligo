@@ -13,7 +13,7 @@ c(5, 1, 5), verbose = TRUE,  correctionFile = NULL, prefix =
 "tmp.crlmm.", balance = 1.5)
 justCRLMM(filenames, batch_size = 40000, minLLRforCalls = c(5, 1, 5),
 recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE,
-pkgname = NULL)
+pkgname = NULL, tmpdir=tempdir())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +31,7 @@ pkgname = NULL)
   \item{correctionFile}{A filename.}
   \item{phenoData}{\code{phenoData} object or \code{NULL}}
   \item{pkgname}{alt. pdInfo package to be used}
+  \item{tmpdir}{Directory where temporary files are going to be stored at.}
 }
 
 \details{The \code{correctionFile} is a string (eg, "outputEM.rda")
