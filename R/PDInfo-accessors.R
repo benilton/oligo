@@ -92,7 +92,7 @@ setMethod("pmSequence", "AffySNPPDInfo",
             dbGetQuery(db(object), sql)[[1]]
           })
 
-setMethod("pmPosition", "AffySNPPDInfo",
+setMethod("pmOffset", "AffySNPPDInfo",
           function(object){
             sql <- "select offset from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
             dbGetQuery(db(object), sql)[[1]]

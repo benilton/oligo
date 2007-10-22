@@ -90,6 +90,7 @@ setGeneric("chromosome", function(object) standardGeneric("chromosome"))
 setGeneric("position", function(object) standardGeneric("position"))
 setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
+setGeneric("pmOffset", function(object) standardGeneric("pmOffset"))
 setGeneric("pmChr", function(object) standardGeneric("pmChr"))
 
 setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))

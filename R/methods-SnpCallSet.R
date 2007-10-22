@@ -32,3 +32,21 @@ setReplaceMethod("callsConfidence", signature(object="SnpCallSet", value="matrix
 
 setMethod("db", "SnpCallSet",
           function(object) db(get(annotation(object))))
+
+setMethod("chromosome", "SnpCallSet",
+          function(object){
+            fs <- featureNames(object)
+            sql <- "SELECT man_fsetid, chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%'"
+            tmp <- dbGetQuery(db(object), sql)
+            idx <- match(fs, tmp[["man_fsetid"]])
+            tmp[idx, "chrom"]
+          })
+
+setMethod("position", "SnpCallSet",
+          function(object){
+            fs <- featureNames(object)
+            sql <- "SELECT man_fsetid, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'"
+            tmp <- dbGetQuery(db(object), sql)
+            idx <- match(fs, tmp[["man_fsetid"]])
+            tmp[idx, "physical_pos"]
+          })

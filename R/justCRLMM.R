@@ -28,9 +28,9 @@ liteNormalization <- function(filenames, destDir, pkgname, verbose=TRUE){
 
 justCRLMM <- function(filenames, batch_size=40000,
                       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
-                      balance=1.5, phenoData=NULL, verbose=TRUE, pkgname=NULL){
-##  tmpdir <- tempfile("crlmm.tmp", getwd())
-  tmpdir <- tempfile("crlmm.tmp", tempdir())
+                      balance=1.5, phenoData=NULL, verbose=TRUE,
+                      pkgname=NULL, tmpdir=tempdir()){
+  tmpdir <- tempfile("crlmm.tmp", tmpdir)
   if (is.null(phenoData))
     stop("phenoData must be provided and must contain a variable called 'gender'.")
 
@@ -172,17 +172,16 @@ justCRLMM <- function(filenames, batch_size=40000,
       }
       myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE, sqsClass=class(sqs))
       LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
-      rm(myDist)
 ##      pacc <- LLR2conf(myCalls, LLR, theSNR[i,], annotation(sqs))
     }
-    save(myCalls, LLR, file=paste(randomName, i, sep="."))
-    rm(correction, Index, k, LLR, myCalls, myenv, params, rparams, snpsIn, sqs, XIndex)
+    save(myDist, myCalls, LLR, file=paste(randomName, i, sep="."))
+    rm(myDist, correction, Index, k, LLR, myCalls, myenv, params, rparams, snpsIn, sqs, XIndex)
     if (verbose){
       cat(del)
       cat(sprintf("Genotyping: %06.2f percent done.", i/length(snps)*100))
     }
   }
-  finalCalls <- finalConfs <- finalSumm <- NULL
+  finalDist <- finalCalls <- finalConfs <- finalSumm <- NULL
 
   if (verbose){
     cat("\n")
@@ -197,7 +196,8 @@ justCRLMM <- function(filenames, batch_size=40000,
     rm(myCalls)
     finalConfs <- rbind(finalConfs, LLR)
     rm(LLR)
-
+    finalDist <- my.abind(finalDist, myDist)
+    rm(myDist)
     load(paste(randomName, i, "summ", sep="."))
     finalSumm <- rbind(finalSumm, theSumm)
     rm(theSumm)
@@ -207,6 +207,8 @@ justCRLMM <- function(filenames, batch_size=40000,
     }
   }
 
+  save(finalDist, file="finalDist.rda")
+  
   if (!snpcnv){
     finalSQS <- sqsFrom(finalSumm)
     ata <- antisenseThetaA(finalSQS)
@@ -247,3 +249,18 @@ justCRLMM <- function(filenames, batch_size=40000,
 
 ##  return(list(calls=out, sqs=finalSQS))
 }
+
+my.abind <- function(x, y){
+  dim.x <- dim(x)
+  dim.y <- dim(y)
+  stopifnot(dim.x[-1] == dim.y[-1])
+  nrows.x <- dim.x[1]
+  nrows.y <- dim.y[1]
+  dim(x) <- c(nrows.x, prod(dim.x[-1]))
+  dim(y) <- c(nrows.y, prod(dim.y[-1]))
+  z <- rbind(x,y)
+  dim(z) = c(nrows.x+nrows.y, dim.x[-1])
+  z
+}
+
+  

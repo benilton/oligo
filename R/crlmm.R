@@ -682,7 +682,8 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
     myDist <- getAffySnpDistanceSingle(object, params, fs)
     myDist[,,-2] <- balance*myDist[,,-2]
   }
-
+  if (!recalibrate)
+    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
 ##  rm(params)
   rm(fs); ## gc()
   XIndex <- getChrXIndex(object)
@@ -713,6 +714,7 @@ crlmm <- function(object, correction=NULL, recalibrate=TRUE,
       myDist[,,-2] <- balance*myDist[,,-2]
     }
 ##    save(rparams, file=paste(prefix, "ParamsAfterRec.rda", sep=""))
+    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
 
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose, sqsClass = class(object))
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass = class(object))
