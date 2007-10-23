@@ -196,7 +196,11 @@ justCRLMM <- function(filenames, batch_size=40000,
     rm(myCalls)
     finalConfs <- rbind(finalConfs, LLR)
     rm(LLR)
-    finalDist <- my.abind(finalDist, myDist)
+    if (i == 1){
+      finalDist <- myDist
+    }else{
+      finalDist <- my.abind(finalDist, myDist)
+    }
     rm(myDist)
     load(paste(randomName, i, "summ", sep="."))
     finalSumm <- rbind(finalSumm, theSumm)
@@ -253,7 +257,7 @@ justCRLMM <- function(filenames, batch_size=40000,
 my.abind <- function(x, y){
   dim.x <- dim(x)
   dim.y <- dim(y)
-  stopifnot(dim.x[-1] == dim.y[-1])
+  stopifnot(identical(dim.x[-1], dim.y[-1]))
   nrows.x <- dim.x[1]
   nrows.y <- dim.y[1]
   dim(x) <- c(nrows.x, prod(dim.x[-1]))
