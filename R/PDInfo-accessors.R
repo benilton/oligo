@@ -219,3 +219,15 @@ setMethod("pmPosition", "TilingPDInfo",
             dbGetQuery(db(object), sql)[[1]]
           })
 
+
+### AffySNPCNV
+
+setMethod("pmSequence", "AffySNPCNVPDInfo",
+          function(object, probes.type="snp"){
+            if (probes.type == "snp"){
+              sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"
+            }else if (probes.type == "cnv"){
+              sql <- "SELECT seq FROM sequenceCNV, pmfeatureCNV WHERE pmfeatureCNV.fid=sequenceCNV.fid ORDER BY pmfeatureCNV.fid"
+            }
+            dbGetQuery(db(object), sql)[[1]]
+          })

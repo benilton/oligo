@@ -39,9 +39,6 @@ sqsFrom.SnpCnv <- function(pmMat){
 }
 
 snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
-  ## assume exprs() is BufferedMatrix
-
-##  tmpExprs <- subBufferedMatrix(exprs(object), pmindex(object))
   tmpExprs <- pm(object)
   pkgname <- annotation(object)
   
@@ -53,11 +50,8 @@ snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
     if (verbose) message("Normalizing to Hapmap.")
     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
     reference <- sort(reference)
-##     for (i in 1:ncol(tmpExprs))
-##       tmpExprs[, i] <- reference[rank(tmpExprs[, i])]
     tmpExprs <- normalize.quantiles.use.target(tmpExprs, reference)
   } else {
-##    normalize.BufferedMatrix.quantiles(tmpExprs, copy=FALSE)
     tmpExprs <- normalize.quantiles(tmpExprs)
     reference <- sort(tmpExprs[,1])
     save(reference, file=paste(pkgname, ".quantileReference.rda", sep=""))
@@ -86,21 +80,16 @@ snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
                    sep="")
   }
   idx <- order(pnVec)
-##  tmpExprs <- subBufferedMatrix(tmpExprs, idx)
-##  set.buffer.dim(tmpExprs, 50000, 1)
   tmpExprs <- tmpExprs[idx, ]
   pnVec <- pnVec[idx]
   rm(idx); ## gc()
 
-##  RowMode(tmpExprs)
-##  theSumm <- median.polish.summarize(tmpExprs, length(unique(pnVec)), pnVec)
-
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-  theSumm <- sqsFrom(.Call("rma_c_complete_copy", tmpExprs, tmpExprs,,
-                           pnVec, length(unique(pnVec)), body(bg.dens),
-                           new.env(), FALSE, FALSE,
-                           as.integer(2), PACKAGE="oligo"))
+  theSumm <- .Call("rma_c_complete_copy", tmpExprs, tmpExprs,
+                   pnVec, length(unique(pnVec)), body(bg.dens),
+                   new.env(), FALSE, FALSE,
+                   as.integer(2), PACKAGE="oligo")
 
   
   rm(tmpExprs, pnVec); ## gc()

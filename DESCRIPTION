@@ -1,11 +1,11 @@
 Package: oligo
-Version: 1.3.7
+Version: 1.3.9
 Title: Oligonucleotide Arrays
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: methods, R (>= 2.5.0), Biobase (>= 1.13.58),
          splines, RSQLite, preprocessCore, AnnotationDbi,
-         affxparser, oligoClasses (>= 0.99.4)
+         affxparser, oligoClasses (>= 1.1.9)
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba, pd.mapping50k.xba240
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
@@ -17,9 +17,7 @@ Collate: AllClasses.R
          methods-platformDesign.R
          methods-FeatureSet.R
          methods-TilingFeatureSet.R
-         methods-SnpCallSet.R
          methods-SnpCnvFeatureSet.R
-         methods-SnpCopyNumberSet.R
          read.celfiles.R
          zzz.R
          readxys.R
@@ -32,6 +30,7 @@ Collate: AllClasses.R
          snprma.R
 	 justSNPRMA.R
 	 justCRLMM.R
-         update.snp6.R
+         methods-snp6.R
+         methods-genotype.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing

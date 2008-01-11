@@ -49,7 +49,7 @@ read.celfiles <- function(filenames,
   pdInfo <- get(pkgname)
   if (is(pdInfo, "platformDesign")) {
     order_index <- pdInfo$order_index
-    tmpExprs <- tmpExprs[order_index, ]
+    tmpExprs <- tmpExprs[order_index,, drop=FALSE ]
   }
 
   rownames(tmpExprs) <- 1:nrow(tmpExprs)
@@ -205,6 +205,6 @@ read.celfiles <- function(filenames,
 
 list.celfiles <-   function(...){
     files <- list.files(...)
-    return(files[grep("\\.[cC][eE][lL]\\.gz$|\\.[cC][eE][lL]$", files)])
+    return(files[grep("\\.[cC][eE][lL]$", files)])
 }
 

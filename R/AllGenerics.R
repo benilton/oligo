@@ -2,7 +2,7 @@ setGeneric("platform", function(object) standardGeneric("platform"))
 
 setGeneric("platform<-", function(object, value) standardGeneric("platform<-"))
 
-setGeneric("db", function(object) standardGeneric("db"))
+## setGeneric("db", function(object) standardGeneric("db"))
 
 setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
 
@@ -46,14 +46,14 @@ setGeneric("featureIndex",
 
 ## setGeneric("allele", function(object) standardGeneric("allele"))
 
-setGeneric("calls<-", function(object, value) standardGeneric("calls<-"))
-
-setGeneric("callsConfidence<-",
-           function(object, value) standardGeneric("callsConfidence<-"))
-
-setGeneric("calls", function(object) standardGeneric("calls"))
-
-setGeneric("callsConfidence", function(object) standardGeneric("callsConfidence"))
+## setGeneric("calls<-", function(object, value) standardGeneric("calls<-"))
+## 
+## setGeneric("callsConfidence<-",
+##            function(object, value) standardGeneric("callsConfidence<-"))
+## 
+## setGeneric("calls", function(object) standardGeneric("calls"))
+## 
+## setGeneric("callsConfidence", function(object) standardGeneric("callsConfidence"))
 
 setGeneric("logRatioAntisense",
            function(object) standardGeneric("logRatioAntisense"))
@@ -64,14 +64,14 @@ setGeneric("logRatioSense",
 setGeneric("snpMedianSilhouette",
            function(object) standardGeneric("snpMedianSilhouette"))
 
-setGeneric("copyNumber<-",
-           function(object, value) standardGeneric("copyNumber<-"))
+## setGeneric("copyNumber<-",
+##            function(object, value) standardGeneric("copyNumber<-"))
 
-setGeneric("cnConfidence<-",
-           function(object, value) standardGeneric("cnConfidence<-"))
+## setGeneric("cnConfidence<-",
+##            function(object, value) standardGeneric("cnConfidence<-"))
 
-setGeneric("copyNumber", function(object) standardGeneric("copyNumber"))
-setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
+## setGeneric("copyNumber", function(object) standardGeneric("copyNumber"))
+## setGeneric("cnConfidence", function(object) standardGeneric("cnConfidence"))
 ## setGeneric("alleleAB", function(object) standardGeneric("alleleAB"))
 ## setGeneric("pmAlleleAB", function(object) standardGeneric("pmAlleleAB"))
 setGeneric("senseThetaA", function(obj) standardGeneric("senseThetaA"))
@@ -86,8 +86,8 @@ setGeneric("thetaB", function(obj) standardGeneric("thetaB"))
 setGeneric("getM", function(obj) standardGeneric("getM"))
 setGeneric("getA", function(obj) standardGeneric("getA"))
 
-setGeneric("chromosome", function(object) standardGeneric("chromosome"))
-setGeneric("position", function(object) standardGeneric("position"))
+## setGeneric("chromosome", function(object) standardGeneric("chromosome"))
+## setGeneric("position", function(object) standardGeneric("position"))
 setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
 setGeneric("pmOffset", function(object) standardGeneric("pmOffset"))
@@ -105,7 +105,7 @@ setGeneric("listFeatureFields", function(object) standardGeneric("listFeatureFie
 setGeneric("listFeatureSetFields", function(object) standardGeneric("listFeatureSetFields"))
 
 setGeneric("pmFragmentLength", function(object) standardGeneric("pmFragmentLength"))
-setGeneric("pmSequence", function(object) standardGeneric("pmSequence"))
+setGeneric("pmSequence", function(object, ...) standardGeneric("pmSequence"))
 setGeneric("mmSequence", function(object) standardGeneric("mmSequence"))
 setGeneric("pmAllele", function(object) standardGeneric("pmAllele"))
 setGeneric("pmStrand", function(object) standardGeneric("pmStrand"))
@@ -123,3 +123,7 @@ setGeneric("rma", function(object, ...) standardGeneric("rma"))
 setGeneric("geometry", function(object) standardGeneric("geometry"))
 
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
+
+##
+
+setGeneric("genotype", function(object, ...) standardGeneric("genotype"))

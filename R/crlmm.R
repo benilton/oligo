@@ -324,7 +324,12 @@ rowIndepChiSqTest <- function(call1,call2){
   return(tmp)
 }
 
-getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE){
+getGenotypeRegionParams <- function(M, initialcalls, f=0, verbose=TRUE, subset){
+  if (!missing(subset)){
+    M <- M[subset,, drop=FALSE]
+    initialcalls <- initialcalls[subset,, drop=FALSE]
+    f <- f[subset,, drop=FALSE]
+  }
   if(verbose) cat("Computing centers and scales for 3 genotypes")
   
 ##   tmp <- .Call("R_HuberMatrixRows2", M+(initialcalls-2)*f,
@@ -615,13 +620,6 @@ replaceAffySnpParams <- function(object,value,subset){
   return(object)
 }
 
-replaceAffySnpParamsSingle <- function(object,value,subset){
-  object$centers[subset,] <- value$centers
-  object$scales[subset,] <- value$scales
-  object$N[subset,] <- value$N
-  return(object)
-}
-
 crlmm <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(5, 1, 5),
                   verbose=TRUE, correctionFile=NULL, prefix="tmp.crlmm.", balance=1.5){
@@ -771,7 +769,9 @@ LLR2conf <-function(theCalls, LLR, SNR, annot){
   load(paste(system.file("extdata", package=annot), "/", annot, ".spline.params.rda", sep=""))
 
   Het <- as.vector(theCalls==2)
-  dst <- rep(Dst, ncol(theCalls))
+
+  ## dst <- rep(Dst, ncol(theCalls))
+
   LLR <- as.vector(sqrt(LLR))
 
   conf <- vector("numeric", length(LLR))
