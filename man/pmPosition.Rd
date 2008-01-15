@@ -3,7 +3,7 @@
 \alias{pmOffset}
 \alias{pmOffset,AffySNPPDInfo-method}
 \alias{pmPosition,TilingFeatureSet-method}
-\alias{position}
+%\alias{position}
 \alias{position,TilingFeatureSet-method}
 \alias{position,SnpCallSet-method}
 \alias{pmPosition,ExpressionPDInfo-method}
@@ -15,7 +15,7 @@
   (PM) probes.
 }
 \usage{
-position(object)
+%position(object)
 pmPosition(object)
 pmOffset(object)
 }

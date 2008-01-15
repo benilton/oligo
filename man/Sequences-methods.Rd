@@ -7,6 +7,7 @@
 \alias{pmSequence,platformDesign-method}
 \alias{mmSequence,AffySNPPDInfo-method}
 \alias{pmSequence,AffySNPPDInfo-method}
+\alias{pmSequence,AffySNPCNVPDInfo-method}
 \alias{pmSequence,ExpressionPDInfo-method}
 \alias{pmSequence,TilingPDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -16,12 +17,13 @@
 }
 \usage{
 mmSequence(object)
-pmSequence(object)
+pmSequence(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{\code{FeatureSet}, \code{platformDesign} or
     \code{AffySNPPDInfo} object}
+  \item{...}{additional arguments}
 }
 \details{
 }

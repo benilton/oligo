@@ -559,9 +559,9 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
   n.chunks <- nrow(analysis)-3
   n.files <- as.integer(analysis[which(analysis[,1] == "nsamples"), 2])
   
-  calls.file <- gzfile(file.path(tmpdir, "crlmm-calls.txt.gz"), "w")
-  llr.file <- gzfile(file.path(tmpdir, "crlmm-llr.txt.gz"), "w")
-  conf.file <- gzfile(file.path(tmpdir, "crlmm-conf.txt.gz"), "w")
+##   calls.file <- gzfile(file.path(tmpdir, "crlmm-calls.txt.gz"), "w")
+##   llr.file <- gzfile(file.path(tmpdir, "crlmm-llr.txt.gz"), "w")
+##   conf.file <- gzfile(file.path(tmpdir, "crlmm-conf.txt.gz"), "w")
   if (verbose){
     txt <- sprintf("Genotyping: %06.2f percent done.", 0)
     cat(txt)

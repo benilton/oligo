@@ -1,7 +1,7 @@
 \name{chromosome}
-\alias{chromosome}
-\alias{chromosome,TilingFeatureSet-method}
-\alias{chromosome,SnpCallSet-method}
+%- \alias{chromosome}
+%- \alias{chromosome,TilingFeatureSet-method}
+%- \alias{chromosome,SnpCallSet-method}
 \alias{pmChr}
 \alias{pmChr,TilingFeatureSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -10,7 +10,7 @@
   Returns chromosome information.
 }
 \usage{
-chromosome(object)
+%- chromosome(object)
 pmChr(object)
 }
 %- maybe also 'usage' for other objects documented here.

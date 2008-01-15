@@ -620,7 +620,7 @@ replaceAffySnpParams <- function(object,value,subset){
   return(object)
 }
 
-crlmm <- function(object, correction=NULL, recalibrate=TRUE,
+crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
                   minLLRforCalls=c(5, 1, 5),
                   verbose=TRUE, correctionFile=NULL, prefix="tmp.crlmm.", balance=1.5){
   library(annotation(object), character.only=TRUE)

@@ -47,13 +47,16 @@ Genotyping can be performed using \oligo and you will need:
 \end{itemize}
 
 We will start by loading the \oligo package and importing the CEL
-files available on the \Rpackage{hapmap100kxba} package. 
+files available on the \Rpackage{hapmap100kxba} package. An output
+directory should also be defined and that is the location where the
+summary files, including genotype calls and confidences are stored.
 
 <<getRawData>>=
 library("oligo")
 library("hapmap100kxba")
 pathCelFiles <- system.file("celFiles", package="hapmap100kxba")
 fullFilenames <- list.celfiles(path=pathCelFiles, full.names=TRUE)
+outputDir <- file.path(getwd(), "crlmmTest")
 @ 
 
 The density of the SNP arrays increased in a way that it is not
@@ -117,36 +120,40 @@ average intensity and fragment length in the log-ratio scale. These
 adjustments may take long time to run, depending on the combination of
 number of samples and computer resources available.
 
-\textbf{A word of warning}: the \Rmethod{crlmm()} method searches for a
-variable \Robject{gender} in the \Rclass{phenoData} slot of the
-\Rclass{SnpQSet} object. If it fails to find that variable, it will try
-estimate the gender from the data. If there is not enough discrimination
-power to estimate the gender, the following error message will be
-returned:
+%% \textbf{A word of warning}: the \Rmethod{crlmm()} method searches for a
+%% variable \Robject{gender} in the \Rclass{phenoData} slot of the
+%% \Rclass{SnpQSet} object. If it fails to find that variable, it will try
+%% estimate the gender from the data. If there is not enough discrimination
+%% power to estimate the gender, the following error message will be
+%% returned:
+%% 
+%% {\bf empty cluster: try a better set of initial centers}
+%% 
+%% Increasing the sample size is one of the possible solutions, although
+%% the preferred one is to have \Robject{gender} already defined in the
+%% \Rclass{phenoData} slot.
 
-{\bf empty cluster: try a better set of initial centers}
+%% The \Rclass{phenoData} slot includes covariates about the
+%% samples. Genotyping and copy number analyses often make use of gender
+%% information in order to provide more precise inferences. The code
+%% below exemplifies the creation of the \Rclass{phenoData} object.
+%% 
+%% <<setPD>>=
+%% aboutSamples <- data.frame(gender=c("female", "female", "male"))
+%% rownames(aboutSamples) <- basename(fullFilenames)
+%% aboutVars <- data.frame(labelDescription="male/female")
+%% rownames(aboutVars) <- "gender"
+%% pd <- new("AnnotatedDataFrame",
+%%           data=aboutSamples,
+%%           varMetadata=aboutVars)
+%% @ 
+%% 
+%% <<crlmm, cache=TRUE>>=
+%% crlmmOut <- justCRLMM(fullFilenames, phenoData=pd, verbose=FALSE)
+%% @ 
 
-Increasing the sample size is one of the possible solutions, although
-the preferred one is to have \Robject{gender} already defined in the
-\Rclass{phenoData} slot.
-
-The \Rclass{phenoData} slot includes covariates about the
-samples. Genotyping and copy number analyses often make use of gender
-information in order to provide more precise inferences. The code
-below exemplifies the creation of the \Rclass{phenoData} object.
-
-<<setPD>>=
-aboutSamples <- data.frame(gender=c("female", "female", "male"))
-rownames(aboutSamples) <- basename(fullFilenames)
-aboutVars <- data.frame(labelDescription="male/female")
-rownames(aboutVars) <- "gender"
-pd <- new("AnnotatedDataFrame",
-          data=aboutSamples,
-          varMetadata=aboutVars)
-@ 
-
-<<crlmm, cache=TRUE>>=
-crlmmOut <- justCRLMM(fullFilenames, phenoData=pd, verbose=FALSE)
+<<crlmm>>=
+crlmm(fullFilenames, outputDir, verbose=FALSE)
 @ 
 
 The \Robject{crlmmOut} object above belongs to the \Rclass{SnpCallSet}
@@ -156,13 +163,25 @@ associated to the calls, represented respectively by the
 can be accessed using the methods of the same name as demonstrated
 below:
 
+%% <<theCalls>>=
+%% calls(crlmmOut)[1:5,1:2]
+%% callsConfidence(crlmmOut)[1:5,1:2]
+%% @ 
+
 <<theCalls>>=
-calls(crlmmOut)[1:5,1:2]
-callsConfidence(crlmmOut)[1:5,1:2]
+calls.file <- file.path(outputDir, "crlmm-calls.txt")
+conf.file <- file.path(outputDir, "crlmm-conf.txt")
+read.delim(calls.file, nrows=5)[, 1:2]
+read.delim(conf.file, nrows=5)[, 1:2]
+@ 
+
+<<clean, echo=FALSE>>=
+unlink(outputDir, recursive=TRUE)
 @ 
 
 The genotype calls are represented by 1 (AA), 2 (AB) and 3 (BB). The
-confidence is the log-likelihood ratio of the two most likely calls.
+confidence is the predicted probability that the algorithm made the
+right call.
 
 \subsection{Exploring the Annotation Package}
 
@@ -176,7 +195,7 @@ five SNP's (probes querying specific SNP's have names starting with
 the string ``SNP'').
 
 <<>>=
-conn <- db(crlmmOut)
+conn <- db(pd.mapping50k.xba240)
 dbListTables(conn)
 dbListFields(conn, "featureSet")
 sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%' LIMIT 5"
