@@ -624,9 +624,9 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
     rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
     colnames(initialCalls) <- colnames(LLR) <- colnames(callsConfidence) <- basename(files)
 
-    write.table(initialCalls, file.path(tmpdir, "crlmm-calls.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1))
-    write.table(LLR, file.path(tmpdir, "crlmm-llr.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1))
-    write.table(callsConfidence, file.path(tmpdir, "crlmm-conf.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1))
+    suppressWarnings(write.table(initialCalls, file.path(tmpdir, "crlmm-calls.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
+    suppressWarnings(write.table(LLR, file.path(tmpdir, "crlmm-llr.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
+    suppressWarnings(write.table(callsConfidence, file.path(tmpdir, "crlmm-conf.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
     
 ##    writeLines(apply(initialCalls, 1, paste, collapse=","), calls.file)
 ##    writeLines(apply(LLR, 1, paste, collapse=","), llr.file)
@@ -640,9 +640,9 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
     }
 
   }
-  close(calls.file)
-  close(llr.file)
-  close(conf.file)
+##  close(calls.file)
+##  close(llr.file)
+##  close(conf.file)
 }
 
 normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgname, reference){
