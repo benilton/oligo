@@ -725,6 +725,8 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   rownames(pacc) <- allSnps
   colnames(pacc) <- sns
 
+  if (verbose) cat("\n")
+  
 ##   out <- new("SnpCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
 ##              antisenseThetaA=ata, antisenseThetaB=atb, senseThetaA=sta, senseThetaB=stb)
 
