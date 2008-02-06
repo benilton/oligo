@@ -791,12 +791,13 @@ readSummaries <- function(type, tmpdir){
   if (type %in% c("alleleA", "alleleB")){
     analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
     files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
-    sizes <- analysis[-(1:3), 2]
+##    sizes <- analysis[-(1:3), 2]
     n.files <- length(files)
+    n.samples <- as.integer(analysis[match("nsamples", analysis[,1]), 2])
     tmp <- NULL
     for (i in 1:n.files){
       nrows <- as.integer(analysis[3+i, 2])
-      tmp <- rbind(tmp, matrix(readBin(files[i], numeric(), nrows*n.files), nrow=nrows))
+      tmp <- rbind(tmp, matrix(readBin(files[i], numeric(), nrows*n.samples), nrow=nrows))
     }
 
     pkgname <- analysis[1, 2]
