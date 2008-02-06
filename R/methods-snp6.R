@@ -782,3 +782,37 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
               f0=f0.file,
               snr=snr.file))
 }
+
+
+readSummaries <- function(type, tmpdir){
+  if (!(type %in% c("alleleA", "alleleB", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense")))
+    stop("'type' must be one of 'alleleA', 'alleleB', 'alleleA-sense', 'alleleA-antisense', 'alleleB-sense', 'alleleB-antisense'")
+
+  if (type %in% c("alleleA", "alleleB")){
+    analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
+    files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
+    sizes <- analysis[-(1:3), 2]
+    n.files <- length(files)
+    tmp <- NULL
+    for (i in 1:n.files){
+      nrows <- as.integer(analysis[3+i, 2])
+      tmp <- rbind(tmp, matrix(readBin(files[i], numeric(), nrows*n.files), nrow=nrows))
+    }
+
+    pkgname <- analysis[1, 2]
+    require(pkgname, character.only=TRUE)
+    tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
+    tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
+    tmpdf[is.na(tmpdf$physical_pos), "physical_pos"] <- 0
+    tmpdf <- tmpdf[order(tmpdf$man_fsetid),]
+    tmpdf[["index"]] <- 1:nrow(tmpdf)
+    tmpdf <- tmpdf[order(tmpdf$chrom, tmpdf$physical_pos, tmpdf$man_fsetid),]
+    tmpidx <- tmpdf[["index"]]
+    
+    rownames(tmp) <- tmpdf[["man_fsetid"]]
+    colnames(tmp) <- as.character(read.table(file.path(tmpdir, "crlmm-calls.txt"), nrows=1, colClasses=rep("character", ncol(tmp))))
+  }else{
+    tmp <- as.matrix(read.delim(file.path(tmpdir, paste(type, ".txt", sep=""))))
+  }
+  return(tmp)
+}

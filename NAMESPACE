@@ -60,7 +60,8 @@ export("basecontent",
        "sequenceDesignMatrix",
        "list.celfiles",
        "list.xysfiles",
-       "getPD")
+       "getPD",
+       "readSummaries")
 
 ## Exported functions for CRLMM
 
