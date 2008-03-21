@@ -613,6 +613,22 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
                                          fs, verbose=FALSE)
       rparams <- updateAffySnpParamsSingle(rparams, thePriors)
       myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, rparams, fs)
+
+      fileAA <- file.path(tmpdir, "crlmm-dstAA.txt")
+      fileAB <- file.path(tmpdir, "crlmm-dstAB.txt")
+      fileBB <- file.path(tmpdir, "crlmm-dstBB.txt")
+      dimnames(myDist) <- list(tmpdf[["man_fsetid"]][overall_pos],
+                               basename(files), c("AA", "AB", "BB"))
+      suppressWarnings(write.table(myDist[,, 1], fileAA, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+      suppressWarnings(write.table(myDist[,, 2], fileAB, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+      suppressWarnings(write.table(myDist[,, 3], fileBB, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+
       ### SAVE THE ABOVE
       myDist[,,-2] <- balance*myDist[,,-2]
       initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
@@ -624,13 +640,18 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
     rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
     colnames(initialCalls) <- colnames(LLR) <- colnames(callsConfidence) <- basename(files)
 
-    suppressWarnings(write.table(initialCalls, file.path(tmpdir, "crlmm-calls.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
-    suppressWarnings(write.table(LLR, file.path(tmpdir, "crlmm-llr.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
-    suppressWarnings(write.table(callsConfidence, file.path(tmpdir, "crlmm-conf.txt"), append=TRUE, quote=FALSE, sep="\t", col.names=(i==1)))
-    
-##    writeLines(apply(initialCalls, 1, paste, collapse=","), calls.file)
-##    writeLines(apply(LLR, 1, paste, collapse=","), llr.file)
-##    writeLines(apply(callsConfidence, 1, paste, collapse=","), conf.file)
+    suppressWarnings(write.table(initialCalls,
+                                 file.path(tmpdir, "crlmm-calls.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
+    suppressWarnings(write.table(LLR,
+                                 file.path(tmpdir, "crlmm-llr.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
+    suppressWarnings(write.table(callsConfidence,
+                                 file.path(tmpdir, "crlmm-conf.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
     
     if (verbose){
       cat(del)
@@ -640,9 +661,6 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
     }
 
   }
-##  close(calls.file)
-##  close(llr.file)
-##  close(conf.file)
 }
 
 normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgname, reference){
@@ -785,13 +803,13 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
 
 
 readSummaries <- function(type, tmpdir){
-  if (!(type %in% c("alleleA", "alleleB", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense")))
-    stop("'type' must be one of 'alleleA', 'alleleB', 'alleleA-sense', 'alleleA-antisense', 'alleleB-sense', 'alleleB-antisense'")
-
+  stopifnot(type %in% c("alleleA", "alleleB",
+                        "alleleA-sense", "alleleA-antisense",
+                        "alleleB-sense", "alleleB-antisense",
+                        "calls", "conf", "llr"))
   if (type %in% c("alleleA", "alleleB")){
     analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
     files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
-##    sizes <- analysis[-(1:3), 2]
     n.files <- length(files)
     n.samples <- as.integer(analysis[match("nsamples", analysis[,1]), 2])
     tmp <- NULL
@@ -812,8 +830,40 @@ readSummaries <- function(type, tmpdir){
     
     rownames(tmp) <- tmpdf[["man_fsetid"]]
     colnames(tmp) <- as.character(read.table(file.path(tmpdir, "crlmm-calls.txt"), nrows=1, colClasses=rep("character", ncol(tmp))))
-  }else{
-    tmp <- as.matrix(read.delim(file.path(tmpdir, paste(type, ".txt", sep=""))))
+  }else if (type %in% c("calls", "conf", "llr", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense")){
+    target <- file.path(tmpdir,
+                        ifelse(type %in% c("calls", "conf", "llr"),
+                               paste("crlmm-", type, ".txt", sep=""),
+                               paste(type, ".txt", sep="")))
+    header <- as.character(read.delim(target, nrow=1, colClasses="character", header=FALSE))
+    nsamples <- length(header)
+    what <- c("character", rep(ifelse(type == "calls", "integer", "numeric"), nsamples))
+    tmp <- as.matrix(read.delim(target, colClasses=what, skip=1, row.names=1, header=FALSE))
+    colnames(tmp) <- header
   }
+  return(tmp)
+}
+
+getCrlmmSummaries <- function(tmpdir){
+  analysis <- read.table(file.path(tmpdir, "analysis.txt"), colClasses="character", header=FALSE)
+  annotation <- analysis[match("annotation", analysis[,1]), 2]
+  snpcnv <- length(grep("genomewidesnp", annotation)) > 0
+  if (snpcnv){
+    summaries <- c("alleleA", "alleleB")
+    tmp <- new("SnpCnvCallSetPlus",
+               calls = readSummaries("calls", tmpdir),
+               callsConfidence = readSummaries("conf", tmpdir),
+               thetaA = readSummaries("alleleA", tmpdir),
+               thetaB = readSummaries("alleleB", tmpdir))
+  }else{
+    tmp <- new("SnpCallSetPlus",
+               calls = readSummaries("calls", tmpdir),
+               callsConfidence = readSummaries("conf", tmpdir),
+               senseThetaA = readSummaries("alleleA-sense", tmpdir),
+               senseThetaB = readSummaries("alleleB-sense", tmpdir),
+               antisenseThetaA = readSummaries("alleleA-antisense", tmpdir),
+               antisenseThetaB = readSummaries("alleleB-antisense", tmpdir))
+  }
+  annotation(tmp) <- annotation
   return(tmp)
 }

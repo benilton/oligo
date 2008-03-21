@@ -675,13 +675,14 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
 
   if (class(object) == "SnpQSet"){
     myDist <- getAffySnpDistance(object, params, fs)
+    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
     myDist[,,-2,] <- balance*myDist[,,-2,]
   }else{
     myDist <- getAffySnpDistanceSingle(object, params, fs)
+    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
     myDist[,,-2] <- balance*myDist[,,-2]
   }
   if (!recalibrate)
-    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
 ##  rm(params)
   rm(fs); ## gc()
   XIndex <- getChrXIndex(object)

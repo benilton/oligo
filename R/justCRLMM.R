@@ -566,7 +566,13 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   sns <- basename(filenames)
   liteNormalization(filenames, destDir=tmpdir, batch_size=batch_size, verbose=verbose)
   filenames <- paste(tmpdir, "/normalized-", basename(filenames), sep="")
-  
+
+  analysis <- data.frame(v1=c("annotation", "nsamples", "batch_size"),
+                         v2=c(pkgname, length(filenames), batch_size),
+                         stringsAsFactors=FALSE)
+  write.table(analysis, file.path(tmpdir, "analysis.txt"), row.names=FALSE,
+              col.names=FALSE, quote=FALSE)
+
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
@@ -646,6 +652,7 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
                                                 rm(myCalls)
       rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
       myDist <- getAffySnpDistance(sqs, rparams, correction$fs, verbose=FALSE)
+      save(myDist, file=paste(randomName, "DONT-REMOVEME", i, sep="."))
       myDist[,,-2,] <- balance*myDist[,,-2,]
       rm(oneStrand)
       myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE)

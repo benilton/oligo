@@ -61,7 +61,8 @@ export("basecontent",
        "list.celfiles",
        "list.xysfiles",
        "getPD",
-       "readSummaries")
+       "readSummaries",
+       "getCrlmmSummaries")
 
 ## Exported functions for CRLMM
 

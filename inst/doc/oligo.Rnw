@@ -156,23 +156,26 @@ number of samples and computer resources available.
 crlmm(fullFilenames, outputDir, verbose=FALSE)
 @ 
 
-The \Robject{crlmmOut} object above belongs to the \Rclass{SnpCallSet}
-class and contains the genotype calls and confidence measures
-associated to the calls, represented respectively by the
-\Robject{calls} and \Robject{callsConfidence} matrices. These matrices
-can be accessed using the methods of the same name as demonstrated
-below:
+The \Rfunction{crlmm} method does not return an object to the R session. Instead, it saves the objects to disk, as not all systems are guaranteed to meet the memory requirements that \Rclass{SnpCallSetPlus} (for 100K and 500K arrays) or \Rclass{SnpCnvCallSetPlus} (for SNP 5.0 and SNP 6.0 arrays) objects might need. For convenience, the \Rfunction{getCrlmmSummaries} will read the information from disk and make a \Rclass{SnpCallSetPlus} or \Rclass{SnpCnvCallSetPlus} object available to the user.
 
-%% <<theCalls>>=
-%% calls(crlmmOut)[1:5,1:2]
-%% callsConfidence(crlmmOut)[1:5,1:2]
-%% @ 
+%% The \Robject{crlmmOut} object above belongs to the \Rclass{SnpCallSet}
+%% class and contains the genotype calls and confidence measures
+%% associated to the calls, represented respectively by the
+%% \Robject{calls} and \Robject{callsConfidence} matrices. These matrices
+%% can be accessed using the methods of the same name as demonstrated
+%% below:
 
 <<theCalls>>=
-calls.file <- file.path(outputDir, "crlmm-calls.txt")
-conf.file <- file.path(outputDir, "crlmm-conf.txt")
-read.delim(calls.file, nrows=5)[, 1:2]
-read.delim(conf.file, nrows=5)[, 1:2]
+crlmmOut <- getCrlmmSummaries(outputDir)
+calls(crlmmOut)[1:5,1:2]
+callsConfidence(crlmmOut)[1:5,1:2]
+@ 
+
+<<theCalls>>=
+crlmmCalls <- readSummaries("calls", outputDir)
+crlmmConf <- readSummaries("conf", outputDir)
+crlmmCalls[1:5, 1:2]
+crlmmConf[1:5, 1:2]
 @ 
 
 The genotype calls are represented by 1 (AA), 2 (AB) and 3 (BB). The

@@ -62,6 +62,11 @@ setMethod("kind", "AffySNPCNVPDInfo",
               "SNPCNV"
           })
 
+setMethod("kind", "AffyGeneSTPDInfo",
+          function(object) {
+              "GeneST"
+          })
+
 setMethod("kind", "ExpressionPDInfo",
           function(object) {
             "expression"
@@ -76,7 +81,7 @@ setMethod("probeNames", "AffySNPPDInfo",
           function(object, subset=NULL) {
             sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
             tmp <- dbGetQuery(db(object), sql)
-            tmp[order(tmp$fid), "man_fsetid"]
+            tmp[order(tmp$fid, tmp$man_fsetid), "man_fsetid"]
           })
 
 ## FIXME: this method should be renamed!
@@ -146,7 +151,7 @@ setMethod("probeNames", "ExpressionPDInfo",
           function(object, subset=NULL) {
             sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
             tmp <- dbGetQuery(db(object), sql)
-            tmp[order(tmp$fid), "man_fsetid"]
+            tmp[order(tmp$fid, tmp$man_fsetid), "man_fsetid"]
           })
 
 ## FIXME: this method should be renamed!
@@ -197,7 +202,7 @@ setMethod("probeNames", "TilingPDInfo",
           function(object, subset=NULL) {
             sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
             tmp <- dbGetQuery(db(object), sql)
-            tmp[order(tmp$fid), "man_fsetid"]
+            tmp[order(tmp$fid, tmp$man_fsetid), "man_fsetid"]
           })
 
 ## FIXME: this method should be renamed!
