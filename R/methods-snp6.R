@@ -504,9 +504,9 @@ getAffySnpDistanceSingle56 <- function(x, params, f=0, subset=1:(dim(x)[1]),
   return(Dist)
 }
 
-genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(5, 1, 5), recalibrate=TRUE, verbose=TRUE, pkgname){
+genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(5, 1, 5), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE){
   if (!file.exists(tmpdir)){
-    tmp <- normalizeOne(files, tmpdir, pkgname=pkgname)
+    tmp <- normalizeOne(files, tmpdir, pkgname=pkgname, reference=reference)
     if(missing(pkgname))
       pkgname <- cleanPlatformName(readCelHeader(files[1])$chiptype)
   }else{
@@ -663,7 +663,7 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
   }
 }
 
-normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgname, reference){
+normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgname, reference=TRUE){
   
   ## Check existence of directory (destination)
   ## The destDir should not exist (yet)
@@ -683,10 +683,13 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
 
   n.snps <- dbGetQuery(conn, "SELECT row_count FROM table_info WHERE tbl='featureSet'")[[1]]
 
-  ## Get feature IDs and load reference
-  if (missing(reference))
-    load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
-  reference <- sort(reference)
+##   ## Get feature IDs and load reference
+##   if (reference){
+##     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
+##   }else{
+##     quantile.normalization
+##   }
+##   reference <- sort(reference)
 
   tmp <- dbGetQuery(conn, paste("SELECT fid, man_fsetid, allele, featureSet.chrom, featureSet.physical_pos",
                                 "FROM pmfeature, featureSet",
@@ -702,8 +705,6 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
 
   tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
   ngenes <- length(unique(pnVec))
-## the one below should be stored somewhere  
-##  snpnames <- unique(gsub("\\:[AB]$", "", pnVec))
 
   info <- dbGetQuery(conn, "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
   info[is.na(info[["chrom"]]), "chrom"] <- 0
@@ -752,6 +753,21 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
   f0.file <- file.path(destDir, "f0")
   snr.file <- file.path(destDir, "snr")
 
+  ## Get feature IDs and load reference
+  if (reference){
+    load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
+  }else{
+    if (verbose){
+      message("Creating normalization vector from the data.")
+      message(length(tmp$fid)/2^20, "GB RAM required")
+    }
+    reference <- normalize.quantiles.determine.target(readCelIntensities(celFiles,
+                                                                         indices=tmp$fid))
+    if (verbose) message("normalization vector created")
+  }
+  reference <- sort(reference)
+
+  
   for (i in 1:length(celFiles)){
     pms <- normalize.quantiles.use.target(readCelIntensities(celFiles[i],
                                                              indices=tmp$fid),

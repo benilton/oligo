@@ -1,6 +1,6 @@
 crlmm <- function(filenames, outdir, batch_size=40000, balance=1.5,
                     minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
-                    verbose=TRUE, pkgname){
+                    verbose=TRUE, pkgname, reference=TRUE){
   stopifnot(!(missing(filenames) | missing(outdir)))
   if(missing(pkgname)) pkgname <- cleanPlatformName(readCelHeader(filenames[1])$chiptype)
   require(pkgname, character.only=TRUE)
@@ -13,6 +13,6 @@ crlmm <- function(filenames, outdir, batch_size=40000, balance=1.5,
     genotypeOne(filenames, outdir, batch_size=batch_size,
                 balance=balance, minLLRforCalls=minLLRforCalls,
                 recalibrate=recalibrate, verbose=verbose,
-                pkgname=pkgname)
+                pkgname=pkgname, reference=reference)
   }
 }
