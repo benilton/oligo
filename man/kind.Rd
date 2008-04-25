@@ -6,7 +6,7 @@
 \alias{kind,ExpressionPDInfo-method}
 \alias{kind,TilingPDInfo-method}
 \alias{kind,AffyExpressionPDInfo-method}
-\alias{kind,AffyGeneSTPDInfo-method}
+\alias{kind,AffyGenePDInfo-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Array type}
 \description{

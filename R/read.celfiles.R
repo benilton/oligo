@@ -61,7 +61,7 @@ read.celfiles <- function(filenames,
                      SNP="SnpFeatureSet",
                      SNPCNV="SnpCnvFeatureSet",
                      exon="ExonFeatureSet",
-                     GeneST="GeneSTFeatureSet",
+                     Gene="GeneFeatureSet",
                      stop("unknown array type: ", arrayType))
 
   out <- new(theClass,

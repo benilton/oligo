@@ -62,9 +62,9 @@ setMethod("kind", "AffySNPCNVPDInfo",
               "SNPCNV"
           })
 
-setMethod("kind", "AffyGeneSTPDInfo",
+setMethod("kind", "AffyGenePDInfo",
           function(object) {
-              "GeneST"
+              "Gene"
           })
 
 setMethod("kind", "ExpressionPDInfo",
