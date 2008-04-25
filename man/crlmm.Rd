@@ -10,7 +10,7 @@
 \usage{
 crlmm(filenames, outdir, batch_size=40000, balance=1.5,
       minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
-      verbose=TRUE, pkgname)
+      verbose=TRUE, pkgname, reference=TRUE)
 justCRLMM(filenames, batch_size = 40000, minLLRforCalls = c(5, 1, 5),
 recalibrate = TRUE, balance = 1.5, phenoData = NULL, verbose = TRUE,
 pkgname = NULL, tmpdir=tempdir())
@@ -28,6 +28,7 @@ pkgname = NULL, tmpdir=tempdir())
   \item{verbose}{Logical.}
   \item{phenoData}{\code{phenoData} object or \code{NULL}}
   \item{pkgname}{alt. pdInfo package to be used}
+  \item{reference}{logical, defaulting to TRUE ...}
   \item{tmpdir}{Directory where temporary files are going to be stored at.}
 }
 
