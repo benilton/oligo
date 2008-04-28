@@ -776,11 +776,15 @@ LLR2conf <-function(theCalls, LLR, SNR, annot){
   LLR <- as.vector(sqrt(LLR))
 
   conf <- vector("numeric", length(LLR))
-  tmp <- pmin(LLR[!Het], HmzK3)
-  conf[!Het] <- lm1$coef[1]+lm1$coef[2]*tmp+lm1$coef[3]*(tmp-HmzK2)*I(tmp>HmzK2)
+  if (any(!Het)){
+    tmp <- pmin(LLR[!Het], HmzK3)
+    conf[!Het] <- lm1$coef[1]+lm1$coef[2]*tmp+lm1$coef[3]*(tmp-HmzK2)*I(tmp>HmzK2)
+  }
 
-  tmp <- pmin(LLR[Het], HtzK3)
-  conf[Het] <- lm2$coef[1]+lm2$coef[2]*tmp+lm2$coef[3]*(tmp-HtzK2)*I(tmp>HtzK2)
+  if (any(Het)){
+    tmp <- pmin(LLR[Het], HtzK3)
+    conf[Het] <- lm2$coef[1]+lm2$coef[2]*tmp+lm2$coef[3]*(tmp-HtzK2)*I(tmp>HtzK2)
+  }
 
   conf <- matrix(conf, ncol=ncol(theCalls))
 
