@@ -12,3 +12,8 @@ setMethod("show", "platformDesign", function(object) {
     cat("Number of columns:", ncol(object), "\n")
     cat("Number of features:", nProbes(object), "\n")
 })
+
+setMethod("show", "FeatureSet", function(object){
+  callNextMethod()
+  require(annotation(object), character.only=TRUE)
+})

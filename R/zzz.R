@@ -5,7 +5,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  message("This is the oligo package")
+  message("oligo Package - Series 1.5.x")
 }
 
 .onUnload <- function( libpath ){

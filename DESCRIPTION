@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.5.0
+Version: 1.5.1
 Title: Oligonucleotide Arrays
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
@@ -32,5 +32,6 @@ Collate: AllClasses.R
 	 justCRLMM.R
          methods-snp6.R
          methods-genotype.R
+         trash.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing

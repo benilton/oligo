@@ -1,10 +1,5 @@
-read.celfiles <- function(filenames,
-                          pkgname=NULL,
-                          phenoData=NULL,
-                          featureData=NULL,
-                          experimentData=NULL,
-                          notes=NULL,
-                          verbose = TRUE){
+read.celfiles <- function(filenames, pkgname, phenoData, featureData,
+                          experimentData, notes, verbose = TRUE){
 
   n <- length(filenames)
   if (n == 0)
@@ -24,7 +19,7 @@ read.celfiles <- function(filenames,
   ## RI: We should check if the pd package is available here. If not try
   ## to install it
   ## load pdInfo
-  if (is.null(pkgname))
+  if (missing(pkgname))
     pkgname <- cleanPlatformName(ref.cdfName)
   if (require(pkgname, character.only=TRUE)){
     if (verbose)
@@ -34,23 +29,21 @@ read.celfiles <- function(filenames,
   }
   arrayType <- kind(get(pkgname))
 
-  if (arrayType %in% c("SNP", "SNPCNV"))
-    warning("SNP chips should be handled using justSNPRMA or justCRLMM.")
-
-  if (verbose)
-    message(sprintf("The intensity matrix will require %3.2f MB of RAM.",
-                    prod(dim.intensity)*8/(1024^2)*length(filenames)))
-    
   tmpExprs <- readCelIntensities(filenames)
 
   ## BC: Nov 15-16 2005, the PDenv is ordered already in the way
   ##     we want PM/MMs to be. So, we need to reorder the cel
   ##     input, so the pm/mm methods are faster.
   pdInfo <- get(pkgname)
-  if (is(pdInfo, "platformDesign")) {
-    order_index <- pdInfo$order_index
-    tmpExprs <- tmpExprs[order_index,, drop=FALSE ]
-  }
+
+  if (is(pdInfo, "platformDesign"))
+    stop("Create a pdInfo package using the 'pdInfoBuilder' package")
+    
+  
+##   if (is(pdInfo, "platformDesign")) {
+##     order_index <- pdInfo$order_index
+##     tmpExprs <- tmpExprs[order_index,, drop=FALSE ]
+##   }
 
   rownames(tmpExprs) <- 1:nrow(tmpExprs)
   colnames(tmpExprs) <- basename(filenames)
@@ -70,21 +63,21 @@ read.celfiles <- function(filenames,
              manufacturer="Affymetrix",
              annotation=pkgname)
 
-  if (is.null(featureData)){
+  if (missing(featureData)){
     featureData(out) <- annotatedDataFrameFrom(assayData(out), byrow=TRUE)
   }else{
     featureData(out) <- featureData
   }
-  if (is.null(phenoData)){
+  if (missing(phenoData)){
     phenoData(out) <- annotatedDataFrameFrom(assayData(out), byrow=FALSE)
   }else{
     phenoData(out) <- phenoData
   }
-  if (is.null(experimentData)){
+  if (missing(experimentData)){
     ed <- new("MIAME")
     preproc(ed)$filenames <- filenames
     preproc(ed)$oligoversion <- packageDescription("oligo")$Version
-    if (!is.null(notes)) notes(ed) <- notes
+    if (!missing(notes)) notes(ed) <- notes
     experimentData(out) <- ed
   }else{
     experimentData(out) <- experimentData
