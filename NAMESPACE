@@ -36,6 +36,7 @@ exportMethods("$",
               "nrow",
               "platform",
               "platform<-",
+              "plotM",
 ##              "platformDesignName",
               "pm",
               "pm<-",
@@ -62,7 +63,9 @@ export("basecontent",
        "list.xysfiles",
        "getPD",
        "readSummaries",
-       "getCrlmmSummaries")
+       "getCrlmmSummaries",
+       "smoothChr",
+       "getSets")
 
 ## Exported functions for CRLMM
 
