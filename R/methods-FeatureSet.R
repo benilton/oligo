@@ -96,11 +96,25 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                  })
 
 setMethod("boxplot", signature(x="FeatureSet"),
-          function(x, which, range=0, ...){
+          function(x, which, range=0, col=1:ncol(x), ...){
             if(!missing(which)) warning("Argument 'which' not yet implemented")
-            idx <- sample(nrow(x), 5000)
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
             tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-            boxplot(tmpdf, range=range, ...)
+            idx <- is.na(tmpdf[[1]])
+            if (any(idx))
+              tmpdf <- tmpdf[!idx,]
+            boxplot(tmpdf, range=range, col=col, ...)
+          })
+
+setMethod("boxplot", signature(x="ExpressionSet"),
+          function(x, which, range=0, col=1:ncol(x), ...){
+            if(!missing(which)) warning("Argument 'which' not yet implemented")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
+            idx <- is.na(tmpdf[[1]])
+            if (any(idx))
+              tmpdf <- tmpdf[!idx,]
+            boxplot(tmpdf, range=range, col=col, ...)
           })
 
 
@@ -127,6 +141,30 @@ setMethod("hist", "FeatureSet",
             if (!missing(which)) warning("Argument 'which' not implemented yet.")
             idx <- sample(nrow(x), min(c(100000, nrow(x))))
             tmp <- exprs(x[idx,])
+            idx <- is.na(tmp[,1])
+            if(any(idx))
+              tmp <- tmp[!idx,, drop=FALSE]
+            if (log){
+              tmp <- log2(tmp)
+              xlab <- "log intensity"
+            }
+            x.density <- apply(tmp, 2, density)
+            all.x <- sapply(x.density, "[[", "x")
+            all.y <- sapply(x.density, "[[", "y")
+            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+            invisible(x.density)
+          })
+
+setMethod("hist", "ExpressionSet",
+          function(x, col=1:ncol(x), log=TRUE,
+                   which, ylab="density", xlab="intensity",
+                   type="l", ...){
+            if (!missing(which)) warning("Argument 'which' not implemented yet.")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmp <- exprs(x[idx,])
+            idx <- is.na(tmp[,1])
+            if(any(idx))
+              tmp <- tmp[!idx,, drop=FALSE]
             if (log){
               tmp <- log2(tmp)
               xlab <- "log intensity"

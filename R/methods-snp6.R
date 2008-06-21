@@ -819,11 +819,11 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
 
 
 readSummaries <- function(type, tmpdir){
-  stopifnot(type %in% c("alleleA", "alleleB",
+  stopifnot(type %in% c("alleleA", "alleleB", "fs",
                         "alleleA-sense", "alleleA-antisense",
                         "alleleB-sense", "alleleB-antisense",
                         "calls", "conf", "llr"))
-  if (type %in% c("alleleA", "alleleB")){
+  if (type %in% c("alleleA", "alleleB", "fs")){
     analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
     files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
     n.files <- length(files)
@@ -870,7 +870,8 @@ getCrlmmSummaries <- function(tmpdir){
                calls = readSummaries("calls", tmpdir),
                callsConfidence = readSummaries("conf", tmpdir),
                thetaA = readSummaries("alleleA", tmpdir),
-               thetaB = readSummaries("alleleB", tmpdir))
+               thetaB = readSummaries("alleleB", tmpdir),
+               fs = readSummaries("fs", tmpdir))
   }else{
     tmp <- new("SnpCallSetPlus",
                calls = readSummaries("calls", tmpdir),
