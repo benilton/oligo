@@ -193,7 +193,8 @@ setMethod("pmindex", "TilingPDInfo",
           })
 
 setMethod("mmindex", "TilingPDInfo",
-          function(object) {
+          function(object, subset=NULL) {
+            if(!is.null(subset)) message("subset not yet implemented")
             dbGetQuery(db(object),
                        "select fid from mmfeature")[[1]]
           })

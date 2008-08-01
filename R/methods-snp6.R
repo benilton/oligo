@@ -777,7 +777,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
                             new.env(), FALSE, FALSE,
                             as.integer(2), PACKAGE="oligo")[,1],
                       ncol=2, byrow=TRUE)
-    rm(pms)
+    rm(pms); gc()
     correction <- fitAffySnpMixture56(theSumm, verbose=FALSE)
 
     for (j in 1:length(filenames)){
@@ -801,7 +801,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, pkgn
     writeBin(correction$snr, conn)
     close(conn)
 
-    rm(correction)
+    rm(correction, theSumm); gc()
     if (verbose){
       cat(del)
       txt <- sprintf("Normalization: %06.2f percent done.", i/length(celFiles)*100)
@@ -883,4 +883,225 @@ getCrlmmSummaries <- function(tmpdir){
   }
   annotation(tmp) <- annotation
   return(tmp)
+}
+
+################
+################
+################
+
+genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(.95, .95, .95), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE){
+  if (!file.exists(tmpdir)){
+    tmp <- normalizeOne(files, tmpdir, pkgname=pkgname, reference=reference)
+    if(missing(pkgname))
+      pkgname <- cleanPlatformName(readCelHeader(files[1])$chiptype)
+  }else{
+    message("Using previous results stored at ", tmpdir)
+    analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
+    if(missing(pkgname))
+      pkgname <- analysis[which(analysis[,1]=="annotation"), 2]
+    batch_size <- as.integer(analysis[which(analysis[,1]=="batch_size"), 2])
+    tmp <- list(alleleA=dir(tmpdir, pattern="alleleA", full.names=TRUE),
+                alleleB=dir(tmpdir, pattern="alleleB", full.names=TRUE),
+                initialCalls=dir(tmpdir, pattern="initialCalls", full.names=TRUE),
+                fs=dir(tmpdir, pattern="fs", full.names=TRUE),
+                f0=dir(tmpdir, pattern="f0", full.names=TRUE),
+                snr=dir(tmpdir, pattern="snr", full.names=TRUE))
+    stopifnot(require(pkgname, character.only=TRUE))
+    ## MAYBE MORE TESTS OF VALIDITY
+  }
+
+  load(system.file(paste("extdata/", pkgname, "CrlmmInfo.rda", sep=""), package=pkgname))
+  
+  ## myenv should take abou 65MB RAM
+  ## I'll assume this is OK for now
+  ## and not subset it
+  myenv <- get(paste(pkgname,"Crlmm",sep="")); rm(list=paste(pkgname,"Crlmm",sep=""))
+  theN <- myenv$params$N
+  pis <- theN/rowSums(theN)
+  pis[pis == 0] <- .001
+  pis <- pis/rowSums(pis)
+  rm(theN)
+
+  thePriors <- get("priors", myenv)
+
+  tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
+  tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
+  tmpdf[is.na(tmpdf$physical_pos), "physical_pos"] <- 0
+  tmpdf <- tmpdf[order(tmpdf$man_fsetid),]
+  tmpdf[["index"]] <- 1:nrow(tmpdf)
+  tmpdf <- tmpdf[order(tmpdf$chrom, tmpdf$physical_pos, tmpdf$man_fsetid),]
+  tmpidx <- tmpdf[["index"]]
+##   rm(tmpdf); gc()
+  
+##   myenv$params$centers <- myenv$params$centers[tmpidx,]
+##   myenv$params$scales <- myenv$params$scales[tmpidx,]
+##   myenv$params$N <- myenv$params$N[tmpidx,]
+##   myenv$hapmapCallIndex <- myenv$hapmapCallIndex[tmpidx]
+
+  Index <- which(!get("hapmapCallIndex", myenv))
+  
+  analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
+  breaks <- cumsum(c(0, as.integer(analysis[-(1:3),2])))
+  index.grps <- cut(Index, breaks, include.lowest=TRUE, labels=FALSE)
+  Index <- Index-breaks[index.grps]
+  index.grps <- split(Index, index.grps)
+  rm(breaks)
+  
+  n.chunks <- nrow(analysis)-3
+  n.files <- as.integer(analysis[which(analysis[,1] == "nsamples"), 2])
+  
+##   calls.file <- gzfile(file.path(tmpdir, "crlmm-calls.txt.gz"), "w")
+##   llr.file <- gzfile(file.path(tmpdir, "crlmm-llr.txt.gz"), "w")
+##   conf.file <- gzfile(file.path(tmpdir, "crlmm-conf.txt.gz"), "w")
+  if (verbose){
+    txt <- sprintf("Genotyping: %06.2f percent done.", 0)
+    cat(txt)
+    del <- paste(rep("\b", nchar(txt)), collapse="", sep="")
+  }
+  last <- 0
+  for (i in 1:n.chunks){
+    index <- index.grps[[i]]
+    nrows <- as.integer(analysis[i+3,2])
+    overall_pos <- (last+1):(last+nrows)
+    last <- max(overall_pos)
+    
+    alleleA <- matrix(readBin(tmp$alleleA[i], numeric(),
+                              nrows*n.files), nrow=nrows)
+    alleleB <- matrix(readBin(tmp$alleleB[i], numeric(),
+                              nrows*n.files), nrow=nrows)
+    fs <- matrix(readBin(tmp$fs[i], numeric(), nrows*n.files),
+                         nrow=nrows)
+    initialCalls <- matrix(readBin(tmp$initialCalls[i], integer(),
+                                   nrows*n.files), nrow=nrows)
+    initialCalls[-index,] <- NA
+    rparams <- getGenotypeRegionParams(alleleA[index,]-alleleB[index,],
+                                       initialCalls[index,],
+                                       fs[index,], verbose=FALSE)
+    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE)
+    params <- get("params", myenv)
+    params$centers <- params$centers[overall_pos,]
+    params$scales <- params$scales[overall_pos,]
+    params$N <- params$N[overall_pos,]
+    params  <- replaceAffySnpParamsSingle(params, rparams, index)
+    thePis <- pis[overall_pos,]
+
+    myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, params, fs)
+    ##SAVE THE ABOVE
+    myDist[,,-2] <- balance*myDist[,,-2]
+    XIndex <- integer()
+    if (length(grep("chrX", tmp$initialCalls[i])) > 0)
+      XIndex <- 1:nrows
+
+    maleIndex <- rep(FALSE, n.files)
+    initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
+    LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
+
+    ### REPLACE tmpConf by LLR to recover
+    tmpConf <- improveConfidence(alleleA-alleleB, fs, initialCalls, params, thePriors, thePis)
+    
+    if (recalibrate){
+      for(k in 1:3)
+        initialCalls[ initialCalls == k & tmpConf < minLLRforCalls[k]] <- NA
+
+      rparams <- getGenotypeRegionParams(alleleA-alleleB,
+                                         initialCalls,
+                                         fs, verbose=FALSE)
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors)
+      myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, rparams, fs)
+
+      fileAA <- file.path(tmpdir, "crlmm-dstAA.txt")
+      fileAB <- file.path(tmpdir, "crlmm-dstAB.txt")
+      fileBB <- file.path(tmpdir, "crlmm-dstBB.txt")
+      dimnames(myDist) <- list(tmpdf[["man_fsetid"]][overall_pos],
+                               basename(files), c("AA", "AB", "BB"))
+      suppressWarnings(write.table(myDist[,, 1], fileAA, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+      suppressWarnings(write.table(myDist[,, 2], fileAB, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+      suppressWarnings(write.table(myDist[,, 3], fileBB, append=TRUE,
+                                   quote=FALSE, sep="\t",
+                                   col.names=(i==1)))
+
+      ### SAVE THE ABOVE
+      myDist[,,-2] <- balance*myDist[,,-2]
+      initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
+      LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
+      rm(myDist)
+
+    }
+    callsConfidence <- improveConfidence(alleleA-alleleB, fs, initialCalls, rparams, thePriors, thePis)
+##    callsConfidence <- LLR2conf(initialCalls, LLR, readBin(tmp$snr, numeric(), n.files), pkgname)
+
+    rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
+    colnames(initialCalls) <- colnames(LLR) <- colnames(callsConfidence) <- basename(files)
+
+    suppressWarnings(write.table(initialCalls,
+                                 file.path(tmpdir, "crlmm-calls.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
+    suppressWarnings(write.table(LLR,
+                                 file.path(tmpdir, "crlmm-llr.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
+    suppressWarnings(write.table(callsConfidence,
+                                 file.path(tmpdir, "crlmm-conf.txt"),
+                                 append=TRUE, quote=FALSE, sep="\t",
+                                 col.names=(i==1)))
+    
+    if (verbose){
+      cat(del)
+      txt <- sprintf("Genotyping: %06.2f percent done.", i/n.chunks*100)
+      cat(txt)
+      del <- paste(rep("\b", nchar(txt)), collapse="", sep="")
+    }
+
+  }
+}
+
+improveConfidence <- function(M, fs, theCalls, params, priors, pis){
+  shift <- params$centers
+  v <- 5*params$scale^2
+  n <- params$N
+  i <- n[,1] == 0
+  n[i, 1] <- n[i, 3]
+  i <- n[,3] == 0
+  n[i, 3] <- n[i, 1]
+  rm(i)
+  n[n[,2] == 0, 2] <- priors$d0s[2]
+  n[n[,1] == 0 & n[,3] == 0, c(1,3)] <- priors$d0s[1]
+ 
+  s20 <- priors$s20
+
+  tmpD <- sweep(v, 2, s20)
+  tmpD[tmpD <= 0] <- .005
+  theNu <- 2*v/tmpD
+  rm(tmpD)
+
+  pk <- function(theM, theF, theMu, theN, theNu, thePi, s20k){
+    p1 <- exp(-(theM-theF-theMu)^2/(2*theNu/(theNu+1)*s20k*(1+1/theN)))
+    p2 <- (theN/theNu*s20k)/(beta(1/2, theNu/2)^2)
+    thePi*p1*p2
+  }
+
+  p1 <- pk(M, fs, shift[,1], n[,1], theNu[,1], pis[,1], s20[1])
+  p2 <- pk(M, 0, shift[,2], n[,2], theNu[,2], pis[,2], s20[2])
+  p3 <- pk(M, -fs, shift[,3], n[,3], theNu[,3], pis[,3], s20[3])
+  tot <- p1+p2+p3
+  p1 <- p1/tot
+  p2 <- p2/tot
+  rm(tot)
+  p3 <- 1-p1-p2
+  
+  newConf <- p1
+  rm(p1)
+  i2 <- theCalls == 2
+  newConf[i2] <- p2[i2]
+  rm(i2, p2)
+  i3 <- theCalls == 3
+  newConf[i3] <- p3[i3]
+  rm(i3, p3)
+  if (any(is.na(newConf))) browser()
+  return(newConf)
 }
