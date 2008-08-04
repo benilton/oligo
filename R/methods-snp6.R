@@ -504,7 +504,7 @@ getAffySnpDistanceSingle56 <- function(x, params, f=0, subset=1:(dim(x)[1]),
   return(Dist)
 }
 
-genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(5, 1, 5), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE){
+genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(5, 1, 5), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE, d0s=80){
   if (!file.exists(tmpdir)){
     tmp <- normalizeOne(files, tmpdir, pkgname=pkgname, reference=reference)
     if(missing(pkgname))
@@ -586,7 +586,7 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
     rparams <- getGenotypeRegionParams(alleleA[index,]-alleleB[index,],
                                        initialCalls[index,],
                                        fs[index,], verbose=FALSE)
-    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE)
+    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE, d0s=d0s)
     params <- get("params", myenv)
     params$centers <- params$centers[overall_pos,]
     params$scales <- params$scales[overall_pos,]
@@ -611,7 +611,7 @@ genotypeOne <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, mi
       rparams <- getGenotypeRegionParams(alleleA-alleleB,
                                          initialCalls,
                                          fs, verbose=FALSE)
-      rparams <- updateAffySnpParamsSingle(rparams, thePriors)
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, d0s=d0s)
       myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, rparams, fs)
 
       fileAA <- file.path(tmpdir, "crlmm-dstAA.txt")
@@ -889,7 +889,7 @@ getCrlmmSummaries <- function(tmpdir){
 ################
 ################
 
-genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(.95, .95, .95), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE){
+genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, minLLRforCalls=c(.95, .95, .95), recalibrate=TRUE, verbose=TRUE, pkgname, reference=TRUE, d0s=80, theMult=15){
   if (!file.exists(tmpdir)){
     tmp <- normalizeOne(files, tmpdir, pkgname=pkgname, reference=reference)
     if(missing(pkgname))
@@ -977,7 +977,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
     rparams <- getGenotypeRegionParams(alleleA[index,]-alleleB[index,],
                                        initialCalls[index,],
                                        fs[index,], verbose=FALSE)
-    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE)
+    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE, d0s=d0s)
     params <- get("params", myenv)
     params$centers <- params$centers[overall_pos,]
     params$scales <- params$scales[overall_pos,]
@@ -997,7 +997,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
     LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
 
     ### REPLACE tmpConf by LLR to recover
-    tmpConf <- improveConfidence(alleleA-alleleB, fs, initialCalls, params, thePriors, thePis)
+    tmpConf <- improveConfidence(alleleA-alleleB, fs, initialCalls, params, thePriors, thePis, theMult)
     
     if (recalibrate){
       for(k in 1:3)
@@ -1006,7 +1006,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
       rparams <- getGenotypeRegionParams(alleleA-alleleB,
                                          initialCalls,
                                          fs, verbose=FALSE)
-      rparams <- updateAffySnpParamsSingle(rparams, thePriors)
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, d0s=d0s)
       myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, rparams, fs)
 
       fileAA <- file.path(tmpdir, "crlmm-dstAA.txt")
@@ -1031,7 +1031,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
       rm(myDist)
 
     }
-    callsConfidence <- improveConfidence(alleleA-alleleB, fs, initialCalls, rparams, thePriors, thePis)
+    callsConfidence <- improveConfidence(alleleA-alleleB, fs, initialCalls, rparams, thePriors, thePis, theMult)
 ##    callsConfidence <- LLR2conf(initialCalls, LLR, readBin(tmp$snr, numeric(), n.files), pkgname)
 
     rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
@@ -1060,7 +1060,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
   }
 }
 
-improveConfidence <- function(M, fs, theCalls, params, priors, pis){
+improveConfidence2 <- function(M, fs, theCalls, params, priors, pis){
   shift <- params$centers
   v <- 5*params$scale^2
   n <- params$N
@@ -1105,3 +1105,49 @@ improveConfidence <- function(M, fs, theCalls, params, priors, pis){
   if (any(is.na(newConf))) browser()
   return(newConf)
 }
+
+
+improveConfidence <- function(M, fs, theCalls, params, priors, pis, mult=15){
+  shift <- params$centers
+  v <- mult*params$scale^2
+  n <- params$N
+  i <- n[,1] == 0
+  n[i, 1] <- n[i, 3]
+  i <- n[,3] == 0
+  n[i, 3] <- n[i, 1]
+  rm(i)
+  n[n[,2] == 0, 2] <- priors$d0s[2]
+  n[n[,1] == 0 & n[,3] == 0, c(1,3)] <- priors$d0s[1]
+  n[, c(1, 3)] <- rowSums(n[, c(1, 3)])
+  
+  s20 <- priors$s20
+  tmpD <- sweep(v, 2, s20)
+  tmpD[tmpD <= 0] <- .005
+  theNu <- 2*v/tmpD
+  rm(tmpD)
+  pk <- function(theM, theF, theMu, theN, theNu, thePi, s20k){
+    p1 <- exp(-(theM-theF-theMu)^2/(2*theNu/(theNu+1)*s20k*(1+1/theN)))
+    p2 <- (sqrt(theN)/(theNu*s20k))/(beta(1/2, theNu/2)^2)
+    thePi*p1*p2
+  }
+  p1 <- pk(M, fs, shift[,1], n[,1], theNu[,1], pis[,1], s20[1])
+  p2 <- pk(M, 0, shift[,2], n[,2], theNu[,2], pis[,2], s20[2])
+  p3 <- pk(M, -fs, shift[,3], n[,3], theNu[,3], pis[,3], s20[3])
+  tot <- p1+p2+p3
+  
+  p1 <- p1/tot
+  p2 <- p2/tot
+  rm(tot)
+  p3 <- 1-p1-p2
+  
+  newConf <- p1
+  rm(p1)
+  i2 <- theCalls == 2
+  newConf[i2] <- p2[i2]
+  rm(i2, p2)
+  i3 <- theCalls == 3
+  newConf[i3] <- p3[i3]
+  rm(i3, p3)
+  return(newConf)
+}
+
