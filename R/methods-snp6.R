@@ -920,9 +920,19 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
   pis <- theN/rowSums(theN)
   pis[pis == 0] <- .001
   pis <- pis/rowSums(pis)
-  rm(theN)
+
 
   thePriors <- get("priors", myenv)
+
+  i <- theN[,1] == 0
+  theN[i, 1] <- theN[i, 3]
+  i <- theN[,3] == 0
+  theN[i, 3] <- theN[i, 1]
+  rm(i)
+  theN[theN[,2] == 0, 2] <- thePriors$d0s[2]
+  theN[theN[,1] == 0 & theN[,3] == 0, c(1,3)] <- thePriors$d0s[1]
+  theN[, c(1, 3)] <- rowSums(theN[, c(1, 3)])
+  
 
   tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
   tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
@@ -984,8 +994,9 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
     params$N <- params$N[overall_pos,]
     params  <- replaceAffySnpParamsSingle(params, rparams, index)
     thePis <- pis[overall_pos,]
-
+    theNs <- theN[overall_pos,]
     myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, params, fs)
+    
     ##SAVE THE ABOVE
     myDist[,,-2] <- balance*myDist[,,-2]
     XIndex <- integer()
@@ -995,9 +1006,12 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
     maleIndex <- rep(FALSE, n.files)
     initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
     LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
-
+    tmpConf <- improveConfidence(alleleA-alleleB, fs, initialCalls, params, thePriors, thePis, theNs, theMult)
+    
     ### REPLACE tmpConf by LLR to recover
-    tmpConf <- improveConfidence(alleleA-alleleB, fs, initialCalls, params, thePriors, thePis, theMult)
+##     posterior <- improveConfidence(alleleA-alleleB, fs, params, thePriors, thePis, theMult)
+##     initialCalls <- posterior$theCalls
+##     tmpConf <- posterior$theConf
     
     if (recalibrate){
       for(k in 1:3)
@@ -1024,19 +1038,23 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
                                    quote=FALSE, sep="\t",
                                    col.names=(i==1)))
 
-      ### SAVE THE ABOVE
+   ### SAVE THE ABOVE
       myDist[,,-2] <- balance*myDist[,,-2]
       initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
       LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
       rm(myDist)
 
     }
-    callsConfidence <- improveConfidence(alleleA-alleleB, fs, initialCalls, rparams, thePriors, thePis, theMult)
-##    callsConfidence <- LLR2conf(initialCalls, LLR, readBin(tmp$snr, numeric(), n.files), pkgname)
+##     posterior <- improveConfidence(alleleA-alleleB, fs, params, thePriors, thePis, theMult)
+##     initialCalls <- posterior$theCalls
+##     callsConfidence <- posterior$theConf
+##     rm(posterior)
 
+    callsConfidence <- improveConfidence(alleleA-alleleB, fs, initialCalls, rparams, thePriors, thePis, theNs, theMult)
+##    callsConfidence <- LLR2conf(initialCalls, LLR, readBin(tmp$snr, numeric(), n.files), pkgname)
     rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
     colnames(initialCalls) <- colnames(LLR) <- colnames(callsConfidence) <- basename(files)
-
+    
     suppressWarnings(write.table(initialCalls,
                                  file.path(tmpdir, "crlmm-calls.txt"),
                                  append=TRUE, quote=FALSE, sep="\t",
@@ -1058,6 +1076,7 @@ genotypeOne2 <- function(files, tmpdir=getwd(), batch_size=40000, balance=1.5, m
     }
 
   }
+  return(TRUE)
 }
 
 improveConfidence2 <- function(M, fs, theCalls, params, priors, pis){
@@ -1107,7 +1126,7 @@ improveConfidence2 <- function(M, fs, theCalls, params, priors, pis){
 }
 
 
-improveConfidence <- function(M, fs, theCalls, params, priors, pis, mult=15){
+improveConfidence3 <- function(M, fs, theCalls, params, priors, pis, mult=15){
   shift <- params$centers
   v <- mult*params$scale^2
   n <- params$N
@@ -1151,3 +1170,87 @@ improveConfidence <- function(M, fs, theCalls, params, priors, pis, mult=15){
   return(newConf)
 }
 
+improveConfidence4 <- function(M, fs, params, priors, pis, mult=15){
+  shift <- params$centers
+  v <- mult*params$scale^2
+  n <- params$N
+  i <- n[,1] == 0
+  n[i, 1] <- n[i, 3]
+  i <- n[,3] == 0
+  n[i, 3] <- n[i, 1]
+  rm(i)
+  n[n[,2] == 0, 2] <- priors$d0s[2]
+  n[n[,1] == 0 & n[,3] == 0, c(1,3)] <- priors$d0s[1]
+  n[, c(1, 3)] <- rowSums(n[, c(1, 3)])
+  
+  s20 <- priors$s20
+  tmpD <- sweep(v, 2, s20)
+  tmpD[tmpD <= 0] <- .005
+  theNu <- 2*v/tmpD
+  rm(tmpD)
+  pk <- function(theM, theF, theMu, theN, theNu, thePi, s20k){
+    p1 <- exp(-(theM-theF-theMu)^2/(2*theNu/(theNu+1)*s20k*(1+1/theN)))
+    p2 <- (sqrt(theN)/(theNu*s20k))/(beta(1/2, theNu/2)^2)
+    thePi*p1*p2
+  }
+  p1 <- pk(M, fs, shift[,1], n[,1], theNu[,1], pis[,1], s20[1])
+  p2 <- pk(M, 0, shift[,2], n[,2], theNu[,2], pis[,2], s20[2])
+  p3 <- pk(M, -fs, shift[,3], n[,3], theNu[,3], pis[,3], s20[3])
+  tot <- p1+p2+p3
+  
+  p1 <- p1/tot
+  p2 <- p2/tot
+  rm(tot)
+  p3 <- 1-p1-p2
+  gtypesFromPosteriors(p1, p2, p3)
+}
+
+gtypesFromPosteriors <- function(pAA, pAB, pBB){
+  tmpCalls <- array(as.integer(3), dim=dim(pAA))
+  dimnames(tmpCalls) <- dimnames(pBB)
+  tmpConf <- pBB
+  i1 <- (pAA > pAB) & (pAA > pBB)
+  tmpCalls[i1] <- as.integer(1)
+  tmpConf[i1] <- pAA[i1]
+  rm(i1); gc()
+  i2 <- (pAB > pAA) & (pAB > pBB)
+  tmpCalls[i2] <- as.integer(2)
+  tmpConf[i2] <- pAB[i2]
+  rm(i2); gc()
+  return(list(theCalls=tmpCalls, theConf=tmpConf))
+}
+
+improveConfidence <- function(M, fs, theCalls, params, priors, pis, n, mult=1){
+  shift <- params$centers
+  v <- mult*params$scale^2
+
+  s20 <- priors$s20
+  tmpD <- sweep(v, 2, s20)
+  tmpD[tmpD <= 0] <- .005
+  theNu <- 2*v/tmpD
+  rm(tmpD)
+  pk <- function(theM, theF, theMu, theN, theNu, thePi, s20k){
+    p1 <- exp(-(theM-theF-theMu)^2/(2*theNu/(theNu+1)*s20k*(1+1/theN)))
+    p2 <- (sqrt(theN)/(theNu*s20k))/(beta(1/2, theNu/2)^2)
+    thePi*p1*p2
+  }
+  p1 <- pk(M, fs, shift[,1], n[,1], theNu[,1], pis[,1], s20[1])
+  p2 <- pk(M, 0, shift[,2], n[,2], theNu[,2], pis[,2], s20[2])
+  p3 <- pk(M, -fs, shift[,3], n[,3], theNu[,3], pis[,3], s20[3])
+  tot <- p1+p2+p3
+
+  p1 <- p1/tot
+  p2 <- p2/tot
+  rm(tot)
+  p3 <- 1-p1-p2
+
+  newConf <- p1
+  rm(p1)
+  i2 <- theCalls == 2
+  newConf[i2] <- p2[i2]
+  rm(i2, p2)
+  i3 <- theCalls == 3
+  newConf[i3] <- p3[i3]
+  rm(i3, p3)
+  return(newConf)
+}
