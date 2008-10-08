@@ -17,14 +17,14 @@
 }
 
 \usage{
-antisenseThetaA(obj)
-antisenseThetaA(obj)
-senseThetaA(obj)
-senseThetaA(obj)
+antisenseThetaA(object)
+antisenseThetaB(object)
+senseThetaA(object)
+senseThetaB(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{obj}{\code{SnpQSet} object}
+  \item{object}{\code{SnpQSet} object}
 }
 
 \details{

@@ -2,6 +2,7 @@
 \alias{genomeBuild}
 \alias{genomeBuild,TilingFeatureSet-method}
 \alias{genomeBuild,PDInfo-method}
+\alias{genomeBuild,FeatureSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Genome Build Information}
 \description{

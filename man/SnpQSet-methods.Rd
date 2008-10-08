@@ -5,6 +5,7 @@
 \alias{getM,SnpQSet-method}
 \alias{getA,SnpCnvQSet-method}
 \alias{getM,SnpCnvQSet-method}
+\alias{getM,TilingQSet-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Compute average log-intensities / log-ratios}
 \description{
@@ -12,12 +13,12 @@
   alleles, within strand.
 }
 \usage{
-getA(obj)
-getM(obj)
+getA(object)
+getM(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{obj}{\code{SnpQSet} object.}
+  \item{object}{\code{SnpQSet} object.}
 }
 
 \details{

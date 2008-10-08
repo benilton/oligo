@@ -1,5 +1,5 @@
 useDynLib("oligo")
-import(Biobase, splines, graphics, stats, methods, affxparser)
+import(Biobase, splines, graphics, stats, methods, affxparser, oligoClasses)
 
 exportMethods("$",
               "antisenseThetaA",
@@ -63,9 +63,9 @@ export("basecontent",
        "list.xysfiles",
        "getPD",
        "readSummaries",
-       "getCrlmmSummaries",
-       "smoothChr",
-       "getSets")
+       "getCrlmmSummaries")
+##       "smoothChr",
+##       "getSets")
 
 ## Exported functions for CRLMM
 

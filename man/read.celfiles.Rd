@@ -8,8 +8,7 @@
 }
 \usage{
 
-read.celfiles(filenames, pkgname = NULL, phenoData = NULL, featureData =
-NULL, experimentData = NULL, notes = "", verbose = TRUE)
+read.celfiles(filenames, pkgname, phenoData, featureData, experimentData, notes = "", verbose = TRUE)
 
 }
 %- maybe also 'usage' for other objects documented here.

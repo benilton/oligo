@@ -13,6 +13,7 @@
 \alias{length,FeatureSet-method}
 \alias{featureInfo}
 \alias{featureInfo,platformDesign-method}
+\alias{show,FeatureSet-method}
 \alias{show,PDInfo-method}
 \alias{show,platformDesign-method}
 \alias{names,platformDesign-method}
@@ -32,6 +33,7 @@
 \alias{db,SnpQSet-method}
 \alias{db,SnpCnvQSet-method}
 \alias{db,SnpFeatureSet-method}
+\alias{db,FeatureSet-method}
 \alias{exprs,FeatureSet-method}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
