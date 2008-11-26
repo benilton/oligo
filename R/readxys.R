@@ -111,6 +111,7 @@ read.xysfiles <- function(filenames,
   tmpE$index <- tmpE$X + (tmpE$Y-1)*geometry(get(pkgname))[2]
   idx <- order(tmpE$index)
   tmpExprs <- tmpExprs[idx,, drop=FALSE]
+  colnames(tmpExprs) <- basename(filenames)
   rm(tmpE, idx)
 
   arrayType <- kind(get(pkgname))
