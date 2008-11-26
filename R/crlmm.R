@@ -29,7 +29,7 @@ snpGenderCall <- function(object){
 getChrXIndex <- function(object){
   sql <- "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'"
   chrs <- dbGetQuery(db(get(annotation(object))), sql)
-  chrs <- chrs[order(chrs[["chrom"]], chrs[["physical_pos"]], na.last=FALSE),]
+  chrs <- chrs[order(chrs[["chrom"]], chrs[["physical_pos"]], chrs[["man_fsetid"]], na.last=FALSE),]
   return(which(chrs[["chrom"]] == "X"))
 }
 
