@@ -185,7 +185,19 @@ setMethod("mmSequence", "FeatureSet",
 setMethod("rma", "FeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL){
             pms <- pm(object, subset)
+
+            tmpQcPm <- dbGetQuery(db(object),
+                                  paste("SELECT man_fsetid, fid",
+                                        "FROM featureSet, qcpmfeature",
+                                        "WHERE qcpmfeature.fsetid=featureSet.fsetid"))
+            qcpms <- exprs(object)[tmpQcPm[["fid"]],]
+
+            pms <- rbind(pms, qcpms)
+            
             pnVec <- probeNames(object, subset)
+
+            pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
+            
             ngenes <- length(unique(pnVec))
             idx <- order(pnVec)
             pms <- pms[idx,, drop=FALSE]
@@ -198,6 +210,7 @@ setMethod("rma", "FeatureSet",
                           background, as.integer(2), PACKAGE="oligo")
 
             colnames(exprs) <- sampleNames(object)
+            rownames(exprs) <- unique(pnVec)
 
             out <- new("ExpressionSet",
                        phenoData = phenoData(object),
