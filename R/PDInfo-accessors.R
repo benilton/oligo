@@ -1,3 +1,5 @@
+### rearranged by function
+
 setMethod("initialize", "DBPDInfo",
           function(.Object, ...) {
             .Object <- callNextMethod()
@@ -12,18 +14,12 @@ setMethod("manufacturer", "PDInfo",
 setMethod("genomeBuild", "PDInfo",
           function(object) object@genomebuild)
 
-setMethod("db", signature(object="DBPDInfo"),
+  setMethod("geometry", "DBPDInfo", ## changed signature from PDInfo to DBPDInfo
+		  function(object) object@geometry)
+  
+  setMethod("db", signature(object="DBPDInfo"),
           function(object) object@getdb())
 
-setMethod("geometry", "PDInfo",
-          function(object) object@geometry)
-
-setMethod("nrow", "platformDesign", function(x) x@nrow)
-setMethod("ncol", "platformDesign", function(x) x@ncol)
-## XXX: this should be type(object), but I ran into trouble
-## because 'type' is somehow magic.  Didn't have time to
-## track it down, so we're using kind for now.
-setMethod("kind", "platformDesign", function(object) object@type)
 
 setMethod("nProbes", "AffySNPPDInfo",
           function(object) {
@@ -32,39 +28,42 @@ setMethod("nProbes", "AffySNPPDInfo",
             sum(subset(object@tableInfo,
                        tbl %in% probeTables, row_count))
           })
-
+  
+## need to implement subset here, subset assumed to be Transcript Identifiers? MS
+## PM
 setMethod("pmindex", "AffySNPPDInfo",
-          function(object, subset=NULL) {
+          function(object, subset=NULL) { 
             ## might improve by telling RSQLite how
             ## many rows we will fetch?  same for mmindex.
             dbGetQuery(db(object),
                        "select fid from pmfeature")[[1]]
           })
-
+## MM
 setMethod("mmindex", "AffySNPPDInfo",
-          function(object) {
+          function(object, subset=NULL) { ## has missing subset argument : MA
             dbGetQuery(db(object),
                        "select fid from mmfeature")[[1]]
           })
 
+setMethod("kind", "AffySNPPDInfo",
+		  function(object) {
+			  "SNP"
+		  })
+  
 setMethod("kind", "AffyExpressionPDInfo",
           function(object) {
               "expression"
           })
 
-setMethod("kind", "AffySNPPDInfo",
-          function(object) {
-              "SNP"
-          })
 
 setMethod("kind", "AffySNPCNVPDInfo",
           function(object) {
               "SNPCNV"
           })
-
+ 
 setMethod("kind", "AffyGenePDInfo",
           function(object) {
-              "Gene"
+              "gene" ### changed to lower case to make consistant with others
           })
 
 setMethod("kind", "ExpressionPDInfo",

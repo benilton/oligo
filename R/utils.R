@@ -74,3 +74,31 @@ trigammaInverse <- function(x) {
 	}
 	y
 }
+
+
+## Taken directly from affy
+checkValidFilenames <- function(filenames) {
+	## Returns TRUE if filenames is a character vector containing
+	## paths to files that exist (directories don't count).
+	## A suitable error message is printed via stop() if invalid
+	## file names are encountered.
+	if (!is.character(filenames))
+		stop(strwrap(paste("file names must be specified using a character",
+								"vector, not a", sQuote(typeof(filenames)))),
+				call.=FALSE)
+	
+	if (length(filenames) == 0)
+		stop("no file names provided")
+	
+	if (any(sapply(filenames, nchar) < 1))
+		stop("empty file names are not allowed")
+	
+	finfo <- file.info(filenames)
+	whBad <- sapply(finfo[["isdir"]], function(x) !identical(FALSE, x))
+	if (any(whBad)) {
+		msg <- paste("the following are not valid files:\n",
+				paste("  ", filenames[whBad], collapse="\n"))
+		stop(msg, call.=FALSE)
+	}
+	TRUE
+}

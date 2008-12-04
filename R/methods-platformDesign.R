@@ -103,3 +103,12 @@ setMethod("mmSequence", "platformDesign",
           function(object)
           get("sequence", featureInfo(object))[mmindex(object)]
 )
+
+## moved from PDInfo-accessors.R, seemed like it should go here
+setMethod("nrow", "platformDesign", function(x) x@nrow)
+setMethod("ncol", "platformDesign", function(x) x@ncol)
+## XXX: this should be type(object), but I ran into trouble
+## because 'type' is somehow magic.  Didn't have time to
+## track it down, so we're using kind for now.
+setMethod("kind", "platformDesign", function(object) object@type)
+

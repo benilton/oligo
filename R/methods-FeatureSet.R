@@ -1,10 +1,10 @@
-setMethod("initialize", "FeatureSet",
+setMethod("initialize", signature(.Object="FeatureSet"), 
           function(.Object,
                    assayData = assayDataNew(exprs=exprs, ...),
-                   manufacturer=new("character"),
-                   platform=new("character"),
-                   exprs=new("matrix"),
-                   phenoData = annotatedDataFrameFrom  (assayData, byrow=FALSE),
+                   manufacturer=as.character(NA),
+                   platform=as.character(NA),
+                   exprs=matrix(numeric(0), nrow=nrow, ncol=ncol),
+                   phenoData = annotatedDataFrameFrom(assayData, byrow=FALSE),
                    featureData = annotatedDataFrameFrom(assayData, byrow=TRUE),
                    experimentData = new("MIAME"),
                    annotation = new("character"), ...){
@@ -19,24 +19,72 @@ setMethod("initialize", "FeatureSet",
             .Object
           })
 
-setMethod("exprs", "FeatureSet", function(object) assayDataElement(object, "exprs"))
 
-setMethod("manufacturer", "FeatureSet", function(object) object@manufacturer)
-
-setReplaceMethod("manufacturer", "FeatureSet", function(object, value){
-  object@manufacturer <- value
-  object
+setMethod("platform", signature(object="FeatureSet"),function(object) object@platform)
+setReplaceMethod("platform",signature(object="FeatureSet"),
+		  function(object,value) {
+			  object@platform <- value
+			  object
+		  })
+  
+setMethod("manufacturer", signature(object="FeatureSet"), function(object) object@manufacturer)
+setReplaceMethod("manufacturer", signature(object="FeatureSet"), 
+		function(object, value){
+  			object@manufacturer <- value
+  			object
 })
 
-##loading the library for now... this must change
-setMethod("getPlatformDesign", "FeatureSet", function(object){
-  pdn <- annotation(object)
-  library(pdn,character.only=TRUE)
-  return(get(pdn,pos=paste("package:",pdn,sep="")))
-})
+setMethod("length", signature(x="FeatureSet"), function(x) nrow(pData(x)))
 
+## Currently dim, ncol and nrow all pull from eSet Class definition, and thus is the size of
+##  exprs matrix and not array, should change to array dims -- MS
+# setMethod("dim",
+#          signature=signature(object="FeatureSet"),
+#          function(object) c(object@nrow, object@ncol))
+#
+
+
+## changed annotation to platform - MS
+## thinking is that platform is akin to cdf and annotation akin to db
+## currently they are both the same package, but may in the future want to have annotationDBI like packages
+## for these arrays as well and use annotation slot for this
+
+##loading the library for now... this must change, why?
+setMethod("getPlatformDesign", 
+        signature(object= "FeatureSet"),
+        function(object){
+            pdn <- platform(object)
+            library(pdn,character.only=TRUE)
+            return(get(pdn,pos=paste("package:",pdn,sep="")))
+})
 getPD <- getPlatformDesign
 
+
+setMethod("exprs",
+		signature(object="FeatureSet"),
+		function(object) assayDataElement(object,"exprs"))
+setReplaceMethod("exprs",
+		signature(object="FeatureSet"),
+		function(object, value) assayDataElementReplace(object, "exprs", value))
+
+### future 
+setMethod("se.exprs",
+		signature(object="FeatureSet"),
+		function(object) {
+			obj <- assayDataElement(object,"se.exprs")
+			if (is.null(obj))
+				new("matrix")
+			else
+				obj
+		})
+### future
+setReplaceMethod("se.exprs",
+		signature(object="FeatureSet"),
+		function(object, value) assayDataElementReplace(object, "se.exprs", value))
+
+
+#####################
+############# STRANGE, what should they be?
 ## probeNames - returns probeNames for PMs ... subset ignored for now
 setMethod("probeNames", "FeatureSet",
           function(object, subset=NULL) {
@@ -46,27 +94,20 @@ setMethod("probeNames", "FeatureSet",
           })
 
 ## geneNames - returns geneNames for PMs
-
 ## FIXME: so geneNames is just unique(probeNames(x))?
 ## why the business with factor?
 setMethod("geneNames", "FeatureSet",
           function(object){
               geneNames(getPlatformDesign(object))
           })
-
+#####################
+#####################
 
 ## pmindex method for FeatureSet
 ## WE assume feature_type is PM or MM. this might change with other platforms
 setMethod("pmindex", "FeatureSet",
           function(object, subset=NULL){
             pmindex(getPlatformDesign(object), subset=subset)
-          })
-
-##mmindex method for FeatureSet
-##WE assume feature_type is PM or MM. this might change with other platforms
-setMethod("mmindex", "FeatureSet",
-          function(object, subset=NULL){
-            mmindex(getPlatformDesign(object), subset=subset)
           })
 
 setMethod("pm", "FeatureSet",
@@ -82,10 +123,16 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                  })
 
 ## MM
-## setMethod("mm", "FeatureSet", function(object, subset=NULL){
+##mmindex method for FeatureSet
+##WE assume feature_type is PM or MM. this might change with other platforms
+setMethod("mmindex", "FeatureSet",
+		function(object, subset=NULL){
+			mmindex(getPD(object), subset=subset)
+		})
+
 setMethod("mm", "FeatureSet",
           function(object, subset=NULL){
-            exprs(object)[mmindex(object, subset=subset),]
+            exprs(object)[mmindex(object, subset=subset),] ## subset 
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
@@ -94,94 +141,21 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    tmp[mmindex(object),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
-
-setMethod("boxplot", signature(x="FeatureSet"),
-          function(x, which, range=0, col=1:ncol(x), ...){
-            if(!missing(which)) warning("Argument 'which' not yet implemented")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-            idx <- is.na(tmpdf[[1]])
-            if (any(idx))
-              tmpdf <- tmpdf[!idx,]
-            boxplot(tmpdf, range=range, col=col, ...)
-          })
-
-setMethod("boxplot", signature(x="ExpressionSet"),
-          function(x, which, range=0, col=1:ncol(x), ...){
-            if(!missing(which)) warning("Argument 'which' not yet implemented")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-            idx <- is.na(tmpdf[[1]])
-            if (any(idx))
-              tmpdf <- tmpdf[!idx,]
-            boxplot(tmpdf, range=range, col=col, ...)
-          })
-
-
-setMethod("image", "FeatureSet",
-          function(x, transfo=log2, col=gray((0:64)/64), ...){
-            if(ncol(x) > 1) par(ask=TRUE) else par(ask=FALSE)
-            theDim <- geometry(getPD(x))
-            for (i in 1:ncol(x)){
-              tmp <- matrix(transfo(exprs(x[,i])), ncol=theDim[1], nrow=theDim[2])
-              tmp <- t(tmp[nrow(tmp):1, ncol(tmp):1])
-              image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
-            }
-            par(ask=FALSE)
-          })
-
+		 
+## does not work for GENE ST arrays
 setMethod("featureNames", "FeatureSet",
           function(object) as.character(getPD(object)$feature_set_name)
           )
 
-setMethod("hist", "FeatureSet",
-          function(x, col=1:ncol(x), log=TRUE,
-                   which, ylab="density", xlab="intensity",
-                   type="l", ...){
-            if (!missing(which)) warning("Argument 'which' not implemented yet.")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmp <- exprs(x[idx,])
-            idx <- is.na(tmp[,1])
-            if(any(idx))
-              tmp <- tmp[!idx,, drop=FALSE]
-            if (log){
-              tmp <- log2(tmp)
-              xlab <- "log intensity"
-            }
-            x.density <- apply(tmp, 2, density)
-            all.x <- sapply(x.density, "[[", "x")
-            all.y <- sapply(x.density, "[[", "y")
-            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-            invisible(x.density)
-          })
-
-setMethod("hist", "ExpressionSet",
-          function(x, col=1:ncol(x), log=TRUE,
-                   which, ylab="density", xlab="intensity",
-                   type="l", ...){
-            if (!missing(which)) warning("Argument 'which' not implemented yet.")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmp <- exprs(x[idx,])
-            idx <- is.na(tmp[,1])
-            if(any(idx))
-              tmp <- tmp[!idx,, drop=FALSE]
-            if (log){
-              tmp <- log2(tmp)
-              xlab <- "log intensity"
-            }
-            x.density <- apply(tmp, 2, density)
-            all.x <- sapply(x.density, "[[", "x")
-            all.y <- sapply(x.density, "[[", "y")
-            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-            invisible(x.density)
-          })
-
+## does not work for GENE ST arrays
 setMethod("pmSequence", "FeatureSet",
-          function(object) pmSequence(get(annotation(object))))
+          function(object) pmSequence(getPD(object)))
 
+## does not work for GENE ST arrays
 setMethod("mmSequence", "FeatureSet",
-          function(object) mmSequence(get(annotation(object))))
+          function(object) mmSequence(getPD(object)))
 
+## RMA normalization, likely not OK for ST arrays
 setMethod("rma", "FeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL){
             pms <- pm(object, subset)
@@ -220,6 +194,89 @@ setMethod("rma", "FeatureSet",
             return(out)
           })
 
+  
+  ## QAish functions
+setMethod("boxplot", signature(x="FeatureSet"),
+		  function(x, which, range=0, col=1:ncol(x), ...){
+			  if(!missing(which)) warning("Argument 'which' not yet implemented")
+			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
+			  tmpdf <- as.data.frame(log2(exprs(x[idx,])))
+			  idx <- is.na(tmpdf[[1]])
+			  if (any(idx))
+				  tmpdf <- tmpdf[!idx,]
+			  boxplot(tmpdf, range=range, col=col, ...)
+		  })
+  
+setMethod("boxplot", signature(x="ExpressionSet"),
+		  function(x, which, range=0, col=1:ncol(x), ...){
+			  if(!missing(which)) warning("Argument 'which' not yet implemented")
+			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
+			  tmpdf <- as.data.frame(log2(exprs(x[idx,])))
+			  idx <- is.na(tmpdf[[1]])
+			  if (any(idx))
+				  tmpdf <- tmpdf[!idx,]
+			  boxplot(tmpdf, range=range, col=col, ...)
+		  })
+  
+  
+setMethod("image", signature(x="FeatureSet"),
+		  function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
+              if (which == 0){
+                  which <- 1:length(x)
+              }
+              if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
+			  theDim <- geometry(getPD(x))
+			  for (i in which){
+				  tmp <- matrix(transfo(exprs(x[,i])), ncol=theDim[1], nrow=theDim[2])
+				  tmp <- t(tmp[nrow(tmp):1, ncol(tmp):1])
+				  image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+			  }
+			  par(ask=FALSE)
+		  })
+  
+
+setMethod("hist", "FeatureSet",
+		  function(x, col=1:ncol(x), log=TRUE,
+				  which, ylab="density", xlab="intensity",
+				  type="l", ...){
+			  if (!missing(which)) warning("Argument 'which' not implemented yet.")
+			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
+			  tmp <- exprs(x[idx,])
+			  idx <- is.na(tmp[,1])
+			  if(any(idx))
+				  tmp <- tmp[!idx,, drop=FALSE]
+			  if (log){
+				  tmp <- log2(tmp)
+				  xlab <- "log intensity"
+			  }
+			  x.density <- apply(tmp, 2, density)
+			  all.x <- sapply(x.density, "[[", "x")
+			  all.y <- sapply(x.density, "[[", "y")
+			  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+			  invisible(x.density)
+		  })
+  
+setMethod("hist", "ExpressionSet",
+		  function(x, col=1:ncol(x), log=TRUE,
+				  which, ylab="density", xlab="intensity",
+				  type="l", ...){
+			  if (!missing(which)) warning("Argument 'which' not implemented yet.")
+			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
+			  tmp <- exprs(x[idx,])
+			  idx <- is.na(tmp[,1])
+			  if(any(idx))
+				  tmp <- tmp[!idx,, drop=FALSE]
+			  if (log){
+				  tmp <- log2(tmp)
+				  xlab <- "log intensity"
+			  }
+			  x.density <- apply(tmp, 2, density)
+			  all.x <- sapply(x.density, "[[", "x")
+			  all.y <- sapply(x.density, "[[", "y")
+			  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+			  invisible(x.density)
+		  })
+  
 setMethod("MAplot", "FeatureSet",
           function(object, arrays=1:ncol(object), lowessPlot=FALSE, ...){
             if (length(arrays) > 1) par(ask=TRUE)
@@ -235,5 +292,5 @@ setMethod("MAplot", "FeatureSet",
             if (length(arrays) > 1) par(ask=FALSE)
           })
 
-setMethod("db", "FeatureSet", function(object) db(getPD(object)))
+setMethod("db", "FeatureSet", function(object)    db(getPD(object)))
 setMethod("genomeBuild", "FeatureSet", function(object) genomeBuild(getPD(object)))

@@ -1,0 +1,8 @@
+### CHANGE log for package oligo ###
+
+Changes made by Matt Settles 12-4-2008
+** All changes should generally have effect on only Affy Tiling, ST and expression arrays.
+modifed read.celfiles to appear more like read.affybatch, should present a noticable change
+
+
+
