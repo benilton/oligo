@@ -727,6 +727,7 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   sapply(list.celfiles(tmpdir, full.names=T), unlink)
 
   snr <- matrix(exp(colMeans(log(theSNR))), nrow=1)
+  writeBin(as.numeric(snr), file.path(tmpdir, "snr"))
   colnames(snr) <- sns
   pacc <- as.matrix(LLR2conf(finalCalls, finalConfs, snr, pkgname))
   rownames(pacc) <- allSnps

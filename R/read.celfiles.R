@@ -1,76 +1,123 @@
-## made read.celfiles look more similar to read.affybatch in affy --MS
-read.celfiles <- function( ..., filenames = character(0),
-								pkgname=NULL, 
-						        phenoData=new("AnnotatedDataFrame"),
-						        featureData,
-                                experimentData=NULL, 
-								notes="", 
-								verbose = TRUE,
-								sampleNames = NULL,
-  							    rm.mask = FALSE, rm.outliers=FALSE, rm.extra=FALSE,
-							    sd=FALSE){
+read.celfiles <- function( ..., filenames, pkgname, phenoData,
+                          featureData, experimentData, notes,
+                          verbose=TRUE, sampleNames, rm.mask=FALSE,
+                          rm.outliers=FALSE, rm.extra=FALSE,
+                          sd=FALSE, checkType=TRUE){
 
-    auxnames <- unlist(list(...))
-    filenames <- c(filenames, auxnames)
-    checkValidFilenames(filenames)
-
-	n <- length(filenames)
-	pdata <- pData(phenoData)
-	## try to read sample names form phenoData. if not there use CEL
-	## filenames
-	if(dim(pdata)[1] != n) {
-		## if empty pdata filename are samplenames
-		warning("Incompatible phenoData object. Created a new one.\n")
-		
-		samplenames <- sub("^/?([^/]*/)*", "", filenames, extended=TRUE)
-		pdata <- data.frame(sample=1:n, row.names=samplenames)
-		phenoData <- new("AnnotatedDataFrame",
-				data=pdata,
-				varMetadata=data.frame(
-						labelDescription="arbitrary numbering",
-						row.names="sample"))
-	} else samplenames <- rownames(pdata)
-	if (!is.null(samplenames)) samplenames <- sampleNames
-	if (is.null(experimentData))
-	{
-		experimentData <- new("MIAME")
-		preproc(experimentData)$filenames <- filenames
-		preproc(experimentData)$oligoversion <- packageDescription("oligo")$Version
-	}
-	if (length(notes)!=0) notes(experimentData) <- notes
-	
-	chips <- sapply(filenames, function(x) readCelHeader(x)$chiptype)
-    if (length(unique(chips)) > 1){
-        print(table(chips))
-        stop("All the CEL files must be of the same type.")
-    }
-
-    ## Read in the first Array details
-    headdetails <- readCelHeader(filenames[1])
-    #dim.intensity <- c(headdetails$rows, headdetails$cols)
-    chiptype <- chips[1]
-    
-    if (missing(pkgname))
-        pkgname <- cleanPlatformName(chiptype)
-    
-    if (require(pkgname, character.only=TRUE)){
-        if (verbose)
-            message("Platform design info loaded.")
-    } else {
-        stop("Must install the ", pkgname, " package.")
-    }
+  filenames <- c(filenames, unlist(list(...)))
+  checkValidFilenames(filenames)
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose))
+  
+  ## Read in the first Array details
+  headdetails <- readCelHeader(filenames[1])
+  chiptype <- chips[1]
+  
+  if (missing(pkgname))
+    pkgname <- cleanPlatformName(chiptype)
+  
+  if (require(pkgname, character.only=TRUE)){
     if (is(get(pkgname), "platformDesign"))
-        stop("Create a pdInfo package using the 'pdInfoBuilder' package")    
-    
-	arrayType <- kind(get(pkgname))
-	
-    tmpExprs <- readCelIntensities2(filenames,rm.outliers=rm.outliers,rm.masked=rm.masked,rm.extra=rm.extra,verbose=verbose)
-	colnames(tmpExprs) <- samplenames
-	rownames(tmpExprs) <- 1:nrow(tmpExprs)
+      stop("Create a pdInfo package using the 'pdInfoBuilder' package")    
+    if (verbose)
+      message("Platform design info loaded.")
+  }else{
+    stop("Must install the ", pkgname, " package.")
+  }
+  
+  arrayType <- kind(get(pkgname))
+  tmpExprs <- readCelIntensities2(filenames, rm.outliers=rm.outliers,
+                                  rm.masked=rm.masked,
+                                  rm.extra=rm.extra, verbose=verbose)
+  dimnames(tmpExprs) <- NULL
+  metadata <- getMetadataForMatrix(filenames, phenoData, featureData, experimentData, notes, sampleNames)
+  
+  if (sd) warning("Reading in Standard Errors not yet implemented.\n")
+  theClass <- switch(arrayType,
+                     tiling="TilingFeatureSet",
+                     expression="ExpressionFeatureSet",
+                     SNP="SnpFeatureSet",
+                     SNPCNV="SnpCnvFeatureSet",
+                     exon="ExonFeatureSet",
+                     gene="GeneFeatureSet",
+                     stop("Unknown array type: ", arrayType))
+  
+  return(new(theClass, exprs=tmpExprs, manufacturer="Affymetrix",
+             annotation=pkgname, phenoData=metadata[["phenoData"]],
+             experimentData=metadata[["experimentData"]],
+             featureData=metadata[["featureData"]]))
+  
+}
 
-	if (missing(featureData)) featureData <- annotatedDataFrameFrom(tmpExprs,byrow=TRUE)
-    if (sd) warning("Reading in Standard Errors not yet impletmented.\n")
-	theClass <- switch(arrayType,
+## made read.celfiles look more similar to read.affybatch in affy --MS
+
+read.celfiles.ms <- function( ..., filenames = character(0),
+                          pkgname,
+                          phenoData=new("AnnotatedDataFrame"),
+                          featureData, experimentData=NULL, notes="",
+                          verbose=TRUE, sampleNames=NULL,
+                          rm.mask=FALSE, rm.outliers=FALSE,
+                          rm.extra=FALSE, sd=FALSE){
+
+  filenames <- c(filenames, unlist(list(...)))
+  checkValidFilenames(filenames)
+  n <- length(filenames)
+  
+  pdata <- pData(phenoData)
+  ## try to read sample names form phenoData. if not there use CEL
+  ## filenames
+  if(dim(pdata)[1] != n) {
+    ## if empty pdata filename are samplenames
+    warning("Incompatible phenoData object. Created a new one.\n")
+		
+    samplenames <- sub("^/?([^/]*/)*", "", filenames, extended=TRUE)
+    pdata <- data.frame(sample=1:n, row.names=samplenames)
+    phenoData <- new("AnnotatedDataFrame",
+                     data=pdata,
+                     varMetadata=data.frame(
+                       labelDescription="arbitrary numbering",
+                       row.names="sample"))
+  } else samplenames <- rownames(pdata)
+  if (!is.null(samplenames)) samplenames <- sampleNames
+  if (is.null(experimentData))
+    {
+      experimentData <- new("MIAME")
+      preproc(experimentData)$filenames <- filenames
+      preproc(experimentData)$oligoversion <- packageDescription("oligo")$Version
+    }
+  if (length(notes)!=0) notes(experimentData) <- notes
+  
+  chips <- sapply(filenames, function(x) readCelHeader(x)$chiptype)
+  if (length(unique(chips)) > 1){
+    print(table(chips))
+    stop("All the CEL files must be of the same type.")
+  }
+
+  ## Read in the first Array details
+  headdetails <- readCelHeader(filenames[1])
+  ##dim.intensity <- c(headdetails$rows, headdetails$cols)
+  chiptype <- chips[1]
+    
+  if (missing(pkgname))
+    pkgname <- cleanPlatformName(chiptype)
+  
+  if (require(pkgname, character.only=TRUE)){
+    if (verbose)
+      message("Platform design info loaded.")
+  } else {
+    stop("Must install the ", pkgname, " package.")
+  }
+  if (is(get(pkgname), "platformDesign"))
+    stop("Create a pdInfo package using the 'pdInfoBuilder' package")    
+  
+  arrayType <- kind(get(pkgname))
+  
+  tmpExprs <- readCelIntensities2(filenames,rm.outliers=rm.outliers,rm.masked=rm.masked,rm.extra=rm.extra,verbose=verbose)
+  colnames(tmpExprs) <- samplenames
+  rownames(tmpExprs) <- 1:nrow(tmpExprs)
+  
+  if (missing(featureData)) featureData <- annotatedDataFrameFrom(tmpExprs,byrow=TRUE)
+  if (sd) warning("Reading in Standard Errors not yet impletmented.\n")
+  theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
                      SNP="SnpFeatureSet",
@@ -78,17 +125,17 @@ read.celfiles <- function( ..., filenames = character(0),
                      exon="ExonFeatureSet",
                      gene="GeneFeatureSet",
                      stop("unknown array type: ", arrayType))
-	return(new(theClass,
-					 exprs  = tmpExprs,
-					 platform=pkgname, ## why do we have this why not just use annotation
-					 manufacturer="Affymetrix",
-					 annotation=pkgname,
-					 phenoData  = phenoData,
-					 experimentData = experimentData,
-					 featureData = featureData))
+  return(new(theClass,
+             exprs  = tmpExprs,
+             platform=pkgname, ## why do we have this why not just use annotation
+             manufacturer="Affymetrix",
+             annotation=pkgname,
+             phenoData  = phenoData,
+             experimentData = experimentData,
+             featureData = featureData))
 	 ##se.exprs = array(NaN, dim=dim.sd),
 	 ##cdfName    = cdfname,   ##cel@cdfName,
-	 }
+}
 
 ## read.celfiles.old <- function(filenames,
 ##                           pkgname=NULL,

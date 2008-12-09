@@ -76,29 +76,74 @@ trigammaInverse <- function(x) {
 }
 
 
-## Taken directly from affy
 checkValidFilenames <- function(filenames) {
-	## Returns TRUE if filenames is a character vector containing
-	## paths to files that exist (directories don't count).
-	## A suitable error message is printed via stop() if invalid
-	## file names are encountered.
-	if (!is.character(filenames))
-		stop(strwrap(paste("file names must be specified using a character",
-								"vector, not a", sQuote(typeof(filenames)))),
-				call.=FALSE)
-	
-	if (length(filenames) == 0)
-		stop("no file names provided")
-	
-	if (any(sapply(filenames, nchar) < 1))
-		stop("empty file names are not allowed")
-	
-	finfo <- file.info(filenames)
-	whBad <- sapply(finfo[["isdir"]], function(x) !identical(FALSE, x))
-	if (any(whBad)) {
-		msg <- paste("the following are not valid files:\n",
-				paste("  ", filenames[whBad], collapse="\n"))
-		stop(msg, call.=FALSE)
-	}
-	TRUE
+  ## must be character
+  stopifnot(is.character(filenames))
+
+  ## must exist
+  dirs <- file.info(filenames)[["isdir"]]
+  if (any(is.na(dirs))){
+    msg <- paste("These do not exist:",
+                 paste("\t", filenames[is.na(dirs)], collapse="\n"), sep="\n")
+    stop(msg, call.=FALSE)
+  }
+  
+  ## must be files, not dir
+  if (any(dirs)){
+    msg <- paste("These are directories:",
+                 paste("\t", filenames[dirs], collapse="\n"), sep="\n")
+    stop(msg, call.=FALSE)
+  }
+
+  ## must be readable
+  readable <- file.access(filenames, 4) == 0
+  if (any(!readable)){
+    msg <- paste("These are not readable:",
+                 paste("\t", filenames[!readable], collapse="\n"), sep="\n")
+    stop(msg, call.=FALSE)
+  }
+  
+  TRUE
+}
+
+checkValidPhenodataForFiles <- function(filenames, pd){
+  if (missing(pd)) return(FALSE)
+  if (class(pd) != "AnnotatedDataFrame") return(FALSE)
+  return(length(filenames) == nrow(pd))
+}
+
+createDefaultMiame <- function(filenames, notes){
+  experimentData <- new("MIAME")
+  preproc(experimentData)$filenames <- filenames
+  preproc(experimentData)$oligoversion <- packageDescription("oligo", field="Version")
+  if (!missing(notes))
+    notes(experimentData) <- notes
+  experimentData
+}
+
+checkChipTypes <- function(filenames, verbose=TRUE){
+  chips <- sapply(filenames, function(x) readCelHeader(x)[["chiptype"]])
+  ok <- length(unique(chips)) == 1
+  if(!ok & verbose) message("All the CEL files must be of the same type.")
+  ok
+}
+
+getMetadata <- function(theMatrix, filenames, phenoData, featureData, experimentData, notes, sampleNames){
+  stopifnot(!missing(theMatrix), !missing(filenames), is.matrix(theMatrix), is.character(filenames))
+  if (!checkValidPhenodataForFiles(filenames, phenoData))
+    phenoData <- annotatedDataFrameFrom(theMatrix, byrow=FALSE)
+  if (!missing(sampleNames)){
+    sampleNames(phenoData) <- sampleNames
+  }else{
+    sampleNames(phenoData) <- sub("^/?([^/]*/)*", "", filenames, extended=TRUE)
+  }
+  if (missing(experimentData))
+    experimentData <- createDefaultMiame(filenames)
+  if (missing(featureData))
+    featureData <- annotatedDataFrameFrom(theMatrix,byrow=TRUE)
+
+  out <- list(filenames=filenames,
+              phenoData=phenoData,
+              featureData=featureData,
+              experimentData=experimentData)
 }

@@ -1,5 +1,13 @@
 ### CHANGE log for package oligo ###
 
+12-8-2008: BC
+added binary snr file for 50k,250k arrays (crlmm)
+
+12-6-2008: BC
+read.celfiles was modified
+added: checkValidPhenodataForFiles, createPhenodataFromIds, createDefaultMiame, checkChipTypes
+these helpers can (and will) be used for read.xysfiles
+
 Changes made by Matt Settles 12-4-2008
 ** All changes should generally have effect on only Affy Tiling, ST and expression arrays.
 modifed read.celfiles to appear more like read.affybatch, should present a noticable change

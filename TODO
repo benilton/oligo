@@ -1,0 +1,7 @@
+oligo's TODO
+- remove dependence on affxparser
+- add dependence on affyio (much faster than affxparser)
+- add examples, so package is tested whenever it's built and modifications do not break current code
+- will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed
+- add the faster genotyping code for SNP 5.0/6.0
+- add the CN tool
