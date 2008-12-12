@@ -8,6 +8,14 @@ setMethod("pmPosition", "TilingFeatureSet", function(object) position(object)[pm
 
 setMethod("pmChr", "TilingFeatureSet", function(object) chromosome(object)[pmindex(object)])
 
+setMethod("pmChr", "TilingFeatureSet",
+          function(object){
+            conn <- db(object)
+            tmp <- dbGetQuery(conn, "SELECT fid, chrom FROM pmfeature, featureSet WHERE pmfeature.fsetid=featureSet.fsetid")
+            tmp <- tmp[order(tmp[["fid"]]),]
+            tmp[["chrom"]]
+          })
+
 ## TilingQSet
 
 setMethod("getM", "TilingQSet", function(object) assayDataElement(object, "M"))
