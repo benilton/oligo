@@ -4,7 +4,13 @@ setMethod("position", "TilingFeatureSet", function(object) getPD(object)$positio
 
 setMethod("genomeBuild", "TilingFeatureSet", function(object) getPD(object)@genomebuild)
 
-setMethod("pmPosition", "TilingFeatureSet", function(object) position(object)[pmindex(object)])
+setMethod("pmPosition", "TilingFeatureSet",
+          function(object){
+            conn <- db(object)
+            tmp <- dbGetQuery(conn, "SELECT fid, position FROM pmfeature")
+            tmp <- tmp[order(tmp[["fid"]]),]
+            tmp[["position"]]
+          })
 
 setMethod("pmChr", "TilingFeatureSet", function(object) chromosome(object)[pmindex(object)])
 

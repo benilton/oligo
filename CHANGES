@@ -2,6 +2,8 @@
 
 12-8-2008: BC
 added binary snr file for 50k,250k arrays (crlmm)
+fixed pmPosition for NGS tiling
+
 
 12-6-2008: BC
 read.celfiles was modified
