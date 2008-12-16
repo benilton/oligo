@@ -73,7 +73,7 @@ smoothChr <- function(chr, tfs, f=.2, bw=200, verbose=TRUE){
   }
   if (verbose) close(pb)
   rm(M)
-  M <- do.call("rbind", out)
+  M <- do.call(rbind, out)
   rownames(M) <- NULL
   rownames(info) <- NULL
   new("TilingQSet", M=M, featureData=new("AnnotatedDataFrame", data=info),
