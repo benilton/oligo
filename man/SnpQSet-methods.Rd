@@ -24,11 +24,12 @@ getM(object)
 \details{
 
   SNPRMA summarizes the SNP information into 4 quantities (log2-scale):
+  \itemize{
   \item{antisenseThetaA}{antisense allele A}
   \item{antisenseThetaB}{antisense allele B}
   \item{senseThetaA}{sense allele A}
   \item{senseThataB}{sense allele B}
-
+  }
   The average log-intensities are given by:
   \code{(antisenseThetaA+antisenseThetaB)/2} and
   \code{(senseThetaA+senseThetaB)/2}.
@@ -46,9 +47,6 @@ getM(object)
   dimension described above is dropped.
 }
 
-\references{}
-\author{}
-\note{}
 \seealso{\code{\link{snprma}}}
 \examples{
 }

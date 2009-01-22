@@ -263,7 +263,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   ProbeNames = Calloc(rows,const char *);
 
   for (i =0; i < rows; i++)
-    ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+    ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   
   
   outnames = Calloc(nprobesets,char *);
@@ -290,7 +290,7 @@ SEXP rma_c_call(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP no
   
   for ( i =0; i < nprobesets; i++){
     PROTECT(temp = mkChar(outnames[i]));
-    SET_VECTOR_ELT(names,i,temp); /* was a direct mkChar prior to Sep 2, 2005*/
+    SET_STRING_ELT(names,i,temp); /* was a direct mkChar prior to Sep 2, 2005*/
     UNPROTECT(1);
   }
   SET_VECTOR_ELT(dimnames,0,names);

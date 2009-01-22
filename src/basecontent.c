@@ -68,10 +68,10 @@ SEXP basecontent(SEXP x)
 
   /* dim names */
   PROTECT(colnames = allocVector(STRSXP, 4));
-  SET_VECTOR_ELT(colnames, 0, mkChar("A"));
-  SET_VECTOR_ELT(colnames, 1, mkChar("T"));
-  SET_VECTOR_ELT(colnames, 2, mkChar("C"));
-  SET_VECTOR_ELT(colnames, 3, mkChar("G"));
+  SET_STRING_ELT(colnames, 0, mkChar("A"));
+  SET_STRING_ELT(colnames, 1, mkChar("T"));
+  SET_STRING_ELT(colnames, 2, mkChar("C"));
+  SET_STRING_ELT(colnames, 3, mkChar("G"));
 
   /* dim names */
   PROTECT(rownames = allocVector(STRSXP, n));
