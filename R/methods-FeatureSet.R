@@ -219,21 +219,45 @@ setMethod("boxplot", signature(x="ExpressionSet"),
 		  })
   
   
+## setMethod("image", signature(x="FeatureSet"),
+## 		  function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
+##               if (which == 0){
+##                   which <- 1:length(x)
+##               }
+##               if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
+##               theDim <- geometry(getPD(x))
+##               for (i in which){
+##                 tmp <- matrix(transfo(exprs(x[,i])), ncol=theDim[1], nrow=theDim[2])
+##                 tmp <- t(tmp[nrow(tmp):1, ncol(tmp):1])
+##                 image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+##               }
+##               par(ask=FALSE)
+##             })
+
+
 setMethod("image", signature(x="FeatureSet"),
-		  function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
-              if (which == 0){
-                  which <- 1:length(x)
-              }
-              if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
-			  theDim <- geometry(getPD(x))
-			  for (i in which){
-				  tmp <- matrix(transfo(exprs(x[,i])), ncol=theDim[1], nrow=theDim[2])
-				  tmp <- t(tmp[nrow(tmp):1, ncol(tmp):1])
-				  image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
-			  }
-			  par(ask=FALSE)
-		  })
-  
+          function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
+            if (which == 0){
+              which <- 1:length(x)
+            }
+            if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
+            conn <- db(x)
+            geom <- geometry(getPD(x))
+            tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
+            theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
+            theInfo <- do.call("rbind", theInfo)
+            theInfo <- theInfo[order(theInfo[["fid"]]), ]
+            idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
+            for (i in which){
+              theInfo[["signal"]] <- transfo(as.numeric(exprs(x[theInfo[["fid"]], i])))
+              int <- matrix(NA, nr=geom[1], nc=geom[2])
+              int[idx] <- theInfo[["signal"]]
+              int <- t(int[nrow(int):1, ncol(int):1])
+              image(int, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+            }
+            par(ask=FALSE)
+          })
+
 
 setMethod("hist", "FeatureSet",
 		  function(x, col=1:ncol(x), log=TRUE,
