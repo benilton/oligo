@@ -14,19 +14,19 @@ setMethod("manufacturer", "PDInfo",
 setMethod("genomeBuild", "PDInfo",
           function(object) object@genomebuild)
 
-  setMethod("geometry", "DBPDInfo", ## changed signature from PDInfo to DBPDInfo
-		  function(object) object@geometry)
+setMethod("geometry", "DBPDInfo", ## changed signature from PDInfo to DBPDInfo
+          function(object) object@geometry)
   
-  setMethod("db", signature(object="DBPDInfo"),
+setMethod("db", signature(object="DBPDInfo"),
           function(object) object@getdb())
 
-
-setMethod("nProbes", "AffySNPPDInfo",
+setMethod("nProbes", "DBPDInfo",
           function(object) {
             ## Note: does not include QC probes
-            probeTables <- c("mmfeature", "pmfeature")
-            sum(subset(object@tableInfo,
-                       tbl %in% probeTables, row_count))
+            conn <- db(object)
+            sql <- paste("SELECT row_count FROM table_info WHERE",
+                         "tbl IN ('mmfeature', 'pmfeature', 'pmfeatureCNV')")
+            sum(dbGetQuery(conn, sql)[[1]])
           })
   
 ## need to implement subset here, subset assumed to be Transcript Identifiers? MS
@@ -124,13 +124,13 @@ setMethod("pmStrand", "AffySNPPDInfo",
 
 ### For Expression
 
-setMethod("nProbes", "ExpressionPDInfo",
-          function(object) {
-            ## Note: does not include QC probes
-            probeTables <- c("mmfeature", "pmfeature")
-            sum(subset(object@tableInfo,
-                       tbl %in% probeTables, row_count))
-          })
+## setMethod("nProbes", "ExpressionPDInfo",
+##           function(object) {
+##             ## Note: does not include QC probes
+##             probeTables <- c("mmfeature", "pmfeature")
+##             sum(subset(object@tableInfo,
+##                        tbl %in% probeTables, row_count))
+##           })
 
 setMethod("pmindex", "ExpressionPDInfo",
           function(object, subset=NULL) {
@@ -175,13 +175,13 @@ setMethod("pmPosition", "ExpressionPDInfo",
 
 ### For Tiling
 
-setMethod("nProbes", "TilingPDInfo",
-          function(object) {
-            ## Note: does not include QC probes
-            probeTables <- c("mmfeature", "pmfeature")
-            sum(subset(object@tableInfo,
-                       tbl %in% probeTables, row_count))
-          })
+## setMethod("nProbes", "TilingPDInfo",
+##           function(object) {
+##             ## Note: does not include QC probes
+##             probeTables <- c("mmfeature", "pmfeature")
+##             sum(subset(object@tableInfo,
+##                        tbl %in% probeTables, row_count))
+##           })
 
 setMethod("pmindex", "TilingPDInfo",
           function(object, subset=NULL) {

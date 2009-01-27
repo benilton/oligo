@@ -5,13 +5,12 @@ Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: methods, R (>= 2.5.0), Biobase (>= 1.13.58),
          splines, RSQLite, preprocessCore, AnnotationDbi,
-         affxparser, oligoClasses (>= 1.1.18)
+         affxparser, oligoClasses (>= 1.5.1)
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba, pd.mapping50k.xba240
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
 License: LGPL version 2 or newer
-Collate: AllClasses.R
-         AllGenerics.R
+Collate: AllGenerics.R
          basecontent.R
          PDInfo-accessors.R
          methods-platformDesign.R
@@ -23,7 +22,6 @@ Collate: AllClasses.R
          readxys.R
          sequence.R
          utils.R
-         methods-SnpQSet.R
          methods-SnpFeatureSet.R
          crlmm.R
          show-methods.R
@@ -32,7 +30,6 @@ Collate: AllClasses.R
 	 justCRLMM.R
          methods-snp6.R
          methods-genotype.R
-         trash.R
          m2snp6.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing

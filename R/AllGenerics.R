@@ -1,8 +1,9 @@
-setGeneric("platform", function(object) standardGeneric("platform"))
-setGeneric("platform<-", function(object, value) standardGeneric("platform<-"))
-setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
-setGeneric("manufacturer<-",
-           function(object, value) standardGeneric("manufacturer<-"))
+## setGeneric("platform", function(object) standardGeneric("platform"))
+## setGeneric("platform<-", function(object, value) standardGeneric("platform<-"))
+## setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
+## setGeneric("manufacturer<-",
+##            function(object, value) standardGeneric("manufacturer<-"))
+
 setGeneric("kind", function(object) standardGeneric("kind"))
 setGeneric("getPlatformDesign",
            function(object) standardGeneric("getPlatformDesign"))
@@ -16,14 +17,15 @@ setGeneric("featureIndex",
            })
 setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntisense"))
 setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))
-setGeneric("senseThetaA", function(object) standardGeneric("senseThetaA"))
-setGeneric("senseThetaB", function(object) standardGeneric("senseThetaB"))
-setGeneric("antisenseThetaA", function(object) standardGeneric("antisenseThetaA"))
-setGeneric("antisenseThetaB", function(object) standardGeneric("antisenseThetaB"))
-setGeneric("thetaA", function(object) standardGeneric("thetaA"))
-setGeneric("thetaB", function(object) standardGeneric("thetaB"))
-setGeneric("getM", function(object) standardGeneric("getM"))
-setGeneric("getA", function(object) standardGeneric("getA"))
+
+## setGeneric("senseThetaA", function(object) standardGeneric("senseThetaA"))
+## setGeneric("senseThetaB", function(object) standardGeneric("senseThetaB"))
+## setGeneric("antisenseThetaA", function(object) standardGeneric("antisenseThetaA"))
+## setGeneric("antisenseThetaB", function(object) standardGeneric("antisenseThetaB"))
+## setGeneric("thetaA", function(object) standardGeneric("thetaA"))
+## setGeneric("thetaB", function(object) standardGeneric("thetaB"))
+## setGeneric("getM", function(object) standardGeneric("getM"))
+## setGeneric("getA", function(object) standardGeneric("getA"))
 setGeneric("genomeBuild", function(object) standardGeneric("genomeBuild"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
 setGeneric("pmOffset", function(object) standardGeneric("pmOffset"))

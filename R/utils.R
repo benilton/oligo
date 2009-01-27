@@ -128,8 +128,10 @@ checkChipTypes <- function(filenames, verbose=TRUE){
   ok
 }
 
-getMetadata <- function(theMatrix, filenames, phenoData, featureData, experimentData, notes, sampleNames){
-  stopifnot(!missing(theMatrix), !missing(filenames), is.matrix(theMatrix), is.character(filenames))
+getMetadata <- function(theMatrix, filenames, phenoData, featureData,
+                        experimentData, notes, sampleNames){
+  stopifnot(!missing(theMatrix), !missing(filenames),
+            is.matrix(theMatrix), is.character(filenames))
   if (!checkValidPhenodataForFiles(filenames, phenoData))
     phenoData <- annotatedDataFrameFrom(theMatrix, byrow=FALSE)
   if (!missing(sampleNames)){

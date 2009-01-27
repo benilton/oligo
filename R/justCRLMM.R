@@ -167,8 +167,8 @@ justCRLMM <- function(filenames, batch_size=40000,
     }
         
     XIndex <- which(snps[i] %in% snps.chrX)
-    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
-    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
+    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
 
     if(recalibrate){
       for(k in 1:3)
@@ -190,8 +190,8 @@ justCRLMM <- function(filenames, batch_size=40000,
         myDist <- getAffySnpDistanceSingle(sqs, rparams, correction$fs, verbose=FALSE)
         myDist[,,-2] <- balance*myDist[,,-2]
       }
-      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE, sqsClass=class(sqs))
-      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
+      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex=NULL, verbose=FALSE, sqsClass=class(sqs))
+      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
 ##      pacc <- LLR2conf(myCalls, LLR, theSNR[i,], annotation(sqs))
     }
     save(myDist, myCalls, LLR, file=paste(randomName, i, sep="."))
@@ -411,8 +411,8 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
     }
         
     XIndex <- which(snps[i] %in% snps.chrX)
-    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
-    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
+    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
 
     if(recalibrate){
       for(k in 1:3)
@@ -434,8 +434,8 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
         myDist <- getAffySnpDistanceSingle(sqs, rparams, correction$fs, verbose=FALSE)
         myDist[,,-2] <- balance*myDist[,,-2]
       }
-      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE, sqsClass=class(sqs))
-      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE, sqsClass=class(sqs))
+      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex=NULL, verbose=FALSE, sqsClass=class(sqs))
+      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE, sqsClass=class(sqs))
     }
     save(myDist, myCalls, LLR, file=paste(randomName, i, sep="."))
     rm(myDist, correction, Index, k, LLR, myCalls, myenv, params, rparams, snpsIn, sqs, XIndex)
@@ -638,8 +638,8 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
     myDist[,,-2,] <- balance*myDist[,,-2,]
     
     XIndex <- which(snps[i] %in% snps.chrX)
-    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=FALSE)
-    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE)
+    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex=NULL,verbose=FALSE)
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE)
 
     if(recalibrate){
       for(k in 1:3)
@@ -655,8 +655,8 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
       save(myDist, file=paste(randomName, "DONT-REMOVEME", i, sep="."))
       myDist[,,-2,] <- balance*myDist[,,-2,]
       rm(oneStrand)
-      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=FALSE)
-      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=FALSE)
+      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex=NULL, verbose=FALSE)
+      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE)
     }
     save(myDist, myCalls, LLR, file=paste(randomName, i, sep="."))
     

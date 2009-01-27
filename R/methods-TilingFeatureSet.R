@@ -24,7 +24,7 @@ setMethod("pmChr", "TilingFeatureSet",
 
 ## TilingQSet
 
-setMethod("getM", "TilingQSet", function(object) assayDataElement(object, "M"))
+## setMethod("getM", "TilingQSet", function(object) assayDataElement(object, "M"))
 
 setMethod("plotM", c("TilingQSet", "missing"), function(object, i, ...){
   if (nrow(object) < 5000){

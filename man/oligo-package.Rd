@@ -2,7 +2,7 @@
 \alias{oligo-package}
 \docType{package}
 \title{
-The oligo package: a tool for analysis of oligonucleotide arrays
+The oligo package: a tool for low-level analysis of oligonucleotide arrays
 }
 \description{
 The \pkg{oligo} package handles oligonucleotide arrays: expression,
@@ -16,14 +16,26 @@ and NimbleGen. The package provides tools for preprocessing.
   for NimbleGen) and allow the user to perform analyses starting at the
   feature-level.
 
-  Reading in the intensity files require the existence of data packages
+Reading in the intensity files require the existence of data packages
 that contain the chip specific information (X/Y coordinates; feature
-types; sequence). These data packages packages are build using the
-\pkg{makePlatformDesign} package, except for the Affymetrix SNP arrays
-that uses the data packages built via \pkg{pdInfoBuilder} package. Soon,
-all the data packages will be built using the \pkg{pdInfoBuilder}
-package.
+types; sequence). These data packages packages are built using the
+\pkg{pdInfoBuilder} package. 
 
+For Affymetrix SNP arrays, users are asked to download the already built
+annotation packages from BioConductor. This is because these packages
+contain metadata that are not (yet) automatically created. The following
+annotation packages are available:
+
+50K Xba  - pd.mapping50kxba.240
+50K Hind - pd.mapping50khind.240
+250K Sty - pd.mapping250k.sty
+250K Nsp - pd.mapping250k.nsp
+GenomeWideSnp 5 (SNP 5.0) - pd.genomewidesnp.5
+GenomeWideSnp 6 (SNP 6.0) - pd.genomewidesnp.6
+
+For users interested in genotype calls for SNP 5.0 and 6.0 arrays, we
+strongly recommend the use use the \pkg{crlmm} package, which implements
+a more efficient version of CRLMM.
 }
 \author{
   Benilton Carvalho - \email{bcarvalh@jhsph.edu}
@@ -33,10 +45,4 @@ package.
 Carvalho, B.; Bengtsson, H.; Speed, T. P. & Irizarry, R. A. Exploration, Normalization, and Genotype Calls of High Density Oligonucleotide SNP Array Data. Biostatistics, 2006.
 }
 
-
 \keyword{ package }
-\examples{
-## rawData <- read.celfiles(list.celfiles())
-## preProc <- snprma(rawData)
-## gtCalls <- crlmm(preProc, correctionFile="outEM.rda")
-}

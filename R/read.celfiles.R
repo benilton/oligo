@@ -10,7 +10,8 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   
   ## Read in the first Array details
   headdetails <- readCelHeader(filenames[1])
-  chiptype <- chips[1]
+##  chiptype <- chips[1]
+  chiptype <- headdetails[["chiptype"]]
   
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
@@ -26,10 +27,12 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   
   arrayType <- kind(get(pkgname))
   tmpExprs <- readCelIntensities2(filenames, rm.outliers=rm.outliers,
-                                  rm.masked=rm.masked,
+                                  rm.masked=rm.mask,
                                   rm.extra=rm.extra, verbose=verbose)
   dimnames(tmpExprs) <- NULL
-  metadata <- getMetadataForMatrix(filenames, phenoData, featureData, experimentData, notes, sampleNames)
+
+  metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
+                          experimentData, notes, sampleNames)
   
   if (sd) warning("Reading in Standard Errors not yet implemented.\n")
   theClass <- switch(arrayType,
@@ -111,7 +114,7 @@ read.celfiles.ms <- function( ..., filenames = character(0),
   
   arrayType <- kind(get(pkgname))
   
-  tmpExprs <- readCelIntensities2(filenames,rm.outliers=rm.outliers,rm.masked=rm.masked,rm.extra=rm.extra,verbose=verbose)
+  tmpExprs <- readCelIntensities2(filenames,rm.outliers=rm.outliers,rm.masked=rm.mask,rm.extra=rm.extra,verbose=verbose)
   colnames(tmpExprs) <- samplenames
   rownames(tmpExprs) <- 1:nrow(tmpExprs)
   

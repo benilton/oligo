@@ -949,15 +949,15 @@ genotypeOne <- function(files, outDir, batch_size=40000,
     if (!file.info(outDir)[["isdir"]])
       stop(outDir, " is not a valid directory.")
     outDir <- gsub("/*$", "", outDir)
-    if (verbode) message("Loading results from previous normalization/summarization step.")
+    if (verbose) message("Loading results from previous normalization/summarization step.")
     obj <- load(file.path(outDir, "NormalizationSummarizationOutput.rda"))
     if (!all(c("pkgNorm", "filesNorm") %in% obj))
       stop(file.path(outDir, "NormalizationSummarizationOutput.rda"), " does not have 'pkgNorm' and/or 'filesNorm' object(s).")
-    normOut <- filesNorm
-    if (!missing(pkgname) & pkgname != pkgNorm)
+    normOut <- get("filesNorm")
+    if (!missing(pkgname) & pkgname != get("pkgNorm"))
       stop("Annotation used for normalization is different from the specified one.")
-    pkgname <- pkgNorm
-    rm(pkgNorm, filesNorm)
+    pkgname <- get("pkgNorm")
+    rm(list=c("pkgNorm", "filesNorm"))
   }
 
   load(system.file(paste("extdata/", pkgname, "CrlmmInfo.rda", sep=""), package=pkgname))

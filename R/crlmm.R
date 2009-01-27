@@ -777,6 +777,17 @@ LLR2conf <-function(theCalls, LLR, SNR, annot){
   LLR <- as.vector(sqrt(LLR))
 
   conf <- vector("numeric", length(LLR))
+
+  ## geting rid of NOTES:
+  HmzK3 <- get("HmzK3")
+  lm1 <- get("lm1")
+  HmzK2 <- get("HmzK2")
+  HtzK3 <- get("HtzK3")
+  lm2 <- get("lm2")
+  HtzK2 <- get("HtzK2")
+  SNRK <- get("SNRK")
+  SNRlm <- get("SNRlm")
+  
   if (any(!Het)){
     tmp <- pmin(LLR[!Het], HmzK3)
     conf[!Het] <- lm1$coef[1]+lm1$coef[2]*tmp+lm1$coef[3]*(tmp-HmzK2)*I(tmp>HmzK2)

@@ -25,13 +25,4 @@ Class \code{"\linkS4class{PDInfo}"}, directly.
 \section{Methods}{
 No methods defined with class "DBPDInfo" in the signature.
 }
-\references{}
-\author{}
-\note{}
-
-\seealso{
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-}
 \keyword{classes}

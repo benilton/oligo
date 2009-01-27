@@ -7,6 +7,7 @@
 \alias{listFeatureSetFields,AffySNPPDInfo-method}
 \alias{geometry}
 \alias{geometry,PDInfo-method}
+\alias{geometry,DBPDInfo-method}
 
 \title{List fields in the (pm/mm)feature table}
 \description{
@@ -20,16 +21,4 @@ listFeatureSetFields(object)
 \arguments{
   \item{object}{\code{PDInfo} object}
 }
-\details{
-}
-\value{
-}
-\references{}
-\author{}
-\note{}
-\seealso{}
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{manip}
