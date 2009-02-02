@@ -4,7 +4,11 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                           rm.outliers=FALSE, rm.extra=FALSE,
                           sd=FALSE, checkType=TRUE){
 
-  filenames <- c(filenames, unlist(list(...)))
+  if (!missing(filenames)){
+    filenames <- c(filenames, unlist(list(...)))
+  }else{
+    filenames <- unlist(list(...))
+  }
   checkValidFilenames(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose))
   
