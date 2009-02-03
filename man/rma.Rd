@@ -1,10 +1,9 @@
 \name{rma}
 \alias{rma}
 \alias{rma,FeatureSet-method}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{RMA}
 \description{
-  RMA
+  Robust Multichip Average algorithm.
 }
 \usage{
 rma(object, ...)
@@ -20,13 +19,15 @@ rma(object, ...)
 \value{
   \code{ExpressionSet} object.
 }
-\references{}
-\author{}
-\note{}
 \seealso{\code{\link{snprma}}}
 \examples{
+if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
+xysPath <- system.file("xysFiles", package="maqcExpression4plex")
+xysFiles <- list.xysfiles(xysPath, full.name=TRUE)
+ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
+summarized <- rma(ngsExpressionFeatureSet)
+show(summarized)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+}
 \keyword{manip}
 

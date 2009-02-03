@@ -4,7 +4,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{List CEL/XYS files}
 \description{
-  Lists the CEL (CEL.gz) / XYS files.
+  Lists the CEL/XYS files.
 }
 \usage{
 list.celfiles(...)
@@ -13,18 +13,12 @@ list.celfiles(...)
 \arguments{
   \item{\dots}{parameters to be passed to \code{list.files}}
 }
-\details{
+\value{
   Character vector with the filenames.
 }
-\value{
-}
-
-\references{}
-\author{}
-\note{}
-\seealso{}
 \examples{
+list.xysfiles()
+list.celfiles()
 }
-
 \keyword{file}
 

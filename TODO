@@ -5,3 +5,4 @@ oligo's TODO
 - will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed
 - add the faster genotyping code for SNP 5.0/6.0
 - add the CN tool
+- make read.celfiles and read.xysfiles consistent

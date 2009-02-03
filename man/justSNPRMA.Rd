@@ -1,6 +1,5 @@
 \name{justSNPRMA}
 \alias{justSNPRMA}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Summarization of SNP data}
 \description{
   This function implements the SNPRMA method for summarization of SNP
@@ -9,7 +8,6 @@
 \usage{
 justSNPRMA(filenames, verbose = TRUE, phenoData = NULL, normalizeToHapmap = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filenames}{character vector with the filenames.}
   \item{verbose}{logical flag for verbosity.}
@@ -20,11 +18,9 @@ justSNPRMA(filenames, verbose = TRUE, phenoData = NULL, normalizeToHapmap = TRUE
 \value{
   \code{SnpQSet} or a \code{SnpCnvQSet}, depending on the array type.
 }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+%% Add Examples
 \examples{
 ## snprmaResults <- justSNPRMA(list.celfiles())
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{manip}
 

@@ -8,9 +8,10 @@
   Create MA plots using a reference array (based on medians).
 }
 \section{Methods}{
-\describe{
-
-\item{object = "FeatureSet"}{ExpressionFeatureSet}
-}}
+  \describe{
+    \item{object = "FeatureSet"}{ExpressionFeatureSet}
+  }
+}
+%% Add Examples
 \keyword{methods}
 

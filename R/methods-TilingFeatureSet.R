@@ -1,26 +1,26 @@
-setMethod("chromosome", "TilingFeatureSet", function(object) getPD(object)$chromosome)
+#### setMethod("chromosome", "TilingFeatureSet", function(object) getPD(object)$chromosome)
+#### 
+#### setMethod("position", "TilingFeatureSet", function(object) getPD(object)$position)
 
-setMethod("position", "TilingFeatureSet", function(object) getPD(object)$position)
+## setMethod("genomeBuild", "TilingFeatureSet", function(object) getPD(object)@genomebuild)
 
-setMethod("genomeBuild", "TilingFeatureSet", function(object) getPD(object)@genomebuild)
+## setMethod("pmPosition", "TilingFeatureSet",
+##           function(object){
+##             conn <- db(object)
+##             tmp <- dbGetQuery(conn, "SELECT fid, position FROM pmfeature")
+##             tmp <- tmp[order(tmp[["fid"]]),]
+##             tmp[["position"]]
+##           })
 
-setMethod("pmPosition", "TilingFeatureSet",
-          function(object){
-            conn <- db(object)
-            tmp <- dbGetQuery(conn, "SELECT fid, position FROM pmfeature")
-            tmp <- tmp[order(tmp[["fid"]]),]
-            tmp[["position"]]
-          })
-
-setMethod("pmChr", "TilingFeatureSet", function(object) chromosome(object)[pmindex(object)])
-
-setMethod("pmChr", "TilingFeatureSet",
-          function(object){
-            conn <- db(object)
-            tmp <- dbGetQuery(conn, "SELECT fid, chrom FROM pmfeature, featureSet WHERE pmfeature.fsetid=featureSet.fsetid")
-            tmp <- tmp[order(tmp[["fid"]]),]
-            tmp[["chrom"]]
-          })
+## setMethod("pmChr", "TilingFeatureSet", function(object) chromosome(object)[pmindex(object)])
+## 
+## setMethod("pmChr", "TilingFeatureSet",
+##           function(object){
+##             conn <- db(object)
+##             tmp <- dbGetQuery(conn, "SELECT fid, chrom FROM pmfeature, featureSet WHERE pmfeature.fsetid=featureSet.fsetid")
+##             tmp <- tmp[order(tmp[["fid"]]),]
+##             tmp[["chrom"]]
+##           })
 
 ## TilingQSet
 

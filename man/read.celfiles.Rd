@@ -1,7 +1,6 @@
 \name{read.celfiles}
 \alias{read.celfiles}
 \alias{cleanPlatformName}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Parser to CEL files}
 \description{
   Reads CEL files.
@@ -36,7 +35,12 @@ rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
   \item{\code{SnpFeatureSet}}{if SNP arrays}
   \item{\code{TilingFeatureSet}}{if Tiling arrays}
 }
-\seealso{\code{\link{read.xysfiles}} for NimbleGen arrays}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+\seealso{\code{\link{list.celfiles}}, \code{\link{read.xysfiles}}}
+\examples{
+if(require(pd.mapping50k.xba240) & require(hapmap100kxba)){
+celPath <- system.file("celFiles", package="hapmap100kxba")
+celFiles <- list.celfiles(celPath, full.name=TRUE)
+affySnpFeatureSet <- read.celfiles(celFiles)
+}
+}
 \keyword{IO}

@@ -1,6 +1,5 @@
 \name{read.xysfiles}
 \alias{read.xysfiles}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Parser to XYS files}
 \description{
   NimbleGen provides XYS files which are read by this function.
@@ -8,7 +7,6 @@
 \usage{
 read.xysfiles(filenames, pkgname = NULL, phenoData = NULL, featureData = NULL, experimentData = NULL, notes = NULL, verbose = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filenames}{\code{character} vector with filenames.}
   \item{pkgname}{\code{character} vector with alternative PD Info
@@ -27,13 +25,12 @@ read.xysfiles(filenames, pkgname = NULL, phenoData = NULL, featureData = NULL, e
   \item{\code{ExpressionFeatureSet}}{if Expresssion arrays}
   \item{\code{TilingFeatureSet}}{if Tiling arrays}
 }
-
-\references{}
-\author{}
-\note{}
-\seealso{\code{\link{read.celfiles}} for Affymetrix arrays}
+\seealso{\code{\link{list.xysfiles}}, \code{\link{read.celfiles}}}
 \examples{
+if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
+xysPath <- system.file("xysFiles", package="maqcExpression4plex")
+xysFiles <- list.xysfiles(xysPath, full.name=TRUE)
+ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+}
 \keyword{IO}

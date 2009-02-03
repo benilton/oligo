@@ -1,51 +1,24 @@
 useDynLib("oligo")
 import(Biobase, splines, graphics, stats, methods, affxparser, oligoClasses)
 
-exportMethods(
-##              "$",
-              "boxplot",
+exportMethods("boxplot",
               "db",
               "exprs",
-              "featureIndex",
-              "featureInfo",
-              "featureNames",
               "geneNames",
-              "genomeBuild",
-              "geometry",
-              "getPlatformDesign",
               "hist",
               "image",
               "initialize",
-              "kind",
               "length",
-              "listFeatureFields",
-              "listFeatureSetFields",
-              "manufacturer",
               "MAplot",
               "mm",
               "mm<-",
-              "mmindex",
-              "mmSequence",
-##              "names",
-              "ncol",
-              "nProbes",
-              "nrow",
               "platform",
               "plotM",
               "pm",
               "pm<-",
-              "pmAllele",
-              "pmChr",
-              "pmindex",
-              "pmPosition",
-              "pmSequence",
-              "pmStrand",
-              "probeNames",
-              "rma",
-              "show")
+              "rma")
 
 ## Exported functions
-
 export("basecontent",
        "cleanPlatformName",
        "read.celfiles",
@@ -53,14 +26,10 @@ export("basecontent",
        "sequenceDesignMatrix",
        "list.celfiles",
        "list.xysfiles",
-       "getPD",
        "readSummaries",
        "getCrlmmSummaries")
-##       "smoothChr",
-##       "getSets")
 
 ## Exported functions for CRLMM
-
 export("crlmm",
        "snprma",
        "justSNPRMA",

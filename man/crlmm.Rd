@@ -1,7 +1,6 @@
 \name{crlmm}
 \alias{crlmm}
 \alias{justCRLMM}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Genotype Calls}
 \description{
   Performs genotype calls via CRLMM (Corrected Robust Linear Model with
@@ -31,22 +30,9 @@ pkgname = NULL, tmpdir=tempdir())
   \item{reference}{logical, defaulting to TRUE ...}
   \item{tmpdir}{Directory where temporary files are going to be stored at.}
 }
-
-\details{}
-
 \value{
   \code{SnpCallSetPlus} object.
 }
-
-\references{}
-\author{}
-\note{}
-
-\seealso{}
-\examples{
-## crlmmResults <- justCRLMM(list.celfiles())
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+%% Add Examples
 \keyword{classif}
 

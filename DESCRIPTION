@@ -12,7 +12,6 @@ Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/
 License: LGPL version 2 or newer
 Collate: AllGenerics.R
          basecontent.R
-         PDInfo-accessors.R
          methods-platformDesign.R
          methods-FeatureSet.R
          methods-TilingFeatureSet.R
@@ -22,9 +21,7 @@ Collate: AllGenerics.R
          readxys.R
          sequence.R
          utils.R
-         methods-SnpFeatureSet.R
          crlmm.R
-         show-methods.R
          snprma.R
 	 justSNPRMA.R
 	 justCRLMM.R

@@ -16,15 +16,6 @@ boxplot(x, ...)
   \item{x}{a \code{FeatureSet}-like object}
   \item{\dots}{arguments to be passed to plot}
 }
-\details{
-}
-\value{
-}
-\references{}
-\author{}
-\note{}
 \seealso{\code{\link{hist}}, \code{\link{image}}}
-\examples{
-}
-
+%% Add examples
 \keyword{hplot}

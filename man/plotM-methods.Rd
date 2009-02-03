@@ -12,12 +12,13 @@
   classes of data.
 }
 \section{Methods}{
-\describe{
-\item{object = "SnpQSet", i = "character"}{Plot log-ratio for SNP data for sample i.}
-\item{object = "SnpQSet", i = "integer"}{Plot log-ratio for SNP data for sample i.}
-\item{object = "SnpQSet", i = "numeric"}{Plot log-ratio for SNP data for sample i.}
-\item{object = "TilingQSet", i = "missing"}{Plot log-ratio for Tiling
-  data for sample i.}
-}}
+  \describe{
+    \item{object = "SnpQSet", i = "character"}{Plot log-ratio for SNP data for sample i.}
+    \item{object = "SnpQSet", i = "integer"}{Plot log-ratio for SNP data for sample i.}
+    \item{object = "SnpQSet", i = "numeric"}{Plot log-ratio for SNP data for sample i.}
+    \item{object = "TilingQSet", i = "missing"}{Plot log-ratio for Tiling data for sample i.}
+  }
+}
+%% Add example
 \keyword{methods}
 

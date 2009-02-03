@@ -3,14 +3,11 @@
 \alias{pm}
 \alias{mm,FeatureSet-method}
 \alias{pm,FeatureSet-method}
-\alias{pm,SnpCnvFeatureSet-method}
+%\alias{pm,SnpCnvFeatureSet-method}
 \alias{mm<-}
 \alias{pm<-}
 \alias{mm<-,FeatureSet,matrix-method}
 \alias{pm<-,FeatureSet,matrix-method}
-\alias{mm<-,FeatureSet,BufferedMatrix-method}
-\alias{pm<-,FeatureSet,BufferedMatrix-method}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Accessor to the PM/MM matrices}
 \description{
   Accessor to the PM/MM matrices.
@@ -32,15 +29,13 @@ pm(object)<-value
   The intensity matrix is stored as a \code{BufferedMatrix} object. This
   should leave more memory for computations.
 }
-\value{
-  PM or MM matrix as requested as a \code{BufferedMatrix} object.
-}
-
-\references{}
-\author{}
-\note{}
-\seealso{}
 \examples{
+if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
+xysPath <- system.file("xysFiles", package="maqcExpression4plex")
+xysFiles <- list.xysfiles(xysPath, full.name=TRUE)
+ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
+pm(ngsExpressionFeatureSet)[1:10,]
+}
 }
 
 \keyword{manip}

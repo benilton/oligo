@@ -1,39 +1,3 @@
-setMethod("getPlatformDesign", 
-          signature(object= "FeatureSet"),
-          function(object){
-            pdn <- annotation(object)
-            library(pdn,character.only=TRUE)
-            return(get(pdn,pos=paste("package:",pdn,sep="")))
-          })
-getPD <- getPlatformDesign
-
-#####################
-############# STRANGE, what should they be?
-## probeNames - returns probeNames for PMs ... subset ignored for now
-setMethod("probeNames", "FeatureSet",
-          function(object, subset=NULL) {
-              if (!is.null(subset))
-                warning("ignoring subset arg, feature not implemented")
-              probeNames(getPlatformDesign(object))
-          })
-
-## geneNames - returns geneNames for PMs
-## FIXME: so geneNames is just unique(probeNames(x))?
-## why the business with factor?
-setMethod("geneNames", "FeatureSet",
-          function(object){
-              geneNames(getPlatformDesign(object))
-          })
-#####################
-#####################
-
-## pmindex method for FeatureSet
-## WE assume feature_type is PM or MM. this might change with other platforms
-setMethod("pmindex", "FeatureSet",
-          function(object, subset=NULL){
-            pmindex(getPlatformDesign(object), subset=subset)
-          })
-
 setMethod("pm", "FeatureSet",
           function(object, subset=NULL){
             exprs(object)[pmindex(object, subset=subset),,drop=FALSE]
@@ -45,14 +9,6 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                    tmp[pmindex(object),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
-
-## MM
-##mmindex method for FeatureSet
-##WE assume feature_type is PM or MM. this might change with other platforms
-setMethod("mmindex", "FeatureSet",
-		function(object, subset=NULL){
-			mmindex(getPD(object), subset=subset)
-		})
 
 setMethod("mm", "FeatureSet",
           function(object, subset=NULL){
@@ -66,11 +22,6 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 		 
-## does not work for GENE ST arrays
-setMethod("featureNames", "FeatureSet",
-          function(object) as.character(getPD(object)$feature_set_name)
-          )
-
 ## does not work for GENE ST arrays
 setMethod("pmSequence", "FeatureSet",
           function(object) pmSequence(getPD(object)))
@@ -239,6 +190,3 @@ setMethod("MAplot", "FeatureSet",
             }
             if (length(arrays) > 1) par(ask=FALSE)
           })
-
-setMethod("db", "FeatureSet", function(object)    db(getPD(object)))
-setMethod("genomeBuild", "FeatureSet", function(object) genomeBuild(getPD(object)))
