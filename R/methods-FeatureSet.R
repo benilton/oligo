@@ -35,17 +35,20 @@ setMethod("rma", "FeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL){
             pms <- pm(object, subset)
 
-            tmpQcPm <- dbGetQuery(db(object),
-                                  paste("SELECT man_fsetid, fid",
-                                        "FROM featureSet, qcpmfeature",
-                                        "WHERE qcpmfeature.fsetid=featureSet.fsetid"))
-            qcpms <- exprs(object)[tmpQcPm[["fid"]],]
+            if (manufacturer(object) == "Affymetrix"){
+              tmpQcPm <- dbGetQuery(db(object),
+                                    paste("SELECT man_fsetid, fid",
+                                          "FROM featureSet, qcpmfeature",
+                                          "WHERE qcpmfeature.fsetid=featureSet.fsetid"))
+              qcpms <- exprs(object)[tmpQcPm[["fid"]],]
 
-            pms <- rbind(pms, qcpms)
+              pms <- rbind(pms, qcpms)
+            }
             
             pnVec <- probeNames(object, subset)
 
-            pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
+            if (manufacturer(object) == "Affymetrix")
+              pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
             
             ngenes <- length(unique(pnVec))
             idx <- order(pnVec)
@@ -72,26 +75,26 @@ setMethod("rma", "FeatureSet",
   
   ## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
-		  function(x, which, range=0, col=1:ncol(x), ...){
-			  if(!missing(which)) warning("Argument 'which' not yet implemented")
-			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
-			  tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-			  idx <- is.na(tmpdf[[1]])
-			  if (any(idx))
-				  tmpdf <- tmpdf[!idx,]
-			  boxplot(tmpdf, range=range, col=col, ...)
-		  })
+          function(x, which, range=0, col=1:ncol(x), ...){
+            if(!missing(which)) warning("Argument 'which' not yet implemented")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
+            idx <- is.na(tmpdf[[1]])
+            if (any(idx))
+              tmpdf <- tmpdf[!idx,]
+            boxplot(tmpdf, range=range, col=col, ...)
+          })
   
 setMethod("boxplot", signature(x="ExpressionSet"),
-		  function(x, which, range=0, col=1:ncol(x), ...){
-			  if(!missing(which)) warning("Argument 'which' not yet implemented")
-			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
-			  tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-			  idx <- is.na(tmpdf[[1]])
-			  if (any(idx))
-				  tmpdf <- tmpdf[!idx,]
-			  boxplot(tmpdf, range=range, col=col, ...)
-		  })
+          function(x, which, range=0, col=1:ncol(x), ...){
+            if(!missing(which)) warning("Argument 'which' not yet implemented")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
+            idx <- is.na(tmpdf[[1]])
+            if (any(idx))
+              tmpdf <- tmpdf[!idx,]
+            boxplot(tmpdf, range=range, col=col, ...)
+          })
   
   
 ## setMethod("image", signature(x="FeatureSet"),
@@ -135,47 +138,51 @@ setMethod("image", signature(x="FeatureSet"),
 
 
 setMethod("hist", "FeatureSet",
-		  function(x, col=1:ncol(x), log=TRUE,
-				  which, ylab="density", xlab="intensity",
-				  type="l", ...){
-			  if (!missing(which)) warning("Argument 'which' not implemented yet.")
-			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
-			  tmp <- exprs(x[idx,])
-			  idx <- is.na(tmp[,1])
-			  if(any(idx))
-				  tmp <- tmp[!idx,, drop=FALSE]
-			  if (log){
-				  tmp <- log2(tmp)
-				  xlab <- "log intensity"
-			  }
-			  x.density <- apply(tmp, 2, density)
-			  all.x <- sapply(x.density, "[[", "x")
-			  all.y <- sapply(x.density, "[[", "y")
-			  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-			  invisible(x.density)
-		  })
-  
+          function(x, col=1:ncol(x), transfo=log2,
+                   which, ylab="density", xlab="log intensity",
+                   type="l", ...){
+            stopifnot(is.function(transfo))
+            if (!missing(which)) warning("Argument 'which' not implemented yet.")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmp <- exprs(x[idx,])
+            idx <- is.na(tmp[,1])
+            if(any(idx))
+              tmp <- tmp[!idx,, drop=FALSE]
+            tmp <- transfo(tmp)
+##             if (plot.log){
+##               tmp <- log2(tmp)
+##               xlab <- "log intensity"
+##             }
+            x.density <- apply(tmp, 2, density)
+            all.x <- sapply(x.density, "[[", "x")
+            all.y <- sapply(x.density, "[[", "y")
+            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+            invisible(x.density)
+          })
+
 setMethod("hist", "ExpressionSet",
-		  function(x, col=1:ncol(x), log=TRUE,
-				  which, ylab="density", xlab="intensity",
-				  type="l", ...){
-			  if (!missing(which)) warning("Argument 'which' not implemented yet.")
-			  idx <- sample(nrow(x), min(c(100000, nrow(x))))
-			  tmp <- exprs(x[idx,])
-			  idx <- is.na(tmp[,1])
-			  if(any(idx))
-				  tmp <- tmp[!idx,, drop=FALSE]
-			  if (log){
-				  tmp <- log2(tmp)
-				  xlab <- "log intensity"
-			  }
-			  x.density <- apply(tmp, 2, density)
-			  all.x <- sapply(x.density, "[[", "x")
-			  all.y <- sapply(x.density, "[[", "y")
-			  matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-			  invisible(x.density)
-		  })
-  
+          function(x, col=1:ncol(x), transfo=log2,
+                   which, ylab="density", xlab="log intensity",
+                   type="l", ...){
+            stopifnot(is.function(transfo))
+            if (!missing(which)) warning("Argument 'which' not implemented yet.")
+            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            tmp <- exprs(x[idx,])
+            idx <- is.na(tmp[,1])
+            if(any(idx))
+              tmp <- tmp[!idx,, drop=FALSE]
+            tmp <- transfo(tmp)
+##             if (plot.log){
+##               tmp <- log2(tmp)
+##               xlab <- "log intensity"
+##             }
+            x.density <- apply(tmp, 2, density)
+            all.x <- sapply(x.density, "[[", "x")
+            all.y <- sapply(x.density, "[[", "y")
+            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
+            invisible(x.density)
+          })
+
 setMethod("MAplot", "FeatureSet",
           function(object, arrays=1:ncol(object), lowessPlot=FALSE, ...){
             if (length(arrays) > 1) par(ask=TRUE)

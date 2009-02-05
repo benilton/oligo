@@ -5,9 +5,11 @@
   NimbleGen provides XYS files which are read by this function.
 }
 \usage{
-read.xysfiles(filenames, pkgname = NULL, phenoData = NULL, featureData = NULL, experimentData = NULL, notes = NULL, verbose = FALSE)
+read.xysfiles(..., filenames, pkgname, phenoData, featureData,
+experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
 }
 \arguments{
+  \item{...}{file names}
   \item{filenames}{\code{character} vector with filenames.}
   \item{pkgname}{\code{character} vector with alternative PD Info
     package name}
@@ -16,6 +18,10 @@ read.xysfiles(filenames, pkgname = NULL, phenoData = NULL, featureData = NULL, e
   \item{experimentData}{\code{experimentData}}
   \item{notes}{\code{notes}}
   \item{verbose}{\code{verbose}}
+  \item{sampleNames}{\code{character} vector with sample names (usually
+    better descriptors than the filenames)}
+  \item{checkType}{\code{logical}. Check type of each file? This can be
+    time consuming.}
 }
 \details{
   The function will read the XYS files provided by NimbleGen Systems and

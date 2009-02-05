@@ -10,19 +10,16 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
     filenames <- unlist(list(...))
   }
   checkValidFilenames(filenames)
-  if (checkType) stopifnot(checkChipTypes(filenames, verbose))
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix"))
   
   ## Read in the first Array details
   headdetails <- readCelHeader(filenames[1])
-##  chiptype <- chips[1]
   chiptype <- headdetails[["chiptype"]]
   
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
   
   if (require(pkgname, character.only=TRUE)){
-    if (is(get(pkgname), "platformDesign"))
-      stop("Create a pdInfo package using the 'pdInfoBuilder' package")    
     if (verbose)
       message("Platform design info loaded.")
   }else{

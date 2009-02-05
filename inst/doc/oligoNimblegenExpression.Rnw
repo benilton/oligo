@@ -1,0 +1,175 @@
+%\VignetteIndexEntry{Analysis of NimbleGen Expression Data with the oligo Package }
+%\VignetteDepends{oligo, macqcExpression4plex, pd.hg18.60mer.expr, genefilter, geneplotter, limma, RColorBrewer}
+%\VignetteKeywords{Expression, NimbleGen, Oligonucleotide Arrays}
+%\VignettePackage{oligo}
+\documentclass{article}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textsf{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\oligo}{\Rpackage{oligo}}
+
+\usepackage{graphicx}
+
+\title{Analysis of NimbleGen Expression Data with the oligo Package}
+\author{Benilton Carvalho}
+\maketitle
+
+\begin{document}
+
+<<setup, echo=FALSE, results=hide>>=
+options(width=60)
+options(continue=" ")
+options(prompt="R> ")
+options(width=45, digits=2)
+@ 
+
+\section{Introduction}
+\label{sec:intro}
+
+This document presents a non-trivial use of the \oligo{} Package for the analysis of NimbleGen Expression data. This vignette follows the structure of the chapter \textbf{From CEL files to a list of interesting genes} by R. A. Irizarry \textit{in} \textit{Bioinformatics and Computational Biology Solutions Using R and Bioconductor}, which shows a case study for Affymetrix Expression arrays.
+
+In order to analyze microarray data using \oligo, the user is expected to have installed on the system a package with the annotation for the particular array design on which the experiment was performed. For the example in question here, the design is hg18\_60mer\_expr and the annotation package associated to it is \Rpackage{pd.hg18.60mer.expr}, which is built by using the \Rpackage{pdInfoBuilder} package.
+
+\section{Initialization of the environment}
+\label{sec:init}
+
+We start by loading the packages that are going to be used in this session. The \Rpackage{maqcExpression4plex} package provides a set of six samples on the MAQC Study; the set is comprised of samples on two groups: universal reference and brain. The remaining packages offer additional functionality, like tools for filtering, plotting and visualization.
+<<loading, echo=TRUE>>=
+  library(oligo)
+  library(maqcExpression4plex)
+  library(genefilter)
+  library(geneplotter)
+  library(limma)
+  library(RColorBrewer)
+  palette(brewer.pal(8, "Dark2"))
+@
+
+Once the package is loaded, we can easily get the location of the XYS files that contain the intensities by calling \Rfunction{list.xysfiles}, which takes the same arguments as \Rfunction{list.files}. To minimize the chance of problems, we strongly recommend the use of \Rcode{full.names=TRUE}.
+<<listing>>=
+  extdata <- system.file("extdata",
+      package="maqcExpression4plex")
+  xys.files <- list.xysfiles(extdata,
+      full.names=TRUE)
+  basename(xys.files)
+@ %def
+
+To read the XYS files, we provide the \Rfunction{read.xysfiles} function, which also takes \Robject{phenoData}, \Robject{experimentData} and \Robject{featureData} objects and returns an appropriate subclass of \Rclass{FeatureSet}.
+<<ExpressionFeatureSet>>=
+  pd <- dir(extdata, pattern="phenoData", full.names=TRUE)
+  pd <- read.AnnotatedDataFrame(pd)
+  maqc <- read.xysfiles(xys.files, phenoData=pd)
+  class(maqc)
+@ %def
+
+\section{Exploring the feature-level data}
+\label{sec:exploring}
+
+The \Rfunction{read.xysfiles} function returns, in this case, an instance of \Rclass{ExpressionFeatureSet} and the intensities of these files are stored in its \Robject{exprs} slot, which can be accessed with a method with the same name.
+<<rawdata>>=
+   exprs(maqc)[10001:10010, 1:2]
+@ %def
+
+The \Rmethod{boxplot} method can be used to produce boxplots for the feature-level data.
+<<maqcBoxplot, fig=TRUE>>=
+  boxplot(maqc, main="MAQC Sample Data")
+@ %def
+
+Similarly, a smoothed histogram for the feature-level data can be obtained with the \Rmethod{hist} method.
+<<maqcHist, fig=TRUE>>=
+  hist(maqc, main="MAQC Sample Data")
+@ %def
+
+\section{RMA algorithm}
+\label{sec:rma}
+
+The RMA algorithm can be applied to the raw data of expression arrays. It is available via the \Rmethod{rma} method. The algorithm will perform background subtraction, quantile normalization and summarization via median polish. The result of \Rmethod{rma} is an instance of \Rclass{ExpressionSet} class, which also contains an \Rmethod{exprs} slot and method.
+<<rma>>=
+  eset <- rma(maqc)
+  class(eset)
+  show(eset)
+  exprs(eset)[1:10, 1:2]
+@ %def
+
+The \Rmethod{boxplot} and \Rmethod{hist} methods are also implemented for \Rclass{ExpressionSet} objects. Note that \Rmethod{rma}'s output is in the $\log_2$ scale, so we call such methods using the argument \Rcode{transfo=identity}, so the data are not transformed in any way.
+<<rmaResultsB, fig=TRUE>>=
+  boxplot(eset, transfo=identity, main="After RMA")
+@ %def
+
+<<rmaResultsH, fig=TRUE>>=
+  hist(eset, transfo=identity, main="After RMA")
+@ %def
+
+\section{Assessing differential expression}
+\label{sec:diffexp}
+
+One simple approach to assess differential expression is to flag units with log-ratios greater (in absolute value) than 1, i.e. a change greater than 2-fold when comparing brain vs. universal reference.
+<<naive>>=
+  e <- exprs(eset)
+  index <- which(eset[["Key"]] == "brain")
+  d <- rowMeans(e[, index])-rowMeans(e[, -index])
+  a <- rowMeans(e)
+  sum(abs(d)>1)
+@ 
+
+Another approach is to use $t$-tests to infer whether or not there is differential expression.
+<<ttests>>=
+  tt <- rowttests(e, factor(eset$Key))
+  lod <- -log10(tt[["p.value"]])
+@ 
+
+The MA plot can be used to visualize the behavior of the log-ratio as a function of average log-intensity. Features with log-ratios greater (in absolute value) than 1 are candidates for being classified as differentially expressed.
+<<maplot, fig=TRUE>>=
+  smoothScatter(a, d, xlab="Average Intensity", ylab="Log-ratio", main="MAQC Sample Data")
+  abline(h=c(-1, 1), col=2)
+@ 
+
+The use of $t$-tests allows us to use the volcano plot to visualize candidates for differential expression. Below, we highlight, in blue, the top 25 in log-ratio and, in red, the top 25 in effect size.
+<<volcanoplot2, fig=TRUE, echo=FALSE>>=
+  o1 <- order(abs(d),decreasing=TRUE)[1:25]
+  o2 <- order(abs(tt[["statistic"]]),decreasing=TRUE)[1:25]
+  o <- union(o1,o2)
+  smoothScatter(d, lod, main="A Better view")
+  points(d[o1], lod[o1], pch=18, col="blue")
+  points(d[o2], lod[o2], pch=1, col="red")
+  abline(h=2, v=c(-1, 1), col=2)
+@ 
+
+The \Rpackage{limma} Package can also be used to assess difference in expression between the two groups.
+<<limma>>=
+  design <- model.matrix(~factor(eset[["Key"]]))
+  fit <- lmFit(eset, design)
+  ebayes <- eBayes(fit)
+  lod <- -log10(ebayes[["p.value"]][,2])
+  mtstat<- ebayes[["t"]][,2]
+@ 
+
+The Empirical Bayes approach implemented in \Rpackage{limma} provides moderated $t$-statistic, shown to have a better performance when compared to the standard $t$-statistic. Below, we reconstruct the volcano plot, but using the moderated $t$-statisic.
+<<volcanoplot3, fig=TRUE>>=
+  o1 <- order(abs(d), decreasing=TRUE)[1:25]
+  o2 <- order(abs(mtstat), decreasing=TRUE)[1:25]
+  o <- union(o1, o2)
+  smoothScatter(d, lod, main="Moderated t", xlab="Log-ratio", ylab="LOD")
+  points(d[o1], lod[o1], pch=18,col="blue")
+  points(d[o2], lod[o2], pch=1,col="red")
+  abline(h=2, v=c(-1, 1))
+@ 
+
+The \Rmethod{topTable} command provides us a way of ranking genes for further evaluation. In the case below, we adjust for multiple testing by FDR and look at the Top-10 genes.
+<<toptable>>=
+  tab <- topTable(ebayes, coef=2, adjust="fdr", n=10)
+  tab
+@ 
+
+\section{Session Info}
+\label{sec:sessionInfo}
+
+This document was created using the following:
+<<sessionInfo>>=
+  sessionInfo()
+@ 
+
+\end{document}

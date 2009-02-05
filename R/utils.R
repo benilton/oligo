@@ -121,10 +121,24 @@ createDefaultMiame <- function(filenames, notes){
   experimentData
 }
 
-checkChipTypes <- function(filenames, verbose=TRUE){
-  chips <- sapply(filenames, function(x) readCelHeader(x)[["chiptype"]])
-  ok <- length(unique(chips)) == 1
-  if(!ok & verbose) message("All the CEL files must be of the same type.")
+checkChipTypes <- function(filenames, verbose=TRUE, manufacturer){
+  if (missing(manufacturer)) stop("'checkChipTypes' needs 'manufacturer'")
+  if (manufacturer == "affymetrix"){
+    chips <- sapply(filenames, function(x) readCelHeader(x)[["chiptype"]])
+    ok <- length(unique(chips)) == 1
+    if(!ok & verbose) message("All the CEL files must be of the same type.")
+  }else if(manufacturer == "nimblegen"){
+    designnamelist <- NULL
+    for (xysfile in filenames){
+      firstline <- readxysHeader(xysfile)
+      designname <- unlist(strsplit(firstline[grep("designname",firstline,fixed=TRUE,useBytes=TRUE)],"="))[2]
+      designnamelist <- rbind(designnamelist,designname)
+    }
+    ok <- length(unique(designnamelist)) == 1
+    if(!ok & verbose) message("All the XYS files must be of the same type.")
+  }else{
+    stop("'manufacturer' ", manufacturer, " unknown")
+  }
   ok
 }
 

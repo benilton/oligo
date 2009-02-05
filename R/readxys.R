@@ -60,33 +60,25 @@ stuffForXYSandCELreaders <- function(filenames,
   return(list(filenames=filenames,samplenames=samplenames, phenoData=phenoData, description=description))
 }
 
-read.xysfiles <- function(filenames,
-                          pkgname=NULL,
-                          phenoData=NULL,
-                          featureData=NULL,
-                          experimentData=NULL,
-                          notes=NULL,
-                          verbose = FALSE) {
+read.xysfiles <- function(..., filenames, pkgname, phenoData,
+                          featureData, experimentData, notes,
+                          verbose=TRUE, sampleNames, checkType=TRUE) {
   
-  ## Create space to store the design names
-  designnamelist <- NULL
-
-  ## Read the header for all XYS files, get design name for each
-  for (xysfile in filenames){
-    firstline <- readxysHeader(xysfile)
-    designname <- unlist(strsplit(firstline[grep("designname",firstline,fixed=TRUE,useBytes=TRUE)],"="))[2]
-    designnamelist <- rbind(designnamelist,designname)
+  if (!missing(filenames)){
+    filenames <- c(filenames, unlist(list(...)))
+  }else{
+    filenames <- unlist(list(...))
   }
 
-  ## How many different designs?
-  numberdesigns <- length(unique(designnamelist))
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
 
-  ## All XYS files should point to one NDF file
-  if(numberdesigns != 1)
-    stop("XYS Files do not refer to the same design!")
+  ## Get design name from the first
+  firstline <- readxysHeader(filenames[1])
+  designname <- unlist(strsplit(firstline[grep("designname",
+                firstline, fixed=TRUE, useBytes=TRUE)], "="))[2]
     
   ## Load PDenv for the XYS files
-  if (is.null(pkgname))
+  if (missing(pkgname))
     pkgname <- cleanPlatformName(designname)
   if (require(pkgname, character.only=TRUE)){
     if (verbose)
@@ -95,10 +87,9 @@ read.xysfiles <- function(filenames,
     stop("Must install the ", pkgname, " package.")
   }
 
+  arrayType <- kind(get(pkgname))
   tmpExprs <- NULL
   for (i in seq(along=filenames)){
-    if (verbose) cat(".")
-
     ## Read XYS "as is"
     tmpE <- readonexysfile(filenames[i])
     if (length(filenames) > 1){
@@ -106,47 +97,27 @@ read.xysfiles <- function(filenames,
     }else{
       tmpExprs <- matrix(tmpE$SIGNAL, ncol=1)
     }
-    if(verbose) cat(" Done.\n")
   }
   tmpE$index <- tmpE$X + (tmpE$Y-1)*geometry(get(pkgname))[2]
   idx <- order(tmpE$index)
   tmpExprs <- tmpExprs[idx,, drop=FALSE]
-  colnames(tmpExprs) <- basename(filenames)
   rm(tmpE, idx)
+  dimnames(tmpExprs) <- NULL
+  
+  metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
+                          experimentData, notes, sampleNames)
 
-  arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
                      SNP="SnpFeatureSet",
+                     SNPCNV="SnpCnvFeatureSet",
                      exon="ExonFeatureSet",
-                     stop("unknown array type: ", arrayType))
+                     gene="GeneFeatureSet",
+                     stop("Unknown array type: ", arrayType))
 
-  out <- new(theClass,
-             exprs=tmpExprs,
-             platform=pkgname,
-             manufacturer="NimbleGen",
-             annotation=pkgname)
-
-  if (is.null(featureData)){
-    featureData(out) <- annotatedDataFrameFrom(assayData(out), byrow=TRUE)
-  }else{
-    featureData(out) <- featureData
-  }
-  if (is.null(phenoData)){
-    phenoData(out) <- annotatedDataFrameFrom(assayData(out), byrow=FALSE)
-  }else{
-    phenoData(out) <- phenoData
-  }
-  if (is.null(experimentData)){
-    ed <- new("MIAME")
-    preproc(ed)$filenames <- filenames
-    preproc(ed)$oligoversion <- packageDescription("oligo")$Version
-    if (!is.null(notes)) notes(ed) <- notes
-    experimentData(out) <- ed
-  }else{
-    ed <- experimentData
-    experimentData(out) <- ed
-  }
-  out
+  return(new(theClass, exprs=tmpExprs, manufacturer="NimbleGen",
+             annotation=pkgname, phenoData=metadata[["phenoData"]],
+             experimentData=metadata[["experimentData"]],
+             featureData=metadata[["featureData"]]))
 }
