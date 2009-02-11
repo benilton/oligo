@@ -35,7 +35,7 @@ setMethod("rma", "FeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL){
             pms <- pm(object, subset)
 
-            if (manufacturer(object) == "Affymetrix"){
+            if (manufacturer(object) == "Affymetrix" & class(object) == "ExpressionFeatureSet"){
               tmpQcPm <- dbGetQuery(db(object),
                                     paste("SELECT man_fsetid, fid",
                                           "FROM featureSet, qcpmfeature",
