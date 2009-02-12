@@ -47,7 +47,7 @@ setMethod("rma", "FeatureSet",
             
             pnVec <- probeNames(object, subset)
 
-            if (manufacturer(object) == "Affymetrix")
+            if (manufacturer(object) == "Affymetrix" & class(object) == "ExpressionFeatureSet")
               pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
             
             ngenes <- length(unique(pnVec))
