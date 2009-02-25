@@ -1,5 +1,4 @@
 %\VignetteIndexEntry{Oligo Vignette}
-%\VignetteDepends{oligo, hapmap100kxba, pd.mapping50k.xba240}
 %\VignetteKeywords{Expression, SNP, Affymetrix, NimbleGen, Oligonucleotide Arrays}
 %\VignettePackage{oligo}
 \documentclass{article}
