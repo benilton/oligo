@@ -34,7 +34,7 @@ experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
 \seealso{\code{\link{list.xysfiles}}, \code{\link{read.celfiles}}}
 \examples{
 if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
-xysPath <- system.file("xysFiles", package="maqcExpression4plex")
+xysPath <- system.file("extdata", package="maqcExpression4plex")
 xysFiles <- list.xysfiles(xysPath, full.name=TRUE)
 ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
 }

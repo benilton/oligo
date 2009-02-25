@@ -22,7 +22,7 @@ rma(object, ...)
 \seealso{\code{\link{snprma}}}
 \examples{
 if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
-xysPath <- system.file("xysFiles", package="maqcExpression4plex")
+xysPath <- system.file("extdata", package="maqcExpression4plex")
 xysFiles <- list.xysfiles(xysPath, full.name=TRUE)
 ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
 summarized <- rma(ngsExpressionFeatureSet)

@@ -14,11 +14,10 @@
 
 \usepackage{graphicx}
 
+\begin{document}
 \title{Analysis of NimbleGen Expression Data with the oligo Package}
 \author{Benilton Carvalho}
 \maketitle
-
-\begin{document}
 
 <<setup, echo=FALSE, results=hide>>=
 options(width=60)
@@ -117,7 +116,7 @@ One simple approach to assess differential expression is to flag units with log-
 
 Another approach is to use $t$-tests to infer whether or not there is differential expression.
 <<ttests>>=
-  tt <- rowttests(e, factor(eset$Key))
+  tt <- rowttests(e, factor(eset[["Key"]]))
   lod <- -log10(tt[["p.value"]])
 @ 
 
