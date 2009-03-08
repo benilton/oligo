@@ -30,50 +30,7 @@ setMethod("pmSequence", "FeatureSet",
 setMethod("mmSequence", "FeatureSet",
           function(object) mmSequence(getPD(object)))
 
-## RMA normalization, likely not OK for ST arrays
-setMethod("rma", "FeatureSet",
-          function(object, background=TRUE, normalize=TRUE, subset=NULL){
-            pms <- pm(object, subset)
-
-            if (manufacturer(object) == "Affymetrix" & class(object) == "ExpressionFeatureSet"){
-              tmpQcPm <- dbGetQuery(db(object),
-                                    paste("SELECT man_fsetid, fid",
-                                          "FROM featureSet, qcpmfeature",
-                                          "WHERE qcpmfeature.fsetid=featureSet.fsetid"))
-              qcpms <- exprs(object)[tmpQcPm[["fid"]],]
-
-              pms <- rbind(pms, qcpms)
-            }
-            
-            pnVec <- probeNames(object, subset)
-
-            if (manufacturer(object) == "Affymetrix" & class(object) == "ExpressionFeatureSet")
-              pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
-            
-            ngenes <- length(unique(pnVec))
-            idx <- order(pnVec)
-            pms <- pms[idx,, drop=FALSE]
-            pnVec <- pnVec[idx]
-            bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
-
-            exprs <-.Call("rma_c_complete_copy", pms, pms,
-                          pnVec, ngenes,  body(bg.dens),
-                          new.env(), normalize,
-                          background, as.integer(2), PACKAGE="oligo")
-
-            colnames(exprs) <- sampleNames(object)
-            rownames(exprs) <- unique(pnVec)
-
-            out <- new("ExpressionSet",
-                       phenoData = phenoData(object),
-                       annotation = annotation(object),
-                       experimentData = experimentData(object),
-                       exprs = exprs)
-            return(out)
-          })
-
-  
-  ## QAish functions
+## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which, range=0, col=1:ncol(x), ...){
             if(!missing(which)) warning("Argument 'which' not yet implemented")

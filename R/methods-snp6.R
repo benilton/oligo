@@ -587,11 +587,15 @@ old.normalizeOne <- function(celFiles, destDir, batch_size=40000, verbose=TRUE, 
     pms <- normalize.quantiles.use.target(readCelIntensities(celFiles[i],
                                                              indices=tmp$fid),
                                           reference, copy=FALSE)
-    theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms,
-                            pnVec, ngenes,  body(bg.dens),
-                            new.env(), FALSE, FALSE,
-                            as.integer(2), PACKAGE="oligo")[,1],
+
+    theSumm <- matrix(basicRMA(pms, pnVec, ngenes, FALSE, FALSE)[,1],
                       ncol=2, byrow=TRUE)
+    
+##     theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms,
+##                             pnVec, ngenes,  body(bg.dens),
+##                             new.env(), FALSE, FALSE,
+##                             as.integer(2), PACKAGE="oligo")[,1],
+##                       ncol=2, byrow=TRUE)
     rm(pms); gc()
     correction <- fitAffySnpMixture56(theSumm, verbose=FALSE)
 
@@ -899,10 +903,14 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
     ## Summarized data now in 2 columns (A and B)
     pms <- n2t(readCelIntensities(celFiles[i], indices=tmp$fid),
                reference, copy=FALSE)
-    theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms, pnVec,
-                            nSnpAlleleCombinations, body(bg.dens),
-                            new.env(), FALSE, FALSE, as.integer(2),
-                            PACKAGE="oligo")[,1], ncol=2, byrow=TRUE)
+
+    theSumm <- matrix(basicRMA(pms, pnVec, nSnpAlleleCombinations,
+                               FALSE, FALSE), ncol=2, byrow=TRUE)
+    
+##     theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms, pnVec,
+##                             nSnpAlleleCombinations, body(bg.dens),
+##                             new.env(), FALSE, FALSE, as.integer(2),
+##                             PACKAGE="oligo")[,1], ncol=2, byrow=TRUE)
     rm(pms); gc()
     correction <- fitAffySnpMixture56(theSumm, verbose=FALSE)
     for (j in 1:length(filenames)){

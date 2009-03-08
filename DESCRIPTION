@@ -1,7 +1,7 @@
 Package: oligo
-Version: 1.7.18
-Title: Oligonucleotide Arrays
-Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry <rafa@jhu.edu> and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
+Version: 1.7.19
+Title: Tools for low-level analysis of oligonucleotide arrays.
+Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
 Depends: methods, R (>= 2.5.0), Biobase (>= 1.13.58),
          splines, RSQLite, preprocessCore, AnnotationDbi,
@@ -13,6 +13,8 @@ License: LGPL version 2 or newer
 Collate: AllGenerics.R
          basecontent.R
          methods-platformDesign.R
+         methods-ExonFeatureSet.R
+         methods-ExpressionFeatureSet.R
          methods-FeatureSet.R
          methods-TilingFeatureSet.R
          methods-SnpCnvFeatureSet.R

@@ -86,10 +86,12 @@ snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
 
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-  theSumm <- .Call("rma_c_complete_copy", tmpExprs, tmpExprs,
-                   pnVec, length(unique(pnVec)), body(bg.dens),
-                   new.env(), FALSE, FALSE,
-                   as.integer(2), PACKAGE="oligo")
+  theSumm <- basicRMA(tmpExprs, pnVec, length(unique(pnVec)), FALSE, FALSE)
+  
+##   theSumm <- .Call("rma_c_complete_copy", tmpExprs, tmpExprs,
+##                    pnVec, length(unique(pnVec)), body(bg.dens),
+##                    new.env(), FALSE, FALSE,
+##                    as.integer(2), PACKAGE="oligo")
 
   
   rm(tmpExprs, pnVec); ## gc()

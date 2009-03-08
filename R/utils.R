@@ -163,3 +163,19 @@ getMetadata <- function(theMatrix, filenames, phenoData, featureData,
               featureData=featureData,
               experimentData=experimentData)
 }
+
+basicRMA <- function(pmMat, pnVec, nPn, normalize=TRUE, background=TRUE,
+                     bgversion=2, destructive=FALSE, verbose=TRUE, ...){
+
+  pnVec <- split(0:(length(pnVec)-1), pnVec)
+  
+  if (destructive){
+    theExprs <- .Call("rma_c_complete", pmMat, pnVec, nPn, normalize,
+                      background, bgversion, verbose, PACKAGE="oligo")
+  }else{
+    theExprs <- .Call("rma_c_complete_copy", pmMat, pnVec, nPn,
+                      normalize, background, bgversion,
+                      verbose, PACKAGE="oligo")
+  }
+  return(theExprs)
+}

@@ -114,10 +114,13 @@ justCRLMM <- function(filenames, batch_size=40000,
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- .Call("rma_c_complete_copy", pms, pms,
-                     pnVec[idx], ngenes,  body(bg.dens),
-                     new.env(), FALSE, FALSE,
-                     as.integer(2), PACKAGE="oligo")
+    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    
+##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
+##                      pnVec[idx], ngenes,  body(bg.dens),
+##                      new.env(), FALSE, FALSE,
+##                      as.integer(2), PACKAGE="oligo")
+    
     save(theSumm, file=paste(randomName, i, "summ", sep="."))
     if (!snpcnv){
       sqs <- sqsFrom(theSumm)
@@ -358,10 +361,13 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- .Call("rma_c_complete_copy", pms, pms,
-                     pnVec[idx], ngenes,  body(bg.dens),
-                     new.env(), FALSE, FALSE,
-                     as.integer(2), PACKAGE="oligo")
+    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    
+##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
+##                      pnVec[idx], ngenes,  body(bg.dens),
+##                      new.env(), FALSE, FALSE,
+##                      as.integer(2), PACKAGE="oligo")
+    
     save(theSumm, file=paste(randomName, i, "summ", sep="."))
     if (!snpcnv){
       sqs <- sqsFrom(theSumm)
@@ -601,10 +607,13 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- .Call("rma_c_complete_copy", pms, pms,
-                     pnVec[idx], ngenes,  body(bg.dens),
-                     new.env(), FALSE, FALSE,
-                     as.integer(2), PACKAGE="oligo")
+    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    
+##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
+##                      pnVec[idx], ngenes,  body(bg.dens),
+##                      new.env(), FALSE, FALSE,
+##                      as.integer(2), PACKAGE="oligo")
+    
     save(theSumm, file=paste(randomName, i, "summ", sep="."))
     sqs <- sqsFrom(theSumm)
 
