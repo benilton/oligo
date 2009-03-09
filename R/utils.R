@@ -179,3 +179,30 @@ basicRMA <- function(pmMat, pnVec, nPn, normalize=TRUE, background=TRUE,
   }
   return(theExprs)
 }
+
+sequenceDesignMatrix <- function(seqs){
+  if(length(unique(sapply(seqs,nchar)))!=1) stop("Sequences must be of same length.")
+  oligolength <- nchar(seqs[1])
+  mat <- .Call("gcrma_getSeq2",paste(seqs,collapse=""),length(seqs),oligolength,PACKAGE="oligo")
+  colnames(mat) <- paste(rep(c("A","C","G"),rep(oligolength,3)),position=rep(1:oligolength,3),sep="_")
+  return(mat)
+}
+
+basecontent <- function(seq) {
+  good   = !is.na(seq)
+  havena = !all(good)
+  if(havena)
+    seq = seq[good]
+  
+  rv = .Call("basecontent", seq, PACKAGE="oligo")
+
+  if(havena) {
+    z = rv
+    rv = matrix(NA, nrow=length(good), ncol=ncol(z))
+    colnames(rv) = colnames(z)
+    rv[good, ] = z
+  }
+  
+  return(rv)
+}
+

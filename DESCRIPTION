@@ -11,7 +11,6 @@ Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.hg18.60mer.expr, maqcExpressio
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
 License: LGPL version 2 or newer
 Collate: AllGenerics.R
-         basecontent.R
          methods-platformDesign.R
          methods-ExonFeatureSet.R
          methods-ExpressionFeatureSet.R
@@ -21,7 +20,6 @@ Collate: AllGenerics.R
          read.celfiles.R
          zzz.R
          readxys.R
-         sequence.R
          utils.R
          crlmm.R
          snprma.R
@@ -29,6 +27,5 @@ Collate: AllGenerics.R
 	 justCRLMM.R
          methods-snp6.R
          methods-genotype.R
-         m2snp6.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression
