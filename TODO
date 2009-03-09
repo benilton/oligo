@@ -1,5 +1,5 @@
 oligo's TODO
-- remove dependence on affxparser
+- remove dependence on affxparser (this cannot happen if in the future we process by batch)
 - add dependence on affyio (much faster than affxparser)
 - add examples, so package is tested whenever it's built and modifications do not break current code
 - will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed

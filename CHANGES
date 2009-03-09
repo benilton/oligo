@@ -19,3 +19,4 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 ** Added a basicRMA function in utils.R
 ** Added an rma method for Exon arrays.
 ** Changes previous rma method (originally for FeatureSet objs) to handle only ExpressionFeatureSet objects. The method is now in methods-ExpressionFeatureSet.R.
+** RMA for Exon: we summarize to the probeset level. The output, an ExpressionSet, contains in its featureData slot annotation for further processing (to the exon/gene-level)
