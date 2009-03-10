@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.7.21
+Version: 1.7.23
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
@@ -12,6 +12,7 @@ Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/
 License: LGPL version 2 or newer
 Collate: AllGenerics.R
          methods-platformDesign.R
+         methods-GeneFeatureSet.R
          methods-ExonFeatureSet.R
          methods-ExpressionFeatureSet.R
          methods-FeatureSet.R
