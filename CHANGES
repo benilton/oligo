@@ -1,25 +1,41 @@
 ### CHANGE log for package oligo ###
 
 12-8-2008: BC
-added binary snr file for 50k,250k arrays (crlmm)
-fixed pmPosition for NGS tiling
+
+** added binary snr file for 50k,250k arrays (crlmm)
+
+** fixed pmPosition for NGS tiling
 
 12-6-2008: BC
-read.celfiles was modified
-added: checkValidPhenodataForFiles, createPhenodataFromIds, createDefaultMiame, checkChipTypes
+
+** read.celfiles was modified
+
+** added: checkValidPhenodataForFiles, createPhenodataFromIds, createDefaultMiame, checkChipTypes
 these helpers can (and will) be used for read.xysfiles
 
 Changes made by Matt Settles 12-4-2008
+
 ** All changes should generally have effect on only Affy Tiling, ST and expression arrays.
 modifed read.celfiles to appear more like read.affybatch, should present a noticable change
 
 03-8-2009: BC
+
 ** Copied rma2.c from Affy... API for RMA changed.
+
 ** Added a basicRMA function in utils.R
+
 ** Added an rma method for Exon arrays.
+
 ** Changes previous rma method (originally for FeatureSet objs) to handle only ExpressionFeatureSet objects. The method is now in methods-ExpressionFeatureSet.R.
+
 ** RMA for Exon: we summarize to the probeset level. The output, an ExpressionSet, contains in its featureData slot annotation for further processing (to the exon/gene-level)
 
 03-9-2009: BC - committed version 1.7.23
+
 ** Added support for Gene ST Arrays (structure very similar to Exon)
+
 ** Added RMA for Gene ST arrays. The only difference from RMA/Exon is the SQL query that includes an INNER JOIN to account for multiplicity (1:N mapping from probe to probeset). This is implemented in methods-GeneFeatureSet.R
+
+08-17-2009: BC - committed version 1.7.25
+
+** Modified rma method to extract information from pmfeature and bgfeature (bgfeature is assumed to contain PM probes only) tables. The qcpmfeature table will not be available for pdInfoBuilder objects on what I call 'version 2.0'.
