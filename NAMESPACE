@@ -2,9 +2,13 @@ useDynLib("oligo")
 import(Biobase, splines, graphics, stats, methods, affxparser, oligoClasses)
 
 exportMethods("boxplot",
+              "bg",
+              "bg<-",
               "db",
               "exprs",
               "geneNames",
+              "getX",
+              "getY",
               "hist",
               "image",
               "initialize",

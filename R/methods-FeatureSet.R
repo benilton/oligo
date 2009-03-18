@@ -1,3 +1,16 @@
+setMethod("bg", "FeatureSet",
+          function(object){
+            bgi <- bgindex(object)
+            exprs(object[bgi,])
+          })
+
+setReplaceMethod("bg", signature(object="FeatureSet", value="matrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   tmp[bgindex(object),] <- value
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
+
 setMethod("pm", "FeatureSet",
           function(object, subset=NULL){
             exprs(object)[pmindex(object, subset=subset),,drop=FALSE]
@@ -153,4 +166,16 @@ setMethod("MAplot", "FeatureSet",
                 lines(lowess((tmp+ref)/2, tmp-ref), col="red")
             }
             if (length(arrays) > 1) par(ask=FALSE)
+          })
+
+
+
+setMethod("getX", "FeatureSet",
+          function(object, type){
+            getX(getPD(object), type)
+          })
+
+setMethod("getY", "FeatureSet",
+          function(object, type){
+            getY(getPD(object), type)
           })
