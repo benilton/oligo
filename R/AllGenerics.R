@@ -1,3 +1,7 @@
+setGeneric("getX", function(object, type) standardGeneric("getX"))
+setGeneric("getY", function(object, type) standardGeneric("getY"))
+setGeneric("bg", function(object, subset=NULL) standardGeneric("bg"))
+
 ## setGeneric("platform", function(object) standardGeneric("platform"))
 ## setGeneric("platform<-", function(object, value) standardGeneric("platform<-"))
 ## setGeneric("manufacturer",function(object) standardGeneric("manufacturer"))
@@ -11,6 +15,8 @@ setGeneric("pm", function(object, subset=NULL, ...) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
 setGeneric("mm", function(object, subset=NULL) standardGeneric("mm"))
 setGeneric("mm<-", function(object, value) standardGeneric("mm<-"))
+setGeneric("bg", function(object, subset=NULL) standardGeneric("bg"))
+setGeneric("bg<-", function(object, value) standardGeneric("bg<-"))
 ## setGeneric("featureIndex",
 ##            function(object, which=c("both","pm","mm"), subset=NULL) {
 ##                standardGeneric("featureIndex")

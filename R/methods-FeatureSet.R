@@ -1,6 +1,6 @@
 setMethod("bg", "FeatureSet",
-          function(object){
-            bgi <- bgindex(object)
+          function(object, subset=NULL){
+            bgi <- bgindex(object, subset=subset)
             exprs(object[bgi,])
           })
 

@@ -1,33 +1,37 @@
 \name{mm}
 \alias{mm}
 \alias{pm}
+\alias{bg}
 \alias{mm,FeatureSet-method}
 \alias{pm,FeatureSet-method}
-%\alias{pm,SnpCnvFeatureSet-method}
+\alias{bg,FeatureSet-method}
 \alias{mm<-}
 \alias{pm<-}
+\alias{bg<-}
 \alias{mm<-,FeatureSet,matrix-method}
 \alias{pm<-,FeatureSet,matrix-method}
-\title{Accessor to the PM/MM matrices}
+\alias{bg<-,FeatureSet,matrix-method}
+
+%% OK!
+
+\title{Accessors and replacement methods for the PM/MM/BG matrices.}
 \description{
-  Accessor to the PM/MM matrices.
+  Accessors and replacement methods for the PM/MM/BG matrices.
 }
 \usage{
 mm(object, subset = NULL)
 pm(object, subset = NULL, ...)
+bg(object, subset = NULL)
 mm(object)<-value
 pm(object)<-value
+bg(object)<-value
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{object}{\code{FeatureSet} object }
-  \item{subset}{not implemented yet}
-  \item{value}{\code{matrix} or \code{BufferedMatrix} object}
-  \item{...}{extra arguments}
-}
-\details{
-  The intensity matrix is stored as a \code{BufferedMatrix} object. This
-  should leave more memory for computations.
+  \item{object}{\code{FeatureSet} object.}
+  \item{subset}{Not implemented yet.}
+  \item{value}{\code{matrix} object.}
+  \item{...}{Extra arguments for future implementation.}
 }
 \examples{
 if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
