@@ -1,7 +1,3 @@
-# Reading NimbleGen Data
-# Author: Benilton Carvalho
-# Last Modification: May 28, 2005
-
 list.xysfiles <-   function(...){
   files <- list.files(...)
   return(files[grep("\\.[xX][yY][sS]\\.gz$|\\.[xX][yY][sS]$", files)])
