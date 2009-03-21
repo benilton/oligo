@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.7.27
+Version: 1.7.28
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
@@ -28,4 +28,5 @@ Collate: AllGenerics.R
          methods-snp6.R
          methods-genotype.R
 LazyLoad: Yes
-biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression
+biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression, Bioinformatics, DataImport, Transcription, ChIPchip, CopyNumberVariants, CpGIsland
+
