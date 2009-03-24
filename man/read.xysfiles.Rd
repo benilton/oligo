@@ -1,5 +1,6 @@
 \name{read.xysfiles}
 \alias{read.xysfiles}
+\alias{read.xysfiles2}
 \title{Parser to XYS files}
 \description{
   NimbleGen provides XYS files which are read by this function.
@@ -7,10 +8,17 @@
 \usage{
 read.xysfiles(..., filenames, pkgname, phenoData, featureData,
 experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
+
+read.xysfiles2(channel1, channel2, pkgname, phenoData, featureData,
+experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
 }
 \arguments{
   \item{...}{file names}
   \item{filenames}{\code{character} vector with filenames.}
+  \item{channel1}{a \code{character} vector with the CEL filenames for
+    the first 'channel' on a Tiling application}
+  \item{channel2}{a \code{character} vector with the CEL filenames for
+    the second 'channel' on a Tiling application}
   \item{pkgname}{\code{character} vector with alternative PD Info
     package name}
   \item{phenoData}{\code{phenoData}}

@@ -1,5 +1,4 @@
 \name{getX}
-\Rdversion{1.1}
 \alias{getX}
 \alias{getY}
 \alias{getX-methods}

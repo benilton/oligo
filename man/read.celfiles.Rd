@@ -1,5 +1,6 @@
 \name{read.celfiles}
 \alias{read.celfiles}
+\alias{read.celfiles2}
 \alias{cleanPlatformName}
 \title{Parser to CEL files}
 \description{
@@ -9,11 +10,19 @@
 read.celfiles(..., filenames, pkgname, phenoData, featureData,
 experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
 rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
+
+read.celfiles2(channel1, channel2, pkgname, phenoData, featureData,
+experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
+rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{...}{names of files to be read.}
   \item{filenames}{a \code{character} vector with the CEL filenames.}
+  \item{channel1}{a \code{character} vector with the CEL filenames for
+    the first 'channel' on a Tiling application}
+  \item{channel2}{a \code{character} vector with the CEL filenames for
+    the second 'channel' on a Tiling application}
   \item{pkgname}{alternative data package to be loaded.}
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}

@@ -58,4 +58,4 @@ setGeneric("rma", function(object, ...) standardGeneric("rma"))
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
 setGeneric("genotype", function(object, ...) standardGeneric("genotype"))
 
-setGeneric("plotM", function(object, i, ...) standardGeneric("plotM"))
+## setGeneric("plotM", function(object, i, ...) standardGeneric("plotM"))

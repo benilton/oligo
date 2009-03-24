@@ -5,12 +5,18 @@
 \alias{mm,FeatureSet-method}
 \alias{pm,FeatureSet-method}
 \alias{bg,FeatureSet-method}
+\alias{mm,TilingFeatureSet2-method}
+\alias{pm,TilingFeatureSet2-method}
+\alias{bg,TilingFeatureSet2-method}
 \alias{mm<-}
 \alias{pm<-}
 \alias{bg<-}
 \alias{mm<-,FeatureSet,matrix-method}
 \alias{pm<-,FeatureSet,matrix-method}
 \alias{bg<-,FeatureSet,matrix-method}
+\alias{mm<-,TilingFeatureSet2,array-method}
+\alias{pm<-,TilingFeatureSet2,array-method}
+\alias{bg<-,TilingFeatureSet2,array-method}
 
 %% OK!
 
@@ -33,6 +39,13 @@ bg(object)<-value
   \item{value}{\code{matrix} object.}
   \item{...}{Extra arguments for future implementation.}
 }
+
+\details{
+  For all objects but \code{TilingFeatureSet2}, these methods will
+  return matrices. In case of \code{TilingFeatureSet2} objects, the
+  value is a 3-dimensional array (probes x samples x channels).
+}
+
 \examples{
 if (require(maqcExpression4plex) & require(pd.hg18.60mer.expr)){
 xysPath <- system.file("extdata", package="maqcExpression4plex")

@@ -8,6 +8,21 @@ readxysHeader <- function(filename) scan(filename,nlines=1,quiet=TRUE, what=char
 readonexysfile <- function(filename)
   read.delim(filename, comment.char="#")
 
+readXysMatrix <- function(filenames){
+  tmpExprs <- NULL
+  for (i in seq(along=filenames)){
+    ## Read XYS "as is"
+    tmpE <- readonexysfile(filenames[i])
+    if (length(filenames) > 1){
+      tmpExprs <- cbind(tmpExprs, tmpE$SIGNAL)
+    }else{
+      tmpExprs <- matrix(tmpE$SIGNAL, ncol=1)
+    }
+  }
+  list(intensities=tmpExprs, X=tmpE[["X"]], Y=tmpE[["Y"]])
+}
+
+
 stuffForXYSandCELreaders <- function(filenames,
                                      phenoData=new("AnnotatedDataFrame"),
                                      description=NULL,
@@ -59,13 +74,9 @@ stuffForXYSandCELreaders <- function(filenames,
 read.xysfiles <- function(..., filenames, pkgname, phenoData,
                           featureData, experimentData, notes,
                           verbose=TRUE, sampleNames, checkType=TRUE) {
-  
-  if (!missing(filenames)){
-    filenames <- c(filenames, unlist(list(...)))
-  }else{
-    filenames <- unlist(list(...))
-  }
 
+  filenames <- getFilenames(filenames=filenames, ...)
+  checkValidFilenames(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
 
   ## Get design name from the first
@@ -116,4 +127,52 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
              annotation=pkgname, phenoData=metadata[["phenoData"]],
              experimentData=metadata[["experimentData"]],
              featureData=metadata[["featureData"]]))
+}
+
+
+## For 2 channels - Tiling
+read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
+                          featureData, experimentData, notes,
+                          verbose=TRUE, sampleNames, checkType=TRUE) {
+  
+  filenames <- c(channel1, channel2)
+  checkValidFilenames(filenames)
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
+
+  ## Get design name from the first
+  firstline <- readxysHeader(filenames[1])
+  designname <- unlist(strsplit(firstline[grep("designname",
+                firstline, fixed=TRUE, useBytes=TRUE)], "="))[2]
+    
+  ## Load PDenv for the XYS files
+  if (missing(pkgname))
+    pkgname <- cleanPlatformName(designname)
+  if (require(pkgname, character.only=TRUE)){
+    if (verbose)
+      message("Platform design info loaded.")
+  }else{
+    stop("Must install the ", pkgname, " package.")
+  }
+
+  arrayType <- kind(get(pkgname))
+  channel1Intensities <- readXysMatrix(channel1)
+  channel2Intensities <- readXysMatrix(channel2)
+  idxChannel1 <- channel1Intensities[["X"]]+(channel1Intensities[["Y"]]-1)*geometry(get(pkgname))[2]
+  idxChannel2 <- channel2Intensities[["X"]]+(channel2Intensities[["Y"]]-1)*geometry(get(pkgname))[2]
+  stopifnot(identical(sort(idxChannel1), sort(idxChannel2)))
+  channel1Intensities <- channel1Intensities[["intensities"]][order(idxChannel1),, drop=FALSE]
+  channel2Intensities <- channel2Intensities[["intensities"]][order(idxChannel2),, drop=FALSE]
+  rm(idxChannel1, idxChannel2)
+
+  metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+
+  out <- new("TilingFeatureSet2",
+             channel1=channel1Intensities,
+             channel2=channel2Intensities,
+             manufacturer="NimbleGen",
+             annotation=pkgname,
+             phenoData=metadata[["phenoData"]],
+             experimentData=metadata[["experimentData"]],
+             featureData=metadata[["featureData"]])
+  return(out)
 }

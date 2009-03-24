@@ -1,4 +1,5 @@
 useDynLib("oligo")
+
 import(Biobase, splines, graphics, stats, methods, affxparser, oligoClasses)
 
 exportMethods("boxplot",
@@ -6,7 +7,7 @@ exportMethods("boxplot",
               "bg<-",
               "db",
               "exprs",
-              "geneNames",
+##              "geneNames",
               "getX",
               "getY",
               "hist",
@@ -17,7 +18,7 @@ exportMethods("boxplot",
               "mm",
               "mm<-",
               "platform",
-              "plotM",
+##              "plotM",
               "pm",
               "pm<-",
               "rma")
@@ -31,7 +32,10 @@ export("basecontent",
        "list.celfiles",
        "list.xysfiles",
        "readSummaries",
-       "getCrlmmSummaries")
+       "getCrlmmSummaries",
+       "getNgsColorsInfo",
+       "read.xysfiles2",
+       "read.celfiles2")
 
 ## Exported functions for CRLMM
 export("crlmm",

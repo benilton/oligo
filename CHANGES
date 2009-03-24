@@ -36,6 +36,13 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 
 ** Added RMA for Gene ST arrays. The only difference from RMA/Exon is the SQL query that includes an INNER JOIN to account for multiplicity (1:N mapping from probe to probeset). This is implemented in methods-GeneFeatureSet.R
 
-08-17-2009: BC - committed version 1.7.25
+03-17-2009: BC - committed version 1.7.25
 
 ** Modified rma method to extract information from pmfeature and bgfeature (bgfeature is assumed to contain PM probes only) tables. The qcpmfeature table will not be available for pdInfoBuilder objects on what I call 'version 2.0'.
+
+03-24-2009: B Carvalho - committed versioin 1.7.29
+
+** Several small changes to clean up package
+
+** Added TilingFeatureSet2, read.xysfiles2, read.celfiles2, getNgsColorInfo as an attempt to appropriately handle two colors applications of tiling arrays.
+

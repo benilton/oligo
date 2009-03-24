@@ -193,3 +193,25 @@ basecontent <- function(seq) {
   return(rv)
 }
 
+## Helper to parse the dots and combine with filenames
+getFilenames <- function(filenames, ...){
+  if (!missing(filenames)){
+    filenames <- c(filenames, unlist(list(...)))
+  }else{
+    filenames <- unlist(list(...))
+  }
+  filenames
+}
+
+getNgsColorsInfo <- function(path=".", pattern1="_532", pattern2="_635", ...){
+  files1 <- list.xysfiles(path, pattern=pattern1, ...)
+  files2 <- list.xysfiles(path, pattern=pattern2, ...)
+  prefix1 <- sapply(strsplit(basename(files1), pattern1), "[[", 1)
+  prefix2 <- sapply(strsplit(basename(files2), pattern2), "[[", 1)
+  sugg <- identical(prefix1, prefix2)
+  stopifnot(length(files1) == length(files2))
+  out <- data.frame(color1=files1, color2=files2, stringsAsFactors=FALSE)
+  if (sugg)
+    out[["sampleNames"]] <- prefix1
+  return(out)
+}

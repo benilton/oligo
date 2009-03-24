@@ -4,11 +4,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                           rm.outliers=FALSE, rm.extra=FALSE,
                           sd=FALSE, checkType=TRUE){
 
-  if (!missing(filenames)){
-    filenames <- c(filenames, unlist(list(...)))
-  }else{
-    filenames <- unlist(list(...))
-  }
+  filenames <- getFilenames(filenames=filenames, ...)
   checkValidFilenames(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix"))
   
@@ -117,3 +113,55 @@ readCelIntensities2 <- function(filenames, indices=NULL,
 	intensities
 }
 
+## TilingFeatureSet2
+
+read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
+                          featureData, experimentData, notes,
+                          verbose=TRUE, sampleNames, rm.mask=FALSE,
+                          rm.outliers=FALSE, rm.extra=FALSE,
+                          sd=FALSE, checkType=TRUE){
+
+  filenames <- c(channel1, channel2)
+  checkValidFilenames(filenames)
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix"))
+  
+  ## Read in the first Array details
+  headdetails <- readCelHeader(filenames[1])
+  chiptype <- headdetails[["chiptype"]]
+  
+  if (missing(pkgname))
+    pkgname <- cleanPlatformName(chiptype)
+  
+  if (require(pkgname, character.only=TRUE)){
+    if (verbose)
+      message("Platform design info loaded.")
+  }else{
+    stop("Must install the ", pkgname, " package.")
+  }
+  
+  arrayType <- kind(get(pkgname))
+  
+  channel1Intensities <- readCelIntensities2(channel1,
+                                  rm.outliers=rm.outliers,
+                                  rm.masked=rm.mask,
+                                  rm.extra=rm.extra, verbose=verbose)
+  
+  channel2Intensities <- readCelIntensities2(channel2,
+                                  rm.outliers=rm.outliers,
+                                  rm.masked=rm.mask,
+                                  rm.extra=rm.extra, verbose=verbose)
+  dimnames(channel1Intensities) <- NULL
+  dimnames(channel2Intensities) <- NULL
+
+  metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+
+  out <- new("TilingFeatureSet2",
+             channel1=channel1Intensities,
+             channel2=channel2Intensities,
+             manufacturer="Affymetrix",
+             annotation=pkgname,
+             phenoData=metadata[["phenoData"]],
+             experimentData=metadata[["experimentData"]],
+             featureData=metadata[["featureData"]])
+  return(out)
+}
