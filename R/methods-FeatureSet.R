@@ -35,11 +35,9 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 		 
-## does not work for GENE ST arrays
 setMethod("pmSequence", "FeatureSet",
           function(object) pmSequence(getPD(object)))
 
-## does not work for GENE ST arrays
 setMethod("mmSequence", "FeatureSet",
           function(object) mmSequence(getPD(object)))
 

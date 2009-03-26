@@ -1,7 +1,5 @@
 oligo's TODO
 - Move code back from oligoClasses (leave there *only* class definitions and accessors for elements of those classes)
-- Add parsers for 2 channels (tiling)
 - Fix pmSequence() to use the new struct in the pdInfoBuilder pkg
 - add examples, so package is tested whenever it's built and modifications do not break current code
 - will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed
-- make read.celfiles and read.xysfiles consistent
