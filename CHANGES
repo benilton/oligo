@@ -49,3 +49,9 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 03-25-2009: B Carvalho
 
 ** Changes to accommodate sequence methods
+
+03-26-2009: B Carvalho
+
+** Improved NAMESPACE
+
+** Added basicRMA() to interface with RMA C-code

@@ -109,12 +109,11 @@ justCRLMM <- function(filenames, batch_size=40000,
     
     idx <- order(pnVec)
     tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
-    ngenes <- length(unique(pnVec))
 
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    theSumm <- basicRMA(pms, pnVec[idx], FALSE, FALSE)
     
 ##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
 ##                      pnVec[idx], ngenes,  body(bg.dens),
@@ -130,7 +129,7 @@ justCRLMM <- function(filenames, batch_size=40000,
 
     annotation(sqs) <- pkgname
     phenoData(sqs) <- phenoData
-    rm(pms, mid, sql, tmp, pnVec, idx, ngenes)
+    rm(pms, mid, sql, tmp, pnVec, idx)
 
     ### TRYING CRLMM HERE
     correction <- fitAffySnpMixture(sqs, verbose=FALSE)
@@ -356,12 +355,11 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
     
     idx <- order(pnVec)
     tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
-    ngenes <- length(unique(pnVec))
 
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    theSumm <- basicRMA(pms, pnVec[idx], FALSE, FALSE)
     
 ##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
 ##                      pnVec[idx], ngenes,  body(bg.dens),
@@ -377,7 +375,7 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
 
     annotation(sqs) <- pkgname
     phenoData(sqs) <- phenoData
-    rm(pms, mid, sql, tmp, pnVec, idx, ngenes)
+    rm(pms, mid, sql, tmp, pnVec, idx)
 
     ### TRYING CRLMM HERE
     correction <- fitAffySnpMixture(sqs, verbose=FALSE)
@@ -602,12 +600,11 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
                    c("S", "A")[tmp[["strand"]]+1], sep="")
     idx <- order(pnVec)
     tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
-    ngenes <- length(unique(pnVec))
 
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
-    theSumm <- basicRMA(pms, pnVec[idx], ngenes, FALSE, FALSE)
+    theSumm <- basicRMA(pms, pnVec[idx], FALSE, FALSE)
     
 ##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
 ##                      pnVec[idx], ngenes,  body(bg.dens),
@@ -619,7 +616,7 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
 
     annotation(sqs) <- pkgname
     phenoData(sqs) <- phenoData
-    rm(pms, mid, sql, tmp, pnVec, idx, ngenes)
+    rm(pms, mid, sql, tmp, pnVec, idx)
 
     ### TRYING CRLMM HERE
     correction <- fitAffySnpMixture(sqs, verbose=FALSE)

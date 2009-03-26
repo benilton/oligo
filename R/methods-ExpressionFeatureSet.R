@@ -12,12 +12,11 @@ setMethod("rma", "ExpressionFeatureSet",
               pms <- rbind(pms, qcpms)
               pnVec <- c(pnVec, tmpQcPm[["man_fsetid"]])
             }
-            ngenes <- length(unique(pnVec))
             idx <- order(pnVec)
             pms <- pms[idx,, drop=FALSE]
             dimnames(pms) <- NULL
             pnVec <- pnVec[idx]
-            exprs <- basicRMA(pms, pnVec, ngenes, normalize, background)
+            exprs <- basicRMA(pms, pnVec, normalize, background)
             colnames(exprs) <- sampleNames(object)
             rownames(exprs) <- unique(pnVec)
             out <- new("ExpressionSet",

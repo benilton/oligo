@@ -1,8 +1,8 @@
 # Loading required libraries
 
-.onLoad <- function(libname, pkgname) {
-  require("methods")
-}
+## .onLoad <- function(libname, pkgname) {
+##   require("methods")
+## }
 
 .onAttach <- function(libname, pkgname) {
   message("Welcome to oligo version ", packageDescription("oligo", field="Version"))

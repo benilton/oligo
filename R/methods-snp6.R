@@ -464,8 +464,8 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
     pms <- n2t(readCelIntensities(celFiles[i], indices=tmp$fid),
                reference, copy=FALSE)
 
-    theSumm <- matrix(basicRMA(pms, pnVec, nSnpAlleleCombinations,
-                               FALSE, FALSE), ncol=2, byrow=TRUE)
+    theSumm <- matrix(basicRMA(pms, pnVec, FALSE, FALSE),
+                      ncol=2, byrow=TRUE)
     
 ##     theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms, pnVec,
 ##                             nSnpAlleleCombinations, body(bg.dens),

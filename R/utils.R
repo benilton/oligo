@@ -151,9 +151,9 @@ getMetadata <- function(theMatrix, filenames, phenoData, featureData,
               experimentData=experimentData)
 }
 
-basicRMA <- function(pmMat, pnVec, nPn, normalize=TRUE, background=TRUE,
+basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                      bgversion=2, destructive=FALSE, verbose=TRUE, ...){
-
+  nPn <- length(unique(pnVec))
   pnVec <- split(0:(length(pnVec)-1), pnVec)
   
   if (destructive){
@@ -164,6 +164,7 @@ basicRMA <- function(pmMat, pnVec, nPn, normalize=TRUE, background=TRUE,
                       normalize, background, bgversion,
                       verbose, PACKAGE="oligo")
   }
+  colnames(theExprs) <- colnames(pmMat)
   return(theExprs)
 }
 

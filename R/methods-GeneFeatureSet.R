@@ -16,7 +16,6 @@ setMethod("rma", "GeneFeatureSet",
             dimnames(pms) <- NULL
             theExprs <- basicRMA(pms,
                                  as.character(featureInfo[["fsetid"]]),
-                                 length(unique(featureInfo[["fsetid"]])),
                                  normalize, background)
             rm(pms)
 

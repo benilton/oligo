@@ -63,7 +63,7 @@ justSNPRMA <- function(filenames,
 
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
-  theSumm <- basicRMA(tmpExprs, pnVec, length(unique(pnVec)), FALSE, FALSE)
+  theSumm <- basicRMA(tmpExprs, pnVec, FALSE, FALSE)
   
 ##   theSumm <-.Call("rma_c_complete_copy", tmpExprs, tmpExprs,
 ##                   pnVec, length(unique(pnVec)), body(bg.dens),
