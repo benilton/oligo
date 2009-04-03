@@ -55,3 +55,7 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 ** Improved NAMESPACE
 
 ** Added basicRMA() to interface with RMA C-code
+
+04-02-2009: B Carvalho
+
+** Added affyio to parse CEL files. This is an initial attempt. 'affyio' provides a much faster parser and also allows users to read in CEL.gz files.

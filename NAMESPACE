@@ -36,10 +36,8 @@ importMethodsFrom(Biobase, annotatedDataFrameFrom, annotation,
                   "sampleNames<-", varMetadata)
 importFrom(Biobase, assayDataElement, assayDataElementReplace)
 
-## Needed from preprocessCore
-## importFrom(preprocessCore, normalize.quantiles,
-##            normalize.quantiles.determine.target,
-##            normalize.quantiles.use.target)
+## Needed from affyio
+import(affyio)
 
 ## Get everything from oligoClasses
 import(oligoClasses)

@@ -2,15 +2,17 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                           featureData, experimentData, notes,
                           verbose=TRUE, sampleNames, rm.mask=FALSE,
                           rm.outliers=FALSE, rm.extra=FALSE,
-                          sd=FALSE, checkType=TRUE){
-
+                          sd=FALSE, checkType=TRUE, useAffyio=TRUE){
+  
   filenames <- getFilenames(filenames=filenames, ...)
   checkValidFilenames(filenames)
-  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix"))
+  if (checkType)
+    stopifnot(checkChipTypes(filenames, verbose, "affymetrix", useAffyio))
   
   ## Read in the first Array details
-  headdetails <- readCelHeader(filenames[1])
-  chiptype <- headdetails[["chiptype"]]
+##   headdetails <- readCelHeader(filenames[1])
+##   chiptype <- headdetails[["chiptype"]]
+  chiptype <- getCelChipType(filenames[1], useAffyio)
   
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
@@ -23,14 +25,23 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   }
   
   arrayType <- kind(get(pkgname))
-  tmpExprs <- readCelIntensities2(filenames, rm.outliers=rm.outliers,
-                                  rm.masked=rm.mask,
-                                  rm.extra=rm.extra, verbose=verbose)
+  if (useAffyio){
+    headdetails <- .Call("ReadHeader", as.character(filenames[1]),
+                         PACKAGE="affyio")
+    tmpExprs <- .Call("read_abatch", filenames, rm.mask, rm.outliers,
+                      rm.extra, headdetails[[1]], headdetails[[2]], verbose,
+                      PACKAGE="affyio")
+    rm(headdetails)
+  }else{
+    tmpExprs <- readCelIntensities2(filenames, rm.outliers=rm.outliers,
+                                    rm.masked=rm.mask,
+                                    rm.extra=rm.extra, verbose=verbose)
+  }
   dimnames(tmpExprs) <- NULL
 
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames)
-  
+
   if (sd) warning("Reading in Standard Errors not yet implemented.\n")
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
@@ -40,7 +51,6 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                      exon="ExonFeatureSet",
                      gene="GeneFeatureSet",
                      stop("Unknown array type: ", arrayType))
-  
   return(new(theClass, exprs=tmpExprs, manufacturer="Affymetrix",
              annotation=pkgname, phenoData=metadata[["phenoData"]],
              experimentData=metadata[["experimentData"]],
@@ -119,15 +129,16 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
                           featureData, experimentData, notes,
                           verbose=TRUE, sampleNames, rm.mask=FALSE,
                           rm.outliers=FALSE, rm.extra=FALSE,
-                          sd=FALSE, checkType=TRUE){
+                          sd=FALSE, checkType=TRUE, useAffyio=TRUE){
 
   filenames <- c(channel1, channel2)
   checkValidFilenames(filenames)
-  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix"))
+  if (checkType) stopifnot(checkChipTypes(filenames, verbose, "affymetrix", useAffyio))
   
   ## Read in the first Array details
-  headdetails <- readCelHeader(filenames[1])
-  chiptype <- headdetails[["chiptype"]]
+##   headdetails <- readCelHeader(filenames[1])
+##   chiptype <- headdetails[["chiptype"]]
+  chiptype <- getCelChipType(filenames[1], useAffyio)
   
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
@@ -140,16 +151,28 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }
   
   arrayType <- kind(get(pkgname))
-  
-  channel1Intensities <- readCelIntensities2(channel1,
+
+  if (useAffyio){
+    headdetails <- .Call("ReadHeader", as.character(filenames[1]),
+                         PACKAGE="affyio")
+    channel1Intensities <- .Call("read_abatch", channel1, rm.mask,
+                      rm.outliers, rm.extra, headdetails[[1]],
+                      headdetails[[2]], verbose, PACKAGE="affyio")
+    channel2Intensities <- .Call("read_abatch", channel2, rm.mask,
+                      rm.outliers, rm.extra, headdetails[[1]],
+                      headdetails[[2]], verbose, PACKAGE="affyio")
+    rm(headdetails)
+  }else{
+    channel1Intensities <- readCelIntensities2(channel1,
                                   rm.outliers=rm.outliers,
                                   rm.masked=rm.mask,
                                   rm.extra=rm.extra, verbose=verbose)
   
-  channel2Intensities <- readCelIntensities2(channel2,
+    channel2Intensities <- readCelIntensities2(channel2,
                                   rm.outliers=rm.outliers,
                                   rm.masked=rm.mask,
                                   rm.extra=rm.extra, verbose=verbose)
+  }
   dimnames(channel1Intensities) <- NULL
   dimnames(channel2Intensities) <- NULL
 

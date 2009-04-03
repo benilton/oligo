@@ -9,13 +9,15 @@
 \usage{
 read.celfiles(..., filenames, pkgname, phenoData, featureData,
 experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
-rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
+rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE,
+useAffyio = TRUE)
 
 read.celfiles2(channel1, channel2, pkgname, phenoData, featureData,
 experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
-rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
+rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE,
+useAffyio = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{...}{names of files to be read.}
   \item{filenames}{a \code{character} vector with the CEL filenames.}
@@ -37,6 +39,8 @@ rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
   \item{sd}{\code{logical}. Read SD?}
   \item{checkType}{\code{logical}. Check type of each file? This can be
     time consuming.}
+  \item{useAffyio}{\code{logical}. Use 'affyio' instead of 'affxparser'
+    to read in CEL files.}
 }
 \value{
   \item{\code{ExpressionFeatureSet}}{if Expresssion arrays}
@@ -44,6 +48,10 @@ rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE)
   \item{\code{SnpFeatureSet}}{if SNP arrays}
   \item{\code{TilingFeatureSet}}{if Tiling arrays}
 }
+\details{
+  When using 'affyio' to read in CEL files, the user can read compressed
+  CEL files (CEL.gz). Additionally, 'affyio' is much faster than 'affxparser'.
+  }
 \seealso{\code{\link{list.celfiles}}, \code{\link{read.xysfiles}}}
 \examples{
 if(require(pd.mapping50k.xba240) & require(hapmap100kxba)){

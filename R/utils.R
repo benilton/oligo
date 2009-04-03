@@ -108,10 +108,16 @@ createDefaultMiame <- function(filenames, notes){
   experimentData
 }
 
-checkChipTypes <- function(filenames, verbose=TRUE, manufacturer){
+getCelChipType <- function(x, useAffyio){
+  ifelse(useAffyio,
+         read.celfile.header(x)[["cdfName"]],
+         readCelHeader(x)[["chiptype"]])
+}
+
+checkChipTypes <- function(filenames, verbose=TRUE, manufacturer, useAffyio){
   if (missing(manufacturer)) stop("'checkChipTypes' needs 'manufacturer'")
   if (manufacturer == "affymetrix"){
-    chips <- sapply(filenames, function(x) readCelHeader(x)[["chiptype"]])
+    chips <- sapply(filenames, getCelChipType, useAffyio)
     ok <- length(unique(chips)) == 1
     if(!ok & verbose) message("All the CEL files must be of the same type.")
   }else if(manufacturer == "nimblegen"){
