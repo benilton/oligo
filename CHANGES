@@ -59,3 +59,7 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-02-2009: B Carvalho
 
 ** Added affyio to parse CEL files. This is an initial attempt. 'affyio' provides a much faster parser and also allows users to read in CEL.gz files.
+
+04-06-2009: B Carvalho
+
+** list.celfiles() also returns .cel.gz files

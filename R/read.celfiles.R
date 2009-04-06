@@ -60,7 +60,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
 
 list.celfiles <-   function(...){
     files <- list.files(...)
-    return(files[grep("\\.[cC][eE][lL]$", files)])
+    return(files[grep("\\.[cC][eE][lL]\\.[gG][zZ]$|\\.[cC][eE][lL]$", files)])
 }
 
 ## reimplementation of readCelIntensites from affxparser, allows for rm.mask, 
