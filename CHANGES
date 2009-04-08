@@ -63,3 +63,7 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-06-2009: B Carvalho
 
 ** list.celfiles() also returns .cel.gz files
+
+04-07-2009: B Carvalho
+
+** Cleaned up code.

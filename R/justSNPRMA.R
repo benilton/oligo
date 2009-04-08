@@ -65,12 +65,6 @@ justSNPRMA <- function(filenames,
 
   theSumm <- basicRMA(tmpExprs, pnVec, FALSE, FALSE)
   
-##   theSumm <-.Call("rma_c_complete_copy", tmpExprs, tmpExprs,
-##                   pnVec, length(unique(pnVec)), body(bg.dens),
-##                   new.env(), FALSE, FALSE,
-##                   as.integer(2), PACKAGE="oligo")
-
-  
   rm(tmpExprs, pnVec)
   colnames(theSumm) <- basename(filenames)
   if (!snpcnv){

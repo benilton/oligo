@@ -115,11 +115,6 @@ justCRLMM <- function(filenames, batch_size=40000,
     dimnames(pms) <- NULL
     theSumm <- basicRMA(pms, pnVec[idx], FALSE, FALSE)
     
-##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
-##                      pnVec[idx], ngenes,  body(bg.dens),
-##                      new.env(), FALSE, FALSE,
-##                      as.integer(2), PACKAGE="oligo")
-    
     save(theSumm, file=paste(randomName, i, "summ", sep="."))
     if (!snpcnv){
       sqs <- sqsFrom(theSumm)

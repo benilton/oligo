@@ -117,10 +117,6 @@ setMethod("hist", "FeatureSet",
             if(any(idx))
               tmp <- tmp[!idx,, drop=FALSE]
             tmp <- transfo(tmp)
-##             if (plot.log){
-##               tmp <- log2(tmp)
-##               xlab <- "log intensity"
-##             }
             x.density <- apply(tmp, 2, density)
             all.x <- sapply(x.density, "[[", "x")
             all.y <- sapply(x.density, "[[", "y")
@@ -140,10 +136,6 @@ setMethod("hist", "ExpressionSet",
             if(any(idx))
               tmp <- tmp[!idx,, drop=FALSE]
             tmp <- transfo(tmp)
-##             if (plot.log){
-##               tmp <- log2(tmp)
-##               xlab <- "log intensity"
-##             }
             x.density <- apply(tmp, 2, density)
             all.x <- sapply(x.density, "[[", "x")
             all.y <- sapply(x.density, "[[", "y")
