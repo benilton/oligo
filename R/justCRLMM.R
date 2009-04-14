@@ -573,7 +573,7 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
                          v2=c(pkgname, length(filenames), batch_size),
                          stringsAsFactors=FALSE)
   write.table(analysis, file.path(tmpdir, "analysis.txt"), row.names=FALSE,
-              col.names=FALSE, quote=FALSE)
+              col.names=FALSE, quote=FALSE, sep="\t")
 
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
@@ -777,7 +777,7 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
                          v2=c(pkgname, length(filenames), batch_size),
                          stringsAsFactors=FALSE)
   write.table(analysis, file.path(tmpdir, "analysis.txt"), row.names=FALSE,
-              col.names=FALSE, quote=FALSE)
+              col.names=FALSE, quote=FALSE, sep="\t")
 
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))

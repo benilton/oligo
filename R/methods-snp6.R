@@ -420,7 +420,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
   analysis <- data.frame(fields=c("annotation", "nsamples", "batch_size", filenames),
              values=c(pkgname, length(celFiles), batch_size,
                sapply(split.rowids, length)))
-  write.table(analysis, file.path(destDir, "analysis.txt"), row.names=FALSE, col.names=FALSE, quote=FALSE)
+  write.table(analysis, file.path(destDir, "analysis.txt"), row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t")
   
   alleleA.files <- file.path(destDir, paste("alleleA-", filenames, sep=""))
   alleleB.files <- file.path(destDir, paste("alleleB-", filenames, sep=""))
