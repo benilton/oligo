@@ -309,7 +309,7 @@ readSummaries <- function(type, tmpdir){
 }
 
 getCrlmmSummaries <- function(tmpdir){
-  analysis <- read.table(file.path(tmpdir, "analysis.txt"), colClasses="character", header=FALSE)
+  analysis <- read.delim(file.path(tmpdir, "analysis.txt"), colClasses="character", header=FALSE)
   annotation <- analysis[match("annotation", analysis[,1]), 2]
   snpcnv <- length(grep("genomewidesnp", annotation)) > 0
   if (snpcnv){

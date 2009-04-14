@@ -67,3 +67,7 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-07-2009: B Carvalho
 
 ** Cleaned up code.
+
+04-13-2009: B Carvalho
+
+** Changed read.table to read.delim in getCrlmmSummaries so filenames with white spaces do not break the code.

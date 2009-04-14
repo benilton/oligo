@@ -11,6 +11,7 @@ sqsFrom <- function(pmMat){
   tmp[idx,] <- pmMat
   rownames(tmp) <- rep(snps, each=4)
   aTa <- seq(1, nrow(tmp), by=4)
+  colnames(tmp) <- samples
   tmp <- new("SnpQSet",
              antisenseThetaA=tmp[aTa,, drop=FALSE],
              senseThetaA=tmp[(aTa+1),, drop=FALSE],
@@ -32,6 +33,7 @@ sqsFrom.SnpCnv <- function(pmMat){
   tmp[idx,] <- pmMat
   rownames(tmp) <- rep(snps, each=2)
   aTa <- seq(1, nrow(tmp), by=2)
+  colnames(tmp) <- samples
   tmp <- new("SnpCnvQSet",
              thetaA=tmp[aTa,, drop=FALSE],
              thetaB=tmp[(aTa+1),, drop=FALSE])

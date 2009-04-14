@@ -768,7 +768,9 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
 ### }
 
 LLR2conf <-function(theCalls, LLR, SNR, annot){
-  load(paste(system.file("extdata", package=annot), "/", annot, ".spline.params.rda", sep=""))
+  thePath <- system.file("extdata", package=annot)
+  theFile <- paste(annot, ".spline.params.rda", sep="")
+  load(file.path(thePath, theFile))
 
   Het <- as.vector(theCalls==2)
 
