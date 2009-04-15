@@ -3,8 +3,10 @@
 \alias{getY}
 \alias{getX-methods}
 \alias{getX,FeatureSet-method}
+\alias{getX,DBPDInfo-method}
 \alias{getY-methods}
 \alias{getY,FeatureSet-method}
+\alias{getY,DBPDInfo-method}
 \title{Accessors for physical array coordinates.}
 
 \description{
