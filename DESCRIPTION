@@ -1,9 +1,9 @@
 Package: oligo
-Version: 1.7.42
+Version: 1.7.43
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
-Depends: R (>= 2.5.0), oligoClasses (>= 1.5.9), preprocessCore
+Depends: R (>= 2.8.0), oligoClasses (>= 1.5.22), preprocessCore
 Imports: splines, affxparser, graphics, utils, stats, DBI, Biobase (>= 1.13.58), methods, affyio
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, geneplotter, limma, RColorBrewer
@@ -28,4 +28,3 @@ Collate: AllGenerics.R
          methods-genotype.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression, Bioinformatics, DataImport, Transcription, ChIPchip, CopyNumberVariants, CpGIsland
-

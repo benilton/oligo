@@ -806,7 +806,7 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
     tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
 
     pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
-    pms <- pms[idx, ]
+    pms <- pms[idx,, drop=FALSE]
     dimnames(pms) <- NULL
     colnames(pms) <- sns
     theSumm <- basicRMA(pms, pnVec[idx], normalize=FALSE, background=FALSE, verbose=FALSE)
