@@ -40,7 +40,6 @@ We start by loading the packages that are going to be used in this session. The 
   library(oligo)
   library(maqcExpression4plex)
   library(genefilter)
-  library(geneplotter)
   library(limma)
   library(RColorBrewer)
   palette(brewer.pal(8, "Dark2"))
