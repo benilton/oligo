@@ -22,8 +22,8 @@ Collate: AllGenerics.R
          utils.R
          crlmm.R
          snprma.R
-	     justSNPRMA.R
-	     justCRLMM.R
+         justSNPRMA.R
+         justCRLMM.R
          methods-snp6.R
          methods-genotype.R
 LazyLoad: Yes
