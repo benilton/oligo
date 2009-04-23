@@ -66,3 +66,17 @@ setReplaceMethod("bg", signature(object="TilingFeatureSet2", value="array"),
                    tmp[idx,] <- value[,,2]
                    assayDataElementReplace(out, "channel2", tmp)
                  })
+
+##
+
+setMethod("getContainer", "TilingFeatureSet",
+          function(object, probeType=c("pm", "bg")){
+            probeType <- match.arg(probeType)
+            tbl <- ifelse(probeType == "pm", "pmfeature", "bgfeature")
+            conn <- db(object)
+            sql <- paste("SELECT type FROM", tbl,
+                         "INNER JOIN featureSet",
+                         "USING (fsetid)",
+                         "ORDER BY fid")
+            dbGetQuery(conn, sql)[[1]]
+          })
