@@ -75,3 +75,7 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-16-2009: B Carvalho
 
 ** Removed some unused code
+
+04-24-2009: B Carvalho
+
+** Added getContainer help page
