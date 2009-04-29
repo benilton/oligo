@@ -96,8 +96,10 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
 
   arrayType <- kind(get(pkgname))
   tmpExprs <- NULL
+  if (verbose) cat("Reading XYS files...\n")
   for (i in seq(along=filenames)){
     ## Read XYS "as is"
+    if (verbose) cat(" ...  ", filenames[i], ".\n")
     tmpE <- readonexysfile(filenames[i])
     if (length(filenames) > 1){
       tmpExprs <- cbind(tmpExprs, tmpE$SIGNAL)

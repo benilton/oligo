@@ -79,3 +79,9 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-24-2009: B Carvalho
 
 ** Added getContainer help page
+
+** Added more verbosity to read.xysfiles
+
+04-29-2009: B Carvalho
+
+** Fixed documentation for read.celfiles and read.xysfiles

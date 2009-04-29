@@ -50,7 +50,15 @@ useAffyio = TRUE)
 }
 \details{
   When using 'affyio' to read in CEL files, the user can read compressed
-  CEL files (CEL.gz). Additionally, 'affyio' is much faster than 'affxparser'.
+  CEL files (CEL.gz). Additionally, 'affyio' is much faster than
+  'affxparser'.
+
+    The function guesses which annotation package to use from the header
+  of the CEL file. The user can also provide the name of the annotaion
+  package to be used (via the \code{pkgname} argument). If the
+  annotation package cannot be loaded, the function returns an
+  error. If the annotation package is not available from BioConductor,
+  one can use the \code{pdInfoBuilder} package to build one.
   }
 \seealso{\code{\link{list.celfiles}}, \code{\link{read.xysfiles}}}
 \examples{
