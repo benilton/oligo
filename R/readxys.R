@@ -91,7 +91,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
     if (verbose)
       message("Platform design info loaded.")
   }else{
-    stop("Must install the ", pkgname, " package.")
+    stop("The annotation package, ", pkgname, ", could not be loaded.")
   }
 
   arrayType <- kind(get(pkgname))

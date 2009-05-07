@@ -85,3 +85,5 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 04-29-2009: B Carvalho
 
 ** Fixed documentation for read.celfiles and read.xysfiles
+
+** Changed error message (when annotation cannot be loaded)
