@@ -78,6 +78,8 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   filenames <- getFilenames(filenames=filenames, ...)
   checkValidFilenames(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
+  if (!missing(sampleNames))
+    stopifnot(length(sampleNames) == length(filenames))
 
   ## Get design name from the first
   firstline <- readxysHeader(filenames[1])
@@ -95,26 +97,15 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  tmpExprs <- NULL
-  if (verbose) cat("Reading XYS files...\n")
-  for (i in seq(along=filenames)){
-    ## Read XYS "as is"
-    if (verbose) cat(" ...  ", filenames[i], ".\n")
-    tmpE <- readonexysfile(filenames[i])
-    if (length(filenames) > 1){
-      tmpExprs <- cbind(tmpExprs, tmpE$SIGNAL)
-    }else{
-      tmpExprs <- matrix(tmpE$SIGNAL, ncol=1)
-    }
-  }
-  tmpE$index <- tmpE$X + (tmpE$Y-1)*geometry(get(pkgname))[2]
-  idx <- order(tmpE$index)
-  tmpExprs <- tmpExprs[idx,, drop=FALSE]
-  rm(tmpE, idx)
-  dimnames(tmpExprs) <- NULL
+  tmp <- .Call("R_read_xys_files", filenames, verbose)
+  idx <- order(tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2])
+  tmpExprs <- tmp[["intensities"]][idx,, drop=FALSE]
+  rm(tmp)
   
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames)
+  if(!missing(sampleNames))
+    colnames(tmpExprs) <- sampleNames
 
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
@@ -140,6 +131,8 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   filenames <- c(channel1, channel2)
   checkValidFilenames(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
+  if (!missing(sampleNames))
+    stopifnot(length(sampleNames) == length(channel1), length(sampleNames) == length(channel2))
 
   ## Get design name from the first
   firstline <- readxysHeader(filenames[1])
@@ -157,16 +150,23 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  channel1Intensities <- readXysMatrix(channel1)
-  channel2Intensities <- readXysMatrix(channel2)
-  idxChannel1 <- channel1Intensities[["X"]]+(channel1Intensities[["Y"]]-1)*geometry(get(pkgname))[2]
-  idxChannel2 <- channel2Intensities[["X"]]+(channel2Intensities[["Y"]]-1)*geometry(get(pkgname))[2]
-  stopifnot(identical(sort(idxChannel1), sort(idxChannel2)))
-  channel1Intensities <- channel1Intensities[["intensities"]][order(idxChannel1),, drop=FALSE]
-  channel2Intensities <- channel2Intensities[["intensities"]][order(idxChannel2),, drop=FALSE]
-  rm(idxChannel1, idxChannel2)
+  tmp <- .Call("R_read_xys_files", channel1, verbose)
+  idxChannel1 <- tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2]
+  idx <- order(idxChannel1)
+  channel1Intensities <- tmp[["intensities"]][idx,,drop=FALSE]
+  dates1 <- tmp[["date"]]
+  rm(tmp)
+  
+  tmp <- .Call("R_read_xys_files", channel2, verbose)
+  idxChannel2 <- tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2]
+  stopifnot(identical(idxChannel1, idxChannel2))
+  channel2Intensities <- tmp[["intensities"]][idx,,drop=FALSE]
+  dates2 <- tmp[["date"]]
+  rm(tmp)
 
   metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+  if(!missing(sampleNames))
+    colnames(channel1Intensities) <- colnames(channel2Intensities) <- sampleNames
 
   out <- new("TilingFeatureSet2",
              channel1=channel1Intensities,

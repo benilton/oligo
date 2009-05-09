@@ -41,6 +41,8 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
 
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames)
+  if(!missing(sampleNames))
+    colnames(tmpExprs) <- sampleNames
 
   if (sd) warning("Reading in Standard Errors not yet implemented.\n")
   theClass <- switch(arrayType,
@@ -177,6 +179,8 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   dimnames(channel2Intensities) <- NULL
 
   metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+  if(!missing(sampleNames))
+    colnames(channel1Intensities) <- colnames(channel2Intensities) <- sampleNames
 
   out <- new("TilingFeatureSet2",
              channel1=channel1Intensities,

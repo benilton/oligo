@@ -87,3 +87,11 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 ** Fixed documentation for read.celfiles and read.xysfiles
 
 ** Changed error message (when annotation cannot be loaded)
+
+05-07-2009: B Carvalho
+
+** Added C-code to parse XYS files
+
+05-09-2009: B Carvalho
+
+** Fixed sampleNames that was being ignored
