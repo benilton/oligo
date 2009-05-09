@@ -95,3 +95,5 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 05-09-2009: B Carvalho
 
 ** Fixed sampleNames that was being ignored
+
+** Removed extra ordering for XYS files
