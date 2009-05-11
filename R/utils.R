@@ -144,7 +144,8 @@ getMetadata <- function(theMatrix, filenames, phenoData, featureData,
   if (!missing(sampleNames)){
     sampleNames(phenoData) <- sampleNames
   }else{
-    sampleNames(phenoData) <- sub("^/?([^/]*/)*", "", filenames, extended=TRUE)
+##    sampleNames(phenoData) <- sub("^/?([^/]*/)*", "", filenames, extended=TRUE)
+    sampleNames(phenoData) <- basename(filenames)
   }
   if (missing(experimentData))
     experimentData <- createDefaultMiame(filenames)
@@ -171,6 +172,7 @@ basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                       verbose, PACKAGE="oligo")
   }
   colnames(theExprs) <- colnames(pmMat)
+  rownames(theExprs) <- unique(pnVec)
   return(theExprs)
 }
 

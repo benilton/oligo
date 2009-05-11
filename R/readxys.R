@@ -97,16 +97,11 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  tmp <- .Call("R_read_xys_files", filenames, verbose)
-##   idx <- order(tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2])
-##   tmpExprs <- tmp[["intensities"]][idx,, drop=FALSE]
-  tmpExprs <- tmp[["intensities"]]
-  rm(tmp)
+  tmpExprs <- .Call("R_read_xys_files", filenames, verbose)[["intensities"]]
   
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames)
-  if(!missing(sampleNames))
-    colnames(tmpExprs) <- sampleNames
+  colnames(tmpExprs) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
@@ -151,25 +146,12 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  tmp <- .Call("R_read_xys_files", channel1, verbose)
-  idxChannel1 <- tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2]
-##   idx <- order(idxChannel1)
-##   channel1Intensities <- tmp[["intensities"]][idx,,drop=FALSE]
-  channel1Intensities <- tmp[["intensities"]]
-  dates1 <- tmp[["date"]]
-  rm(tmp)
-  
-  tmp <- .Call("R_read_xys_files", channel2, verbose)
-  idxChannel2 <- tmp[["coordinates"]][, "X"]+(tmp[["coordinates"]][, "Y"]-1)*geometry(get(pkgname))[2]
-##   stopifnot(identical(idxChannel1, idxChannel2))
-##   channel2Intensities <- tmp[["intensities"]][idx,,drop=FALSE]
-  channel2Intensities <- tmp[["intensities"]]
-  dates2 <- tmp[["date"]]
-  rm(tmp)
+  channel1Intensities <- .Call("R_read_xys_files", channel1, verbose)[["intensities"]]
+  channel2Intensities <- .Call("R_read_xys_files", channel2, verbose)[["intensities"]]
+  ## must get dates from here
 
   metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
-  if(!missing(sampleNames))
-    colnames(channel1Intensities) <- colnames(channel2Intensities) <- sampleNames
+  colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   out <- new("TilingFeatureSet2",
              channel1=channel1Intensities,

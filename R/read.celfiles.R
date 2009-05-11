@@ -10,8 +10,6 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
     stopifnot(checkChipTypes(filenames, verbose, "affymetrix", useAffyio))
   
   ## Read in the first Array details
-##   headdetails <- readCelHeader(filenames[1])
-##   chiptype <- headdetails[["chiptype"]]
   chiptype <- getCelChipType(filenames[1], useAffyio)
   
   if (missing(pkgname))
@@ -37,12 +35,10 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                                     rm.masked=rm.mask,
                                     rm.extra=rm.extra, verbose=verbose)
   }
-  dimnames(tmpExprs) <- NULL
 
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames)
-  if(!missing(sampleNames))
-    colnames(tmpExprs) <- sampleNames
+  colnames(tmpExprs) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   if (sd) warning("Reading in Standard Errors not yet implemented.\n")
   theClass <- switch(arrayType,
@@ -179,8 +175,7 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   dimnames(channel2Intensities) <- NULL
 
   metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
-  if(!missing(sampleNames))
-    colnames(channel1Intensities) <- colnames(channel2Intensities) <- sampleNames
+  colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   out <- new("TilingFeatureSet2",
              channel1=channel1Intensities,

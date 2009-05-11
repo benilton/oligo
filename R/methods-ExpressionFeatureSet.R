@@ -15,10 +15,9 @@ setMethod("rma", "ExpressionFeatureSet",
             idx <- order(pnVec)
             pms <- pms[idx,, drop=FALSE]
             dimnames(pms) <- NULL
+            colnames(pms) <- sampleNames(object)
             pnVec <- pnVec[idx]
             exprs <- basicRMA(pms, pnVec, normalize, background)
-            colnames(exprs) <- sampleNames(object)
-            rownames(exprs) <- unique(pnVec)
             out <- new("ExpressionSet",
                        phenoData = phenoData(object),
                        annotation = annotation(object),
