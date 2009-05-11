@@ -27,17 +27,20 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
     headdetails <- .Call("ReadHeader", as.character(filenames[1]),
                          PACKAGE="affyio")
     tmpExprs <- .Call("read_abatch", filenames, rm.mask, rm.outliers,
-                      rm.extra, headdetails[[1]], headdetails[[2]], verbose,
-                      PACKAGE="affyio")
+                      rm.extra, headdetails[[1]], headdetails[[2]],
+                      verbose, PACKAGE="affyio")
     rm(headdetails)
   }else{
-    tmpExprs <- readCelIntensities2(filenames, rm.outliers=rm.outliers,
+    tmpExprs <- readCelIntensities2(filenames,
+                                    rm.outliers=rm.outliers,
                                     rm.masked=rm.mask,
-                                    rm.extra=rm.extra, verbose=verbose)
+                                    rm.extra=rm.extra,
+                                    verbose=verbose)
   }
+  datetime <- getAffyTimeDateAsString(filenames, useAffyio=useAffyio)
 
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
-                          experimentData, notes, sampleNames)
+                          experimentData, notes, sampleNames, AffyDate2Posix(datetime))
   colnames(tmpExprs) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   if (sd) warning("Reading in Standard Errors not yet implemented.\n")
@@ -173,8 +176,15 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }
   dimnames(channel1Intensities) <- NULL
   dimnames(channel2Intensities) <- NULL
+  date1 <- GetAffyTimeDateAsString(channel1, useAffyio=useAffyio)
+  date2 <- GetAffyTimeDateAsString(channel2, useAffyio=useAffyio)
+  date1 <- AffyDate2Posix(date1)
+  date2 <- AffyDate2Posix(date2)
 
-  metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+  metadata <- getMetadata2(channel1Intensities, channel2Intensities,
+                           channel1, channel2,
+                           phenoData, featureData, experimentData, notes, sampleNames,
+                           date1, date2)
   colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   out <- new("TilingFeatureSet2",

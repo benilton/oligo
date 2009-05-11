@@ -97,10 +97,13 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  tmpExprs <- .Call("R_read_xys_files", filenames, verbose)[["intensities"]]
+  tmp <- .Call("R_read_xys_files", filenames, verbose)
+  tmpExprs <- tmp[["intensities"]]
+  datetime <- tmp[["date"]]
+  rm(tmp)
   
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
-                          experimentData, notes, sampleNames)
+                          experimentData, notes, sampleNames, NgsDate2Posix(datetime))
   colnames(tmpExprs) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   theClass <- switch(arrayType,
@@ -146,11 +149,20 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }
 
   arrayType <- kind(get(pkgname))
-  channel1Intensities <- .Call("R_read_xys_files", channel1, verbose)[["intensities"]]
-  channel2Intensities <- .Call("R_read_xys_files", channel2, verbose)[["intensities"]]
+  tmp <- .Call("R_read_xys_files", channel1, verbose)
+  channel1Intensities <- tmp[["intensities"]]
+  date1 <- tmp[["date"]]
+  rm(tmp)
+  tmp <- .Call("R_read_xys_files", channel2, verbose)
+  channel2Intensities <- tmp[["intensities"]]
+  date2 <- tmp[["date"]]
+  rm(tmp)
   ## must get dates from here
 
-  metadata <- getMetadata(channel1Intensities, channel1, phenoData, featureData, experimentData, notes, sampleNames)
+  metadata <- getMetadata2(channel1Intensities, channel2Intensities,
+                           channel1, channel2, phenoData, featureData,
+                           experimentData, notes, sampleNames,
+                           NgsDate2Posix(date1), NgsDate2Posix(date2))
   colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
   out <- new("TilingFeatureSet2",
