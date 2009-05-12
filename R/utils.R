@@ -204,6 +204,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
     tmpPD <- new("AnnotatedDataFrame",
                  data=theDF,
                  varMetadata=vmDF)
+    sampleNames(tmpPD) <- sampleNames(phenoData)
     phenoData <- combine(phenoData, tmpPD)
     rm(theDF, vmDF, tmpPD)
   }
@@ -214,6 +215,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
     tmpPD <- new("AnnotatedDataFrame",
                  data=theDF,
                  varMetadata=vmDF)
+    sampleNames(tmpPD) <- sampleNames(phenoData)
     phenoData <- combine(phenoData, tmpPD)
     rm(theDF, vmDF, tmpPD)
   }

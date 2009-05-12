@@ -97,3 +97,10 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 ** Fixed sampleNames that was being ignored
 
 ** Removed extra ordering for XYS files
+
+05-11-2009: B Carvalho
+
+** Fixed bug with getMetadata2: if user passes a phenoData object,
+this would be incorrectly combined with other objects because the
+sampleNames were different.
+
