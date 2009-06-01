@@ -239,6 +239,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
 
 basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                      bgversion=2, destructive=FALSE, verbose=TRUE, ...){
+  pns <- unique(pnVec)
   nPn <- length(unique(pnVec))
   pnVec <- split(0:(length(pnVec)-1), pnVec)
   
@@ -251,7 +252,7 @@ basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                       verbose, PACKAGE="oligo")
   }
   colnames(theExprs) <- colnames(pmMat)
-  rownames(theExprs) <- unique(pnVec)
+  rownames(theExprs) <- pns
   return(theExprs)
 }
 

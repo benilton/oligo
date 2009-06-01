@@ -104,3 +104,6 @@ modifed read.celfiles to appear more like read.affybatch, should present a notic
 this would be incorrectly combined with other objects because the
 sampleNames were different.
 
+05-21-2009: B Carvalho
+
+** Fixed bug with basicRMA.
