@@ -37,7 +37,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                                     rm.extra=rm.extra,
                                     verbose=verbose)
   }
-  datetime <- getAffyTimeDateAsString(filenames, useAffyio=useAffyio)
+  datetime <- GetAffyTimeDateAsString(filenames, useAffyio=useAffyio)
 
   metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
                           experimentData, notes, sampleNames, AffyDate2Posix(datetime))
