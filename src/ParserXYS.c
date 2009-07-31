@@ -4,15 +4,18 @@
 **  --------------------------------------
 **  
 **  I) HISTORY
-**  
-**  April 28, 2009 - Initial working version
-**                   (earlier versions didn't
-**                   quite match R's results)
-**  April 30, 2009 - Added dimnames to matrices
-**                 - Added output list
+**
+**  July  30, 2009 - Removed 'dimnamesout' from
+**                   the variable definition in
+**                   R_read_xys_files
 **  May    7, 2009 - Added parser for header
 **                   Added check for designname
 **                   Calling this version 1.0
+**  April 30, 2009 - Added dimnames to matrices
+**                 - Added output list
+**  April 28, 2009 - Initial working version
+**                   (earlier versions didn't
+**                   quite match R's results)
 **  
 **  II) TODO
 **  None, for the moment
@@ -213,7 +216,7 @@ SEXP R_read_xys_files(SEXP filenames, SEXP verbosity){
   double *ptr2signal;
   FILE *fp;
   SEXP signal, xy, output;
-  SEXP dimnames, dimnamesxy, dimnamesout, fnames, colnamesxy, namesout, dates;
+  SEXP dimnames, dimnamesxy, fnames, colnamesxy, namesout, dates;
   char *d0, *d1;
 
   verbose = asLogical(verbosity);

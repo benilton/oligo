@@ -107,3 +107,9 @@ sampleNames were different.
 05-21-2009: B Carvalho
 
 ** Fixed bug with basicRMA.
+
+07-31-2009: B Carvalho
+
+** Fixed warnings at the C-level
+
+** More strict versions of dependencies
