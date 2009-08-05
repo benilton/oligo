@@ -305,7 +305,6 @@ getNgsColorsInfo <- function(path=".", pattern1="_532", pattern2="_635", ...){
   return(out)
 }
 
-
 ## Date/time extractors
 GetAffyTimeDateAsString <- function(filenames, useAffyio=TRUE){
   if (useAffyio){

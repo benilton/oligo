@@ -3,7 +3,7 @@ crlmm <- function(filenames, outdir, batch_size=40000, balance=1.5,
                     verbose=TRUE, pkgname, reference=TRUE){
   stopifnot(!(missing(filenames) | missing(outdir)))
   if(missing(pkgname)) pkgname <- cleanPlatformName(readCelHeader(filenames[1])$chiptype)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname, verbose=verbose)
   if(pkgname %in% c("pd.mapping50k.xba240", "pd.mapping50k.hind240",
                     "pd.mapping250k.nsp", "pd.mapping250k.sty")){
     justCRLMMv3(filenames, outdir, batch_size=batch_size,

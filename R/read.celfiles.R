@@ -15,7 +15,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
   
-  if (require(pkgname, character.only=TRUE)){
+  if (requireAnnotation(pkgname, verbose=verbose)){
     if (verbose)
       message("Platform design info loaded.")
   }else{
@@ -144,7 +144,7 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chiptype)
   
-  if (require(pkgname, character.only=TRUE)){
+  if (requireAnnotation(pkgname, verbose=verbose)){
     if (verbose)
       message("Platform design info loaded.")
   }else{

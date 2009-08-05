@@ -278,7 +278,7 @@ readSummaries <- function(type, tmpdir){
       tmp <- rbind(tmp, matrix(readBin(files[i], dataType, nrows*n.samples), nrow=nrows))
     }
     pkgname <- analysis[1, 2]
-    require(pkgname, character.only=TRUE)
+    requireAnnotation(pkgname)
     tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
     tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
     tmpdf[is.na(tmpdf$physical_pos), "physical_pos"] <- 0
@@ -362,7 +362,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
     pkgname <- cleanPlatformName(chiptype)
 
   ## Get annotation package
-  stopifnot(require(pkgname, character.only=TRUE))
+  stopifnot(requireAnnotation(pkgname))
   conn <- db(get(pkgname))
 
   n.snps <- dbGetQuery(conn, "SELECT row_count FROM table_info WHERE tbl='featureSet'")[[1]]

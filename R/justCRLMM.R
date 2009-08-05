@@ -9,7 +9,7 @@ liteNormalization <- function(celFiles, destDir, batch_size=40000, verbose=TRUE)
   
   ## Determine pkg and number of files to read at once
   pkgname <- cleanPlatformName(header$chiptype)
-  stopifnot(require(pkgname, character.only=TRUE))
+  stopifnot(requireAnnotation(pkgname))
   conn <- db(get(pkgname))
   nfeat <- dbGetQuery(conn, "SELECT row_count FROM table_info WHERE tbl='pmfeature'")[[1]]
   nfiles <- max((batch_size * 20 * length(celFiles)) %/% nfeat, 1)
@@ -72,7 +72,7 @@ justCRLMM <- function(filenames, batch_size=40000,
     pkgname <- cleanPlatformName(chips[1])
   snpcnv <- pkgname == "pd.genomewidesnp.6"
   rm(chips)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname)
 
   sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
   snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
@@ -304,7 +304,7 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
     pkgname <- cleanPlatformName(chips[1])
   snpcnv <- pkgname == "pd.genomewidesnp.6"
   rm(chips)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname)
 
   sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
   snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
@@ -524,7 +524,7 @@ genotypeByChromosome <- function(filenames, batch_size=10000,
                                  pkgname=NULL, tmpdir=tempdir()){
   if (is.null(pkgname))
     pkgname <- cleanPlatformName(readCelHeader(filenames[1])$chiptype)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname)
   sql <- "SELECT DISTINCT chrom FROM featureSet WHERE man_fsetid LIKE 'SNP%'"
   chrs <- dbGetQuery(db(get(pkgname)), sql)[[1]]
   chrs <- chrs[!is.na(chrs) & chrs != "MT"]
@@ -560,7 +560,7 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chips[1])
   rm(chips)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname, verbose=verbose)
 
   sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
   snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
@@ -764,7 +764,7 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
   if (missing(pkgname))
     pkgname <- cleanPlatformName(chips[1])
   rm(chips)
-  require(pkgname, character.only=TRUE)
+  requireAnnotation(pkgname, verbose=verbose)
 
   sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
   snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]

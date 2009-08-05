@@ -89,7 +89,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   ## Load PDenv for the XYS files
   if (missing(pkgname))
     pkgname <- cleanPlatformName(designname)
-  if (require(pkgname, character.only=TRUE)){
+  if (requireAnnotation(pkgname, verbose=verbose)){
     if (verbose)
       message("Platform design info loaded.")
   }else{
@@ -141,7 +141,7 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   ## Load PDenv for the XYS files
   if (missing(pkgname))
     pkgname <- cleanPlatformName(designname)
-  if (require(pkgname, character.only=TRUE)){
+  if (requireAnnotation(pkgname, verbose=verbose)){
     if (verbose)
       message("Platform design info loaded.")
   }else{

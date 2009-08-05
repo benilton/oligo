@@ -113,3 +113,7 @@ sampleNames were different.
 ** Fixed warnings at the C-level
 
 ** More strict versions of dependencies
+
+08-05-2009: B Carvalho
+
+** Replaced require(annotation(obj)) by requireAnnotation(annotation(obj))
