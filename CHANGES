@@ -117,3 +117,7 @@ sampleNames were different.
 08-05-2009: B Carvalho
 
 ** Replaced require(annotation(obj)) by requireAnnotation(annotation(obj))
+
+08-06-2009: B Carvalho
+
+** RMA, for Exon and Gene arrays, is now possible to the gene-level
