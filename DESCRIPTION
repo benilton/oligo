@@ -3,7 +3,7 @@ Version: 1.9.17
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <bcarvalh@jhsph.edu>, Rafael A. Irizarry and Ben Bolstad with contributions from Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <bcarvalh@jhsph.edu>
-Depends: R (>= 2.10.0), oligoClasses (>= 1.7.10), preprocessCore (>= 1.7.4)
+Depends: R (>= 2.10.0), oligoClasses (>= 1.7.12), preprocessCore (>= 1.7.4)
 Imports: splines, affxparser (>= 1.17.3), graphics, utils, stats, DBI (>= 0.2-4), Biobase (>= 2.5.5), methods, affyio (>= 1.13.3)
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, RColorBrewer
