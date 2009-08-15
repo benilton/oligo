@@ -87,19 +87,27 @@ setMethod("image", signature(x="FeatureSet"),
               which <- 1:length(x)
             }
             if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
-            conn <- db(x)
             geom <- geometry(getPD(x))
-            tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
-            theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
-            theInfo <- do.call("rbind", theInfo)
-            theInfo <- theInfo[order(theInfo[["fid"]]), ]
-            idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
-            for (i in which){
-              theInfo[["signal"]] <- transfo(as.numeric(exprs(x[theInfo[["fid"]], i])))
-              int <- matrix(NA, nr=geom[1], nc=geom[2])
-              int[idx] <- theInfo[["signal"]]
-              int <- t(int[nrow(int):1, ncol(int):1])
-              image(int, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+            if (tolower(manufacturer(x)) != "affymetrix"){
+              conn <- db(x)
+              tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
+              theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
+              theInfo <- do.call("rbind", theInfo)
+              theInfo <- theInfo[order(theInfo[["fid"]]), ]
+              idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
+              for (i in which){
+                theInfo[["signal"]] <- transfo(as.numeric(exprs(x[theInfo[["fid"]], i])))
+                tmp <- matrix(NA, nr=geom[1], nc=geom[2])
+                tmp[idx] <- theInfo[["signal"]]
+                tmp <- as.matrix(rev(as.data.frame(tmp)))
+                image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+              }
+            }else{
+              for (i in which){
+                tmp <- matrix(transfo(exprs(x[,i])), ncol=geom[1], nrow=geom[2])
+                tmp <- as.matrix(rev(as.data.frame(tmp)))
+                image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
+              }
             }
             par(ask=FALSE)
           })

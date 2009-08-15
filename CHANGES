@@ -121,3 +121,7 @@ sampleNames were different.
 08-06-2009: B Carvalho
 
 ** RMA, for Exon and Gene arrays, is now possible to the gene-level
+
+08-14-2009: B Carvalho
+
+** Fixed image() for Affymetrix arrays
