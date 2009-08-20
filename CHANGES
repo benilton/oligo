@@ -125,3 +125,7 @@ sampleNames were different.
 08-14-2009: B Carvalho
 
 ** Fixed image() for Affymetrix arrays
+
+08-18-2009: B Carvalho
+
+** Fixed and improved behavior of boxplot() for ExpressionSet and FeatureSet objects

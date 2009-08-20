@@ -12,7 +12,7 @@ setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntise
 setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))
 
 setGeneric("hist", function(x, ...) standardGeneric("hist"))
-setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
+##setGeneric("boxplot", function(x, ...) standardGeneric("boxplot"))
 setGeneric("image", function(x, ...) standardGeneric("image"))
 setGeneric("rma", function(object, ...) standardGeneric("rma"))
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))

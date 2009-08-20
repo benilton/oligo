@@ -43,25 +43,19 @@ setMethod("mmSequence", "FeatureSet",
 
 ## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
-          function(x, which, range=0, col=1:ncol(x), ...){
-            if(!missing(which)) warning("Argument 'which' not yet implemented")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-            idx <- is.na(tmpdf[[1]])
-            if (any(idx))
-              tmpdf <- tmpdf[!idx,]
-            boxplot(tmpdf, range=range, col=col, ...)
+          function(x, which=pmindex(x), transfo=log2, range=0, ...){
+            toPlot <- exprs(x[which,])
+            toPlot <- transfo(toPlot)
+            toPlot <- as.data.frame(toPlot)
+            boxplot(toPlot, range=range, ...)
           })
   
 setMethod("boxplot", signature(x="ExpressionSet"),
-          function(x, which, range=0, col=1:ncol(x), ...){
-            if(!missing(which)) warning("Argument 'which' not yet implemented")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmpdf <- as.data.frame(log2(exprs(x[idx,])))
-            idx <- is.na(tmpdf[[1]])
-            if (any(idx))
-              tmpdf <- tmpdf[!idx,]
-            boxplot(tmpdf, range=range, col=col, ...)
+          function(x, which=1:nrow(x), transfo=identity, range=0, ...){
+            toPlot <- exprs(x[which,])
+            toPlot <- transfo(toPlot)
+            toPlot <- as.data.frame(toPlot)
+            boxplot(toPlot, range=range, ...)
           })
   
   
