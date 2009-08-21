@@ -129,3 +129,7 @@ sampleNames were different.
 08-18-2009: B Carvalho
 
 ** Fixed and improved behavior of boxplot() for ExpressionSet and FeatureSet objects
+
+08-20-2009: B Carvalho
+
+** Added more details to the documentation associated to list.celfiles() and list.xysfiles()
