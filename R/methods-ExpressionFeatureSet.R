@@ -2,7 +2,8 @@ setMethod("rma", "ExpressionFeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL){
             pms <- pm(object, subset)
             pnVec <- probeNames(object, subset)
-            if (manufacturer(object) == "Affymetrix"){
+            tbls <- dbListTables(db(object))
+            if (manufacturer(object) == "Affymetrix" && "bgfeature" %in% tbls){
               sql <- paste("SELECT man_fsetid, fid",
                            "FROM bgfeature",
                            "INNER JOIN featureSet",

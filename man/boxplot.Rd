@@ -9,9 +9,9 @@
 }
 \usage{
 boxplot(x, \dots)
-\S4method{boxplot}{FeatureSet}(x, which=pmindex(x), transfo=log2,
+\S4method{boxplot}{FeatureSet}(x, which=c("pm", "mm", "both"), transfo=log2,
 range=0, \dots)
-\S4method{boxplot}{ExpressionSet}(x, which=1:nrow(x), transfo=identity,
+\S4method{boxplot}{ExpressionSet}(x, which, transfo=identity,
 range=0, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -19,8 +19,8 @@ range=0, \dots)
 \arguments{
   \item{x}{a \code{FeatureSet}-like object or \code{ExpressionSet}
     object.}
-  \item{which}{an integer vector determining which rows of 'x' should be
-    plotted. See 'Details'.}
+  \item{which}{character defining what probe types are to be used in the
+  plot.}
   \item{transfo}{a function to transform the data before plotting. See
     'Details'.}
   \item{range}{this determines how far the plot whiskers extend out from
@@ -32,13 +32,6 @@ range=0, \dots)
 }
 
 \details{
-  The 'which' argument should be used to subset the object to be
-  plotted. For example, if the user wants to plot the PM probes, he
-  should use 'which=pmindex(x)', if MM probes are to be plotted
-  'which=mmindex(x)'. If all probes are to be plotted
-  'which=1:nrow(x)'. Note that pmindex/mmindex options will not work for
-  summarized data.
-
   The 'transfo' argument will set the transformation to be used. For raw
   data, 'transfo=log2' is a common practice. For summarized data (which
   are often in log2-scale), no transformation is needed (therefore 'transfo=identity').

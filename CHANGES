@@ -133,3 +133,7 @@ sampleNames were different.
 08-20-2009: B Carvalho
 
 ** Added more details to the documentation associated to list.celfiles() and list.xysfiles()
+
+10-21-2009: B Carvalho
+
+** Fixed some probles in the vignettes

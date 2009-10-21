@@ -43,21 +43,34 @@ setMethod("mmSequence", "FeatureSet",
 
 ## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
-          function(x, which=pmindex(x), transfo=log2, range=0, ...){
-            toPlot <- exprs(x[which,])
+          function(x, which=c("pm", "mm", "both"),
+                   transfo=log2, range=0, ...){
+            stopifnot(is.function(transfo))
+            which <- match.arg(which)
+            if (which == "pm"){
+              idx <- pmindex(x)
+            }else if (which == "mm"){
+              idx <- mmindex(x)
+            }else if (which == "both"){
+              idx <- 1:nrow(x)
+            }else{
+              stop("Invalid value for 'which'. Allowed values are: 'pm', 'mm', 'both'")
+            }
+            toPlot <- exprs(x[idx,])
             toPlot <- transfo(toPlot)
             toPlot <- as.data.frame(toPlot)
             boxplot(toPlot, range=range, ...)
           })
   
 setMethod("boxplot", signature(x="ExpressionSet"),
-          function(x, which=1:nrow(x), transfo=identity, range=0, ...){
-            toPlot <- exprs(x[which,])
+          function(x, which, transfo=identity, range=0, ...){
+            stopifnot(is.function(transfo))
+            if(!missing(which)) warning("Argument 'which' ignored.")
+            toPlot <- exprs(x)
             toPlot <- transfo(toPlot)
             toPlot <- as.data.frame(toPlot)
             boxplot(toPlot, range=range, ...)
           })
-  
   
 ## setMethod("image", signature(x="FeatureSet"),
 ## 		  function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
@@ -109,11 +122,20 @@ setMethod("image", signature(x="FeatureSet"),
 
 setMethod("hist", "FeatureSet",
           function(x, col=1:ncol(x), transfo=log2,
-                   which, ylab="density", xlab="log intensity",
+                   which=c("pm", "mm", "both"),
+                   ylab="density", xlab="log intensity",
                    type="l", ...){
             stopifnot(is.function(transfo))
-            if (!missing(which)) warning("Argument 'which' not implemented yet.")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
+            which <- match.arg(which)
+            if (which == "pm"){
+              idx <- pmindex(x)
+            }else if (which == "mm"){
+              idx <- mmindex(x)
+            }else if (which == "both"){
+              idx <- 1:nrow(x)
+            }else{
+              stop("Invalid value for 'which'. Allowed values are: 'pm', 'mm', 'both'")
+            }
             tmp <- exprs(x[idx,])
             idx <- is.na(tmp[,1])
             if(any(idx))
@@ -128,12 +150,11 @@ setMethod("hist", "FeatureSet",
 
 setMethod("hist", "ExpressionSet",
           function(x, col=1:ncol(x), transfo=log2,
-                   which, ylab="density", xlab="log intensity",
+                   which=1:nrow(x), ylab="density",
+                   xlab="log intensity",
                    type="l", ...){
             stopifnot(is.function(transfo))
-            if (!missing(which)) warning("Argument 'which' not implemented yet.")
-            idx <- sample(nrow(x), min(c(100000, nrow(x))))
-            tmp <- exprs(x[idx,])
+            tmp <- exprs(x[which,])
             idx <- is.na(tmp[,1])
             if(any(idx))
               tmp <- tmp[!idx,, drop=FALSE]
