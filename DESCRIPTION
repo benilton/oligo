@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.9.24
+Version: 1.9.25
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>

@@ -828,6 +828,9 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
 
     ### TRYING CRLMM HERE
     correction <- fitAffySnpMixture(sqs, verbose=FALSE)
+    theF <- correction$fs
+    save(theF, file=file.path(tmpdir, "theF.rda"))
+    rm(theF)
     theSNR[i, ] <- correction$snr
 
     load(system.file(paste("extdata/", pkgname, "CrlmmInfo.rda", sep=""), package=pkgname))

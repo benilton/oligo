@@ -319,15 +319,21 @@ getCrlmmSummaries <- function(tmpdir){
                callsConfidence = readSummaries("conf", tmpdir),
                thetaA = readSummaries("alleleA", tmpdir),
                thetaB = readSummaries("alleleB", tmpdir),
-               fs = readSummaries("fs", tmpdir))
+               F = readSummaries("fs", tmpdir))
   }else{
+    obj <- load(file.path(tmpdir,"theF.rda"))
+    antisenseF = get(obj)[1,,]
+    senseF = get(obj)[2,,]
+    rm(list=obj)
     tmp <- new("SnpCallSetPlus",
                calls = readSummaries("calls", tmpdir),
                callsConfidence = readSummaries("conf", tmpdir),
                senseThetaA = readSummaries("alleleA-sense", tmpdir),
                senseThetaB = readSummaries("alleleB-sense", tmpdir),
                antisenseThetaA = readSummaries("alleleA-antisense", tmpdir),
-               antisenseThetaB = readSummaries("alleleB-antisense", tmpdir))
+               antisenseThetaB = readSummaries("alleleB-antisense", tmpdir),
+               antisenseF=antisenseF,
+               senseF=senseF)
   }
   annotation(tmp) <- annotation
   phenoData(tmp) <- new("AnnotatedDataFrame",
