@@ -257,7 +257,7 @@ readSummaries <- function(type, tmpdir){
   validOptions <- c("alleleA", "alleleB", "fs", "alleleA-sense",
                     "alleleA-antisense", "alleleB-sense",
                     "alleleB-antisense", "calls", "conf", "llr",
-                    "snr", "initialCalls")
+                    "snr", "initialCalls", "antisense-f", "sense-f")
   if (!(type %in% validOptions))
     stop(paste("Invalid 'type' argument.\nValid options are '",
                paste(validOptions, collapse="', '"), "'.", sep=""))
@@ -288,7 +288,7 @@ readSummaries <- function(type, tmpdir){
     tmpidx <- tmpdf[["index"]]
     rownames(tmp) <- tmpdf[["man_fsetid"]]
     colnames(tmp) <- as.character(read.table(file.path(tmpdir, "crlmm-calls.txt"), nrows=1, colClasses=rep("character", ncol(tmp))))
-  }else if (type %in% c("calls", "conf", "llr", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense")){
+  }else if (type %in% c("calls", "conf", "llr", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense", "antisense-f", "sense-f")){
     target <- file.path(tmpdir,
                         ifelse(type %in% c("calls", "conf", "llr"),
                                paste("crlmm-", type, ".txt", sep=""),
@@ -321,10 +321,6 @@ getCrlmmSummaries <- function(tmpdir){
                thetaB = readSummaries("alleleB", tmpdir),
                F = readSummaries("fs", tmpdir))
   }else{
-    obj <- load(file.path(tmpdir,"theF.rda"))
-    antisenseF = get(obj)[1,,]
-    senseF = get(obj)[2,,]
-    rm(list=obj)
     tmp <- new("SnpCallSetPlus",
                calls = readSummaries("calls", tmpdir),
                callsConfidence = readSummaries("conf", tmpdir),
@@ -332,8 +328,8 @@ getCrlmmSummaries <- function(tmpdir){
                senseThetaB = readSummaries("alleleB-sense", tmpdir),
                antisenseThetaA = readSummaries("alleleA-antisense", tmpdir),
                antisenseThetaB = readSummaries("alleleB-antisense", tmpdir),
-               antisenseF=antisenseF,
-               senseF=senseF)
+               antisenseF = readSummaries("antisense-f", tmpdir),
+               senseF = readSummaries("sense-f", tmpdir))
   }
   annotation(tmp) <- annotation
   phenoData(tmp) <- new("AnnotatedDataFrame",
