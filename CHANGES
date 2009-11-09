@@ -137,3 +137,7 @@ sampleNames were different.
 10-21-2009: B Carvalho
 
 ** Fixed some probles in the vignettes
+
+11-09-2009: B Carvalho
+
+** removed rma_background2.c and rma_background2.h; preprocessCore is used instead.

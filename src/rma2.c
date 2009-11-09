@@ -11,7 +11,7 @@
  ** 
  ** last modified: Apr 4, 2003
  **
- ** License: GPL V2 or later (same as the rest of the Affy package)
+ ** License: LGPL V2 or later (same as the rest of the Affy package)
  **
  ** version 1.1 - Initial release to affy package
  **
