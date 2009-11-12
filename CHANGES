@@ -141,3 +141,7 @@ sampleNames were different.
 11-09-2009: B Carvalho
 
 ** removed rma_background2.c and rma_background2.h; preprocessCore is used instead.
+
+11-12-2009: B Carvalho
+
+** added rma() for quick and informal inspection of CNPs

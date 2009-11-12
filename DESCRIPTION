@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.11.2
+Version: 1.11.3
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
@@ -14,6 +14,7 @@ Collate: AllGenerics.R
          methods-ExonFeatureSet.R
          methods-ExpressionFeatureSet.R
          methods-FeatureSet.R
+         methods-SnpCnvFeatureSet.R
          methods-TilingFeatureSet.R
          methods-DBPDInfo.R
          read.celfiles.R

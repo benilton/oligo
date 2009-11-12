@@ -26,4 +26,3 @@ setMethod("rma", "ExpressionFeatureSet",
                        exprs = exprs)
             return(out)
           })
-

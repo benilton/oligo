@@ -71,22 +71,6 @@ setMethod("boxplot", signature(x="ExpressionSet"),
             toPlot <- as.data.frame(toPlot)
             boxplot(toPlot, range=range, ...)
           })
-  
-## setMethod("image", signature(x="FeatureSet"),
-## 		  function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
-##               if (which == 0){
-##                   which <- 1:length(x)
-##               }
-##               if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
-##               theDim <- geometry(getPD(x))
-##               for (i in which){
-##                 tmp <- matrix(transfo(exprs(x[,i])), ncol=theDim[1], nrow=theDim[2])
-##                 tmp <- t(tmp[nrow(tmp):1, ncol(tmp):1])
-##                 image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
-##               }
-##               par(ask=FALSE)
-##             })
-
 
 setMethod("image", signature(x="FeatureSet"),
           function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
