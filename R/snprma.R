@@ -12,11 +12,11 @@ sqsFrom <- function(pmMat){
   rownames(tmp) <- rep(snps, each=4)
   aTa <- seq(1, nrow(tmp), by=4)
   colnames(tmp) <- samples
-  tmp <- new("SnpQSet",
-             antisenseThetaA=tmp[aTa,, drop=FALSE],
-             senseThetaA=tmp[(aTa+1),, drop=FALSE],
-             antisenseThetaB=tmp[(aTa+2),, drop=FALSE],
-             senseThetaB=tmp[(aTa+3),, drop=FALSE])
+  tmp <- new("AlleleSet",
+             antisenseAlleleA=tmp[aTa,, drop=FALSE],
+             senseAlleleA=tmp[(aTa+1),, drop=FALSE],
+             antisenseAlleleB=tmp[(aTa+2),, drop=FALSE],
+             senseAlleleB=tmp[(aTa+3),, drop=FALSE])
   return(tmp)
 }
 
@@ -34,9 +34,9 @@ sqsFrom.SnpCnv <- function(pmMat){
   rownames(tmp) <- rep(snps, each=2)
   aTa <- seq(1, nrow(tmp), by=2)
   colnames(tmp) <- samples
-  tmp <- new("SnpCnvQSet",
-             thetaA=tmp[aTa,, drop=FALSE],
-             thetaB=tmp[(aTa+1),, drop=FALSE])
+  tmp <- new("AlleleSet",
+             alleleA=tmp[aTa,, drop=FALSE],
+             alleleB=tmp[(aTa+1),, drop=FALSE])
   return(tmp)
 }
 
@@ -86,15 +86,7 @@ snprma <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
   pnVec <- pnVec[idx]
   rm(idx); ## gc()
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
-
   theSumm <- basicRMA(tmpExprs, pnVec, FALSE, FALSE)
-  
-##   theSumm <- .Call("rma_c_complete_copy", tmpExprs, tmpExprs,
-##                    pnVec, length(unique(pnVec)), body(bg.dens),
-##                    new.env(), FALSE, FALSE,
-##                    as.integer(2), PACKAGE="oligo")
-
   
   rm(tmpExprs, pnVec); ## gc()
   

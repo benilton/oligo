@@ -187,7 +187,7 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
                            date1, date2)
   colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
-  out <- new("TilingFeatureSet2",
+  out <- new("TilingFeatureSet",
              channel1=channel1Intensities,
              channel2=channel2Intensities,
              manufacturer="Affymetrix",

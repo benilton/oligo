@@ -84,7 +84,6 @@ justCRLMM <- function(filenames, batch_size=40000,
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
   theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
 
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
@@ -235,14 +234,14 @@ justCRLMM <- function(filenames, batch_size=40000,
   
   if (!snpcnv){
     finalSQS <- sqsFrom(finalSumm)
-    ata <- antisenseThetaA(finalSQS)
-    atb <- antisenseThetaB(finalSQS)
-    sta <- senseThetaA(finalSQS)
-    stb <- senseThetaB(finalSQS)
+    ata <- allele(finalSQS, "A", "antisense")
+    atb <- allele(finalSQS, "B", "antisense")
+    sta <- allele(finalSQS, "A", "sense")
+    stb <- allele(finalSQS, "B", "sense")
   }else{
     finalSQS <- sqsFrom.SnpCnv(finalSumm)
-    ta <- thetaA(finalSQS)
-    tb <- thetaB(finalSQS)
+    ta <- allele(finalSQS, "A")
+    tb <- allele(finalSQS, "B")
   }
   rm(finalSQS)
   
@@ -251,19 +250,16 @@ justCRLMM <- function(filenames, batch_size=40000,
   snr <- exp(colMeans(log(theSNR)))
   pacc <- LLR2conf(finalCalls, finalConfs, snr, pkgname)
   if (!snpcnv){
-    out <- new("SnpCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
-               antisenseThetaA=ata, antisenseThetaB=atb, senseThetaA=sta, senseThetaB=stb)
+    out <- new("SnpSuperSet", call=finalCalls, callProbability=pacc, LLR=finalConfs,
+               antisenseAlleleA=ata, antisenseAlleleB=atb, senseAlleleA=sta, senseAlleleB=stb)
     rm(ata, atb, sta, stb)
   }else{
-    out <- new("SnpCnvCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
-               thetaA=ta, thetaB=tb)
+    out <- new("SnpSuperSet", call=finalCalls, callProbability=pacc, LLR=finalConfs,
+               alleleA=ta, alleleB=tb)
     rm(ta, tb)
   }
 
   annotation(out) <- pkgname
-  
-##  out <- new("SnpCallSet", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,  annotation=pkgname)
-##  annotation(finalSQS) <- annotation(out)
   featureNames(out) <- allSnps
   sampleNames(out)  <- sns
   phenoData(out)    <- phenoData
@@ -325,7 +321,6 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
   }
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
   theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
 
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
@@ -358,12 +353,6 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
     pms <- pms[idx, ]
     dimnames(pms) <- NULL
     theSumm <- basicRMA(pms, pnVec[idx], FALSE, FALSE)
-    
-##     theSumm <- .Call("rma_c_complete_copy", pms, pms,
-##                      pnVec[idx], ngenes,  body(bg.dens),
-##                      new.env(), FALSE, FALSE,
-##                      as.integer(2), PACKAGE="oligo")
-    
     save(theSumm, file=paste(randomName, i, "summ", sep="."))
     if (!snpcnv){
       sqs <- sqsFrom(theSumm)
@@ -481,14 +470,14 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
   
   if (!snpcnv){
     finalSQS <- sqsFrom(finalSumm)
-    ata <- antisenseThetaA(finalSQS)
-    atb <- antisenseThetaB(finalSQS)
-    sta <- senseThetaA(finalSQS)
-    stb <- senseThetaB(finalSQS)
+    ata <- allele(finalSQS, "A", "antisense")
+    atb <- allele(finalSQS, "B", "antisense")
+    sta <- allele(finalSQS, "A", "sense")
+    stb <- allele(finalSQS, "B", "sense")
   }else{
     finalSQS <- sqsFrom.SnpCnv(finalSumm)
-    ta <- thetaA(finalSQS)
-    tb <- thetaB(finalSQS)
+    ta <- allele(finalSQS, "A")
+    tb <- allele(finalSQS, "B")
   }
   rm(finalSQS)
   
@@ -497,12 +486,12 @@ justCRLMM2 <- function(filenames, batch_size=10000, chr=1,
   snr <- exp(colMeans(log(theSNR)))
   pacc <- LLR2conf(finalCalls, finalConfs, snr, pkgname)
   if (!snpcnv){
-    out <- new("SnpCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
-               antisenseThetaA=ata, antisenseThetaB=atb, senseThetaA=sta, senseThetaB=stb)
+    out <- new("SnpSuperSet", call=finalCalls, callProbability=pacc, LLR=finalConfs,
+               antisenseAlleleA=ata, antisenseAlleleB=atb, senseAlleleA=sta, senseAlleleB=stb)
     rm(ata, atb, sta, stb)
   }else{
-    out <- new("SnpCnvCallSetPlus", calls=finalCalls, callsConfidence=pacc, LLR=finalConfs,
-               thetaA=ta, thetaB=tb)
+    out <- new("SnpSuperSet", call=finalCalls, callProbability=pacc, LLR=finalConfs,
+               alleleA=ta, alleleB=tb)
     rm(ta, tb)
   }
 
@@ -578,7 +567,6 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
   theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
 
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
@@ -703,10 +691,10 @@ justCRLMMv2 <- function(filenames, tmpdir, batch_size=40000,
   save(finalDist, file=file.path(tmpdir, "finalDist.rda"))
   
   finalSQS <- sqsFrom(finalSumm)
-  ata <- antisenseThetaA(finalSQS)
-  atb <- antisenseThetaB(finalSQS)
-  sta <- senseThetaA(finalSQS)
-  stb <- senseThetaB(finalSQS)
+  ata <- allele(finalSQS, "A", "antisense")
+  atb <- allele(finalSQS, "B", "antisense")
+  sta <- allele(finalSQS, "A", "sense")
+  stb <- allele(finalSQS, "B", "sense")
   rm(finalSQS)
   colnames(ata) <- colnames(atb) <- colnames(sta) <- colnames(stb) <- sns
 
@@ -782,7 +770,6 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
   snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
   snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
   theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
 
   prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
@@ -813,13 +800,13 @@ justCRLMMv3 <- function(filenames, tmpdir, batch_size=40000,
     colnames(theSumm) <- sns
     sqs <- sqsFrom(theSumm)
 
-    saveAppendMatrix(antisenseThetaA(sqs),
+    saveAppendMatrix(allele(sqs, "A", "antisense"),
                      file.path(tmpdir, "alleleA-antisense.txt"), i)
-    saveAppendMatrix(antisenseThetaB(sqs),
+    saveAppendMatrix(allele(sqs, "B", "antisense"),
                      file.path(tmpdir, "alleleB-antisense.txt"), i)
-    saveAppendMatrix(senseThetaA(sqs),
+    saveAppendMatrix(allele(sqs, "A", "sense"),
                      file.path(tmpdir, "alleleA-sense.txt"), i)
-    saveAppendMatrix(senseThetaB(sqs),
+    saveAppendMatrix(allele(sqs, "B", "sense"),
                      file.path(tmpdir, "alleleB-sense.txt"), i)
 
     annotation(sqs) <- pkgname

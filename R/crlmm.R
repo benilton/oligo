@@ -17,7 +17,7 @@ getSnpFragmentLength <- function(object){
 snpGenderCall <- function(object){
   XIndex=getChrXIndex(object)
   tmp=(median(getA(object), na.rm=TRUE))
-  if (class(object) == "SnpQSet"){
+  if (bothStrands(object)){
     a=apply(getA(object)[XIndex,,],2,median, na.rm=TRUE)
   }else{
     a=apply(getA(object)[XIndex,],2,median, na.rm=TRUE)
@@ -57,7 +57,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   }
 ##  rm(tmp)
 
-  if (class(object) == "SnpQSet"){
+  if (bothStrands(object)){
     pis <- array(0,dim=c(I,J,3,2))
     fs <- array(0,dim=c(I,J,2))
     snr <- array(0,dim=J)
@@ -81,7 +81,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   fix <- which(is.na(L))
   L[fix] <- median(L, na.rm=T)
   rm(fix)
-  if (class(object) == "SnpQSet"){
+  if (bothStrands(object)){
     L <- cbind(L,L)
     l <- as.numeric(L[idx, ])
     L <- as.numeric(L)
@@ -94,7 +94,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
   for(j in 1:J){
     Y <- getM(object[,j])
     A <- getA(object[,j])
-    if (class(object) == "SnpQSet"){
+    if (bothStrands(object)){
       Y <- Y[,1,]
       A <- A[,1,]
     }
@@ -107,7 +107,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1],Y[Y>mus[3]]-mus[3])),3)
     sigmas[2] <- sigmas[2]/2
 
-    if (class(object) == "SnpQSet"){
+    if (bothStrands(object)){
       a <- as.numeric(A[idx, ])
       y <- as.numeric(Y[idx, ])
     }else{
@@ -181,7 +181,7 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
     LogLik <- rowSums(z)
     z <- sweep(z, 1, LogLik, "/")
 
-    if (class(object) == "SnpQSet"){
+    if (bothStrands(object)){
       fs[,j,] <- matrix((pred3-pred1)/2,ncol=2)
       for(k in 1:3){
         pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
@@ -662,7 +662,7 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
   rparams <- getAffySnpGenotypeRegionParams(object, myCalls, fs,
                                             subset=Index,verbose=verbose, sqsClass=class(object))
   rm(myCalls); ## gc()
-  if (class(object) == "SnpQSet"){
+  if (bothStrands(object)){
     oneStrand <- apply(is.na(getM(object[,1])[,1,]), 1,
                        function(v) ifelse(length(ll <- which(v))==0, 0, ll))
     rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=verbose)
@@ -674,7 +674,7 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
 ##  save(rparams, params, file=paste(prefix, "ParamsBeforeRec.rda", sep=""))
   rm(myenv, Index)
 
-  if (class(object) == "SnpQSet"){
+  if (bothStrands(object)){
     myDist <- getAffySnpDistance(object, params, fs)
     save(myDist, file=paste(prefix, "distFile.rda", sep=""))
     myDist[,,-2,] <- balance*myDist[,,-2,]
@@ -704,7 +704,7 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
     rm(myCalls)
     ## gc()
 
-    if (class(object) == "SnpQSet"){
+    if (bothStrands(object)){
       rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=verbose)
       myDist <- getAffySnpDistance(object, rparams, fs, verbose=verbose)
       myDist[,,-2,] <- balance*myDist[,,-2,]

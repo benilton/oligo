@@ -165,7 +165,7 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
                            NgsDate2Posix(date1), NgsDate2Posix(date2))
   colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
 
-  out <- new("TilingFeatureSet2",
+  out <- new("TilingFeatureSet",
              channel1=channel1Intensities,
              channel2=channel2Intensities,
              manufacturer="NimbleGen",

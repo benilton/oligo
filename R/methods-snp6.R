@@ -314,22 +314,22 @@ getCrlmmSummaries <- function(tmpdir){
   snpcnv <- length(grep("genomewidesnp", annotation)) > 0
   if (snpcnv){
     summaries <- c("alleleA", "alleleB")
-    tmp <- new("SnpCnvCallSetPlus",
-               calls = readSummaries("calls", tmpdir),
-               callsConfidence = readSummaries("conf", tmpdir),
-               thetaA = readSummaries("alleleA", tmpdir),
-               thetaB = readSummaries("alleleB", tmpdir),
-               F = readSummaries("fs", tmpdir))
+    tmp <- new("SnpSuperSet",
+               call=readSummaries("calls", tmpdir),
+               callProbability=readSummaries("conf", tmpdir),
+               alleleA=readSummaries("alleleA", tmpdir),
+               alleleB=readSummaries("alleleB", tmpdir),
+               F=readSummaries("fs", tmpdir))
   }else{
-    tmp <- new("SnpCallSetPlus",
-               calls = readSummaries("calls", tmpdir),
-               callsConfidence = readSummaries("conf", tmpdir),
-               senseThetaA = readSummaries("alleleA-sense", tmpdir),
-               senseThetaB = readSummaries("alleleB-sense", tmpdir),
-               antisenseThetaA = readSummaries("alleleA-antisense", tmpdir),
-               antisenseThetaB = readSummaries("alleleB-antisense", tmpdir),
-               antisenseF = readSummaries("antisense-f", tmpdir),
-               senseF = readSummaries("sense-f", tmpdir))
+    tmp <- new("SnpSuperSet",
+               call=readSummaries("calls", tmpdir),
+               callProbability=readSummaries("conf", tmpdir),
+               senseAlleleA=readSummaries("alleleA-sense", tmpdir),
+               senseAlleleB=readSummaries("alleleB-sense", tmpdir),
+               antisenseAlleleA=readSummaries("alleleA-antisense", tmpdir),
+               antisenseAlleleB=readSummaries("alleleB-antisense", tmpdir),
+               antisenseF=readSummaries("antisense-f", tmpdir),
+               senseF=readSummaries("sense-f", tmpdir))
   }
   annotation(tmp) <- annotation
   phenoData(tmp) <- new("AnnotatedDataFrame",

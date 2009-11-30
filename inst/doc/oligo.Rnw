@@ -15,7 +15,7 @@
 
 \begin{document}
 \title{An Introduction to the Oligo Package}
-\date{March, 2007}
+\date{November, 2009}
 \author{Benilton Carvalho}
 \maketitle
 
@@ -119,50 +119,12 @@ average intensity and fragment length in the log-ratio scale. These
 adjustments may take long time to run, depending on the combination of
 number of samples and computer resources available.
 
-%% \textbf{A word of warning}: the \Rmethod{crlmm()} method searches for a
-%% variable \Robject{gender} in the \Rclass{phenoData} slot of the
-%% \Rclass{SnpQSet} object. If it fails to find that variable, it will try
-%% estimate the gender from the data. If there is not enough discrimination
-%% power to estimate the gender, the following error message will be
-%% returned:
-%% 
-%% {\bf empty cluster: try a better set of initial centers}
-%% 
-%% Increasing the sample size is one of the possible solutions, although
-%% the preferred one is to have \Robject{gender} already defined in the
-%% \Rclass{phenoData} slot.
-
-%% The \Rclass{phenoData} slot includes covariates about the
-%% samples. Genotyping and copy number analyses often make use of gender
-%% information in order to provide more precise inferences. The code
-%% below exemplifies the creation of the \Rclass{phenoData} object.
-%% 
-%% <<setPD>>=
-%% aboutSamples <- data.frame(gender=c("female", "female", "male"))
-%% rownames(aboutSamples) <- basename(fullFilenames)
-%% aboutVars <- data.frame(labelDescription="male/female")
-%% rownames(aboutVars) <- "gender"
-%% pd <- new("AnnotatedDataFrame",
-%%           data=aboutSamples,
-%%           varMetadata=aboutVars)
-%% @ 
-%% 
-%% <<crlmm, cache=TRUE>>=
-%% crlmmOut <- justCRLMM(fullFilenames, phenoData=pd, verbose=FALSE)
-%% @ 
 
 <<crlmm>>=
 crlmm(fullFilenames, outputDir, verbose=FALSE)
 @ 
 
 The \Rfunction{crlmm} method does not return an object to the R session. Instead, it saves the objects to disk, as not all systems are guaranteed to meet the memory requirements that \Rclass{SnpCallSetPlus} (for 100K and 500K arrays) or \Rclass{SnpCnvCallSetPlus} (for SNP 5.0 and SNP 6.0 arrays) objects might need. For convenience, the \Rfunction{getCrlmmSummaries} will read the information from disk and make a \Rclass{SnpCallSetPlus} or \Rclass{SnpCnvCallSetPlus} object available to the user.
-
-%% The \Robject{crlmmOut} object above belongs to the \Rclass{SnpCallSet}
-%% class and contains the genotype calls and confidence measures
-%% associated to the calls, represented respectively by the
-%% \Robject{calls} and \Robject{callsConfidence} matrices. These matrices
-%% can be accessed using the methods of the same name as demonstrated
-%% below:
 
 <<theCalls>>=
 crlmmOut <- getCrlmmSummaries(outputDir)
