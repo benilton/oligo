@@ -745,12 +745,12 @@ crlmm.old <- function(object, correction=NULL, recalibrate=TRUE,
                                      row.names=c("crlmmSNR"))))
   }
 
-  return(new("SnpCallSet",
+  return(new("SnpSet",
              phenoData=addPhenoData,
              experimentData=experimentData(object),
              annotation=annotation(object),
-             calls=myCalls,
-             callsConfidence=pacc,
+             call=myCalls,
+             callProbability=pacc,
              LLR=LLR))
 }
 

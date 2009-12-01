@@ -448,8 +448,6 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
   }
   reference <- sort(reference)
 
-  
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
   if (verbose){
     message("Normalizing and summarizing.")
     pb <- txtProgressBar(min=1, max=length(celFiles), style=3, initial=1)
@@ -468,11 +466,6 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
 
     theSumm <- matrix(basicRMA(pms, pnVec, FALSE, FALSE),
                       ncol=2, byrow=TRUE)
-    
-##     theSumm <- matrix(.Call("rma_c_complete_copy", pms, pms, pnVec,
-##                             nSnpAlleleCombinations, body(bg.dens),
-##                             new.env(), FALSE, FALSE, as.integer(2),
-##                             PACKAGE="oligo")[,1], ncol=2, byrow=TRUE)
     rm(pms); gc()
     correction <- fitAffySnpMixture56(theSumm, verbose=FALSE)
     for (j in 1:length(filenames)){

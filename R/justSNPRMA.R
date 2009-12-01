@@ -61,8 +61,6 @@ justSNPRMA <- function(filenames,
   pnVec <- pnVec[idx]
   rm(idx)
 
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
-
   theSumm <- basicRMA(tmpExprs, pnVec, FALSE, FALSE)
   
   rm(tmpExprs, pnVec)
