@@ -145,3 +145,7 @@ sampleNames were different.
 11-12-2009: B Carvalho
 
 ** added rma() for quick and informal inspection of CNPs
+
+12-02-2009: B Carvalho - committed version 1.11.6
+
+** brought methods from oligoClasses

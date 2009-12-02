@@ -240,6 +240,7 @@ SEXP R_read_xys_files(SEXP filenames, SEXP verbosity){
 	      CHAR(STRING_ELT(filenames, 0)),
 	      CHAR(STRING_ELT(filenames, i)));
       }
+      Free(d1); // Missed: 12/02/09
     }
   Free(d0);
   if (verbose) Rprintf("Done.\n");
@@ -259,8 +260,8 @@ SEXP R_read_xys_files(SEXP filenames, SEXP verbosity){
 		 ptr2xy, i, nrows, verbose);
     d0 = xys_header_field(CHAR(STRING_ELT(filenames, i)), "date=");
     SET_STRING_ELT(dates, i, mkChar(d0));
+    Free(d0);
   }
-  Free(d0);
 
   PROTECT(output = allocVector(VECSXP, 3));
   SET_VECTOR_ELT(output, 0, xy);

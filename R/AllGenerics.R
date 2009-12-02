@@ -19,3 +19,22 @@ setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
 setGeneric("genotype", function(object, ...) standardGeneric("genotype"))
 
 setGeneric("getContainer", function(object, probeType=c("pm", "bg")) standardGeneric("getContainer"))
+
+##
+setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
+setGeneric("bgindex", function(object, ...) standardGeneric("bgindex"))
+setGeneric("pmindex", function(object, ...) standardGeneric("pmindex"))
+setGeneric("mmindex", function(object, ...) standardGeneric("mmindex"))
+setGeneric("bgSequence", function(object, ...) standardGeneric("bgSequence"))
+setGeneric("pmSequence", function(object, ...) standardGeneric("pmSequence"))
+setGeneric("mmSequence", function(object) standardGeneric("mmSequence"))
+setGeneric("pmOffset", function(object) standardGeneric("pmOffset"))
+setGeneric("pmChr", function(object) standardGeneric("pmChr"))
+setGeneric("pmFragmentLength", function(object) standardGeneric("pmFragmentLength"))
+setGeneric("pmAllele", function(object) standardGeneric("pmAllele"))
+setGeneric("pmStrand", function(object) standardGeneric("pmStrand"))
+setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
+setGeneric("getPlatformDesign", function(object) standardGeneric("getPlatformDesign"))
+setGeneric("getX", function(object, type) standardGeneric("getX"))
+setGeneric("getY", function(object, type) standardGeneric("getY"))
+
