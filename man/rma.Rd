@@ -3,6 +3,7 @@
 \alias{rma,ExpressionFeatureSet-method}
 \alias{rma,ExonFeatureSet-method}
 \alias{rma,GeneFeatureSet-method}
+\alias{rma,SnpCnvFeatureSet-method}
 \title{RMA - Robust Multichip Average algorithm}
 \description{
   Robust Multichip Average methodology. This will convert an

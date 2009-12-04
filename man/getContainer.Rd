@@ -15,7 +15,7 @@ getContainer(object, probeType)
 }
 \arguments{
   \item{object}{
-    A \code{TilingFeatureSet} or \code{TilingFeatureSet2} object.
+    A \code{TilingFeatureSet} or \code{TilingFeatureSet} object.
 }
   \item{probeType}{
     String describing which probes to query ('pm', 'bg')

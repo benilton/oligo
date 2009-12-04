@@ -47,7 +47,7 @@ stuffForXYSandCELreaders <- function(filenames,
     ##if empty pdata filename are samplenames
 
     cat("Incompatible phenoData object. Created a new one.\n")
-    samplenames <- sub("^/?([^/]*/)*", "", unlist(filenames), extended=TRUE)
+    samplenames <- basename(unlist(filenames))
 
     if(nwells>1){
       wells <- paste(".",as.character(unique(get(designname)@lookup$container)),sep="")

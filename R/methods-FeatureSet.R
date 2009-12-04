@@ -73,10 +73,8 @@ setMethod("boxplot", signature(x="ExpressionSet"),
           })
 
 setMethod("image", signature(x="FeatureSet"),
-          function(x, which=0, transfo=log2, col=gray((0:64)/64), ...){
-            if (which == 0){
-              which <- 1:length(x)
-            }
+          function(x, which, transfo=log2, col=gray((0:64)/64), ...){
+            if (missing(which)) which <- 1:ncol(x)
             if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
             geom <- geometry(getPD(x))
             if (tolower(manufacturer(x)) != "affymetrix"){
@@ -179,9 +177,6 @@ setMethod("getY", "FeatureSet",
 
 ## moved back from oligoClasses
 
-setMethod("length", signature(x="FeatureSet"),
-          function(x) nrow(pData(x)))
-
 setMethod("bgSequence",
           signature(object="FeatureSet"),
           function(object){
@@ -222,11 +217,6 @@ setMethod("pmChr", "FeatureSet",
             tmp <- dbGetQuery(conn, sql)
             tmp <- tmp[order(tmp[["fid"]]),]
             tmp[["chrom"]]
-          })
-
-setMethod("geneNames", "FeatureSet",
-          function(object){
-            geneNames(getPlatformDesign(object))
           })
 
 setMethod("pmindex", "FeatureSet",

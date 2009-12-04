@@ -28,6 +28,8 @@ importMethodsFrom(DBI, dbGetQuery)
 
 ## Needed from Biobase
 importClassesFrom(Biobase, ExpressionSet)
+importFrom("Biobase", "se.exprs<-")
+importFrom("Biobase", "se.exprs")
 importMethodsFrom(Biobase, annotatedDataFrameFrom, annotation,
                   "annotation<-", experimentData, exprs, featureData,
                   "featureData<-", featureNames, "featureNames<-",
@@ -46,11 +48,9 @@ import(oligoClasses)
 exportMethods("boxplot",
               "bg",
               "bg<-",
-              "bgIndex",
               "bgSequence",
               "db",
               "exprs",
-              "geneNames",
               "getContainer",
               "getPlatformDesign",
               "getX",
@@ -58,7 +58,6 @@ exportMethods("boxplot",
               "hist",
               "image",
               "initialize",
-              "length",
               "MAplot",
               "mm",
               "mm<-",

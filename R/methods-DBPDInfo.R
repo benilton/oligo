@@ -56,11 +56,6 @@ setMethod("probeNames", "DBPDInfo",
             tmp[order(tmp[["fid"]], tmp[["man_fsetid"]]), "man_fsetid"]
           })
 
-setMethod("geneNames", "DBPDInfo",
-          function(object) {
-              unique(probeNames(object))
-          })
-
 setMethod("pmSequence", "AffySNPPDInfo",
           function(object){
             sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"

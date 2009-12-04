@@ -11,8 +11,6 @@ basecontent(seq)
   \item{seq}{character vector of length \code{n} containg a valid
     sequence (A/T/C/G)}
 }
-\details{
-}
 \value{
   \code{matrix} with \code{n} rows and 4 columns with the counts for
   each base.
