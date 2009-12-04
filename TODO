@@ -1,4 +1,5 @@
-oligo's TODO
-- Move code back from oligoClasses (leave there *only* class definitions and accessors for elements of those classes)
+- improve documentation
+- add support for big datasets
+- add support for parallel computing
 - add examples, so package is tested whenever it's built and modifications do not break current code
 - will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed
