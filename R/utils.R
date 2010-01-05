@@ -138,7 +138,8 @@ checkChipTypes <- function(filenames, verbose=TRUE, manufacturer, useAffyio){
 getMetadata <- function(theMatrix, filenames, phenoData, featureData,
                         experimentData, notes, sampleNames, datetime){
   stopifnot(!missing(theMatrix), !missing(filenames),
-            is.matrix(theMatrix), is.character(filenames),
+            ifelse(isPackageLoaded("bigmemory"), is.big.matrix(theMatrix), is.matrix(theMatrix)),
+            is.character(filenames),
             ncol(theMatrix) == length(filenames))
   if (!checkValidPhenodataForFiles(filenames, phenoData)){
     phenoData <- new("AnnotatedDataFrame",
@@ -161,7 +162,7 @@ getMetadata <- function(theMatrix, filenames, phenoData, featureData,
   if (missing(experimentData))
     experimentData <- createDefaultMiame(filenames)
   if (missing(featureData))
-    featureData <- annotatedDataFrameFrom(theMatrix,byrow=TRUE)
+    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix,byrow=TRUE)
 
   out <- list(filenames=filenames,
               phenoData=phenoData,
@@ -177,7 +178,8 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
                          datetime1, datetime2){
   stopifnot(!missing(theMatrix1), !missing(theMatrix2),
             !missing(filesChannel1), !missing(filesChannel2),
-            is.matrix(theMatrix1), is.matrix(theMatrix2),
+            ifelse(isPackageLoaded("bigmemory"), is.big.matrix(theMatrix1), is.matrix(theMatrix1)),
+            ifelse(isPackageLoaded("bigmemory"), is.big.matrix(theMatrix2), is.matrix(theMatrix2)),
             is.character(filesChannel1), is.character(filesChannel2),
             ncol(theMatrix1) == length(filesChannel1),
             ncol(theMatrix2) == length(filesChannel2),
@@ -227,7 +229,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
   if (missing(experimentData))
     experimentData <- createDefaultMiame(filesChannel1)
   if (missing(featureData))
-    featureData <- annotatedDataFrameFrom(theMatrix1,byrow=TRUE)
+    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix1,byrow=TRUE)
 
   out <- list(filesChannel1=filesChannel1,
               filesChannel2=filesChannel2,
@@ -383,4 +385,13 @@ AffyDate2Posix <- function(txt){
     out <- original
   }
   out
+}
+
+isPackageLoaded <- function(pkg){
+  pkg <- paste("package:", pkg, sep="")
+  pkg %in% search()
+}
+
+isClusterRunning <- function(){
+  is(getOption("cluster"), "cluster")
 }
