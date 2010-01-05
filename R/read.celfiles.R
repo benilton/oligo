@@ -1,11 +1,9 @@
 read.celfiles <- function( ..., filenames, pkgname, phenoData,
-                          featureData, experimentData, protocolData,
-                          notes, verbose=TRUE, sampleNames,
-                          rm.mask=FALSE, rm.outliers=FALSE,
-                          rm.extra=FALSE, checkType=TRUE,
-                          useAffyio=TRUE, intensityFile){
-  ## TODO: remove useAffyio
-  ##       add protocolData with scandate
+                          featureData, experimentData, notes,
+                          verbose=TRUE, sampleNames, rm.mask=FALSE,
+                          rm.outliers=FALSE, rm.extra=FALSE,
+                          sd=FALSE, checkType=TRUE, useAffyio=TRUE){
+  
   filenames <- getFilenames(filenames=filenames, ...)
   checkValidFilenames(filenames)
   if (checkType)
@@ -23,42 +21,29 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   }else{
     stop("The annotation package, ", pkgname, ", could not be loaded.")
   }
-
-  headdetails <- .Call("ReadHeader", as.character(filenames[1]),
-                       PACKAGE="affyio")
-  if (missing(sampleNames)){
-    dns <- list(as.character(1:prod(headdetails[[2]])),
-                basename(filenames))
-  }else{
-    dns <- list(as.character(1:prod(headdetails[[2]])),
-                sampleNames)
-  }
   
-  if (isPackageLoaded("bigmemory")){
-    stopifnot(!missing(intensityFile))
-    tmpExprs <- filebacked.big.matrix(prod(headdetails[[2]]),
-                                      length(filenames), type="double",
-                                      backingfile=basename(intensityFile),
-                                      backingpath=dirname(intensityFile),
-                                      descriptorfile=paste(basename(intensityFile),
-                                        "desc", sep="."), dimnames=dns)
-    for (i in 1:length(filenames)){
-      if (verbose) message("Reading ", filenames[i])
-      tmpExprs[,i] <- read.celfile(filenames[i], TRUE)[["INTENSITY"]][["MEAN"]]
-    }
-    rm(i)
-  }else{
-    intensityFile <- NULL
+  arrayType <- kind(get(pkgname))
+  if (useAffyio){
+    headdetails <- .Call("ReadHeader", as.character(filenames[1]),
+                         PACKAGE="affyio")
     tmpExprs <- .Call("read_abatch", filenames, rm.mask, rm.outliers,
                       rm.extra, headdetails[[1]], headdetails[[2]],
                       verbose, PACKAGE="affyio")
-    dimnames(tmpExprs) <- dns
+    rm(headdetails)
+  }else{
+    tmpExprs <- readCelIntensities2(filenames,
+                                    rm.outliers=rm.outliers,
+                                    rm.masked=rm.mask,
+                                    rm.extra=rm.extra,
+                                    verbose=verbose)
   }
-  rm(headdetails, dns)
-
   datetime <- GetAffyTimeDateAsString(filenames, useAffyio=useAffyio)
 
-  arrayType <- kind(get(pkgname))
+  metadata <- getMetadata(tmpExprs, filenames, phenoData, featureData,
+                          experimentData, notes, sampleNames, AffyDate2Posix(datetime))
+  colnames(tmpExprs) <- Biobase::sampleNames(metadata[["phenoData"]])
+
+  if (sd) warning("Reading in Standard Errors not yet implemented.\n")
   theClass <- switch(arrayType,
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
@@ -67,52 +52,77 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                      exon="ExonFeatureSet",
                      gene="GeneFeatureSet",
                      stop("Unknown array type: ", arrayType))
+  return(new(theClass, exprs=tmpExprs, manufacturer="Affymetrix",
+             annotation=pkgname, phenoData=metadata[["phenoData"]],
+             experimentData=metadata[["experimentData"]],
+             featureData=metadata[["featureData"]]))
   
-  out <- new(theClass)
-
-  ## assayData
-  slot(out, "assayData") <- assayDataNew(exprs=tmpExprs)
-
-  ## phenoData
-  if (missing(phenoData)){
-    pdd <- data.frame(exprs=filenames)
-    vmd <- data.frame(labelDescription="Filenames",
-                      channel=factor("exprs", levels=c("exprs", "_ALL_")))
-    phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
-    sampleNames(phenoData) <- colnames(tmpExprs)
-    rm(pdd, vmd)
-  }
-  slot(out, "phenoData") <- phenoData
-  rm(phenoData)
-  
-  ## featureData
-  if (missing(featureData))
-    featureData <- Biobase:::annotatedDataFrameFromMatrix(tmpExprs, byrow=TRUE)
-  slot(out, "featureData") <- featureData
-  rm(featureData)
-  
-  ## protocolData
-  if (missing(protocolData))
-    protocolData <- Biobase:::annotatedDataFrameFromMatrix(tmpExprs, FALSE)
-  slot(out, "protocolData") <- protocolData
-  rm(protocolData)
-  
-  slot(out, "manufacturer") <- "Affymetrix"
-  slot(out, "annotation") <- pkgname
-  slot(out, "intensityFile") <- intensityFile
-  if (validObject(out)){
-    return(out)
-  }else{
-    stop("Resulting object is invalid.")
-  }
-
 }
 
-## Now in oligoClasses
-## list.celfiles <-   function(...){
-##     files <- list.files(...)
-##     return(files[grep("\\.[cC][eE][lL]\\.[gG][zZ]$|\\.[cC][eE][lL]$", files)])
-## }
+list.celfiles <-   function(...){
+    files <- list.files(...)
+    return(files[grep("\\.[cC][eE][lL]\\.[gG][zZ]$|\\.[cC][eE][lL]$", files)])
+}
+
+## reimplementation of readCelIntensites from affxparser, allows for rm.mask, 
+## rm.outliers and rm.extra arguments as used in the affy package
+
+readCelIntensities2 <- function(filenames, indices=NULL,
+                                rm.masked=FALSE, rm.outliers=FALSE,
+                                rm.extra=FALSE, verbose=0){
+	if(rm.extra) rm.outliers=TRUE;rm.masked=TRUE;
+	if (length(filenames) == 0) 
+		stop("Argument 'filenames' is empty.")
+	filenames <- file.path(dirname(filenames), basename(filenames))
+	missing <- !file.exists(filenames)
+	if (any(missing)) {
+		missing <- paste(filenames[missing], collapse = ", ")
+		stop("Cannot read CEL files. Some files not found: ", 
+				missing)
+	}
+	if (length(verbose) != 1) {
+		stop("Argument 'verbose' must be a single integer.")
+	}
+	if (!is.finite(as.integer(verbose))) {
+		stop("Argument 'verbose' must be an integer: ", verbose)
+	}
+	verbose <- as.integer(verbose)
+	if (verbose > 1) {
+		cat("Entering readCelIntensities2()\n ... reading headers\n")
+	}
+	all.headers <- lapply(as.list(filenames), readCelHeader)
+	chiptype <- unique(sapply(all.headers, function(x) x$chiptype))
+	if (length(chiptype) != 1) {
+		warning("The CEL files do not have the same chiptype.")
+	}
+	nrows <- unique(sapply(all.headers, function(x) x$rows))
+	ncols <- unique(sapply(all.headers, function(x) x$cols))
+	if (length(nrows) != 1 || length(ncols) != 1) {
+		stop("The CEL files dimension do not match.")
+	}
+	nfiles <- length(filenames)
+	if (verbose > 0) {
+		cat(" ... allocating memory for intensity matrix\n")
+	}
+	if (is.null(indices)) {
+		intensities <- matrix(NA, nrow = nrows * ncols, ncol = nfiles)
+	}
+	else {
+		intensities <- matrix(NA, nrow = length(indices), ncol = nfiles)
+	}
+	colnames(intensities) <- filenames
+	for (i in 1:nfiles) {
+		if (verbose > 0) 
+			cat(" ... reading", filenames[i], "\n")
+		tmp <- readCel(filename = filenames[i], 
+				indices = indices, readIntensities = TRUE, readHeader = FALSE, 
+				readStdvs = FALSE, readPixels = FALSE, readXY = FALSE, 
+				readOutliers = rm.outliers, readMasked = rm.masked, verbose = (verbose - 1))
+		if(rm.outliers || rm.masked) tmp$intensities[c(tmp$outliers,tmp$masked)] <- NA
+		intensities[,i] <- tmp$intensities
+	}
+	intensities
+}
 
 ## TilingFeatureSet2
 

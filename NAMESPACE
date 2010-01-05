@@ -28,6 +28,8 @@ importMethodsFrom(DBI, dbGetQuery)
 
 ## Needed from Biobase
 importClassesFrom(Biobase, ExpressionSet)
+importFrom("Biobase", "se.exprs<-")
+importFrom("Biobase", "se.exprs")
 importMethodsFrom(Biobase, annotatedDataFrameFrom, annotation,
                   "annotation<-", experimentData, exprs, featureData,
                   "featureData<-", featureNames, "featureNames<-",
@@ -43,17 +45,54 @@ import(affyio)
 import(oligoClasses)
 
 ## Exporting
-exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
-              getPlatformDesign, getX, getY, hist, image, initialize,
-              MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-",
-              pmAllele, pmindex, pmFragmentLength, pmOffset, pmPosition,
-              pmSequence, pmStrand, probeNames, rma)
+exportMethods("boxplot",
+              "bg",
+              "bg<-",
+              "bgSequence",
+              "db",
+              "exprs",
+              "getContainer",
+              "getPlatformDesign",
+              "getX",
+              "getY",
+              "hist",
+              "image",
+              "initialize",
+              "MAplot",
+              "mm",
+              "mm<-",
+              "mmindex",
+              "mmSequence",
+              "pm",
+              "pm<-",
+              "pmAllele",
+              "pmindex",
+              "pmFragmentLength",
+              "pmOffset",
+              "pmPosition",
+              "pmSequence",
+              "pmStrand",
+              "probeNames",
+              "rma")
 
 ## Exported functions
-export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
-       sequenceDesignMatrix, list.celfiles, list.xysfiles,
-       readSummaries, getCrlmmSummaries, getNgsColorsInfo,
-       read.xysfiles2, read.celfiles2, basicRMA)
+export("basecontent",
+       "cleanPlatformName",
+       "read.celfiles",
+       "read.xysfiles",
+       "sequenceDesignMatrix",
+       "list.celfiles",
+       "list.xysfiles",
+       "readSummaries",
+       "getCrlmmSummaries",
+       "getNgsColorsInfo",
+       "read.xysfiles2",
+       "read.celfiles2",
+       "basicRMA")
 
 ## Exported functions for CRLMM
-export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
+export("crlmm",
+       "snprma",
+       "justSNPRMA",
+       "justCRLMM",
+       getPD)

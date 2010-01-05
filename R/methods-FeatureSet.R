@@ -163,6 +163,8 @@ setMethod("MAplot", "FeatureSet",
             if (length(arrays) > 1) par(ask=FALSE)
           })
 
+
+
 setMethod("getX", "FeatureSet",
           function(object, type){
             getX(getPD(object), type)
@@ -172,6 +174,8 @@ setMethod("getY", "FeatureSet",
           function(object, type){
             getY(getPD(object), type)
           })
+
+## moved back from oligoClasses
 
 setMethod("bgSequence",
           signature(object="FeatureSet"),
@@ -248,6 +252,16 @@ setMethod("pmPosition", "FeatureSet",
             tmp[["position"]]
           })
 
+setMethod("se.exprs",
+          signature(object="FeatureSet"),
+          function(object) {
+            assayDataElement(object,"se.exprs")
+          })
+setReplaceMethod("se.exprs",
+		signature(object="FeatureSet"),
+		function(object, value)
+                 assayDataElementReplace(object, "se.exprs", value))
+
 setMethod("kind",
           signature(object="FeatureSet"),
           function(object){
@@ -262,36 +276,3 @@ setMethod("getPlatformDesign",
             return(get(pdn,pos=paste("package:",pdn,sep="")))
           })
 getPD <- getPlatformDesign
-
-############################################
-### bgCorrect
-### normalize
-### summarize
-############################################
-
-bgCorrect <- function(object, method="rma", copy=TRUE){
-  objClass <- class(object)
-  stopifnot(objClass %in% c("matrix", "big.matrix"))
-  method <- match.arg(method, c("rma"))
-  if (method == "rma"){
-    if (objClass == "matrix"){
-      out <- rma.background.correct(object, copy=copy)
-      return(out)
-    }else{
-      if (!isClusterRunning()){
-        if (copy){
-          out <- deepcopy(object, type=typeof(object))
-          for (i in 1:ncol(object))
-            out[,i] <- rma.background.correct(object[, i, drop=FALSE])
-          return(out)
-        }else{
-          for (i in 1:ncol(object))
-            object[,i] <- rma.background.correct(object[, i, drop=FALSE])
-          return(object)
-        }
-      }else{
-        ## If cluster is not running
-      }
-    }
-  }
-}
