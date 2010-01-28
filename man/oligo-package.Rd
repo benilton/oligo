@@ -5,9 +5,14 @@
 The oligo package: a tool for low-level analysis of oligonucleotide arrays
 }
 \description{
-The \pkg{oligo} package handles oligonucleotide arrays: expression,
-tiling, SNP and exon chips. The supported manufacturers are Affymetrix
-and NimbleGen. The package provides tools for preprocessing.
+
+  The \pkg{oligo} package provides tools to preprocess different
+oligonucleotide arrays types: expression, tiling, SNP and exon
+chips. The supported manufacturers are Affymetrix and NimbleGen.
+
+It offers support to large datasets (when the \pkg{bigmemory} is loaded)
+and can execute preprocessing tasks in parallel (if, in addition to
+\pkg{bigmemory}, the \pkg{snow} package is also loaded).
 }
 
 \details{
@@ -23,7 +28,7 @@ types; sequence). These data packages packages are built using the
 
 For Affymetrix SNP arrays, users are asked to download the already built
 annotation packages from BioConductor. This is because these packages
-contain metadata that are not (yet) automatically created. The following
+contain metadata that are not automatically created. The following
 annotation packages are available:
 
 50K Xba  - pd.mapping50kxba.240
@@ -38,7 +43,7 @@ strongly recommend the use use the \pkg{crlmm} package, which implements
 a more efficient version of CRLMM.
 }
 \author{
-  Benilton Carvalho - \email{bcarvalh@jhsph.edu}
+  Benilton Carvalho - \email{carvalho@bclab.org}
 }
 
 \references{

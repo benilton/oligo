@@ -56,8 +56,13 @@ Once the package is loaded, we can easily get the location of the XYS files that
 
 To read the XYS files, we provide the \Rfunction{read.xysfiles} function, which also takes \Robject{phenoData}, \Robject{experimentData} and \Robject{featureData} objects and returns an appropriate subclass of \Rclass{FeatureSet}.
 <<ExpressionFeatureSet>>=
-  pd <- dir(extdata, pattern="phenoData", full.names=TRUE)
-  pd <- read.AnnotatedDataFrame(pd)
+##  pd <- dir(extdata, pattern="phenoData", full.names=TRUE)
+##  pd <- read.AnnotatedDataFrame(pd)
+  theData <- data.frame(Key=rep(c("brain", "universal reference"), each=3))
+  rownames(theData) <- basename(xys.files)
+  vMtData <- data.frame(channel=factor("_ALL_", levels=c("channel1", "channel2", "_ALL_")),
+                        labelDescription="Sample type")
+  pd <- new("AnnotatedDataFrame", data=theData, varMetadata=vMtData)
   maqc <- read.xysfiles(xys.files, phenoData=pd)
   class(maqc)
 @ %def

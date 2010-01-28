@@ -38,3 +38,17 @@ setGeneric("getPlatformDesign", function(object) standardGeneric("getPlatformDes
 setGeneric("getX", function(object, type) standardGeneric("getX"))
 setGeneric("getY", function(object, type) standardGeneric("getY"))
 
+###
+
+setGeneric("backgroundCorrect",
+           function(object, method="rma", copy=TRUE, verbose=TRUE)
+           standardGeneric("backgroundCorrect"))
+
+setGeneric("normalize",
+           function(object, method="quantile", copy=TRUE, verbose=TRUE)
+           standardGeneric("normalize"))
+
+setGeneric("summarize",
+           function(object, probes=rownames(object), method="medianpolish", verbose=TRUE)
+           standardGeneric("summarize"))
+

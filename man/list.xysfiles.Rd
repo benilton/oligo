@@ -1,12 +1,11 @@
-\name{list.celfiles}
-\alias{list.celfiles}
+\name{list.xysfiles}
 \alias{list.xysfiles}
-\title{List CEL/XYS files}
+\title{List XYS files}
 \description{
-  Lists the CEL/XYS files.
+  Lists the XYS files.
 }
 \usage{
-list.celfiles(...)
+list.xysfiles(...)
 }
 \arguments{
   \item{\dots}{parameters to be passed to \code{\link{list.files}}}
@@ -20,7 +19,6 @@ list.celfiles(...)
 }
 \examples{
 list.xysfiles()
-list.celfiles()
 }
 \seealso{\code{\link{list.files}}}
 \keyword{file}

@@ -129,7 +129,7 @@ The \Rfunction{crlmm} method does not return an object to the R session. Instead
 <<theCalls>>=
 crlmmOut <- getCrlmmSummaries(outputDir)
 calls(crlmmOut)[1:5,1:2]
-callsConfidence(crlmmOut)[1:5,1:2]
+confs(crlmmOut, FALSE)[1:5,1:2]
 @ 
 
 <<theCalls>>=

@@ -8,14 +8,12 @@
 }
 \usage{
 read.celfiles(..., filenames, pkgname, phenoData, featureData,
-experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
-rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE,
-useAffyio = TRUE)
+experimentData, protocolData, notes, verbose=TRUE, sampleNames,
+rm.mask=FALSE, rm.outliers=FALSE, rm.extra=FALSE, checkType=TRUE)
 
 read.celfiles2(channel1, channel2, pkgname, phenoData, featureData,
-experimentData, notes, verbose = TRUE, sampleNames, rm.mask = FALSE,
-rm.outliers = FALSE, rm.extra = FALSE, sd = FALSE, checkType = TRUE,
-useAffyio = TRUE)
+experimentData, protocolData, notes, verbose=TRUE, sampleNames,
+rm.mask=FALSE, rm.outliers=FALSE, rm.extra=FALSE, checkType=TRUE)
 }
 
 \arguments{
@@ -29,6 +27,7 @@ useAffyio = TRUE)
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}
   \item{experimentData}{\code{experimentData}}
+  \item{protocolData}{\code{protocolData}}
   \item{notes}{\code{notes}}
   \item{verbose}{\code{logical}}
   \item{sampleNames}{\code{character} vector with sample names (usually
@@ -36,11 +35,8 @@ useAffyio = TRUE)
   \item{rm.mask}{\code{logical}. Read masked?}
   \item{rm.outliers}{\code{logical}. Remove outliers?}
   \item{rm.extra}{\code{logical}. Remove extra?}
-  \item{sd}{\code{logical}. Read SD?}
   \item{checkType}{\code{logical}. Check type of each file? This can be
     time consuming.}
-  \item{useAffyio}{\code{logical}. Use 'affyio' instead of 'affxparser'
-    to read in CEL files.}
 }
 \value{
   \item{\code{ExpressionFeatureSet}}{if Expresssion arrays}
@@ -60,7 +56,7 @@ useAffyio = TRUE)
   error. If the annotation package is not available from BioConductor,
   one can use the \code{pdInfoBuilder} package to build one.
   }
-\seealso{\code{\link{list.celfiles}}, \code{\link{read.xysfiles}}}
+\seealso{\code{\link[oligoClasses]{list.celfiles}}, \code{\link{read.xysfiles}}}
 \examples{
 if(require(pd.mapping50k.xba240) & require(hapmap100kxba)){
 celPath <- system.file("celFiles", package="hapmap100kxba")

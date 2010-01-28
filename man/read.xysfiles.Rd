@@ -7,10 +7,12 @@
 }
 \usage{
 read.xysfiles(..., filenames, pkgname, phenoData, featureData,
-experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
+experimentData, protocolData, notes, verbose=TRUE, sampleNames,
+checkType=TRUE)
 
 read.xysfiles2(channel1, channel2, pkgname, phenoData, featureData,
-experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
+experimentData, protocolData, notes, verbose=TRUE, sampleNames,
+checkType=TRUE)
 }
 \arguments{
   \item{...}{file names}
@@ -24,6 +26,7 @@ experimentData, notes, verbose=TRUE, sampleNames, checkType=TRUE)
   \item{phenoData}{\code{phenoData}}
   \item{featureData}{\code{featureData}}
   \item{experimentData}{\code{experimentData}}
+  \item{protocolData}{\code{protocolData}}
   \item{notes}{\code{notes}}
   \item{verbose}{\code{verbose}}
   \item{sampleNames}{\code{character} vector with sample names (usually

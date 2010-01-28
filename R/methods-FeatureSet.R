@@ -13,7 +13,17 @@ setReplaceMethod("bg", signature(object="FeatureSet", value="matrix"),
 
 setMethod("pm", "FeatureSet",
           function(object, subset=NULL){
-            exprs(object)[pmindex(object, subset=subset),,drop=FALSE]
+            theClass <- class(exprs(object))
+            pmi <- pmindex(object, subset=subset)
+            if (theClass == "matrix"){
+              out <- exprs(object)[pmi,, drop=FALSE]
+            }else if (theClass == "big.matrix"){
+              dUID <- getDatasetUID(object)
+              pmFile <- paste("pm-", dUID, sep="")
+              out <- subsetBO(pmi, object=describe(exprs(object)),
+                              fname=pmFile)
+            }
+            return(out)
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
@@ -163,8 +173,6 @@ setMethod("MAplot", "FeatureSet",
             if (length(arrays) > 1) par(ask=FALSE)
           })
 
-
-
 setMethod("getX", "FeatureSet",
           function(object, type){
             getX(getPD(object), type)
@@ -174,8 +182,6 @@ setMethod("getY", "FeatureSet",
           function(object, type){
             getY(getPD(object), type)
           })
-
-## moved back from oligoClasses
 
 setMethod("bgSequence",
           signature(object="FeatureSet"),
@@ -252,16 +258,6 @@ setMethod("pmPosition", "FeatureSet",
             tmp[["position"]]
           })
 
-setMethod("se.exprs",
-          signature(object="FeatureSet"),
-          function(object) {
-            assayDataElement(object,"se.exprs")
-          })
-setReplaceMethod("se.exprs",
-		signature(object="FeatureSet"),
-		function(object, value)
-                 assayDataElementReplace(object, "se.exprs", value))
-
 setMethod("kind",
           signature(object="FeatureSet"),
           function(object){
@@ -276,3 +272,4 @@ setMethod("getPlatformDesign",
             return(get(pdn,pos=paste("package:",pdn,sep="")))
           })
 getPD <- getPlatformDesign
+

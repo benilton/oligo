@@ -1,3 +1,7 @@
+isMatrixLike <- function(obj){
+  is.big.matrix(obj) || is.matrix(obj)
+}
+
 cleanPlatformName <- function(x)
   gsub("[_-]", ".", paste("pd.", tolower(x), sep=""))
 
@@ -138,7 +142,7 @@ checkChipTypes <- function(filenames, verbose=TRUE, manufacturer, useAffyio){
 getMetadata <- function(theMatrix, filenames, phenoData, featureData,
                         experimentData, notes, sampleNames, datetime){
   stopifnot(!missing(theMatrix), !missing(filenames),
-            is.matrix(theMatrix), is.character(filenames),
+            isMatrixLike(theMatrix), is.character(filenames),
             ncol(theMatrix) == length(filenames))
   if (!checkValidPhenodataForFiles(filenames, phenoData)){
     phenoData <- new("AnnotatedDataFrame",
@@ -161,14 +165,13 @@ getMetadata <- function(theMatrix, filenames, phenoData, featureData,
   if (missing(experimentData))
     experimentData <- createDefaultMiame(filenames)
   if (missing(featureData))
-    featureData <- annotatedDataFrameFrom(theMatrix,byrow=TRUE)
+    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix,byrow=TRUE)
 
   out <- list(filenames=filenames,
               phenoData=phenoData,
               featureData=featureData,
               experimentData=experimentData)
 }
-
 
 getMetadata2 <- function(theMatrix1, theMatrix2,
                          filesChannel1, filesChannel2,
@@ -177,7 +180,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
                          datetime1, datetime2){
   stopifnot(!missing(theMatrix1), !missing(theMatrix2),
             !missing(filesChannel1), !missing(filesChannel2),
-            is.matrix(theMatrix1), is.matrix(theMatrix2),
+            isMatrixLike(theMatrix1), isMatrixLike(theMatrix2),
             is.character(filesChannel1), is.character(filesChannel2),
             ncol(theMatrix1) == length(filesChannel1),
             ncol(theMatrix2) == length(filesChannel2),
@@ -227,7 +230,7 @@ getMetadata2 <- function(theMatrix1, theMatrix2,
   if (missing(experimentData))
     experimentData <- createDefaultMiame(filesChannel1)
   if (missing(featureData))
-    featureData <- annotatedDataFrameFrom(theMatrix1,byrow=TRUE)
+    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix1,byrow=TRUE)
 
   out <- list(filesChannel1=filesChannel1,
               filesChannel2=filesChannel2,
@@ -252,7 +255,6 @@ basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                       verbose, PACKAGE="oligo")
   }
   colnames(theExprs) <- colnames(pmMat)
-  rownames(theExprs) <- pns
   return(theExprs)
 }
 
@@ -365,22 +367,81 @@ GetAffyTimeDateAsString <- function(filenames, useAffyio=TRUE){
 }
 
 NgsDate2Posix <- function(txt){
-  original <- txt
-  tmp <- gsub("(.* )(.{1,3}) ([0-9]{4})", "\\1\\3", txt)
-  out <- as.POSIXct(tmp, format="%A %B %d %H:%M:%S %Y")
-  if (any(is.na(out))){
-    warning("Returning dates/times as strings due to incompatibility.")
-    out <- original
+  if (!missing(txt)){
+    original <- txt
+    tmp <- gsub("(.* )(.{1,3}) ([0-9]{4})", "\\1\\3", txt)
+    out <- as.POSIXct(tmp, format="%A %B %d %H:%M:%S %Y")
+    if (any(is.na(out))){
+      warning("Returning dates/times as strings due to incompatibility.")
+      out <- original
+    }
+  }else{
+    out <- NULL
   }
   out
 }
 
 AffyDate2Posix <- function(txt){
-  original <- txt
-  out <- as.POSIXct(txt, format="%m/%d/%y %H:%M:%S")
-  if (any(is.na(out))){
-    warning("Returning dates/times as strings - format not recognized.")
-    out <- original
+  if (!missing(txt)){
+    original <- txt
+    out <- as.POSIXct(txt, format="%m/%d/%y %H:%M:%S")
+    if (any(is.na(out))){
+      warning("Returning dates/times as strings - format not recognized.")
+      out <- original
+    }
+  }else{
+    out <- NULL
   }
   out
 }
+
+isPackageLoaded <- function(pkg){
+  stopifnot(is.character(pkg))
+  pkg <- paste("package:", pkg, sep="")
+  pkg %in% search()
+}
+
+oligoBigObjectSupport <- function()
+  isPackageLoaded("bigmemory")
+
+oligoParallelSupport <- function()
+  is(getOption("cluster"), "cluster") && isPackageLoaded("snow")
+
+basicPhenoData <- function(mat, filenames){
+  pdd <- data.frame(exprs=filenames)
+  vmd <- data.frame(labelDescription="Filenames",
+                    channel=factor("exprs", levels=c("exprs", "_ALL_")))
+  phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
+  sampleNames(phenoData) <- colnames(mat)
+  return(phenoData)
+}
+
+basicPhenoData2 <- function(mat1, mat2, filenames1, filenames2){
+  stopifnot(identical(colnames(mat1), colnames(mat2)))
+  pdd <- data.frame(filenamesChannel1=filenames1,
+                    filenamesChannel2=filenames2)
+  vmd <- data.frame(labelDescription=c(
+                      "names of files used to create 'channel1'",
+                      "names of files used to create 'channel2'"),
+                    channel=factor(c("channel1", "channel2"),
+                      levels=c("channel1", "channel2", "_ALL_")))
+  phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
+  sampleNames(phenoData) <- colnames(mat1)
+  return(phenoData)
+}
+
+basicFeatureData <- function(mat){
+  Biobase:::annotatedDataFrameFromMatrix(mat, byrow=TRUE)
+}
+
+basicProtocolData <- function(mat){
+  Biobase:::annotatedDataFrameFromMatrix(mat, byrow=FALSE)
+}
+  
+genDatasetUID <- function(filenames){
+  digest(sapply(filenames, digest, algo="sha256", file=TRUE,
+                serialize=FALSE))
+}
+
+getDatasetUID <- function(object)
+  gsub("intensities.{0,1}-", "", basename(slot(object, "intensityFile")))[1]
