@@ -5,6 +5,7 @@
 **  
 **  I) HISTORY
 **
+**  Dec   02, 2009 - Fixed memory leak (forgotten Free(d0))
 **  July  30, 2009 - Removed 'dimnamesout' from
 **                   the variable definition in
 **                   R_read_xys_files

@@ -45,7 +45,7 @@ import(oligoClasses)
 ## Exporting
 exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
               getPlatformDesign, getX, getY, hist, image, initialize,
-              MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-",
+              MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-", pmChr,
               pmAllele, pmindex, pmFragmentLength, pmOffset, pmPosition,
               pmSequence, pmStrand, probeNames, rma)
 

@@ -2,19 +2,18 @@
   version <- packageDescription("oligo", field="Version")
   message(getBar())
   message("Welcome to oligo version ", version)
-  getLargeDataStatus()
-  getParallelStatus()
-  
+  setLargeDataOptions()
+  bm <- getLargeDataStatus()
+  snow <- getParallelStatus()
+
   setHook(packageEvent("bigmemory", "attach"),
           function(...){
             setLargeDataOptions(verbose=FALSE)
             getLargeDataStatus()
-  ##          getParallelStatus()
           })
   
   setHook(packageEvent("snow", "attach"),
           function(...){
-##            getLargeDataStatus()
             getParallelStatus()
           })
   

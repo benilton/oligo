@@ -326,11 +326,13 @@ basicMedianPolishBO <- function(psToSumm, inObj, outObj, probes,
     psList <- splitIndicesByLength(psToSumm, oligoProbesets())
     for (pss in psList){
       iIn <- unlist(pss)
-      tmp <- basicRMA(inObj[iIn,, drop=FALSE], pnVec=probes[iIn],
-                      normalize=FALSE, background=FALSE, verbose=TRUE)
+      inMatrix <- inObj[iIn,, drop=FALSE]
+      tmp <- basicRMA(inMatrix, pnVec=probes[iIn], normalize=FALSE,
+                      background=FALSE, verbose=TRUE)
+      rm(inMatrix, iIn)
       iOut <- match(rownames(tmp), probesets)
       outObj[iOut,] <- tmp
-      rm(tmp)
+      rm(tmp, iOut)
     }
     rm(inObj, outObj, psList)
   }
@@ -385,6 +387,8 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   ## normalize
   if (normalize){
     if (verbose) message("Normalizing...")
+    if (!exists("samplesByNode")) 
+      samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
     stats <- oLapply(samplesByNode, qnTargetStats, describe(pmMat), path, matInEnv=pmName)
     totalN <- sum(sapply(stats, "[[", "n"))
     total <- rowSums(sapply(stats, "[[", "total"))
