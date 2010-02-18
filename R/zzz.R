@@ -6,7 +6,7 @@
   bm <- getLargeDataStatus()
   snow <- getParallelStatus()
 
-  setHook(packageEvent("bigmemory", "attach"),
+  setHook(packageEvent("ff", "attach"),
           function(...){
             setLargeDataOptions(verbose=FALSE)
             getLargeDataStatus()
@@ -38,35 +38,32 @@ setLargeDataOptions <- function(nsamples=100, nprobesets=1000,
 }
 
 getLargeDataStatus <- function(verbose=TRUE){
-  bm <- isPackageLoaded("bigmemory")
-  if (bm){
-    if (verbose){
+  ld <- isPackageLoaded("ff")
+  if (verbose){
+    message(getBar())
+    message("Large dataset support for 'oligo': ", appendLF=FALSE)
+    if (ld){
+      message("Enabled")
       ns <- prettyNum(c(oligoProbesets(), oligoSamples()), big.mark=",")
-      message(getBar())
-      message("Large dataset support for 'oligo': Enabled")
       message("    - Probesets: ", ns[1])
       message("    - Samples..: ", ns[2])
       message("    - Path.....: ", oligoBigObjectPath())
-      message(getBar())
-    }
-  }else{
-    if (verbose){
-      message(getBar())
-      message("Large dataset support for 'oligo': Disabled")
-      message("     - Load 'bigmemory'")
-      message(getBar())
-    }
+    }else{
+      message("Disabled")
+      message("     - Load 'ff'")
+    }      
+    message(getBar())
   }
-  invisible(bm)
+  invisible(ld)
 }
 
 getParallelStatus <- function(verbose=TRUE){
   sn <- isPackageLoaded("snow")
   cl <- oligoParallelSupport()
-  bm <- isPackageLoaded("bigmemory")
-  if (!bm){  
+  ld <- isPackageLoaded("ff")
+  if (!ld){  
     message("Parallel computing support for 'oligo': Disabled")
-    message("     - Load 'bigmemory'")
+    message("     - Load 'ff'")
     if (!sn){
       message("     - Load 'snow'")
       message("     - Use options(cluster=makeCluster(...)")

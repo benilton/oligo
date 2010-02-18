@@ -185,3 +185,8 @@ sampleNames were different.
 
 ** exported pmChr
 ** fixed .onAttach
+
+02-18-2010: B Carvalho - v 1.11.15
+
+** support to large datasets is now given through 'ff'
+** digest is no longer a dependency

@@ -1,43 +1,38 @@
-smartReadCEL <- function(filenames, sampleNames, prefix="intensities-",
-                         path=oligoBigObjectPath(),
-                         uid=genDatasetUID(filenames), headdetails, verbose=TRUE){
-  dns <- list(as.character(1:prod(headdetails[[2]])),
-              sampleNames)
-  if (isPackageLoaded("bigmemory")){
-    bn <- paste(prefix, uid, sep="")
-    intensityFile <- file.path(path, bn)
-    bf <- basename(intensityFile)
-    dbf <- paste(bf, "desc", sep=".")
-    tmpExprs <- filebacked.big.matrix(prod(headdetails[[2]]),
-                                      length(filenames), type="double",
-                                      backingfile=bf, backingpath=path,
-                                      descriptorfile=dbf, dimnames=dns,
-                                      separated=TRUE)
-    rm(bf, dbf, bn)
+smartReadCEL <- function(filenames, sampleNames, headdetails,
+                         verbose=TRUE){
+
+  nr <- prod(headdetails[[2]])
+  dns <- list(as.character(1:nr), sampleNames)
+  
+  if (isPackageLoaded("ff")){
+    tmpExprs <- ff(vmode="double", dim=c(nr, length(filenames)),
+                   pattern=file.path(oligoBigObjectPath(),
+                     "intensities-"))
+    intensityFile <- filename(tmpExprs)
     samplesByNode <- splitIndicesByNode(1:length(filenames))
     oLapply(samplesByNode, oligoReadCels, headdetails, filenames,
-            describe(tmpExprs), path)
+            tmpExprs)
   }else{
     intensityFile <- NA_character_
     tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
                       headdetails[[1]], headdetails[[2]], verbose,
                       PACKAGE="affyio")
-    dimnames(tmpExprs) <- dns
   }
+  dimnames(tmpExprs) <- dns
   rm(headdetails, dns)
   return(list(exprMatrix=tmpExprs, intensityFile=intensityFile))
 }
 
-oligoReadCels <- function(cols, headdetails, filenames, desc,
-                          path=oligoBigObjectPath()){
+oligoReadCels <- function(cols, headdetails, filenames, out){
   ## runs on the nodes
   if (length(cols) > 0){
     grpCols <- splitIndicesByLength(cols, oligoSamples())
-    out <- attach.big.matrix(desc, backingpath=path)
+    open(out)
     for (theCols in grpCols)
       out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
                               FALSE, FALSE, headdetails[[1]],
                               headdetails[[2]], FALSE, PACKAGE="affyio")
+    close(out)
     rm(grpCols, out)
     gc()
   }
@@ -147,13 +142,11 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
     sampleNames <- basename(channel1)
 
   uid <- genDatasetUID(filenames)
-  results <- smartReadCEL(channel1, sampleNames, prefix="intensities1-",
-                          uid=uid, headdetails=headdetails)
+  results <- smartReadCEL(channel1, sampleNames, headdetails=headdetails)
   channel1Intensities <- results[["exprMatrix"]]
   intensityFile1 <- results[["intensityFile"]]
   rm(results)
-  results <- smartReadCEL(channel2, sampleNames, prefix="intensities2-",
-                          uid=uid, headdetails=headdetails)
+  results <- smartReadCEL(channel2, sampleNames, headdetails=headdetails)
   channel2Intensities <- results[["exprMatrix"]]
   intensityFile2 <- results[["intensityFile"]]
   rm(results, headdetails)

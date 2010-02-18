@@ -88,39 +88,42 @@ oligoBigObjectPath <- function(path){
 
 oLapply <- function(X, FUN, ...){
   if (oligoParallelSupport()){
-    requireClusterPkgSet(c("oligo", "bigmemory"))
+    requireClusterPkgSet(c("oligo", "ff"))
     parLapply(getCluster(), X, FUN, ...)
   }else{
     lapply(X, FUN, ...)
   }
 }
 
-loadAndKeep <- function(desc, path, name){
+loadAndKeep <- function(obj, name){
   envir <- .oligoPkgEnv
-  pkg <- "bigmemory"
+  pkg <- "ff"
   require(pkg, character.only=TRUE)
   if (exists(name, envir=envir))
     rm(list=name, envir=envir)
-  assign(name, attach.big.matrix(desc, backingpath=path), envir=envir)
+  assign(name, obj, envir=envir)
+  open(envir[[name]])
   TRUE
 }
 
-sendBO2PkgEnv <- function(desc, path, name){
+sendBO2PkgEnv <- function(obj, name){
   if (oligoParallelSupport()){
-    clusterCall(getCluster(), loadAndKeep, desc, path, name)
+    clusterCall(getCluster(), loadAndKeep, obj, name)
   }else{
-    loadAndKeep(desc, path, name)
+    loadAndKeep(obj, name)
   }
 }
 
-rmFromPkgEnv <- function(name){
-  f <- function(name){
+rmFromPkgEnv <- function(name, garbageCollect=FALSE){
+  f <- function(name, garbageCollect=FALSE){
     if (exists(name, envir=.oligoPkgEnv))
       rm(list=name, envir=.oligoPkgEnv)
+    if (garbageCollect)
+      gc()
   }
   if (oligoParallelSupport()){
-    clusterCall(getCluster(), f, name)
+    clusterCall(getCluster(), f, name, garbageCollect)
   }else{
-    f(name)
+    f(name, garbageCollect)
   }
 }

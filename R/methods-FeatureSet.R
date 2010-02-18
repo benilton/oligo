@@ -17,11 +17,9 @@ setMethod("pm", "FeatureSet",
             pmi <- pmindex(object, subset=subset)
             if (theClass == "matrix"){
               out <- exprs(object)[pmi,, drop=FALSE]
-            }else if (theClass == "big.matrix"){
-              dUID <- getDatasetUID(object)
-              pmFile <- paste("pm-", dUID, sep="")
-              out <- subsetBO(pmi, object=describe(exprs(object)),
-                              fname=pmFile)
+            }else if (theClass == "ff_matrix"){
+              out <- ffSubset(rows=pmi, object=exprs(object),
+                              prefix="pm-")
             }
             return(out)
           })

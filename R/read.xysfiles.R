@@ -1,37 +1,35 @@
-oligoReadXys <- function(cols, headdetails, filenames, desc, path=oligoBigObjectPath()){
+oligoReadXys <- function(cols, headdetails, filenames, out){
   if (length(cols) > 0){
     grpCols <- splitIndicesByLength(cols, oligoSamples())
-    out <- attach.big.matrix(desc, backingpath=path)
+    open(out)
     for (theCols in grpCols)
       out[, theCols] <- .Call("R_read_xys_files", filenames[theCols], FALSE)[["intensities"]]
+    close(out)
     rm(grpCols, out)
+    gc()
   }
   TRUE
 }
 
 
-smartReadXYS <- function(filenames, sampleNames, prefix="intensities-", path=oligoBigObjectPath(), uid=genDatasetUID(filenames), verbose=TRUE){
+smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
   ## this runs on the master node
-  if (isPackageLoaded("bigmemory")){
-    bn <- paste(prefix, uid, sep="")
-    intensityFile <- file.path(path, bn)
+  if (isPackageLoaded("ff")){
+    ## set filename here and location?
 
-    ## missing one read
+    ## wasting one read
     ## just to get nrow
     ## FIX ME
-    tmp <- .Call("R_read_xys_files", filenames[1], FALSE)[["intensities"]]
-    nr <- nrow(tmp)
-    rm(tmp)
-    dns <- list(as.character(1:nr), sampleNames)
-    tmpExprs <- big.matrix(nr, length(filenames), type="double",
-                           backingfile=basename(intensityFile),
-                           backingpath=path,
-                           descriptorfile=paste(basename(intensityFile),
-                           "desc", sep="."), dimnames=dns,
-                           separated=TRUE)
+    nr <- nrow(.Call("R_read_xys_files", filenames[1],
+                     FALSE)[["intensities"]])
+
+    tmpExprs <- ff(vmode="double", dim=c(nr, length(filenames)),
+                   dimnames=list(as.character(1:nr), sampleNames),
+                   pattern=file.path(oligoBigObjectPath(), "intensities-"))
+    intensityFile <- filename(tmpExprs)
+    
     samplesByNode <- splitIndicesByNode(1:length(filenames))
-    oLapply(samplesByNode, oligoReadXys, NULL, filenames,
-            describe(tmpExprs), path=path)
+    oLapply(samplesByNode, oligoReadXys, NULL, filenames, tmpExprs)
   }else{
     intensityFile <- NA_character_
     tmp <- .Call("R_read_xys_files", filenames, verbose)
@@ -40,7 +38,7 @@ smartReadXYS <- function(filenames, sampleNames, prefix="intensities-", path=oli
     rm(tmp)
     dimnames(tmpExprs) <- list(as.character(1:nrow(tmpExprs)), sampleNames)
   }
-  return(list(exprMatrix=tmpExprs, intensityFile=intensityFile))
+  return(list(intensityFile=intensityFile, exprMatrix=tmpExprs))
 }
 
 
@@ -68,55 +66,6 @@ readXysMatrix <- function(filenames){
   }
   list(intensities=tmpExprs, X=tmpE[["X"]], Y=tmpE[["Y"]])
 }
-
-
-## stuffForXYSandCELreaders <- function(filenames,
-##                                      phenoData=new("AnnotatedDataFrame"),
-##                                      description=NULL,
-##                                      notes="",
-##                                      verbose = FALSE,
-##                                      nwells = 1,
-##                                      designname=NULL) {
-##   
-##   nfiles <- length(filenames)
-##   n <- nfiles*nwells
-##   
-##   ## error if no file name !
-## 
-##   if (n == 0)
-##     stop("No file name given !")
-##   if(mode(filenames)!="character")
-##     stop("filenames must be of type character!")
-##   
-##   pdata <- pData(phenoData)
-##   if(dim(pdata)[1] != n) {
-## 
-##     ##if empty pdata filename are samplenames
-## 
-##     cat("Incompatible phenoData object. Created a new one.\n")
-##     samplenames <- basename(unlist(filenames))
-## 
-##     if(nwells>1){
-##       wells <- paste(".",as.character(unique(get(designname)@lookup$container)),sep="")
-##       samplenames <- as.character(t(outer(samplenames,wells,paste,sep="")))
-##     }
-##     
-##     pdata <- data.frame(sample=1:n, row.names=samplenames)
-##     phenoData <- new("AnnotatedDataFrame",
-##                      data=pdata,
-##                      varMetadata=data.frame(labelDescription="arbitrary numbering", row.names="sample"))
-##   }
-##   else samplenames <- rownames(pdata)
-##   
-##   if (is.null(description))
-##     {
-##       description <- new("MIAME")
-##       description@preprocessing$filenames <- filenames
-##       description@preprocessing$oligoversion <- packageDescription("oligo")$Version
-##     }
-##   
-##   return(list(filenames=filenames,samplenames=samplenames, phenoData=phenoData, description=description))
-## }
 
 read.xysfiles <- function(..., filenames, pkgname, phenoData,
                           featureData, experimentData, protocolData, notes,
@@ -146,7 +95,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   if (missing(sampleNames))
     sampleNames <- basename(filenames)
 
-  results <- smartReadXYS(filenames, sampleNames, path=oligoBigObjectPath())
+  results <- smartReadXYS(filenames, sampleNames)
   tmpExprs <- results[["exprMatrix"]]
   intensityFile <- results[["intensityFile"]]
   rm(results)
@@ -219,13 +168,11 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
 
   if (missing(sampleNames))
     sampleNames <- basename(channel1)
-  results <- smartReadXYS(channel1, sampleNames, prefix="intensities1-",
-                          path=oligoBigObjectPath(), uid=uid)
+  results <- smartReadXYS(channel1, sampleNames)
   channel1Intensities <- results[["exprMatrix"]]
   intensityFile1 <- results[["intensityFile"]]
   rm(results)
-  results <- smartReadXYS(channel2, sampleNames, prefix="intensities2-",
-                          path=oligoBigObjectPath(), uid=uid)
+  results <- smartReadXYS(channel2, sampleNames)
   channel2Intensities <- results[["exprMatrix"]]
   intensityFile2 <- results[["intensityFile"]]
   rm(results)
@@ -256,38 +203,4 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   }else{
     stop("Resulting object is invalid.")
   }
-
-
-
-
-
-
-
-
-  
-##   tmp <- .Call("R_read_xys_files", channel1, verbose)
-##   channel1Intensities <- tmp[["intensities"]]
-##   date1 <- tmp[["date"]]
-##   rm(tmp)
-##   tmp <- .Call("R_read_xys_files", channel2, verbose)
-##   channel2Intensities <- tmp[["intensities"]]
-##   date2 <- tmp[["date"]]
-##   rm(tmp)
-  ## must get dates from here
-
-##   metadata <- getMetadata2(channel1Intensities, channel2Intensities,
-##                            channel1, channel2, phenoData, featureData,
-##                            experimentData, notes, sampleNames,
-##                            NgsDate2Posix(date1), NgsDate2Posix(date2))
-  ## colnames(channel1Intensities) <- colnames(channel2Intensities) <- Biobase::sampleNames(metadata[["phenoData"]])
-
-##   out <- new("TilingFeatureSet",
-##              channel1=channel1Intensities,
-##              channel2=channel2Intensities,
-##              manufacturer="NimbleGen",
-##              annotation=pkgname,
-##              phenoData=metadata[["phenoData"]],
-##              experimentData=metadata[["experimentData"]],
-##              featureData=metadata[["featureData"]])
-##   return(out)
 }

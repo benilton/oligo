@@ -1,11 +1,11 @@
 Package: oligo
-Version: 1.11.14
+Version: 1.11.15
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
 Depends: R (>= 2.11.0), oligoClasses (>= 1.9.25), preprocessCore (>= 1.9.0)
-Imports: splines, affxparser (>= 1.17.3), graphics, utils, stats, DBI (>= 0.2-4), Biobase (>= 2.7.3), methods, affyio (>= 1.15.2), digest
-Enhances: bigmemory (>= 4.0.0), snow
+Imports: splines, affxparser (>= 1.17.3), graphics, utils, stats, DBI (>= 0.2-4), Biobase (>= 2.7.3), methods, affyio (>= 1.15.2)
+Enhances: ff, snow
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, RColorBrewer
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
@@ -15,6 +15,7 @@ Collate: AllGenerics.R
          methods-GeneFeatureSet.R
          methods-ExonFeatureSet.R
          methods-ExpressionFeatureSet.R
+         methods-large.R
          methods-FeatureSet.R
          methods-SnpFeatureSet.R
          methods-SnpCnvFeatureSet.R

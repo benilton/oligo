@@ -439,7 +439,7 @@ isPackageLoaded <- function(pkg){
 }
 
 oligoBigObjectSupport <- function()
-  isPackageLoaded("bigmemory")
+  isPackageLoaded("ff")
 
 oligoParallelSupport <- function()
   is(getOption("cluster"), "cluster") && isPackageLoaded("snow")
