@@ -61,12 +61,3 @@ export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
 ## Testing
 exportMethods(backgroundCorrect, normalize, summarize)
 export(oligoProbesets, oligoSamples, setCluster, delCluster, getCluster)
-importFrom(digest, digest)
-
-## if ("bigmemory" %in% rownames(installed.packages())){
-##   importFrom(bigmemory, attach.big.matrix, deepcopy, filebacked.big.matrix, big.matrix)
-##   importMethodsFrom(bigmemory, describe, is.big.matrix)
-## }
-## if ("snow" %in% rownames(installed.packages())){
-##   importFrom(snow, makeCluster, stopCluster, parLapply, clusterCall, clusterSplit)
-## }
