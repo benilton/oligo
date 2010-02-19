@@ -1,3 +1,114 @@
+## TOOLS FOR Large DataSets through 'ff'
+getSomeRowsAllCols <- function(cols, rows, inObj, outObj){
+
+  ## cols inObj match cols outObj
+  ## rows inObj do NOT match rows outObj
+  envir <- .oligoPkgEnv
+  if (length(cols) > 0){
+    inMat <- get(inObj, envir=envir)
+    outMat <- get(outObj, envir=envir)
+    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    for (theCols in grpCols)
+      outMat[, theCols] <- inMat[rows, theCols, drop=FALSE]
+    rm(inMat, outMat, grpCols, theCols)
+    gc()
+  }
+  TRUE
+}
+
+getAllRowsSomeCols <- function(cols, allCols, inObj, outObj){
+  ## cols inObj do NOT match cols outObj
+  ## rows inObj match rows outObj
+  envir <- .oligoPkgEnv
+  if (length(cols) > 0){
+    inMat <- get(inObj, envir=envir)
+    outMat <- get(outObj, envir=envir)
+    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    for (theCols in grpCols){
+      idx <- match(theCols, allCols)
+      outMat[, idx] <- inMat[, theCols, drop=FALSE]
+    }
+    rm(inMat, outMat, grpCols, idx, theCols)
+    gc()
+  }
+  TRUE
+}
+
+getSomeRowsSomeCols <- function(cols, allCols, rows, inObj, outObj){
+  if (length(cols) > 0){
+    envir <- .oligoPkgEnv
+    inMat <- get(inObj, envir=envir)
+    outMat <- get(outObj, envir=envir)
+    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    for (theCols in grpCols){
+      idx <- match(theCols, allCols)
+      outMat[, idx] <- inMat[rows, theCols, drop=FALSE]
+    }
+    rm(inMat, outMat, grpCols, idx, theCols)
+    gc()
+  }
+  TRUE
+}
+
+ffSubset <- function(rows, cols, object, prefix="oligo-",
+                     nameInEnv="subMatrix", clean=TRUE){
+  ## This runs on the master node
+
+  rns <- rownames(object)
+  cns <- colnames(object)
+  dnmsIn <- dimnames(object)
+  dimnames(object) <- NULL
+  sendBO2PkgEnv(object, "inMat")
+
+  if (missing(rows)){
+    nr <- nrow(object)
+  }else{
+    stopifnot(is.numeric(rows))
+    nr <- length(rows)
+    rns <- rns[rows]
+  }
+  if (missing(cols)){
+    nc <- ncol(object)
+  }else{
+    stopifnot(is.numeric(cols))
+    nc <- length(cols)
+    cns <- cns[cols]
+  }
+  
+  out <- ff(vmode=vmode(object), dim=c(nr, nc),
+            pattern=file.path(oligoBigObjectPath(), prefix))
+  sendBO2PkgEnv(out, nameInEnv)
+  
+  ## hypothesis: nr >> nc
+  ## object input: in pkg env and called 'inMat'
+  ## object output: in pkg env and called nameInEnv
+
+  if ((!missing(rows)) && missing(cols)){
+    ## cols iObj match cols oOubj
+    samplesByNode <- splitIndicesByNode(1:ncol(out))
+    oLapply(samplesByNode, getSomeRowsAllCols, rows, "inMat", nameInEnv)
+  }else if (missing(rows) && (!(missing(cols)))){
+    samplesByNode <- splitIndicesByNode(cols)
+    oLapply(samplesByNode, getAllRowsSomeCols, cols, "inMat", nameInEnv)
+  }else if ((!missing(rows)) && (!missing(cols))){
+    samplesByNode <- splitIndicesByNode(cols)
+    oLapply(samplesByNode, getSomeRowsSomeCols, cols, rows, "inMat", nameInEnv)
+  }else{
+    stop("Must specify at least one of 'rows'/'cols'")
+  }
+
+  dimnames(object) <- dnmsIn
+  dnmsOut <- list(rns, cns)
+  rm(rns, cns)
+  dimnames(out) <- dnmsOut
+  
+  rmFromPkgEnv("inMat")
+  if (clean)
+    rmFromPkgEnv(nameInEnv)
+  return(out)
+}
+
+
 ############################################
 ## BackgroundCorrection
 ############################################

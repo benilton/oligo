@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.11.15
+Version: 1.11.16
 Title: Tools for low-level analysis of oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
@@ -11,11 +11,10 @@ Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.hg18.60mer.expr, maqcExpressio
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level.
 License: LGPL (>= 2)
 Collate: AllGenerics.R
-         methods-bigmemory.R
          methods-GeneFeatureSet.R
          methods-ExonFeatureSet.R
          methods-ExpressionFeatureSet.R
-         methods-large.R
+         methods-LDS.R
          methods-FeatureSet.R
          methods-SnpFeatureSet.R
          methods-SnpCnvFeatureSet.R
@@ -23,7 +22,6 @@ Collate: AllGenerics.R
          methods-DBPDInfo.R
          read.celfiles.R
          read.xysfiles.R
-         zzz.R
          utils-general.R
          utils-cluster.R
          crlmm.R
@@ -32,5 +30,6 @@ Collate: AllGenerics.R
          justCRLMM.R
          methods-snp6.R
          methods-genotype.R
+         zzz.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression, Bioinformatics, DataImport, Transcription, ChIPchip, CopyNumberVariants, CpGIsland
