@@ -9,7 +9,7 @@ importFrom(affxparser, createCel, readCel, readCelHeader,
 
 ## Needed from graphics
 importFrom(graphics, boxplot, hist, image, lines, matplot, par, plot)
-importFrom(grDevices, gray)
+importFrom(grDevices, gray, colorRampPalette)
 
 ## Needed from utils
 importFrom(utils, packageDescription, read.delim, read.table,
@@ -53,11 +53,12 @@ exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
 export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        sequenceDesignMatrix, list.xysfiles, readSummaries,
        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
-       read.celfiles2, basicRMA)
+       read.celfiles2, basicRMA, darkColors, seqColors,
+       getAffinitySplineCoefficients, getBaseProfile)
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
 
 ## Testing
 exportMethods(backgroundCorrect, normalize, summarize)
-export(oligoProbesets, oligoSamples, setCluster, delCluster, getCluster)
+export(oligoProbesets, oligoSamples, setCluster, delCluster, getCluster, plotM)

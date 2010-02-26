@@ -1,0 +1,864 @@
+%\VignetteIndexEntry{Hands-On: Introduction to oligo}
+%\VignetteKeywords{expression, exon, tiling, SNP}
+%\VignettePackage{oligo}
+
+\documentclass[12pt, letterpaper]{article}
+
+%% R stuff to use in LaTeX
+\newcommand{\R}{{\textsf{R}}}
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\term}[1]{{\emph{#1}}}
+\newcommand{\Rpackage}[1]{\textsf{#1}}
+\newcommand{\Rfunction}[1]{\texttt{#1}}
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\textit{#1}}}
+\newcommand{\Rfunarg}[1]{{\textit{#1}}}
+
+\usepackage{graphicx, setspace, Sweave, amsfonts, amsmath, multirow, hyperref, amssymb, rotating, subfigure}
+\usepackage[authoryear,round]{natbib}
+\usepackage[margin=1in]{geometry}
+
+%% Location of the figures
+\graphicspath{{./figures/}}
+
+%% Double spacing
+\doublespacing
+
+%% Sweave stuff
+\SweaveOpts{eps=FALSE, prefix.string=figures/fig}
+\usepackage{color}
+\definecolor{midnightblue}{rgb}{0.098,0.098,0.439}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl, baselinestretch=1, formatcom=\color{midnightblue}}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{baselinestretch=1, formatcom=\color{midnightblue}}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl, baselinestretch=1}
+\fvset{listparameters={\setlength{\topsep}{0pt}}}
+
+\title{Hands-On: A Framework for Oligonucleotide Microarrays Preprocessing}
+\author{Benilton S. Carvalho \and Rafael A. Irizarry}
+\date{}
+
+\begin{document}
+
+%% Initializating the R environment
+<<<setup, echo=FALSE, results=hide>>=
+options(prompt="R> ",  continue=" ", width=70, device=pdf)
+@  
+
+\maketitle
+
+This document provides examples on the usage of the \Rpackage{oligo}
+package. The datasets used here can be downloaded by the user, who is
+expected to have the CEL and XYS files in the following directory
+structure:
+
+\begin{table}[!htp]
+  \centering
+  \begin{minipage}{1.0\linewidth}
+  \begin{tabular}{|c|c|c|} \hline
+    Directory Name & Object Name & Description \\ \hline
+    expressionData\footnote{\url{http://www.affymetrix.com/support/technical/sample_data/datasets.affx}} & affyExpressionFS & Latin Square - Affymetrix U95A \\
+    exonData\footnote{\url{http://www.affymetrix.com/support/technical/sample_data/exon_array_data.affx}} & affyExonFS & Exon Sample Dataset - Human\\
+    snpData\footnote{\url{http://hapmap.ncbi.nlm.nih.gov/downloads/raw_data/affy100k/}} & affySnpFS & HapMap samples on XBA Array\\
+    tilingData\footnote{Data available upon request and provided by NimbleGen} & nimbleTilingFS & Sample ChIP-chip dataset \\
+    \hline
+  \end{tabular}
+  \caption{Directory structure used in this document to store CEL and XYS files.}
+  \label{tab:dirStruct}
+  \end{minipage}
+\end{table}
+
+\section{Preprocessing Expression Arrays}
+\label{sec:expressionApp}
+
+The dataset used in this example corresponds to the Latin Square Data
+for Expression Algorithm Assessment on the Human Genome U95 platform,
+made available by Affymetrix on their
+website\footnote{\url{http://www.affymetrix.com/support/technical/sample_data/datasets.affx}}.
+To be used with \Rpackage{oligo}, requires the availability of the
+\Rpackage{pd.hg.u95a} annotation package, built with the
+\Rpackage{pdInfoBuilder} package.
+
+After the annotation package is installed, the next step is to load
+\Rpackage{oligo} and identify the files to be used in the analysis.  The
+\Rfunction{list.celfiles} function can be used to appropriately list
+Affymetrix CEL files. Similarly, the \Rfunction{list.xysfiles} can be
+used with NimbleGen XYS files. Both functions are built on top of
+\Rfunction{list.files}, therefore taking the same arguments as the
+latter, allowing more advanced use when necessary. Below, the
+\Robject{celFiles} contains the all the CEL file names, with full path,
+in the \Robject{expressionData} directory.
+<<load, results=hide>>=  
+library(oligo)
+celFiles <- list.celfiles("expressionData", full.names=TRUE)
+@
+
+Importing the CEL files is achieved with the \Rfunction{read.celfiles}
+function. An analogous function, \Rfunction{read.xysfiles}, is
+available for NimbleGen data, which is delivered via XYS files. Both
+functions will, in general, correctly identify the annotation package
+to be used with the experimental data being imported, but the user can
+specify the \Rfunarg{pkgname} argument to force the use of a
+particular one, if for some reason this is required.
+<<import, results=hide>>=
+affyExpressionFS <- read.celfiles(celFiles, pkgname="pd.hg.u95a")
+@ 
+
+The object \Robject{affyExpressionFS} belongs to the
+\Rclass{ExpressionFeatureSet} class, as it corresponds to expression
+data. The object, like all \Rclass{FeatureSet}-like objects, represents
+features in the rows and samples in the columns and can be easily
+subsetted, using the standard \Robject{$[$} operator. All the
+manipulation structure is inherited through te tight integration between
+\Rpackage{oligo} and \Rpackage{Biobase}, whose documentation we
+recommend to the interested reader.
+<<objClass>>=
+  class(affyExpressionFS)
+@
+
+Figure~\ref{fig:imgAffyExp} demonstrates how the \Rmethod{image} method
+can be used to generate pseudo-images of the samples. In this particular
+plot, we use the first sample as an example.
+<<imageAffyExpression, include=FALSE, fig=TRUE>>=
+image(affyExpressionFS[,1], col=gray((64:0)/64))
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-imageAffyExpression}
+  \caption{Pseudo-image, used for visual assessment of the array, for
+    sample \Robject{1521a99hpp\_av06.CEL}.}
+  \label{fig:imgAffyExp}
+\end{figure}
+
+The user can evaluate the distribution of the observed data by using the
+\Rmethod{hist} method, which will produce smoothed histograms for each
+sample available in the dataset. Before plotting, the method transforms
+the data using the function passed to the \Rfunarg{transfo} argument,
+whose default is \Rfunction{log2}, explaining why the plot is shown on
+the $\log_2$ scale.
+<<histRawAffyExpression, include=FALSE, fig=TRUE>>=
+hist(affyExpressionFS, col=darkColors(59), lty=1, xlim=c(6, 12))
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-histRawAffyExpression}
+  \caption{Smoothed histograms for samples in the dataset.}
+  \label{fig:histAffyExp}
+\end{figure}
+
+Another approach to assess the data distribution is to use the
+\Rmethod{boxplot} method. On the example below, we use only the first 10
+samples in the dataset to simplify the visualization. On
+\Rclass{FeatureSet} objects, the method will automatically transform the
+data to the $\log_2$ scale, but this is easily modified through the
+\Rfunarg{transfo} argument, which takes a function as a valid value.
+<<boxplotRawAffyExpression, include=FALSE, fig=TRUE>>=
+boxplot(affyExpressionFS[, 1:10], col=darkColors(10), names=1:10)
+@ 
+
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-boxplotRawAffyExpression}
+  \caption{Boxplot showing the distribution of the observed
+    $\log_2$-intensities on the sample dataset. The \Rfunction{boxplot}
+    method implemented in \Rpackage{oligo} follows the standards of the
+    original method used by \R{}.}
+  \label{fig:bpAffyExp}
+\end{figure}
+
+Plotting log-ratio \textit{versus} average intensity can often reveal
+intensity effects on log-ratios, as shown by the MA plot on Figure
+\ref{fig:maplotAffyExpression}. The argument \Rfunarg{arrays} can be
+specified to determine which samples will be plotted and the
+\Rfunarg{lowessPlot} is a logical flag to indicate that the user wants a
+lowess curve to be overlapped to the data points.
+<<maplotAffyExpression, include=FALSE, fig=TRUE>>=
+MAplot(affyExpressionFS, arrays=1, lowessPlot=TRUE, ylim=c(-1, 1))
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-maplotAffyExpression}
+  \caption{The MA plot can be used to assess the dependence of log-ratios
+    on average log-intensities.}
+  \label{fig:maplotAffyExpression}
+\end{figure}
+
+The annotation packages used by \Rpackage{oligo} store feature
+sequences. This is done through instances of \Rclass{DNAStringSet}
+objects implemented in the \Rpackage{Biostrings} package. The sequences
+for PM probes can be easily accessed via the \Rfunction{pmSequence}
+function, as shown below.
+<<obtainSequencesAffyExpression>>=
+pmSeq <- pmSequence(affyExpressionFS)
+pmSeq[1:5]
+@ 
+
+When importing the data, \Rpackage{oligo} does not impose any
+transformation, so one needs to manually apply, for example, the
+$\log_2$ transform to the intensities of PM probes, which can be
+accessed with the \Rfunction{pm} function, as needed. Below, we present
+how to centralize the $\log_2$-PM intensities for each sample in
+\Robject{affyExpressionFS}.
+<<obtainPMs, results=hide>>=
+pmsLog2 <- log2(pm(affyExpressionFS))
+@ 
+
+The dependence of intensity on probe sequence is a well established fact
+on the microarray literature. The use of the \Rpackage{oligo} package
+simplifies significantly the observation of this event, as it provides
+simple access to both observed intensities and annotation. Below, we
+estimate the affinity splines coefficients \citep{Wu:2004p1634}.
+<<affinityCoefficients>>=
+coefs <- getAffinitySplineCoefficients(pmsLog2, pmSeq)
+@ 
+
+On Figure~\ref{fig:seqEffectAffyExpression}, we show how the results
+above can be used to estimate the base-position effects on the
+$\log_2$-intensities observed for the first sample in the dataset. The
+\Rfunction{getBaseProfile} function provides a simple way of using the
+affinity coefficients to estimate the effects of interest. It accepts a
+\Rfunarg{plot} argument, which takes logical values, to make the plot
+and returns, invisibly, the estimated effects. All the arguments that
+can be passed to the \Rfunction{matplot} function can also be passed to
+\Rfunction{getBaseProfile}.
+<<seqEffectAffyExpression, include=FALSE, fig=TRUE>>=
+colors <- darkColors(4)
+xL <- "Base Position"
+yL <- "Effect"
+pchs <- c("A", "C", "G", "T")
+getBaseProfile(coefs[,1], plot=TRUE, pch=pchs, type="b", xlab=xL, ylab=yL, lwd=3, col=colors, ylim=c(-.4, .4))
+@ 
+
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-seqEffectAffyExpression}
+  \caption{Sequence effect for the first sample in the dataset. These
+    results have been reported in detail elsewhere, but can be easily
+    reproduced with the use of the \Rpackage{oligo} package.}
+  \label{fig:seqEffectAffyExpression}
+\end{figure}
+
+Tools implemented in other packages can be used in conjunction with
+\Rpackage{oligo} to investigate different hypothesis. The example below
+shows how the \Rfunction{alphabetFrequency} function, defined by the
+\Rpackage{Biostrings} can be used to determine the GC content of the
+probe sequences accessed by \Rpackage{oligo}.
+<<GCplots, results=hide>>=
+counts <- Biostrings::alphabetFrequency(pmSeq, baseOnly=TRUE)
+GCcontent <- ordered(counts[, "G"]+counts[, "C"])
+@
+
+In addition to Figure~\ref{fig:seqEffectAffyExpression}, we can also
+plot the $\log_2$-intensities as a function of the GC content computed
+above. Figure~\ref{fig:gcBpAffyExpression} presents the strong
+dependency of $\log_2$-intensities on GC contents for sample~1, which is
+also present in all other samples.
+<<intensityByContentAffyExpression, include=FALSE, fig=TRUE>>=
+colors <- seqColors(nlevels(GCcontent))
+xL <- "GC Frequency in 25-mers"
+yL <- expression(log[2]~intensity)
+boxplot(pmsLog2[,1]~GCcontent, xlab=xL, ylab=yL, range=0, col=colors)
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-intensityByContentAffyExpression}
+  \caption{On this boxplot stratified by GC content, we can observe the
+    strong dependency of $\log_2$-intensities on the number of G or C
+    bases observed in the probe sequency.}
+\label{fig:gcBpAffyExpression}
+\end{figure}
+
+To preprocess expression data, \Rpackage{oligo} implements the RMA
+algorithm \citep{Irizarry2003a, Irizarry2003b}. The \Rmethod{rma}
+method, as shown below, proceeds with background subtraction,
+normalization and summarization using median polish.
+<<rmaAffyExpression, results=hide>>=
+ppData <- rma(affyExpressionFS)
+@ 
+
+The results are returned in an \Rclass{ExpressionSet} instance and used
+in downstream analyses, as currently done by several strategies for
+microarray data analysis and described elsewhere.
+<<rmaResultClass>>=
+class(ppData)
+@ 
+
+At this point, the user can proceed with, for example, differential
+expression analyses. The methodologies involved in this step make use of
+several other packages, like \Rpackage{limma} and
+\Rpackage{genefilter}. When preprocessing the data, \Rpackage{oligo}
+stores the summaries in a matrix called \Robject{exprs}, present in the
+\Robject{assayData} data slot of the \Rclass{ExpressionSet}
+object. Therefore, the only restriction the additional strategies used
+with the preprocessed data have is to be aware that the processed data
+can be easily accessed with the \Rmethod{exprs} method.
+
+\section{Obtaining Genotype Calls from SNP Arrays}
+\label{sec:genotyping}
+
+The \Rpackage{oligo} package can genotype, using the CRLMM algorithm,
+several Affymetrix SNP arrays. To do so, the user will need, in addition
+to the \Rpackage{oligo} package, an annotation data package specific to
+the designed used in the experiment. Although these annotation packages
+are created using the \Rpackage{pdInfoBuilder} package, the CRLMM
+algorithm requires additional hand-curated data, which are included in
+the packages made available through the BioConductor
+website. Table~\ref{tab:snpPlatforms} describes the supported designs
+and the respective annotation packages.
+\begin{table}[!htp]
+  \centering
+  \begin{tabular}{|c|c|} \hline
+    \textbf{Design}    & \textbf{Annotation Package} \\ \hline
+    Mapping 50K XBA    & \Rpackage{pd.mapping50k.xba240} \\
+    Mapping 50K HIND   & \Rpackage{pd.mapping50k.hind240} \\
+    Mapping 250K NSP   & \Rpackage{pd.mapping250k.nsp} \\
+    Mapping 250K STY   & \Rpackage{pd.mapping250k.sty} \\
+    Genomewide SNP 5.0 & \Rpackage{pd.genomewidesnp.5} \\
+    Genomewide SNP 6.0 & \Rpackage{pd.genomewidesnp.6} \\
+    \hline
+  \end{tabular}
+  \caption{SNP array designs currently supported by the \Rpackage{oligo} package and their respective annotation packages. These annotation packages are made available through the BioConductor website and contain hand-curated data, required by the CRLMM algorithm.}
+  \label{tab:snpPlatforms}
+\end{table}
+
+As an example, we will use the 269 CEL files, on the XBA array,
+available on the HapMap website\footnote{\url{http://www.hapmap.org}},
+which were downloaded and saved, uncompressed, to a subdirectory called
+\Robject{snpData}. Therefore, we need to instruct the software to look for
+the files at the correct location. An output directory should also be
+defined and that is the place where the summary files, including
+genotype calls and confidences are stored. This output directory, which
+we chose to call \Robject{crlmmResults}, must not exist prior to the CRLMM
+call, the software will take care of this task.
+<<getRawSnpData, results=hide>>=
+library("oligo")
+fullFilenames <- list.celfiles("snpData", full.names=TRUE)
+outputDir <- file.path(getwd(), "crlmmResults")
+@ 
+
+Given the always increasing density of the SNP arrays, we developed
+efficient methods to process these chips, reducing the required amount
+of memory even for large studies. Using this approach, we process
+batches of SNPs at a time, saving partial results to disk. We refer the
+interested reader to \citet{Carvalho:2007p32} for detailed information on
+the CRLMM algorithm. The genotyping strategy, in summary, has three
+steps: A) quantile normalizes against a known reference distribution; B)
+summarizes the data to the SNP-allele level using median polish; C) uses
+estimated parameters to classify the samples in genotype groups using
+Mahalanobis distance.
+
+The summaries are average intensities and log-ratios, defined as across
+allele and within strand, ie:
+\begin{eqnarray}
+  A_{s} & = & \frac{\theta_{A, s}+\theta_{B, s}}{2} \\
+  M_{s} & = & \theta_{A, s} - \theta_{B, s},
+\end{eqnarray}
+where $s$ defines the strand (antisense or sense). On the genomewide
+designs, SNP 5.0 and 6.0, the strand information is dropped. These
+summaries can be obtained via \Rmethod{getA} and \Rmethod{getM} methods,
+which return arrays with dimensions corresponding to SNPs, samples and
+strands (if applicable), respectively. These measures are later used for
+genotyping.
+
+CRLMM involves running an EM algorithm to adjust for average intensity
+and fragment length in the log-ratio scale. These adjustments may take
+long time to run, depending on the combination of number of samples and
+computer resources available. Below, we show the simplest way to call
+CRLMM, which requires only the file names and output directory.
+<<crlmm, results=hide>>=
+if (!file.exists(outputDir))
+  crlmm(fullFilenames, outputDir)
+@ 
+
+The \Rfunction{crlmm} method does not return an object to the R session.
+Instead, it saves the objects to disk, as not all systems are guaranteed
+to meet the memory requirements that \Rclass{SnpSuperSet} objects might
+need. For the user's convenience, the \Rfunction{getCrlmmSummaries} will
+read the information from disk and make a \Rclass{SnpCallSetPlus} or
+\Rclass{SnpCnvCallSetPlus} object available to the user.
+
+<<theSummaries>>=
+crlmmOut <- getCrlmmSummaries(outputDir)
+calls(crlmmOut[1:5,1:2])
+confs(crlmmOut[1:5,1:2])
+@ 
+
+The genotype calls are represented by 1 (AA), 2 (AB) and 3 (BB). The
+confidence is the predicted probability that the algorithm made the
+right call.
+
+Summaries generated by the algorithm can also be accessed from the \R{}
+session. The options for summaries are \Rfunarg{"alleleA"},
+\Rfunarg{"alleleB"}, \Rfunarg{"alleleA-sense"},
+\Rfunarg{"alleleA-antisense"}, \Rfunarg{"alleleB-sense"},
+\Rfunarg{"alleleB-antisense"}. The options \Rfunarg{"alleleA"} and
+\Rfunarg{"alleleB"} are only available for SNP 5.0 and SNP 6.0
+platforms. The other options are to be used with 50K and 250K arrays.
+
+Below, we choose two SNPs to show the different configurations of the
+genotype groups.
+<<settingPlotM>>=
+snps <- paste("SNP_A-", c(1703121, 1725330), sep="")
+LIM <- c(-4, 4)
+@ 
+
+Figure \ref{fig:goodSNP} represents a SNP for which genotyping is
+simplified by the good discrimination of both strands. Figure
+\ref{fig:senseSNP} shows a SNP for which features on the antisense
+strand have very good discrimination power, while no information (for
+classification) can be extracted from the sense strand.
+
+<<goodSNP, fig=TRUE, include=FALSE>>=
+gtypes <- as.integer(calls(crlmmOut[snps[1],]))
+plotM(crlmmOut, snps[1], ylim=LIM, xlim=LIM, col=gtypes)
+@ 
+<<senseSNP, fig=TRUE, include=FALSE>>=
+gtypes <- as.integer(calls(crlmmOut[snps[2],]))
+plotM(crlmmOut, snps[2], ylim=LIM, xlim=LIM, col=gtypes)
+@ 
+
+\begin{figure}[!htp]
+  \begin{center}
+    \subfigure[SNP\_A-1703121 has very good discrimination on both
+    strands and, as competing algorithms, CRLMM has excelent performance
+    on scenarios like this. On this plot, genotype calls provided by
+    oligo are represented in different colors (black: AA; red: AB;
+    green: BB)]{\label{fig:goodSNP}
+      \includegraphics[width=.45\textwidth]{fig-goodSNP}}
+    \subfigure[SNP\_A-1725330 presents poor discrimination on the sense
+    strand. Because CRLMM does not average across strands, it can
+    perfectly predict the genotype cluster each sample belongs to. On
+    similar scenarios, competing algorithms are known to fail. Color
+    scheme follows Figure~\ref{fig:goodSNP}.]{\label{fig:senseSNP}
+      \includegraphics[width=.45\textwidth]{fig-senseSNP}}
+  \end{center}
+\end{figure}
+
+CRLMM was shown to outperform competing genotyping tools. We refer the
+reader to \citet{Lin:2008p33} for further details on this subject. The
+genotypes provided by CRLMM, and in this example stored in
+\Robject{crlmmOut}, can be easily used with other BioConductor tools,
+like the \Rpackage{snpMatrix} package, for downstream analyses.
+
+\section{Preprocessing Exon Arrays}
+\label{sec:exon}
+
+On this section, we use colon cancer sample data for exon arrays,
+available on the Affymetrix
+website\footnote{\url{http://www.affymetrix.com/support/technical/sample_data/exon_array_data.affx}},
+to demonstrate the use of the \Rpackage{oligo} package to import and
+preprocess these data. The CEL files were downloaded to the
+\Robject{exonData} directory and, after loading the package, we use the
+\Robject{celFiles} variable to store the full CEL file names (including
+path), as shown below.
+<<loadingPackageFiles, results=hide>>=
+library(oligo)
+celFiles <- list.celfiles("exonData", full.names=TRUE)
+@ 
+
+The \Rfunction{read.celfiles} function is used to import CEL files. Its
+simplest use is shown below. In this example, the parser will read all
+CEL files present in the \Robject{exonData} directory and store the
+results in the \Robject{exonRawData} variable.
+<<readingExonCEL, results=hide>>=
+affyExonFS <- read.celfiles(celFiles)
+@ 
+
+As already noted, \Rpackage{oligo} implements different classes
+depending on the nature of the data. Therefore, \Robject{affyExonFS} is
+an \Rclass{ExonFeatureSet} object. This is a especially interesting
+feature, as it allows methods to behave differently depending on the
+object class.
+
+Generally, RMA will background correct, quantile normalize and summarize
+to the probeset level, as defined in the annotation packages. When
+working with an \Rclass{ExonFeatureSet} object, processing to the
+probeset level provides expression summaries at the exon level and can
+be obtained by setting the argument \Rfunarg{target} to
+\Robject{"probeset"}, as presented below.
+<<rmaExonProbeset, results=hide>>=
+probesetSummaries <- rma(affyExonFS, target="probeset")
+@ 
+
+For Exon arrays, Affymetrix provides additional annotation files that
+define meta-probesets (MPSs), used to summarize the data to the gene
+level. These MPSs are classified in three groups -- core, extended and
+full -- depending on the level of confidence of the sources used to
+generate such annotations. Additional values allowed for the
+\Rfunarg{target} argument are \Robject{"core"}, \Robject{"extended"}
+and \Robject{"full"}. The example below shows how gene level summaries
+can be obtained through \Rpackage{oligo}.
+<<rmaExonGeneCore, results=hide>>=
+geneSummaries <- rma(affyExonFS, target="core")
+@ 
+
+The results obtained from analyses performed with \Rpackage{oligo} can
+be easily combined with features offered by other packages. As an
+example, we use the \Rpackage{biomaRt} package to obtain IDs of
+probesets on the Human Exon array that map to Entrez Gene ID~10948
+(ENSG00000131748).
+<<probesetIDs2EntrezGeneID, results=hide>>=
+library(biomaRt)
+ensembl <- useMart("ensembl", dataset="hsapiens_gene_ensembl")
+theIDs <- getBM(attributes="affy_huex_1_0_st_v2", filters="entrezgene",
+                values=10948, mart=ensembl)[[1]]
+theIDs <- as.character(theIDs)
+@ 
+
+Combining this information with the annotation package associated to the
+data in \Robject{affyExonFS}, we can get detailed facts on the
+probesets found to map to Entrez Gene ID~10948. Below, we obtain,
+respectively, the MPS IDs, probeset IDs, probe IDs and start/stop
+positions for the probesets identified above.
+<<getProbesetInfo, results=hide>>=
+library(AnnotationDbi)
+conn <- db(affyExonFS)
+sql <- paste("SELECT meta_fsetid, pmfeature.fsetid, fid, start, stop",
+             "FROM featureSet, pmfeature, core_mps",
+             "WHERE pmfeature.fsetid = featureSet.fsetid",
+             "AND featureSet.fsetid = core_mps.fsetid",
+             "AND pmfeature.fsetid IN (",
+             toSQLStringSet(theIDs),
+             ")")
+probesetInfo <- dbGetQuery(conn, sql)
+@ 
+
+The availability of start and stop positions of the probesets improves
+the visualization of the summaries at the exon level. If genomic
+coordinates were available for probes themselves, visualization could be
+improved even more. To achieve this, we first obtain the sequences for
+the probes identified above. We saw that the \Rmethod{pmSequence} method
+provides the sequences for all PM probes identified on the chip but,
+instead, we directly load the \Rpackage{Biostrings} object used to store
+the sequence information for these probes. This gives us access not only
+to the sequences, but also to the probe IDs linked to them.
+<<getSequences, results=hide>>=
+library(Biostrings)
+data(pmSequence, package=annotation(affyExonFS))
+@ 
+
+Because probe IDs are available in the \Robject{pmSequence} object, we
+can easily restrict our search to the probes listed in the
+\Robject{probesetInfo} object.
+<<restrictProbes, results=hide>>=
+idx <- match(probesetInfo[["fid"]], pmSequence[["fid"]])
+pmSequence <- pmSequence[idx,]
+@ 
+
+<<clean, echo=FALSE>>=
+rm(idx)
+@ 
+
+The \Robject{pmSequence} object behaves like a \Rclass{data.frame}, but
+it is comprised of complex data structures defined in
+\Rpackage{Biostrings}. Below, we modify its representation to make it a
+regular \Rclass{data.frame} object.
+<<pmSequenceDF, results=hide>>=
+pmSequence <- data.frame(fid=pmSequence[["fid"]],
+                         sequence = as.character(pmSequence[["sequence"]]),
+                         stringsAsFactors=FALSE)
+@ 
+
+By joining the \Robject{probesetInfo} and \Robject{pmSequence} objects,
+we centralize the available probe annotation.
+<<probeInfo>>=
+probeInfo <- merge(probesetInfo, pmSequence)
+@ 
+<<clean, echo=FALSE>>=
+rm(probesetInfo, pmSequence)
+@ 
+
+The genomic coordinates in \Robject{probeInfo} refer to the probesets. To
+better visualize the observed probe intensities, we would be better off
+if the coordinates were relative to the probes. Below, we use the
+\Rpackage{BSgenome.Hsapiens.UCSC.hg18} to obtain up-to-date genomic
+coordinates. The coordinates are found by aligning the probe sequences
+to the reference genome made available through the package. Because
+Entrez Gene ID~10948 is located on chromosome~17, the search is limited
+to this region.
+<<loadingBSgenome, results=hide>>=
+library("BSgenome.Hsapiens.UCSC.hg18")
+chr17 <- Hsapiens[["chr17"]]
+seqs <- complement(DNAStringSet(probeInfo[["sequence"]]))
+seqs <- PDict(seqs)
+matches <- matchPDict(seqs, chr17)
+@ 
+
+<<clean, echo=FALSE>>=
+rm(seqs, chr17)
+@ 
+
+After matching the sequences, we update the genomic coordinates.
+<<>>=
+probeInfo[["start"]] <- unlist(startIndex(matches))
+probeInfo[["stop"]] <- unlist(endIndex(matches))
+@ 
+
+<<clean, echo=FALSE>>=
+rm(matches)
+@ 
+
+With the updated coordinates, we reorder the probe information object,
+\Robject{probeInfo}, and extract the probe intensities in the same
+order. The probe ID field, \Robject{fid} in \Robject{probeInfo},
+provides direct access to the probes of interest. The \Rmethod{exprs}
+method is used to access the intensity matrix of the
+\Robject{affyExonFS} object and immediately subsetted to the probes of
+interest. After subsetting the observed intensities, we
+$\log_2$-transform the data.
+<<reorderByCoordinates, results=hide>>=
+probeInfo <- probeInfo[order(probeInfo[["start"]]),]
+probeData <- exprs(affyExonFS)[probeInfo[["fid"]],]
+probeData <- log2(probeData)
+@ 
+
+We use the updated genomic to estimate the probeset coverage. This
+information will be used when plotting the data and will provide
+approximate delimiters of the probesets.
+<<psRegion, results=hide>>=
+attach(probeInfo)
+probesetStart <- aggregate(as.data.frame(start), list(fsetid=fsetid), min)
+names(probesetStart) <- c("fsetid", "start")
+probesetStop <- aggregate(as.data.frame(stop), list(fsetid=fsetid), max)
+names(probesetStop) <- c("fsetid", "stop")
+detach(probeInfo)
+@ 
+
+The \Robject{psInfo} object will store the probeset information
+(probeset ID, start and stop positions), as shown below. After ordering
+appropriately the data, the \Robject{psInfo} probeset is attached, to
+simplify its usage during the \R{} session.
+<<psInfo, results=hide>>=
+psInfo <- merge(probesetStart, probesetStop)
+psInfo <- psInfo[order(psInfo[["start"]]),]
+psInfo[["fsetid"]] <- as.character(psInfo[["fsetid"]])
+attach(psInfo)
+probesetData <- exprs(probesetSummaries[fsetid,])
+detach(psInfo)
+@ 
+
+<<clean, echo=FALSE>>=
+rm(probesetStart, probesetStop)
+@ 
+
+To visualize the data processed by \Rpackage{oligo}, we will use the
+\Rpackage{GenomeGraphs} package. To match the genome build used to
+update the probe coordinates, an archived version of the database will
+be queried.
+<<loadingGenomeGraphs, results=hide>>=
+library(GenomeGraphs)
+probeids <- as.character(probeInfo[["fsetid"]])
+ensembl = useMart("ensembl_mart_51", dataset="hsapiens_gene_ensembl", archive=T)
+geneid <- "ENSG00000131748"
+title <- makeTitle(text=geneid, color="darkred")
+@ 
+
+The raw data, in the $\log_2$ scale, will be represented by the
+\Robject{raw} object below, created with the \Rmethod{makeExonArray}
+constructor.
+<<rawExon, results=hide>>=
+attach(probeInfo)
+raw <- makeExonArray(intensity=probeData,
+                     probeStart=start,
+                     probeEnd=stop,
+                     probeId=probeids,
+                     nProbes=rep(1, nrow(probeInfo)),
+                     dp=DisplayPars(color="blue", mapColor="dodgerblue2"),
+                     displayProbesets=FALSE)
+detach(probeInfo)
+@ 
+
+The summarized data is also represented through an object created by
+\Rmethod{makeExonArray}. The structure is identical to the one used
+above.
+<<processedExon, results=hide>>=
+attach(psInfo)
+exon <- makeExonArray(intensity=probesetData,
+                      probeStart=start,
+                      probeEnd=stop,
+                      probeId=fsetid,
+                      nProbes=rep(1, nrow(psInfo)),
+                      dp=DisplayPars(color="seagreen",
+                        mapColor="seagreen"),
+                      displayProbesets=FALSE)
+@ 
+
+To represent the probesets designed by Affymetrix, we use an
+\Rclass{AnnotationTrack} object.
+<<annotationTrack, results=hide>>=
+affyModel <- makeAnnotationTrack(start = start,
+                                 end = stop,
+                                 feature = "gene_model",
+                                 group = geneid,
+                                 dp = DisplayPars(gene_model="darkgreen"))
+detach(psInfo)
+@ 
+
+The gene and transcripts representations are build as
+follows. Affymetrix probes will be represented in green, while the gene
+will be in orange; transcripts are represented in blue.
+<<geneTranscripts>>=
+gene <- makeGene(id=geneid, biomart=ensembl)
+transcript <- makeTranscript(id=geneid, biomart=ensembl)
+legend <- makeLegend(c("Affymetrix", "Gene"), fill=c("darkgreen", "orange"))
+@ 
+
+Figure~\ref{fig:ENSG131748}, generated with the \Rfunction{gdPlot}
+function, shows the representation of the $\log_2$-intensities and
+summaries at the exon level. It also shows probesets, gene and
+transcripts on the region of interest.
+<<ENSG131748, fig=TRUE, include=FALSE>>=
+gdPlot(list(title, raw, exon, affyModel, gene, transcript, legend),
+       minBase=35067500, maxBase=35068900)
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-ENSG131748}
+  \caption{Visual representation of observed $\log_2$-intensities and
+    summarized data at the exon level for gene ENSG00000131748. The
+    probes, gene and transcript are also represented, respectively, in
+    green, orange and blue.}
+  \label{fig:ENSG131748}
+\end{figure}
+
+Below, we identify the meta-probeset ID associated to the probes used
+above. Once that is known, we can extract the proper gene-level
+summaries stored in \Robject{geneSummaries}.
+<<mps>>=
+mps <- unique(probeInfo[["meta_fsetid"]])
+mps <- as.character(mps)
+mps
+@ 
+
+Therefore, the standard accessors can be used to obtain the gene
+summaries for the unit above. Figure~\ref{fig:scatterENSG131748} shows
+the expressions for gene ENSG00000131748 across the 33 samples available
+on this dataset.
+<<geneLevelSummaries, include=FALSE, fig=TRUE>>=
+gSummaries <- exprs(geneSummaries[mps,])
+x <- 1:length(gSummaries)
+plot(x, gSummaries, xlab="Sample", ylab="Expression", main=geneid)
+@ 
+\begin{figure}[!htp]
+  \centering
+  \includegraphics[width=.45\textwidth]{fig-geneLevelSummaries}
+  \caption{Expression levels estimated through RMA at the gene level.}
+  \label{fig:scatterENSG131748}
+\end{figure}
+
+\section{Interfacing with \Rpackage{ACME} to Find Enriched Regions Using
+  Tiling Arrays}
+\label{sec:tiling}
+
+On this Section, we demonstrate how \Rpackage{oligo} can be easily
+combined with tools that rely on the structure implemented in the
+\Rpackage{Biobase} package. Using a sample ChIP-chip
+dataset\footnote{Available by request} provided by NimbleGen, we use the
+\Rfunction{getNgsColorsInfo} function to obtain the information
+regarding channels and sample names for the XYS files saved in the
+\Robject{tilingData} directory. The \Rfunction{getNgsColorsInfo} parses
+the file names and, using the \Robject{\_532} and \Robject{\_635}
+strings in the names, suggests channels and sample names for each XYS
+file available.
+<<colorsInfoTiling>>=
+library(oligo)
+info <- getNgsColorsInfo("tilingData", full=TRUE)
+head(info)
+@ 
+
+Combining the results in \Robject{info} with \Rfunction{read.xyfiles2},
+we read the XYS files using a data structure that simplifies the data
+management across different channels.
+<<readTiling, results=hide>>=
+nimbleTilingFS <- read.xysfiles2(info[,2], info[,1], sampleNames=info[,3])
+@ 
+
+The user can access the channel specific data by calling the
+\Rmethod{channel} method. The resulting object is an
+\Rclass{ExpressionSet} object that the user can use as required.
+<<getChannel>>=
+c1 <- channel(nimbleTilingFS, "channel1")
+c2 <- channel(nimbleTilingFS, "channel2")
+@ 
+
+Detailed information on the PM probes available on the array can be
+obtained by directly querying the annotation package. The call below
+will extract the \Robject{fid}, \Robject{fsetid}, \Robject{chromosome}
+and \Robject{start} position of each probe from the annotation package
+and order the results by chromosome and start position.
+<<tilingProbeInfo, results=hide>>=
+sql <- paste("SELECT fid, fsetid, chrom as chromosome, position as start",
+             "FROM pmfeature INNER JOIN featureSet USING(fsetid)",
+             "ORDER BY chrom, position")
+annotPM <- dbGetQuery(db(nimbleTilingFS), sql)
+@ 
+<<cleanTiling, echo=FALSE>>=
+rm(sql, c1, c2)
+@ 
+
+Using the probe sequence, the end position of the probe can be easily
+obtained. We load the sequences directly, so the \Robject{fid} field can
+be used to order the sequences appropriately.
+<<tilingSequence, results=hide>>=
+data(pmSequence, package=annotation(nimbleTilingFS))
+idx <- match(annotPM[["fid"]], pmSequence[["fid"]])
+pmSequence <- pmSequence[idx,]
+@ 
+
+To obtain the end position, we use \Rmethod{width}, defined in the
+\Rpackage{Biostrings} package.
+<<tilingEndPosition>>=
+attach(annotPM)
+library(Biostrings)
+annotPM[["end"]] <- start+width(pmSequence[["sequence"]])-1
+head(annotPM)
+@ 
+
+The \Robject{fid} field corresponds to the row number in the
+\Robject{nimbleTilingFS} object. When applied to the raw data object, the
+\Rmethod{getM} function returns a matrix with the $\log_2$-ratio of the
+intensities. Below, we get the $\log_2$-ratios corresponding to the PM
+probes described in the \Robject{annotPM} object.
+<<tilingM>>=
+ratioPM <- getM(nimbleTilingFS)[fid,]
+dimnames(ratioPM) <- NULL
+detach(annotPM)
+class(ratioPM)
+@ 
+
+By converting \Robject{annotPM} to an \Rclass{AnnotatedDataFrame}, it
+can be used in the \Rclass{featureData} slot of \Rclass{eSet}-like
+objects.
+<<tilingFeatureData, results=hide>>=
+annotPM <- as(annotPM, "AnnotatedDataFrame")
+@ 
+
+We will use the \Rpackage{ACME} package to calculate enrichment, using
+algorithms that are insensitive to normalization strategies and array
+noise. To work with this package, we need to create, first, an
+\Rclass{ACMESet} object, which contains \Robject{chromosome},
+\Robject{start} and \Robject{end} positions in the \Robject{featureData}
+slot.
+<<prepACME>>=
+library(ACME)
+acme <- new("ACMESet", exprs=ratioPM, featureData=annotPM)
+@ 
+
+The \Rfunction{do.aGFF.calc} function processes the \Rclass{ACMESet}
+object, using a window size and threshold to identify the positive
+probes in the object.
+<<tilingCalc, results=hide>>=
+calc <- do.aGFF.calc(acme, window=1000, thresh=0.95)
+@ 
+
+The \Robject{calc} object is then used to find enriched regions with the
+\Rfunction{findRegions} function, as shown below.
+<<tilingRegions>>=
+regs <- findRegions(calc)
+head(regs)
+@ 
+
+\bibliographystyle{plainnat}
+\bibliography{FrameworkPreprocessing}
+
+\end{document}

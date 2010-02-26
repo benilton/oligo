@@ -190,3 +190,13 @@ sampleNames were different.
 
 ** support to large datasets is now given through 'ff'
 ** digest is no longer a dependency
+
+02-26-2010: B Carvalho - v 1.11.18
+
+** added darkColors and seqColors, which will interpolate along some
+   colors I like and generate a vector of length N to be used to set
+   colors when plotting
+** added plotM method for SnpSuperSet
+** added getAffinitySplineCoefficients (estimate affinity spline coefs) 
+   and getBaseProfile (estimate actual effect and optionally plot it)
+** added Hands-On vignette

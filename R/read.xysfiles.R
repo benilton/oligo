@@ -144,7 +144,6 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   
   filenames <- c(channel1, channel2)
   checkValidFilenames(filenames)
-  uid <- genDatasetUID(filenames)
   if (checkType) stopifnot(checkChipTypes(filenames, verbose, "nimblegen"))
   if (!missing(sampleNames))
     stopifnot(length(sampleNames) == length(channel1), length(sampleNames) == length(channel2))

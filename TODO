@@ -3,4 +3,4 @@
 - will need data pkgs (ie, with CEL/XYS files) and annotation pkg, so examples can be executed
 - add support for exon/rma and gene/rma (filtering + summarization)
 - add scanDate to protocolData (check affy)
-- add large objects + cluster support to rma (exon/gene)
+- fix functions for regular crlmm (there are instances of SnpQSet - replaced by AlleleSet - use bothStrands)

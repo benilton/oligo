@@ -475,10 +475,67 @@ basicProtocolData <- function(mat){
   Biobase:::annotatedDataFrameFromMatrix(mat, byrow=FALSE)
 }
   
-genDatasetUID <- function(filenames){
-  digest(sapply(filenames, digest, algo="sha256", file=TRUE,
-                serialize=FALSE))
+## colors I like in oligo
+darkColors <- function(n){
+  cols <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E",
+            "#E6AB02", "#A6761D", "#666666")
+  ff <- colorRampPalette(cols)
+  ff(n)
 }
 
-getDatasetUID <- function(object)
-  gsub("intensities.{0,1}-", "", basename(slot(object, "intensityFile")))[1]
+seqColors <- function(n){
+  cols <- c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6",
+            "#4292C6", "#2171B5", "#08519C", "#08306B")
+  ff <- colorRampPalette(cols)
+  ff(n)
+}
+
+## gcrma-like stuff
+## from jean
+
+getAffinitySplineCoefficients <- function(intensities, sequences){
+  if (is(sequences, "DNAStringSet"))
+    sequences <- as.character(sequences)
+  stopifnot(is.character(sequences))
+  stopifnot(is.matrix(intensities))
+  design <- sequenceDesignMatrix(sequences)
+  rm(sequences)
+  B <- ns(1:25, df=5)
+  design <- cbind(design[,  1:25] %*% B,
+                  design[, 26:50] %*% B,
+                  design[, 51:75] %*% B)
+  fits <- lm(intensities~design)
+  coefs <- coef(fits)[-1,]
+  rownames(coefs) <- rep(c("A", "C", "G"), each=5)
+  coefs
+}
+
+getBaseProfile <- function(coefs, probeLength=25, plot=FALSE, ...){
+  stopifnot(is.vector(coefs))
+  P <- as.integer(length(coefs)/3)
+  B <- ns(1:probeLength, df=5)
+  effects <- matrix(0, nrow=probeLength, ncol=4)
+  colnames(effects) <- c("A", "C", "G", "T")
+  for (i in 1:3)
+    effects[, i] <- B %*% coefs[(i-1)*P + (1:P)]
+  effects <- sweep(effects, 1, rowMeans(effects))
+  if(plot) matplot(1:probeLength, effects, ...)
+  invisible(effects)
+}
+
+## SnpSuperSet method?
+plotM <- function(x, snp, ...){
+  crlmmInfo <- file.path(system.file("extdata", package=annotation(x)),
+                         paste(annotation(x), "CrlmmInfo.rda", sep=""))
+  infoObj <- load(crlmmInfo)
+  f0 <- get(infoObj)$params$f0
+  rm(list=infoObj)
+  obj <- x[snp,]
+  theM <- getM(obj)[,,]
+  theF <- cbind(antisense=assayDataElement(obj, "antisenseF")[,],
+                sense=assayDataElement(obj, "senseF")[,])
+  theCalls <- calls(obj)[,]
+  correctedM <- theM + (theCalls - 2) * (f0-theF)
+  plot(correctedM, ...)
+  invisible(correctedM)
+}

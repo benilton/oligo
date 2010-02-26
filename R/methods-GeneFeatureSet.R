@@ -15,19 +15,11 @@ setMethod("rma", "GeneFeatureSet",
               colnames(pms) <- sampleNames(object)
               theExprs <- basicRMA(pms, pnVec, normalize, background)
               rm(pms)
-            }else if (theClass == "big.matrix"){
-              dUID <- getDatasetUID(object)
-              pmFile <- paste("pmPP-", dUID, sep="")
-              pmName <- "pms"
-              path <- oligoBigObjectPath()
-              assign(pmName, subsetBO(pmi, object=describe(exprs(object)),
-                                      fname=pmFile, nameInEnv=pmName, clean=FALSE))
-              theExprs <- basicRMAbo(pms, pnVec, background=background,
-                                     normalize=normalize, pmName=pmName,
-                                     dUID=dUID)
-              rmFromPkgEnv(pmName)
-              pmfns <- list.files(path, patt=paste("^", pmFile, sep=""), full=TRUE)
-              unlink(pmfns)
+            }else if (theClass == "ff_matrix"){
+              pms <- ffSubset(rows=pmi, object=exprs(object), prefix="pm-")
+              theExprs <- basicRMAbo(pms, pnVec, background=background, normalize=normalize)
+              finalizer(pms) <- "delete"
+              rm(pms)
             }else{
               stop("basicRMA not implemented for '", theClass, "' objects.")
             }
