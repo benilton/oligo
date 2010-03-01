@@ -1,5 +1,5 @@
-%\VignetteIndexEntry{Analysis of NimbleGen Expression Data with the oligo Package }
-%\VignetteKeywords{Expression, NimbleGen, Oligonucleotide Arrays}
+%\VignetteIndexEntry{02 - NimbleGen Expression and Preprocessing}
+%\VignetteKeywords{Expression, NimbleGen}
 %\VignettePackage{oligo}
 \documentclass{article}
 

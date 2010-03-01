@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Hands-On: Introduction to oligo}
+%\VignetteIndexEntry{01 - Overview}
 %\VignetteKeywords{expression, exon, tiling, SNP}
 %\VignettePackage{oligo}
 

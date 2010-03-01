@@ -1,5 +1,5 @@
-%\VignetteIndexEntry{Oligo Vignette}
-%\VignetteKeywords{Expression, SNP, Affymetrix, NimbleGen, Oligonucleotide Arrays}
+%\VignetteIndexEntry{03 - SNP Chips and Genotyping}
+%\VignetteKeywords{SNP, Affymetrix, Genotype, CRLMM}
 %\VignettePackage{oligo}
 \documentclass{article}
 
