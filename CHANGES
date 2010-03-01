@@ -201,7 +201,7 @@ sampleNames were different.
    and getBaseProfile (estimate actual effect and optionally plot it)
 ** added Hands-On vignette
 
-03-01-2010: B Carvalho - v 1.11.21
+03-01-2010: B Carvalho - v 1.11.22
 
 ** fixed vignette scheme
 ** (x.y.20) fixed getFid*

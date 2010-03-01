@@ -1,14 +1,14 @@
 all: overview nimbleexpr affysnp clean
 
-overview: 01Overview.tex
-	cp -p ../scripts/01Overview.pdf .
+overview: V1Overview.tex
+	cp -p ../scripts/V1Overview.pdf .
 
-nimbleexpr: 02NimbleExpressionPreprocessing.tex
-	cp -p ../scripts/02NimbleExpressionPreprocessing.pdf .
+nimbleexpr: V2NExpression.tex
+	cp -p ../scripts/V2NExpression.pdf .
 
-affysnp: 03AffySnpGenotype.tex
-	cp -p ../scripts/03AffySnpGenotype.pdf .
+affysnp: V3AffySnpGenotype.tex
+	cp -p ../scripts/V3AffySnpGenotype.pdf .
 
 clean:
 	$(RM) -f *.out *.bbl *.log *.aux *.blg *.brf *.toc *.tex
-	$(RM) -f Rplots.pdf 02NimbleExpressionPreprocessing-*
+	$(RM) -f Rplots.pdf V2NExpression-*

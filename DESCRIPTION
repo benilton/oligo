@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.11.21
+Version: 1.11.22
 Title: Oligonucleotide arrays tools.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
