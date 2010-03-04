@@ -1,38 +1,42 @@
-        **************************************************
-        *                                                *
-        *              1.11.x SERIES NEWS                *
-        *                                                *
-        **************************************************
+CHANGES IN VERSION 1.11
+-----------------------
 
 USER VISIBLE CHANGES
 
-	o New vignette: Hands-On.
+    o New vignette structure:
+    Vignette 1: Overview (with multiple examples)
+    Vignette 2: Expression (NimbleGen data)
+    Vignette 3: SNP Genotyping (Affymetrix)
+
+    o Uses Imports rather than Depends. Users must
+    explicitly load Biobase, affyio, preprocessCore
+    if they need functions from these packages.
 
 NEW FEATURES
 
-	o Support to large datasets via ff package.
-	The user should load the ff package in order to use
-	this feature. Files used by ff are saved to getwd(),
-	unless the user changes the standard path.
+    o Support to large datasets via ff package.
+    The user should load the ff package in order to use
+    this feature. Files used by ff are saved to getwd(),
+    unless the user changes the standard path.
 
-	o Support to parallel computing via snow package.
-	The user should load *both* ff and snow in order to use
-	the parallel features implemented in the package
-	(backgroundCorrect, normalize, summarize, rma). Cluster
-	variable should be set as options(cluster=makeCluster(...)).
+    o Support to parallel computing via snow package.
+    The user should load *both* ff and snow in order to use
+    the parallel features implemented in the package
+    (backgroundCorrect, normalize, summarize, rma). Cluster
+    variable should be set as options(cluster=makeCluster(...)).
 
-	o seqColors and darkColors, respectively, generate a
-	vector of sequential colors (in blue) and (qualitative)
-	dark colors (based onn Dark2 from RColorBrewer).
+    o seqColors and darkColors, respectively, generate a
+    vector of sequential colors (in blue) and (qualitative)
+    dark colors (based onn Dark2 from RColorBrewer).
 
-	o plotM method for SnpSuperSet (plot genotype clusters).
+    o plotM method for SnpSuperSet (plot genotype clusters).
 
-	o getAffinitySplineCoefficients estimates the affinity
-	spline coefficients.
+    o getAffinitySplineCoefficients estimates the affinity
+    spline coefficients.
 
-	o getBaseProfile estimates and optionally plots sequence
-	 effect like gcrma.
+    o getBaseProfile estimates and optionally plots sequence
+     effect like gcrma.
 
 BUG FIXES
 
-	o Fixed definition for probeNames() for Exon/Gene arrays.
+    o Fixed definition for probeNames() for Exon/Gene arrays.

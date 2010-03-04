@@ -205,3 +205,8 @@ sampleNames were different.
 
 ** fixed vignette scheme
 ** (x.y.20) fixed getFid*
+
+03-04-2010: B Carvalho - v 1.11.23
+
+** fixed format of NEWS
+** fixed NAMESPACE/DESCRIPTION: packages now in Imports
