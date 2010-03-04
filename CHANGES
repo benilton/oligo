@@ -210,3 +210,5 @@ sampleNames were different.
 
 ** fixed format of NEWS
 ** fixed NAMESPACE/DESCRIPTION: packages now in Imports
+** removed getMetadata(2) and other unused functions
+** added documentation to getBaseProfile and getAffinitySplineCoefficients.

@@ -1,6 +1,6 @@
-isMatrixLike <- function(obj){
-  is.big.matrix(obj) || is.matrix(obj)
-}
+## isMatrixLike <- function(obj){
+##   ("ff_matrix" %in% class(obj)) || is.matrix(obj)
+## }
 
 cleanPlatformName <- function(x)
   gsub("[_-]", ".", paste("pd.", tolower(x), sep=""))
@@ -97,20 +97,20 @@ checkValidFilenames <- function(filenames) {
   TRUE
 }
 
-checkValidPhenodataForFiles <- function(filenames, pd){
-  if (missing(pd)) return(FALSE)
-  if (class(pd) != "AnnotatedDataFrame") return(FALSE)
-  return(length(filenames) == nrow(pd))
-}
+## checkValidPhenodataForFiles <- function(filenames, pd){
+##   if (missing(pd)) return(FALSE)
+##   if (class(pd) != "AnnotatedDataFrame") return(FALSE)
+##   return(length(filenames) == nrow(pd))
+## }
 
-createDefaultMiame <- function(filenames, notes){
-  experimentData <- new("MIAME")
-  preproc(experimentData)$filenames <- filenames
-  preproc(experimentData)$oligoversion <- packageDescription("oligo", field="Version")
-  if (!missing(notes))
-    notes(experimentData) <- notes
-  experimentData
-}
+## createDefaultMiame <- function(filenames, notes){
+##   experimentData <- new("MIAME")
+##   preproc(experimentData)$filenames <- filenames
+##   preproc(experimentData)$oligoversion <- packageDescription("oligo", field="Version")
+##   if (!missing(notes))
+##     notes(experimentData) <- notes
+##   experimentData
+## }
 
 getCelChipType <- function(x, useAffyio){
   ifelse(useAffyio,
@@ -139,105 +139,105 @@ checkChipTypes <- function(filenames, verbose=TRUE, manufacturer, useAffyio){
   ok
 }
 
-getMetadata <- function(theMatrix, filenames, phenoData, featureData,
-                        experimentData, notes, sampleNames, datetime){
-  stopifnot(!missing(theMatrix), !missing(filenames),
-            isMatrixLike(theMatrix), is.character(filenames),
-            ncol(theMatrix) == length(filenames))
-  if (!checkValidPhenodataForFiles(filenames, phenoData)){
-    phenoData <- new("AnnotatedDataFrame",
-                     data=data.frame(filenames = filenames),
-                     varMetadata=data.frame(labelDescription=c("names of files used to create object")))
-  }
-  if (missing(sampleNames))
-    sampleNames <- basename(filenames)
-  sampleNames(phenoData) <- sampleNames
-  
-  if (!missing(datetime)){
-    pdDateTime <- new("AnnotatedDataFrame",
-                      data=data.frame(DateTime = datetime),
-                      varMetadata=data.frame(labelDescription="date/time from raw files"))
-    sampleNames(pdDateTime) <- sampleNames(phenoData)
-    phenoData <- combine(phenoData, pdDateTime)
-    rm(pdDateTime)
-  }
-  
-  if (missing(experimentData))
-    experimentData <- createDefaultMiame(filenames)
-  if (missing(featureData))
-    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix,byrow=TRUE)
-
-  out <- list(filenames=filenames,
-              phenoData=phenoData,
-              featureData=featureData,
-              experimentData=experimentData)
-}
-
-getMetadata2 <- function(theMatrix1, theMatrix2,
-                         filesChannel1, filesChannel2,
-                         phenoData, featureData,
-                         experimentData, notes, sampleNames,
-                         datetime1, datetime2){
-  stopifnot(!missing(theMatrix1), !missing(theMatrix2),
-            !missing(filesChannel1), !missing(filesChannel2),
-            isMatrixLike(theMatrix1), isMatrixLike(theMatrix2),
-            is.character(filesChannel1), is.character(filesChannel2),
-            ncol(theMatrix1) == length(filesChannel1),
-            ncol(theMatrix2) == length(filesChannel2),
-            length(filesChannel1) == length(filesChannel2))
-
-  if (missing(phenoData)){
-    theDF <- data.frame(filenamesChannel1=filesChannel1,
-                        filenamesChannel2=filesChannel2)
-    vmDF <- data.frame(labelDescription=c(
-                         "names of files used to create 'channel1'",
-                         "names of files used to create 'channel2'"),
-                       channel=factor(c("channel1", "channel2"),
-                         levels=c("channel1", "channel2", "_ALL_")))
-    phenoData <- new("AnnotatedDataFrame",
-                     data=theDF,
-                     varMetadata=vmDF)
-    rm(theDF, vmDF)
-  }
-
-  if (!missing(datetime1)){
-    theDF <- data.frame(channel1DateTime=datetime1)
-    vmDF <- data.frame(labelDescription=c("date/time from raw files"),
-                       channel=factor("channel1", levels=c("channel1", "channel2", "_ALL_")))
-    tmpPD <- new("AnnotatedDataFrame",
-                 data=theDF,
-                 varMetadata=vmDF)
-    sampleNames(tmpPD) <- sampleNames(phenoData)
-    phenoData <- combine(phenoData, tmpPD)
-    rm(theDF, vmDF, tmpPD)
-  }
-  if (!missing(datetime2)){
-    theDF <- data.frame(channel2DateTime=datetime2)
-    vmDF <- data.frame(labelDescription=c("date/time from raw files"),
-                       channel=factor("channel2", levels=c("channel1", "channel2", "_ALL_")))
-    tmpPD <- new("AnnotatedDataFrame",
-                 data=theDF,
-                 varMetadata=vmDF)
-    sampleNames(tmpPD) <- sampleNames(phenoData)
-    phenoData <- combine(phenoData, tmpPD)
-    rm(theDF, vmDF, tmpPD)
-  }
-
-  if (missing(sampleNames))
-    sampleNames <- basename(filesChannel1)
-  sampleNames(phenoData) <- sampleNames
-  
-  if (missing(experimentData))
-    experimentData <- createDefaultMiame(filesChannel1)
-  if (missing(featureData))
-    featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix1,byrow=TRUE)
-
-  out <- list(filesChannel1=filesChannel1,
-              filesChannel2=filesChannel2,
-              phenoData=phenoData,
-              featureData=featureData,
-              experimentData=experimentData)
-}
+## getMetadata <- function(theMatrix, filenames, phenoData, featureData,
+##                         experimentData, notes, sampleNames, datetime){
+##   stopifnot(!missing(theMatrix), !missing(filenames),
+##             isMatrixLike(theMatrix), is.character(filenames),
+##             ncol(theMatrix) == length(filenames))
+##   if (!checkValidPhenodataForFiles(filenames, phenoData)){
+##     phenoData <- new("AnnotatedDataFrame",
+##                      data=data.frame(filenames = filenames),
+##                      varMetadata=data.frame(labelDescription=c("names of files used to create object")))
+##   }
+##   if (missing(sampleNames))
+##     sampleNames <- basename(filenames)
+##   sampleNames(phenoData) <- sampleNames
+##   
+##   if (!missing(datetime)){
+##     pdDateTime <- new("AnnotatedDataFrame",
+##                       data=data.frame(DateTime = datetime),
+##                       varMetadata=data.frame(labelDescription="date/time from raw files"))
+##     sampleNames(pdDateTime) <- sampleNames(phenoData)
+##     phenoData <- combine(phenoData, pdDateTime)
+##     rm(pdDateTime)
+##   }
+##   
+##   if (missing(experimentData))
+##     experimentData <- createDefaultMiame(filenames)
+##   if (missing(featureData))
+##     featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix,byrow=TRUE)
+## 
+##   out <- list(filenames=filenames,
+##               phenoData=phenoData,
+##               featureData=featureData,
+##               experimentData=experimentData)
+## }
+## 
+## getMetadata2 <- function(theMatrix1, theMatrix2,
+##                          filesChannel1, filesChannel2,
+##                          phenoData, featureData,
+##                          experimentData, notes, sampleNames,
+##                          datetime1, datetime2){
+##   stopifnot(!missing(theMatrix1), !missing(theMatrix2),
+##             !missing(filesChannel1), !missing(filesChannel2),
+##             isMatrixLike(theMatrix1), isMatrixLike(theMatrix2),
+##             is.character(filesChannel1), is.character(filesChannel2),
+##             ncol(theMatrix1) == length(filesChannel1),
+##             ncol(theMatrix2) == length(filesChannel2),
+##             length(filesChannel1) == length(filesChannel2))
+## 
+##   if (missing(phenoData)){
+##     theDF <- data.frame(filenamesChannel1=filesChannel1,
+##                         filenamesChannel2=filesChannel2)
+##     vmDF <- data.frame(labelDescription=c(
+##                          "names of files used to create 'channel1'",
+##                          "names of files used to create 'channel2'"),
+##                        channel=factor(c("channel1", "channel2"),
+##                          levels=c("channel1", "channel2", "_ALL_")))
+##     phenoData <- new("AnnotatedDataFrame",
+##                      data=theDF,
+##                      varMetadata=vmDF)
+##     rm(theDF, vmDF)
+##   }
+## 
+##   if (!missing(datetime1)){
+##     theDF <- data.frame(channel1DateTime=datetime1)
+##     vmDF <- data.frame(labelDescription=c("date/time from raw files"),
+##                        channel=factor("channel1", levels=c("channel1", "channel2", "_ALL_")))
+##     tmpPD <- new("AnnotatedDataFrame",
+##                  data=theDF,
+##                  varMetadata=vmDF)
+##     sampleNames(tmpPD) <- sampleNames(phenoData)
+##     phenoData <- combine(phenoData, tmpPD)
+##     rm(theDF, vmDF, tmpPD)
+##   }
+##   if (!missing(datetime2)){
+##     theDF <- data.frame(channel2DateTime=datetime2)
+##     vmDF <- data.frame(labelDescription=c("date/time from raw files"),
+##                        channel=factor("channel2", levels=c("channel1", "channel2", "_ALL_")))
+##     tmpPD <- new("AnnotatedDataFrame",
+##                  data=theDF,
+##                  varMetadata=vmDF)
+##     sampleNames(tmpPD) <- sampleNames(phenoData)
+##     phenoData <- combine(phenoData, tmpPD)
+##     rm(theDF, vmDF, tmpPD)
+##   }
+## 
+##   if (missing(sampleNames))
+##     sampleNames <- basename(filesChannel1)
+##   sampleNames(phenoData) <- sampleNames
+##   
+##   if (missing(experimentData))
+##     experimentData <- createDefaultMiame(filesChannel1)
+##   if (missing(featureData))
+##     featureData <- Biobase:::annotatedDataFrameFromMatrix(theMatrix1,byrow=TRUE)
+## 
+##   out <- list(filesChannel1=filesChannel1,
+##               filesChannel2=filesChannel2,
+##               phenoData=phenoData,
+##               featureData=featureData,
+##               experimentData=experimentData)
+## }
 
 
 basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
@@ -313,8 +313,6 @@ getFidProbeset <- function(object){
   conn <- db(object)
   sql <- "SELECT fid, fsetid FROM pmfeature"
   featureInfo <- dbGetQuery(conn, sql)
-##   bgInfo <- dbGetQuery(conn, "SELECT fid, fsetid FROM bgfeature")
-##   featureInfo <- rbind(featureInfo, bgInfo)
   featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
   rownames(featureInfo) <- NULL
   return(featureInfo)
@@ -324,9 +322,6 @@ getFidMetaProbesetCore <- function(object){
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-##   sql <- "SELECT fid, meta_fsetid as fsetid FROM bgfeature INNER JOIN core_mps USING(fsetid)"
-##   bgInfo <- dbGetQuery(conn, sql)
-##   featureInfo <- rbind(featureInfo, bgInfo)
   featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
   rownames(featureInfo) <- NULL
   return(featureInfo)
@@ -336,9 +331,6 @@ getFidMetaProbesetFull <- function(object){
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN full_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-##   sql <- "SELECT fid, meta_fsetid as fsetid FROM bgfeature INNER JOIN full_mps USING(fsetid)"
-##   bgInfo <- dbGetQuery(conn, sql)
-##   featureInfo <- rbind(featureInfo, bgInfo)
   featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
   rownames(featureInfo) <- NULL
   return(featureInfo)
@@ -348,9 +340,6 @@ getFidMetaProbesetExtended <- function(object){
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN extended_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-##   sql <- "SELECT fid, meta_fsetid as fsetid FROM bgfeature INNER JOIN extended_mps USING(fsetid)"
-##   bgInfo <- dbGetQuery(conn, sql)
-##   featureInfo <- rbind(featureInfo, bgInfo)
   featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
   rownames(featureInfo) <- NULL
   return(featureInfo)
