@@ -212,3 +212,4 @@ sampleNames were different.
 ** fixed NAMESPACE/DESCRIPTION: packages now in Imports
 ** removed getMetadata(2) and other unused functions
 ** added documentation to getBaseProfile and getAffinitySplineCoefficients.
+** removed reference to genDatasetUID (1.11.26)

@@ -141,7 +141,6 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   if (missing(sampleNames))
     sampleNames <- basename(channel1)
 
-  uid <- genDatasetUID(filenames)
   results <- smartReadCEL(channel1, sampleNames, headdetails=headdetails)
   channel1Intensities <- results[["exprMatrix"]]
   intensityFile1 <- results[["intensityFile"]]
