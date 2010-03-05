@@ -1,4 +1,10 @@
 ## TOOLS FOR Large DataSets through 'ff'
+setMethod("annotatedDataFrameFrom", "ff_matrix",
+          function(object, byrow, ...)
+          Biobase:::annotatedDataFrameFromMatrix(object, byrow, ...)
+          )
+
+
 getSomeRowsAllCols <- function(cols, rows, inObj, outObj){
 
   ## cols inObj match cols outObj
@@ -208,18 +214,26 @@ qnToTargetLDSnode <- function(cols, target, object, matInEnv){
   TRUE
 }
 
-quantileNormalizationLDSmaster <- function(object){
+quantileNormalizationLDSmaster <- function(object, target){
   ## this runs on the master node
   samplesByNode <- splitIndicesByNode(1:ncol(object))
   dmns <- dimnames(object)
   dimnames(object) <- NULL
   outName <- "outObj"
   sendBO2PkgEnv(object, outName)
-  stats <- oLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=outName)
-  totalN <- sum(sapply(stats, "[[", "n"))
-  total <- rowSums(sapply(stats, "[[", "total"))
-  target <- total/totalN
-  rm(stats, total, totalN)
+  if (missing(target)){
+    stats <- oLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=outName)
+    totalN <- sum(sapply(stats, "[[", "n"))
+    total <- rowSums(sapply(stats, "[[", "total"))
+    target <- total/totalN
+    rm(stats, total, totalN)
+  }else{
+    targetOK <- length(target) == nrow(object)
+    if (!targetOK){
+      rmFromPkgEnv(outName)
+      stop("Length of target does not match nrow(object).")
+    }
+  }
   oLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=outName)
   rmFromPkgEnv(outName)
   return(object)
@@ -252,6 +266,31 @@ setMethod("normalize", "ff_matrix",
             return(out)
           })
 
+setMethod("normalizeToTarget", "matrix",
+          function(object, target, method="quantile", copy=TRUE, verbose=TRUE){
+            stopifnot(!missing(target))
+            method <- match.arg(method, "quantile")
+            if (verbose) cat("Normalizing using target... ")
+            out <- normalize.quantiles.use.target(object, target, copy=copy)
+            return(out)
+          })
+
+setMethod("normalizeToTarget", "ff_matrix",
+          function(object, target, method="quantile", copy=TRUE, verbose=TRUE){
+            stopifnot(!missing(target))
+            method <- match.arg(method, "quantile")
+            if (verbose) cat("Normalizing using target... ")
+            if (copy){
+              out <- clone(object, pattern=file.path(oligoBigObjectPath(), "oligo-qn-target-"))
+            }else{
+              out <- object
+            }
+            if (method == "quantile"){
+              quantileNormalizationLDSmaster(out, target)
+            }
+            return(out)
+          })
+
 ############################################
 ## Summarization
 ############################################
@@ -279,7 +318,7 @@ basicMedianPolishBO <- function(psToSumm, inObj, outObj, probes,
       iIn <- unlist(pss)
       inMatrix <- inObj[iIn,, drop=FALSE]
       tmp <- basicRMA(inMatrix, pnVec=probes[iIn], normalize=FALSE,
-                      background=FALSE, verbose=TRUE, destructive=TRUE)
+                      background=FALSE, verbose=FALSE, destructive=TRUE)
       rm(inMatrix, iIn)
       iOut <- match(rownames(tmp), probesets)
       outObj[iOut,] <- tmp

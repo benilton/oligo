@@ -22,8 +22,9 @@ NEW FEATURES
     o Support to parallel computing via snow package.
     The user should load *both* ff and snow in order to use
     the parallel features implemented in the package
-    (backgroundCorrect, normalize, summarize, rma). Cluster
-    variable should be set as options(cluster=makeCluster(...)).
+    (backgroundCorrect, normalize, summarize, rma,
+    normalizeToTarget). Cluster variable should be set as
+    options(cluster=makeCluster(...)).
 
     o seqColors and darkColors, respectively, generate a
     vector of sequential colors (in blue) and (qualitative)

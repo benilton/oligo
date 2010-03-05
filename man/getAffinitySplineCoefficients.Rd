@@ -2,10 +2,10 @@
 \alias{getAffinitySplineCoefficients}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+  Estimate affinity coefficients.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Estimate affinity coefficients using sequence information and splines.
 }
 \usage{
 getAffinitySplineCoefficients(intensities, sequences)

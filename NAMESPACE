@@ -120,5 +120,5 @@ importFrom(utils, packageDescription, read.delim, read.table,
  export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
  
  ## Testing
- exportMethods(backgroundCorrect, normalize, summarize)
+ exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
  export(oligoProbesets, oligoSamples, setCluster, delCluster, getCluster, plotM)

@@ -52,3 +52,7 @@ setGeneric("summarize",
            function(object, probes=rownames(object), method="medianpolish", verbose=TRUE)
            standardGeneric("summarize"))
 
+setGeneric("normalizeToTarget",
+           function(object, target, method="quantile", copy=TRUE, verbose=TRUE)
+           standardGeneric("normalizeToTarget"))
+
