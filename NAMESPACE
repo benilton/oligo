@@ -44,7 +44,10 @@ importFrom(grDevices, colorRampPalette, gray)
 importFrom(methods, callNextMethod, is, new, slot, "slot<-",
            validObject)
 
-importFrom(oligoClasses, list.celfiles, requireAnnotation, isPackageLoaded)
+importFrom(oligoClasses, list.celfiles, requireAnnotation,
+           isPackageLoaded, setCluster, delCluster, getCluster,
+           ocProbesets, ocSamples, ocLapply, splitIndicesByLength,
+           splitIndicesByNode)
 
 importFrom(preprocessCore, normalize.quantiles,
            normalize.quantiles.determine.target,
@@ -59,66 +62,23 @@ importFrom(utils, packageDescription, read.delim, read.table,
            setTxtProgressBar, txtProgressBar, write.table)
 
 
+## EXPORTS
 
-### ## Needed from splines
-### importFrom(splines, ns)
-### 
-### ## Needed from affxparser
-### importFrom(affxparser, createCel, readCel, readCelHeader,
-###            readCelIntensities, updateCel)
-### 
-### ## Needed from graphics
-### importFrom(graphics, boxplot, hist, image, lines, matplot, par, plot)
-### importFrom(grDevices, gray, colorRampPalette)
-### 
-### ## Needed from utils
-### importFrom(utils, packageDescription, read.delim, read.table,
-###            setTxtProgressBar, txtProgressBar, write.table)
-### 
-### ## Needed from methods
-### importClassesFrom(methods, array, matrix)
-### importFrom(methods, "@<-", is, new)
-### 
-### ## Needed from stats
-### importFrom(stats, coef, cov, density, dnorm, fitted, kmeans, lm,
-###            lowess, mad, median, pchisq, quantile, residuals)
-### 
-### ## Needed from DBI
-### importMethodsFrom(DBI, dbGetQuery)
-### 
-### ## Needed from Biobase
-### importClassesFrom(Biobase, ExpressionSet)
-### importMethodsFrom(Biobase, annotatedDataFrameFrom, annotation,
-###                   "annotation<-", experimentData, exprs, featureData,
-###                   "featureData<-", featureNames, "featureNames<-",
-###                   "notes<-", pData, phenoData, "phenoData<-", preproc,
-###                   "preproc<-", rowMedians, sampleNames,
-###                   "sampleNames<-", varMetadata)
-### importFrom(Biobase, assayDataElement, assayDataElementReplace)
-### 
-### ## Needed from affyio
-### import(affyio)
-### 
-### ## Get everything from oligoClasses
-### import(oligoClasses)
-### 
- ## Exporting
- exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
-               getPlatformDesign, getX, getY, hist, image, ## initialize,
-               MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-", pmChr,
-               pmAllele, pmindex, pmFragmentLength, pmOffset, pmPosition,
-               pmSequence, pmStrand, probeNames, rma)
+exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
+              getPlatformDesign, getX, getY, hist, image, ## initialize,
+              MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-", pmChr,
+              pmAllele, pmindex, pmFragmentLength, pmOffset, pmPosition,
+              pmSequence, pmStrand, probeNames, rma)
+
+export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
+       sequenceDesignMatrix, list.xysfiles, readSummaries,
+       getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
+       read.celfiles2, basicRMA, darkColors, seqColors,
+       getAffinitySplineCoefficients, getBaseProfile)
+
+## Exported functions for CRLMM
+export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
  
- ## Exported functions
- export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
-        sequenceDesignMatrix, list.xysfiles, readSummaries,
-        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
-        read.celfiles2, basicRMA, darkColors, seqColors,
-        getAffinitySplineCoefficients, getBaseProfile)
- 
- ## Exported functions for CRLMM
- export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
- 
- ## Testing
- exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
- export(oligoProbesets, oligoSamples, setCluster, delCluster, getCluster, plotM)
+## Testing
+exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
+export(plotM)
