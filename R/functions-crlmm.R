@@ -15,14 +15,14 @@ getSnpFragmentLength <- function(object){
 
 
 snpGenderCall <- function(object){
-  XIndex=getChrXIndex(object)
-  tmp=(median(getA(object), na.rm=TRUE))
+  XIndex <- getChrXIndex(object)
+  tmp <- median(getA(object), na.rm=TRUE)
   if (bothStrands(object)){
-    a=apply(getA(object)[XIndex,,],2,median, na.rm=TRUE)
+    a <- apply(getA(object)[XIndex,,], 2, median, na.rm=TRUE)
   }else{
-    a=apply(getA(object)[XIndex,],2,median, na.rm=TRUE)
+    a <- apply(getA(object)[XIndex,], 2, median, na.rm=TRUE)
   }
-  kfit=kmeans(a,c(min(a),tmp))
+  kfit=kmeans(a, c(min(a),tmp))
   return(factor(c("female","male")[as.numeric(kfit$cluster==1)+1]))
 }
 

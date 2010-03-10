@@ -4,7 +4,7 @@ Title: Oligonucleotide arrays tools.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
 Depends: R (>= 2.11.0),
-         oligoClasses (>= 1.9.34)
+         oligoClasses (>= 1.9.37)
 Imports: affyio (>= 1.15.2),
          affxparser (>= 1.17.3),
          Biobase (>= 2.7.3),
@@ -41,7 +41,7 @@ Collate: AllGenerics.R
          read.xysfiles.R
          utils-general.R
          utils-cluster.R
-         utils-snp.R
+         todo-snp.R
          functions-crlmm.R
          functions-snprma.R
          justSNPRMA.R

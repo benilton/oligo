@@ -44,7 +44,7 @@ importFrom(grDevices, colorRampPalette, gray)
 importFrom(methods, callNextMethod, is, new, slot, "slot<-",
            validObject)
 
-importFrom(oligoClasses, list.celfiles, requireAnnotation)
+importFrom(oligoClasses, list.celfiles, requireAnnotation, isPackageLoaded)
 
 importFrom(preprocessCore, normalize.quantiles,
            normalize.quantiles.determine.target,

@@ -1,6 +1,6 @@
 oligoReadXys <- function(cols, headdetails, filenames, out){
   if (length(cols) > 0){
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     open(out)
     for (theCols in grpCols)
       out[, theCols] <- .Call("R_read_xys_files", filenames[theCols], FALSE)[["intensities"]]
@@ -23,9 +23,8 @@ smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
     nr <- nrow(.Call("R_read_xys_files", filenames[1],
                      FALSE)[["intensities"]])
 
-    tmpExprs <- ff(vmode="double", dim=c(nr, length(filenames)),
-                   dimnames=list(as.character(1:nr), sampleNames),
-                   pattern=file.path(oligoBigObjectPath(), "intensities-"))
+    tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)),
+                         dimnames=list(as.character(1:nr), sampleNames))
     intensityFile <- filename(tmpExprs)
     
     samplesByNode <- splitIndicesByNode(1:length(filenames))

@@ -13,7 +13,7 @@ getCluster <- function()
   getOption("cluster")
 
 requireClusterPkgSet <- function(packages){
-  if (!oligoParallelSupport())
+  if (!parStatus())
     stop("cluster is not ready. Use 'setCluster'.")
   for (pkg in packages){
     pkgOnCluster <- requireClusterPkg(pkg, character.only=TRUE)
@@ -31,63 +31,21 @@ requireClusterPkgSet <- function(packages){
 requireClusterPkg <- function(...)
   all(unlist(clusterCall(getCluster(), require, ...)))
 
-oligoProbesets <- function(n){
-  if (missing(n)){
-    return(getOption("oligoProbesets"))
-  }else{
-    options(oligoProbesets=n)
-    invisible(TRUE)
-  }
-}
-
-oligoSamples <- function(n){
-  if (missing(n)){
-    return(getOption("oligoSamples"))
-  }else{
-    options(oligoSamples=n)
-    invisible(TRUE)
-  }
-}
-
 splitIndicesByLength <- function(x, lg){
   lx <- length(x)
   split(x, rep(1:lx, each=lg, length.out=lx))
 }
 
 splitIndicesByNode <- function(x){
-  if (oligoParallelSupport()){
+  if (parStatus()){
     clusterSplit(getCluster(), x)
   }else{
     list(x)
   }
 }
 
-validWorkDir <- function(path){
-  stopifnot(!missing(path), is.character(path))
-  isDir <- file.info(path)[["isdir"]]
-  if (!isDir) warning(path, " is not a valid directory.")
-  pathExists <- file.access(path, mode=0) == 0
-  if (!pathExists) warning(path, " does not exist.")
-  canRead <- file.access(path, mode=4) == 0
-  if (!canRead) warning("Cannot read from ", path)
-  canWrite <- file.access(path, mode=2) == 0
-  if (!canWrite) warning("Cannot write to ", path)
-  canAccess <- file.access(path, mode=1) == 0
-  if (!canAccess) warning("Cannot access ", path)
-  isDir && pathExists && canRead && canWrite && canAccess
-}
-
-oligoBigObjectPath <- function(path){
-  if (missing(path)){
-    return(getOption("oligoBigObjectPath"))
-  }else{
-    stopifnot(is.character(path))
-    options(oligoBigObjectPath=path)
-  }
-}
-
 oLapply <- function(X, FUN, ...){
-  if (oligoParallelSupport()){
+  if (parStatus()){
     requireClusterPkgSet(c("oligo", "ff"))
     parLapply(getCluster(), X, FUN, ...)
   }else{
@@ -107,7 +65,7 @@ loadAndKeep <- function(obj, name){
 }
 
 sendBO2PkgEnv <- function(obj, name){
-  if (oligoParallelSupport()){
+  if (parStatus()){
     clusterCall(getCluster(), loadAndKeep, obj, name)
   }else{
     loadAndKeep(obj, name)
@@ -121,7 +79,7 @@ rmFromPkgEnv <- function(name, garbageCollect=FALSE){
     if (garbageCollect)
       gc()
   }
-  if (oligoParallelSupport()){
+  if (parStatus()){
     clusterCall(getCluster(), f, name, garbageCollect)
   }else{
     f(name, garbageCollect)

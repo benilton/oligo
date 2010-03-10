@@ -5,9 +5,7 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
   dns <- list(as.character(1:nr), sampleNames)
   
   if (isPackageLoaded("ff")){
-    tmpExprs <- ff(vmode="double", dim=c(nr, length(filenames)),
-                   pattern=file.path(oligoBigObjectPath(),
-                     "intensities-"))
+    tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)))
     intensityFile <- filename(tmpExprs)
     samplesByNode <- splitIndicesByNode(1:length(filenames))
     oLapply(samplesByNode, oligoReadCels, headdetails, filenames,
@@ -26,7 +24,7 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
 oligoReadCels <- function(cols, headdetails, filenames, out){
   ## runs on the nodes
   if (length(cols) > 0){
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     open(out)
     for (theCols in grpCols)
       out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,

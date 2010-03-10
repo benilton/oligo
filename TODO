@@ -9,3 +9,4 @@
      selected fields: x/y/fid/fsetid/man_fsetid
 - subset argument to methods to use selectProbes()
 - add oligo version to FeatureSet objs
+- add crlmm pipeline from SnpFeatureSet (snprma is ready under snprma2)

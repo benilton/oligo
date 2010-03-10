@@ -1,10 +1,3 @@
-## TOOLS FOR Large DataSets through 'ff'
-setMethod("annotatedDataFrameFrom", "ff_matrix",
-          function(object, byrow, ...)
-          Biobase:::annotatedDataFrameFromMatrix(object, byrow, ...)
-          )
-
-
 getSomeRowsAllCols <- function(cols, rows, inObj, outObj){
 
   ## cols inObj match cols outObj
@@ -13,7 +6,7 @@ getSomeRowsAllCols <- function(cols, rows, inObj, outObj){
   if (length(cols) > 0){
     inMat <- get(inObj, envir=envir)
     outMat <- get(outObj, envir=envir)
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
       outMat[, theCols] <- inMat[rows, theCols, drop=FALSE]
     rm(inMat, outMat, grpCols, theCols)
@@ -29,7 +22,7 @@ getAllRowsSomeCols <- function(cols, allCols, inObj, outObj){
   if (length(cols) > 0){
     inMat <- get(inObj, envir=envir)
     outMat <- get(outObj, envir=envir)
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols){
       idx <- match(theCols, allCols)
       outMat[, idx] <- inMat[, theCols, drop=FALSE]
@@ -45,7 +38,7 @@ getSomeRowsSomeCols <- function(cols, allCols, rows, inObj, outObj){
     envir <- .oligoPkgEnv
     inMat <- get(inObj, envir=envir)
     outMat <- get(outObj, envir=envir)
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols){
       idx <- match(theCols, allCols)
       outMat[, idx] <- inMat[rows, theCols, drop=FALSE]
@@ -80,9 +73,8 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
     nc <- length(cols)
     cns <- cns[cols]
   }
-  
-  out <- ff(vmode=vmode(object), dim=c(nr, nc),
-            pattern=file.path(oligoBigObjectPath(), prefix))
+
+  out <- createFF(prefix, dim=c(nr, nc), vmode=vmode(object))
   sendBO2PkgEnv(out, nameInEnv)
   
   ## hypothesis: nr >> nc
@@ -127,7 +119,7 @@ rmaBgCorrectLDSnode <- function(cols, object, matInEnv){
       object <- get(matInEnv, envir=.oligoPkgEnv)
     }
     open(object)
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
       object[, theCols] <- rma.background.correct(object[, theCols, drop=FALSE], copy=FALSE)
     close(object)
@@ -139,9 +131,9 @@ rmaBgCorrectLDSnode <- function(cols, object, matInEnv){
 
 rmaBgCorrectLDSmaster <-  function(object, copy=TRUE){
   ## This runs on the master node
-  stopifnot(oligoBigObjectSupport())
+  stopifnot(ldStatus())
   if (copy){
-    out <- clone(object, pattern=file.path(oligoBigObjectPath(), "oligo-rmabg-"))
+    out <- clone(object, pattern=file.path(ldPath(), "oligo-rmabg-"))
   }else{
     out <- object
   }
@@ -205,7 +197,7 @@ qnToTargetLDSnode <- function(cols, target, object, matInEnv){
       object <- get(matInEnv, envir=.oligoPkgEnv)
     }
     open(object)
-    grpCols <- splitIndicesByLength(cols, oligoSamples())
+    grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
       object[, theCols] <- normalize.quantiles.use.target(object[, theCols, drop=FALSE], target, copy=FALSE)
     close(object)
@@ -255,7 +247,7 @@ setMethod("normalize", "ff_matrix",
             method = match.arg(method, "quantile")
             if (verbose) cat("Normalizing... ")
             if (copy){
-              out <- clone(object, pattern=file.path(oligoBigObjectPath(), "oligo-qn-"))
+              out <- clone(object, pattern=file.path(ldPath(), "oligo-qn-"))
             }else{
               out <- object
             }
@@ -281,7 +273,7 @@ setMethod("normalizeToTarget", "ff_matrix",
             method <- match.arg(method, "quantile")
             if (verbose) cat("Normalizing using target... ")
             if (copy){
-              out <- clone(object, pattern=file.path(oligoBigObjectPath(), "oligo-qn-target-"))
+              out <- clone(object, pattern=file.path(ldPath(), "oligo-qn-target-"))
             }else{
               out <- object
             }
@@ -313,7 +305,7 @@ basicMedianPolishBO <- function(psToSumm, inObj, outObj, probes,
       outObj <- get(matOutEnv, envir=.oligoPkgEnv)
     }
     open(outObj)
-    psList <- splitIndicesByLength(psToSumm, oligoProbesets())
+    psList <- splitIndicesByLength(psToSumm, ocProbesets())
     for (pss in psList){
       iIn <- unlist(pss)
       inMatrix <- inObj[iIn,, drop=FALSE]
@@ -352,8 +344,7 @@ setMethod("summarize", "ff_matrix",
               pnsListByNode <- splitIndicesByNode(probeRowByProbesets)
               pns <- names(probeRowByProbesets)
 
-              out <- ff(vmode="double", dim=c(length(pns), ncol(object)),
-                        pattern=file.path(oligoBigObjectPath(), "oligo-mp-"))
+              out <- createFF("oligo-mp-", dim=c(length(pns), ncol(object)))
               outMat <- "probesetLevel"
               sendBO2PkgEnv(out, outMat)
 
@@ -409,8 +400,7 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   rowsByProbesets <- split(1:nrow(pmMat), pnVec)
   pnsListByNode <- splitIndicesByNode(rowsByProbesets)
   pns <- names(rowsByProbesets)
-  rmaResult <- ff(vmode="double", dim=c(length(pns), ncol(pmMat)),
-                  pattern=file.path(oligoBigObjectPath(), "rma-"))
+  rmaResult <- createFF("rma-", dim=c(length(pns), ncol(pmMat)))
   rmaName <- "rmaResult"
   sendBO2PkgEnv(rmaResult, rmaName)
   oLapply(pnsListByNode, basicMedianPolishBO, probes=pnVec,

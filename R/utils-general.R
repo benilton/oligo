@@ -1,7 +1,3 @@
-## isMatrixLike <- function(obj){
-##   ("ff_matrix" %in% class(obj)) || is.matrix(obj)
-## }
-
 cleanPlatformName <- function(x)
   gsub("[_-]", ".", paste("pd.", tolower(x), sep=""))
 
@@ -387,18 +383,6 @@ AffyDate2Posix <- function(txt){
   out
 }
 
-isPackageLoaded <- function(pkg){
-  stopifnot(is.character(pkg))
-  pkg <- paste("package:", pkg, sep="")
-  pkg %in% search()
-}
-
-oligoBigObjectSupport <- function()
-  isPackageLoaded("ff")
-
-oligoParallelSupport <- function()
-  is(getOption("cluster"), "cluster") && isPackageLoaded("snow")
-
 basicPhenoData <- function(mat, filenames){
   pdd <- data.frame(exprs=filenames)
   vmd <- data.frame(labelDescription="Filenames",
@@ -434,15 +418,15 @@ basicProtocolData <- function(mat){
 darkColors <- function(n){
   cols <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E",
             "#E6AB02", "#A6761D", "#666666")
-  ff <- colorRampPalette(cols)
-  ff(n)
+  fff <- colorRampPalette(cols)
+  fff(n)
 }
 
 seqColors <- function(n){
   cols <- c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6",
             "#4292C6", "#2171B5", "#08519C", "#08306B")
-  ff <- colorRampPalette(cols)
-  ff(n)
+  fff <- colorRampPalette(cols)
+  fff(n)
 }
 
 ## gcrma-like stuff
