@@ -218,6 +218,7 @@ sampleNames were different.
 
 ** moved some docs (cluster related) to oligoClasses
 
-03-11-2010: B Carvalho - 1.11.30
+03-11-2010: B Carvalho
 
-** replaced oLapply by ocLapply(..., neededPkgs="oligo")
+** (1.11.30) replaced oLapply by ocLapply(..., neededPkgs="oligo")
+** (1.11.31) got rid of sendBO2env

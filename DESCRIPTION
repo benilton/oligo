@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.11.30
+Version: 1.11.31
 Title: Oligonucleotide arrays tools.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
@@ -40,7 +40,6 @@ Collate: AllGenerics.R
          read.celfiles.R
          read.xysfiles.R
          utils-general.R
-         utils-cluster.R
          todo-snp.R
          functions-crlmm.R
          functions-snprma.R

@@ -1,48 +1,50 @@
-getSomeRowsAllCols <- function(cols, rows, inObj, outObj){
-
+getSomeRowsAllCols <- function(cols, rows, inMat, outMat){
   ## cols inObj match cols outObj
   ## rows inObj do NOT match rows outObj
-  envir <- .oligoPkgEnv
   if (length(cols) > 0){
-    inMat <- get(inObj, envir=envir)
-    outMat <- get(outObj, envir=envir)
+    open(inMat)
+    open(outMat)
     grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
       outMat[, theCols] <- inMat[rows, theCols, drop=FALSE]
+    close(inMat)
+    close(outMat)
     rm(inMat, outMat, grpCols, theCols)
     gc()
   }
   TRUE
 }
 
-getAllRowsSomeCols <- function(cols, allCols, inObj, outObj){
+getAllRowsSomeCols <- function(cols, allCols, inMat, outMat){
   ## cols inObj do NOT match cols outObj
   ## rows inObj match rows outObj
-  envir <- .oligoPkgEnv
   if (length(cols) > 0){
-    inMat <- get(inObj, envir=envir)
-    outMat <- get(outObj, envir=envir)
+    open(inMat)
+    open(outMat)
     grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols){
       idx <- match(theCols, allCols)
       outMat[, idx] <- inMat[, theCols, drop=FALSE]
     }
+    close(inMat)
+    close(outMat)
     rm(inMat, outMat, grpCols, idx, theCols)
     gc()
   }
   TRUE
 }
 
-getSomeRowsSomeCols <- function(cols, allCols, rows, inObj, outObj){
+getSomeRowsSomeCols <- function(cols, allCols, rows, inMat, outMat){
   if (length(cols) > 0){
-    envir <- .oligoPkgEnv
-    inMat <- get(inObj, envir=envir)
-    outMat <- get(outObj, envir=envir)
+    open(inMat)
+    open(outMat)
     grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols){
       idx <- match(theCols, allCols)
       outMat[, idx] <- inMat[rows, theCols, drop=FALSE]
     }
+    close(inMat)
+    close(outMat)
     rm(inMat, outMat, grpCols, idx, theCols)
     gc()
   }
@@ -57,7 +59,6 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
   cns <- colnames(object)
   dnmsIn <- dimnames(object)
   dimnames(object) <- NULL
-  sendBO2PkgEnv(object, "inMat")
 
   if (missing(rows)){
     nr <- nrow(object)
@@ -75,22 +76,19 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
   }
 
   out <- createFF(prefix, dim=c(nr, nc), vmode=vmode(object))
-  sendBO2PkgEnv(out, nameInEnv)
   
   ## hypothesis: nr >> nc
-  ## object input: in pkg env and called 'inMat'
-  ## object output: in pkg env and called nameInEnv
 
   if ((!missing(rows)) && missing(cols)){
     ## cols iObj match cols oOubj
     samplesByNode <- splitIndicesByNode(1:ncol(out))
-    ocLapply(samplesByNode, getSomeRowsAllCols, rows, "inMat", nameInEnv, neededPkgs="oligo")
+    ocLapply(samplesByNode, getSomeRowsAllCols, rows, object, out, neededPkgs="oligo")
   }else if (missing(rows) && (!(missing(cols)))){
     samplesByNode <- splitIndicesByNode(cols)
-    ocLapply(samplesByNode, getAllRowsSomeCols, cols, "inMat", nameInEnv, neededPkgs="oligo")
+    ocLapply(samplesByNode, getAllRowsSomeCols, cols, object, out, neededPkgs="oligo")
   }else if ((!missing(rows)) && (!missing(cols))){
     samplesByNode <- splitIndicesByNode(cols)
-    ocLapply(samplesByNode, getSomeRowsSomeCols, cols, rows, "inMat", nameInEnv, neededPkgs="oligo")
+    ocLapply(samplesByNode, getSomeRowsSomeCols, cols, rows, object, out, neededPkgs="oligo")
   }else{
     stop("Must specify at least one of 'rows'/'cols'")
   }
@@ -100,9 +98,6 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
   rm(rns, cns)
   dimnames(out) <- dnmsOut
   
-  rmFromPkgEnv("inMat")
-  if (clean)
-    rmFromPkgEnv(nameInEnv)
   return(out)
 }
 
@@ -110,14 +105,10 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
 ############################################
 ## BackgroundCorrection
 ############################################
-rmaBgCorrectLDSnode <- function(cols, object, matInEnv){
+rmaBgCorrectLDSnode <- function(cols, object){
   ## this runs on the node
   ## it (rma) bg corrects 'object' and overwrites it
   if (length(cols) > 0 ){
-    if (!missing(matInEnv)){
-      stopifnot(is.character(matInEnv))
-      object <- get(matInEnv, envir=.oligoPkgEnv)
-    }
     open(object)
     grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
@@ -137,12 +128,12 @@ rmaBgCorrectLDSmaster <-  function(object, copy=TRUE){
   }else{
     out <- object
   }
-  outName <- "out"
-  sendBO2PkgEnv(out, outName)
+  dnms <- dimnames(out)
+  dimnames(out) <- NULL
   samplesByNode <- splitIndicesByNode(1:ncol(out))
-  ocLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=outName, neededPkgs="oligo")
-  rmFromPkgEnv(outName)
-  rm(samplesByNode)
+  ocLapply(samplesByNode, rmaBgCorrectLDSnode, out, neededPkgs="oligo")
+  dimnames(out) <- dnms
+  rm(samplesByNode, dnms)
   return(out)
 }
 
@@ -172,12 +163,8 @@ setMethod("backgroundCorrect", "ff_matrix",
 ############################################
 ## Normalization
 ############################################
-qnTargetStatsLDSnode <- function(cols, object, matInEnv){
+qnTargetStatsLDSnode <- function(cols, object){
   ## this runs on the node
-  if (!missing(matInEnv)){
-    stopifnot(is.character(matInEnv))
-    object <- get(matInEnv, envir=.oligoPkgEnv)
-  }
   open(object)
   total <- rep(0, nrow(object))
   if (length(cols) > 0){
@@ -189,13 +176,9 @@ qnTargetStatsLDSnode <- function(cols, object, matInEnv){
   list(total=total, n=length(cols))
 }
 
-qnToTargetLDSnode <- function(cols, target, object, matInEnv){
+qnToTargetLDSnode <- function(cols, target, object){
   ## this runs on the node
   if (length(cols) > 0){
-    if (!missing(matInEnv)){
-      stopifnot(is.character(matInEnv))
-      object <- get(matInEnv, envir=.oligoPkgEnv)
-    }
     open(object)
     grpCols <- splitIndicesByLength(cols, ocSamples())
     for (theCols in grpCols)
@@ -211,23 +194,18 @@ quantileNormalizationLDSmaster <- function(object, target){
   samplesByNode <- splitIndicesByNode(1:ncol(object))
   dmns <- dimnames(object)
   dimnames(object) <- NULL
-  outName <- "outObj"
-  sendBO2PkgEnv(object, outName)
   if (missing(target)){
-    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=outName, neededPkgs="oligo")
+    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, object=object, neededPkgs="oligo")
     totalN <- sum(sapply(stats, "[[", "n"))
     total <- rowSums(sapply(stats, "[[", "total"))
     target <- total/totalN
     rm(stats, total, totalN)
   }else{
     targetOK <- length(target) == nrow(object)
-    if (!targetOK){
-      rmFromPkgEnv(outName)
+    if (!targetOK)
       stop("Length of target does not match nrow(object).")
-    }
   }
-  ocLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=outName, neededPkgs="oligo")
-  rmFromPkgEnv(outName)
+  ocLapply(samplesByNode, qnToTargetLDSnode, target=target, object=object, neededPkgs="oligo")
   return(object)
 }
 
@@ -288,22 +266,14 @@ setMethod("normalizeToTarget", "ff_matrix",
 ############################################
 
 basicMedianPolishBO <- function(psToSumm, inObj, outObj, probes,
-                                probesets, matInEnv, matOutEnv){
+                                probesets){
   ## this runs on the node
   stopifnot(!missing(probes), !missing(probesets))
   ok <- is.character(probes) && is.character(probesets)
   if (!ok) stop("Ensure inObj and outObj have valid rownames.")
   rm(ok)
   if (length(psToSumm) > 0){
-    if (!missing(matInEnv)){
-      stopifnot(is.character(matInEnv))
-      inObj <- get(matInEnv, envir=.oligoPkgEnv)
-    }
     open(inObj)
-    if (!missing(matOutEnv)){
-      stopifnot(is.character(matOutEnv))
-      outObj <- get(matOutEnv, envir=.oligoPkgEnv)
-    }
     open(outObj)
     psList <- splitIndicesByLength(psToSumm, ocProbesets())
     for (pss in psList){
@@ -336,49 +306,40 @@ setMethod("summarize", "matrix",
 
 setMethod("summarize", "ff_matrix",
           function(object, probes=rownames(object), method="medianpolish", verbose=TRUE){
-            if (verbose) cat("Summarizing... ")
             stopifnot(nrow(object) == length(probes))
             method <- match.arg(method, "medianpolish")
+            if (verbose) message("Summarizing... ", appendLF=FALSE)
             if (method == "medianpolish"){
               probeRowByProbesets <- split(1:nrow(object), probes)
               pnsListByNode <- splitIndicesByNode(probeRowByProbesets)
               pns <- names(probeRowByProbesets)
-
               out <- createFF("oligo-mp-", dim=c(length(pns), ncol(object)))
-              outMat <- "probesetLevel"
-              sendBO2PkgEnv(out, outMat)
-
               dnmsIn <- dimnames(object)
               dimnames(object) <- NULL
-              inMat <- "probeLevel"
-              sendBO2PkgEnv(object, inMat)
               ocLapply(pnsListByNode, basicMedianPolishBO,
-                      probes=probes, probesets=pns,
-                      matInEnv=inMat, matOutEnv=outMat, neededPkgs="oligo")
-              rmFromPkgEnv(outMat)
-              rmFromPkgEnv(inMat)
+                      probes=probes, probesets=pns, inObj=object,
+                      outObj=out, neededPkgs="oligo")
               dimnames(object) <- dnmsIn
               dimnames(out) <- list(names(probeRowByProbesets),
                                     colnames(object))
               
             }
-            if (verbose) cat("OK\n")
+            if (verbose) message("OK")
             return(out)
           })
 
 
 basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                        bgversion=2, destructive=FALSE, verbose=TRUE,
-                       pmName="pms", ...){
+                       ...){
   dnms <- dimnames(pmMat)
   dimnames(pmMat) <- NULL
-  sendBO2PkgEnv(pmMat, pmName)
   
   ## background correct
   if (background){
     if (verbose) message("Background correcting...")
     samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
-    ocLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=pmName, neededPkgs="oligo")
+    ocLapply(samplesByNode, rmaBgCorrectLDSnode, object=pmMat, neededPkgs="oligo")
   }
 
   ## normalize
@@ -386,12 +347,12 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     if (verbose) message("Normalizing...")
     if (!exists("samplesByNode")) 
       samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
-    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=pmName, neededPkgs="oligo")
+    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, object=pmMat, neededPkgs="oligo")
     totalN <- sum(sapply(stats, "[[", "n"))
     total <- rowSums(sapply(stats, "[[", "total"))
     target <- total/totalN
     rm(stats, total, totalN)
-    ocLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=pmName, neededPkgs="oligo")
+    ocLapply(samplesByNode, qnToTargetLDSnode, target=target, object=pmMat, neededPkgs="oligo")
     rm(samplesByNode, target)
   }
 
@@ -401,29 +362,12 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   pnsListByNode <- splitIndicesByNode(rowsByProbesets)
   pns <- names(rowsByProbesets)
   rmaResult <- createFF("rma-", dim=c(length(pns), ncol(pmMat)))
-  rmaName <- "rmaResult"
-  sendBO2PkgEnv(rmaResult, rmaName)
   ocLapply(pnsListByNode, basicMedianPolishBO, probes=pnVec,
-          probesets=pns, matInEnv=pmName, matOutEnv=rmaName, neededPkgs="oligo")
-  rmFromPkgEnv(pmName)
-  rmFromPkgEnv(rmaName, TRUE)
+           probesets=pns, inObj=pmMat, outObj=rmaResult,
+           neededPkgs="oligo")
   dimnames(pmMat) <- dnms
-  rm(dnms, rmaName)
+  rm(dnms)
   dimnames(rmaResult) <- list(pns, colnames(pmMat))
   rm(pns)
   return(rmaResult)
-}
-
-oligoNodeMem <- function(nProbesPerProbeset=10, nProbesets=25000,
-                         nProbesetsPerNode=10000, nSamples=7000,
-                         nSamplesPerNode=100, verbose=TRUE){
-  nProbes <- nProbesPerProbeset*nProbesets
-  procSamples <- nSamplesPerNode*nProbes/(2^27)
-  procProbesets <- nProbesetsPerNode*nProbesPerProbeset*nSamples/(2^27)
-
-  if (verbose){
-    message(sprintf("Usage when processing samples..: %2.2f GB/node.", procSamples))
-    message(sprintf("Usage when processing probesets: %2.2f GB/node.", procProbesets))
-  }
-  invisible(max(c(procSamples, procProbesets)))
 }
