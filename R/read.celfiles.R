@@ -8,8 +8,8 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
     tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)))
     intensityFile <- filename(tmpExprs)
     samplesByNode <- splitIndicesByNode(1:length(filenames))
-    oLapply(samplesByNode, oligoReadCels, headdetails, filenames,
-            tmpExprs)
+    ocLapply(samplesByNode, oligoReadCels, headdetails, filenames,
+            tmpExprs, neededPkgs="oligo")
   }else{
     intensityFile <- NA_character_
     tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,

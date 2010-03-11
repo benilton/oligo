@@ -84,13 +84,13 @@ ffSubset <- function(rows, cols, object, prefix="oligo-",
   if ((!missing(rows)) && missing(cols)){
     ## cols iObj match cols oOubj
     samplesByNode <- splitIndicesByNode(1:ncol(out))
-    oLapply(samplesByNode, getSomeRowsAllCols, rows, "inMat", nameInEnv)
+    ocLapply(samplesByNode, getSomeRowsAllCols, rows, "inMat", nameInEnv, neededPkgs="oligo")
   }else if (missing(rows) && (!(missing(cols)))){
     samplesByNode <- splitIndicesByNode(cols)
-    oLapply(samplesByNode, getAllRowsSomeCols, cols, "inMat", nameInEnv)
+    ocLapply(samplesByNode, getAllRowsSomeCols, cols, "inMat", nameInEnv, neededPkgs="oligo")
   }else if ((!missing(rows)) && (!missing(cols))){
     samplesByNode <- splitIndicesByNode(cols)
-    oLapply(samplesByNode, getSomeRowsSomeCols, cols, rows, "inMat", nameInEnv)
+    ocLapply(samplesByNode, getSomeRowsSomeCols, cols, rows, "inMat", nameInEnv, neededPkgs="oligo")
   }else{
     stop("Must specify at least one of 'rows'/'cols'")
   }
@@ -140,7 +140,7 @@ rmaBgCorrectLDSmaster <-  function(object, copy=TRUE){
   outName <- "out"
   sendBO2PkgEnv(out, outName)
   samplesByNode <- splitIndicesByNode(1:ncol(out))
-  oLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=outName)
+  ocLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=outName, neededPkgs="oligo")
   rmFromPkgEnv(outName)
   rm(samplesByNode)
   return(out)
@@ -214,7 +214,7 @@ quantileNormalizationLDSmaster <- function(object, target){
   outName <- "outObj"
   sendBO2PkgEnv(object, outName)
   if (missing(target)){
-    stats <- oLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=outName)
+    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=outName, neededPkgs="oligo")
     totalN <- sum(sapply(stats, "[[", "n"))
     total <- rowSums(sapply(stats, "[[", "total"))
     target <- total/totalN
@@ -226,7 +226,7 @@ quantileNormalizationLDSmaster <- function(object, target){
       stop("Length of target does not match nrow(object).")
     }
   }
-  oLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=outName)
+  ocLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=outName, neededPkgs="oligo")
   rmFromPkgEnv(outName)
   return(object)
 }
@@ -352,9 +352,9 @@ setMethod("summarize", "ff_matrix",
               dimnames(object) <- NULL
               inMat <- "probeLevel"
               sendBO2PkgEnv(object, inMat)
-              oLapply(pnsListByNode, basicMedianPolishBO,
+              ocLapply(pnsListByNode, basicMedianPolishBO,
                       probes=probes, probesets=pns,
-                      matInEnv=inMat, matOutEnv=outMat)
+                      matInEnv=inMat, matOutEnv=outMat, neededPkgs="oligo")
               rmFromPkgEnv(outMat)
               rmFromPkgEnv(inMat)
               dimnames(object) <- dnmsIn
@@ -378,7 +378,7 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   if (background){
     if (verbose) message("Background correcting...")
     samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
-    oLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=pmName)
+    ocLapply(samplesByNode, rmaBgCorrectLDSnode, matInEnv=pmName, neededPkgs="oligo")
   }
 
   ## normalize
@@ -386,12 +386,12 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     if (verbose) message("Normalizing...")
     if (!exists("samplesByNode")) 
       samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
-    stats <- oLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=pmName)
+    stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, matInEnv=pmName, neededPkgs="oligo")
     totalN <- sum(sapply(stats, "[[", "n"))
     total <- rowSums(sapply(stats, "[[", "total"))
     target <- total/totalN
     rm(stats, total, totalN)
-    oLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=pmName)
+    ocLapply(samplesByNode, qnToTargetLDSnode, target, matInEnv=pmName, neededPkgs="oligo")
     rm(samplesByNode, target)
   }
 
@@ -403,8 +403,8 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   rmaResult <- createFF("rma-", dim=c(length(pns), ncol(pmMat)))
   rmaName <- "rmaResult"
   sendBO2PkgEnv(rmaResult, rmaName)
-  oLapply(pnsListByNode, basicMedianPolishBO, probes=pnVec,
-          probesets=pns, matInEnv=pmName, matOutEnv=rmaName)
+  ocLapply(pnsListByNode, basicMedianPolishBO, probes=pnVec,
+          probesets=pns, matInEnv=pmName, matOutEnv=rmaName, neededPkgs="oligo")
   rmFromPkgEnv(pmName)
   rmFromPkgEnv(rmaName, TRUE)
   dimnames(pmMat) <- dnms

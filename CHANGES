@@ -217,3 +217,7 @@ sampleNames were different.
 03-10-2010: B Carvalho - 1.11.29
 
 ** moved some docs (cluster related) to oligoClasses
+
+03-11-2010: B Carvalho - 1.11.30
+
+** replaced oLapply by ocLapply(..., neededPkgs="oligo")

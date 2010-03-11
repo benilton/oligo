@@ -28,7 +28,7 @@ smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
     intensityFile <- filename(tmpExprs)
     
     samplesByNode <- splitIndicesByNode(1:length(filenames))
-    oLapply(samplesByNode, oligoReadXys, NULL, filenames, tmpExprs)
+    ocLapply(samplesByNode, oligoReadXys, NULL, filenames, tmpExprs, neededPkgs="oligo")
   }else{
     intensityFile <- NA_character_
     tmp <- .Call("R_read_xys_files", filenames, verbose)
