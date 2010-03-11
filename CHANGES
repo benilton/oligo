@@ -213,3 +213,7 @@ sampleNames were different.
 ** removed getMetadata(2) and other unused functions
 ** added documentation to getBaseProfile and getAffinitySplineCoefficients.
 ** removed reference to genDatasetUID (1.11.26)
+
+03-10-2010: B Carvalho - 1.11.29
+
+** moved some docs (cluster related) to oligoClasses
