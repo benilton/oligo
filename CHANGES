@@ -222,3 +222,7 @@ sampleNames were different.
 
 ** (1.11.30) replaced oLapply by ocLapply(..., neededPkgs="oligo")
 ** (1.11.31) got rid of sendBO2env
+
+03-22-2010: B Carvalho
+
+** (1.11.32) fixed probeNames for Gene/Exon arrays (Mikhail Pachkov)

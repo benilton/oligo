@@ -1,7 +1,8 @@
 setMethod("probeNames", "ExonFeatureSet",
           function(object, subset=NULL){
-            res <- dbGetQuery(db(object), "SELECT fsetid FROM pmfeature")[[1]]
-            as.character(res)
+            res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
+            idx <- order(res[["fid"]])
+            as.character(res[idx, "fsetid"])
           })
 
 setMethod("rma", "ExonFeatureSet",

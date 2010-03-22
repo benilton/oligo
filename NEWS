@@ -36,8 +36,9 @@ NEW FEATURES
     spline coefficients.
 
     o getBaseProfile estimates and optionally plots sequence
-     effect like gcrma.
+    effect like gcrma.
 
 BUG FIXES
 
     o Fixed definition for probeNames() for Exon/Gene arrays.
+    (Mikhail Pachkov)
