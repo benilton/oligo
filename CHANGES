@@ -226,3 +226,7 @@ sampleNames were different.
 03-22-2010: B Carvalho
 
 ** (1.11.32) fixed probeNames for Gene/Exon arrays (Mikhail Pachkov)
+
+03-30-2010: B Carvalho
+
+** (1.11.33) fixed documentation to pass R CMD check

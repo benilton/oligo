@@ -2,15 +2,19 @@
 \alias{summarize}
 \alias{summarize-methods}
 \alias{summarize,matrix-method}
-\alias{summarize,big.matrix-method}
+\alias{summarize,ff_matrix-method}
 \alias{backgroundCorrect}
 \alias{backgroundCorrect-methods}
 \alias{backgroundCorrect,matrix-method}
-\alias{backgroundCorrect,big.matrix-method}
+\alias{backgroundCorrect,ff_matrix-method}
 \alias{normalize}
 \alias{normalize-methods}
 \alias{normalize,matrix-method}
-\alias{normalize,big.matrix-method}
+\alias{normalize,ff_matrix-method}
+\alias{normalizeToTarget}
+\alias{normalizeToTarget-methods}
+\alias{normalizeToTarget,matrix-method}
+\alias{normalizeToTarget,ff_matrix-method}
 
 \title{
   Tools for microarray preprocessing
@@ -23,11 +27,13 @@
 backgroundCorrect(object, method="rma", copy=TRUE, verbose=TRUE)
 summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE)
 normalize(object, method="quantile", copy=TRUE, verbose=TRUE)
+normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
 }
 \arguments{
   \item{object}{Object containing probe intensities to be preprocessed.}
   \item{method}{String determining which method to use at that
     preprocessing step.}
+  \item{target}{Vector with the target distribution}
   \item{probes}{Character vector that identifies the name of the probes represented
     by the rows of \code{object}.}
   \item{copy}{Logical flag determining if data must be copied before
@@ -58,5 +64,7 @@ normalized <- normalize(bgCorrected)
 expression <- summarize(normalized, probes=ids)
 intensities[1:20, 1:3]
 expression[1:20, 1:3]
+target <- rnorm(np*nps)
+normalizedToTarget <- normalizeToTarget(intensities, target)
 }
 \keyword{manip}

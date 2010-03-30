@@ -1,6 +1,8 @@
 \name{probeNames}
 \alias{probeNames}
 \alias{probeNames,FeatureSet-method}
+\alias{probeNames,ExonFeatureSet-method}
+\alias{probeNames,GeneFeatureSet-method}
 \alias{probeNames,DBPDInfo-method}
 \title{Accessor to feature names}
 \description{

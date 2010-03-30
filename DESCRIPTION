@@ -1,6 +1,6 @@
 Package: oligo
-Version: 1.11.32
-Title: Oligonucleotide arrays tools.
+Version: 1.11.33
+Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
 Depends: R (>= 2.11.0),
