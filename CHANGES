@@ -230,3 +230,8 @@ sampleNames were different.
 03-30-2010: B Carvalho
 
 ** (1.11.33) fixed documentation to pass R CMD check
+
+04-06-2010: B Carvalho
+
+** (1.11.34) fixed check for getM on TilingFeatureSet
+             fixes for crlmm code (not to be seen by user, code rewrite)

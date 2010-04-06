@@ -96,7 +96,7 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
     tmpExprs <- exprs(object[pmi,])
     dimnames(tmpExprs) <- NULL
     colnames(tmpExprs) <- sampleNames(object)
-  }else if (theClass == "ff_matrix"){
+  }else if ("ff_matrix" %in% theClass){
     tmpExprs <- ffSubset(rows=pmi, object=exprs(object), prefix="pm-")
   }else{
     stop("SNPRMA not implemented for '", theClass, "' objects.")
@@ -109,10 +109,10 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
     if (verbose) message("Normalizing to Hapmap.")
     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
     reference <- sort(reference)
-    tmpExprs <- normalizeToTarget(tmpExprs, target=reference, copy=FALSE, method="quantile")
+    tmpExprs <- normalizeToTarget(tmpExprs, target=reference, copy=FALSE, method="quantile", verbose=FALSE)
     rm(reference)
   } else {
-    tmpExprs <- normalize(tmpExprs, copy=FALSE, method="quantile")
+    tmpExprs <- normalize(tmpExprs, copy=FALSE, method="quantile", verbose=FALSE)
   }
 
   ########################
@@ -127,13 +127,17 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
 
   out <- alleleSetFrom(exprs)
   rm(exprs)
+  annotation(out) <- annotation(object)
+  phenoData(out) <- phenoData(object)
+  protocolData(out) <- protocolData(object)
+  experimentData(out) <- experimentData(object)
   return(out)
 }
 
 
 crlmm2 <- function(object, correction, recalibrate=TRUE,
                    minLLRforCalls=c(5, 1, 5), verbose=TRUE,
-                   prefix="tmp.crlmm.", balance=1.5){
+                   balance=1.5){
   
   ## make this a method for AlleleSet
   stopifnot(is(object, "AlleleSet"))
@@ -143,15 +147,10 @@ crlmm2 <- function(object, correction, recalibrate=TRUE,
   
   library(annotation(object), character.only=TRUE)
 
-  if (missing(correction)){
-    if (verbose) message("Calculating M correction... ", appendLF=FALSE)
-    ## TODO: fix fitAffySnpMixture
-    correction <- fitAffySnpMixture(object, verbose=verbose)
-    save(correction, file=correctionFile)
-    if (verbose) message("Done.\n")
-  }
+  if (verbose) message("Calculating M correction... ", appendLF=FALSE)
+  correction <- fitAffySnpMixture2(object, verbose=verbose)
+  if (verbose) message("Done.\n")
 
-  ## TODO: check validity of correction object
   
   snr <- correction$snr
 
@@ -280,16 +279,11 @@ crlmm2 <- function(object, correction, recalibrate=TRUE,
              LLR=LLR))
 }
 
-mixtureWithPred <- function(M, covar, df1=3, df2=5, probs=rep(1/3, 3),
-                            eps=50, verbose=TRUE){
-
-}
-
 ##gender in pData keeps male female
 fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
-                              eps=50, subSampleSize=10^4, seed=1,
+                               eps=50, subSampleSize=10^4, seed=1,
                                verbose=TRUE){
-    if(is.null(object$gender)){
+  if(is.null(object$gender)){
     maleIndex <- snpGenderCall(object) == "male"
   }else{
     maleIndex <- object$gender == "male"
@@ -309,14 +303,24 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
   }
 ##  rm(tmp)
 
-  if (bothStrands(object)){
-    pis <- array(0,dim=c(I,J,3,2))
-    fs <- array(0,dim=c(I,J,2))
+  if (!ldStatus()){
+    if (bothStrands(object)){
+      pis <- array(0,dim=c(I,J,3,2))
+      fs <- array(0,dim=c(I,J,2))
+    }else{
+      pis <- array(0,dim=c(I,J,3))
+      fs <- array(0,dim=c(I,J))
+    }
     snr <- array(0,dim=J)
-  }else{
-    pis <- array(0,dim=c(I,J,3))
-    fs <- array(0,dim=c(I,J))
-    snr <- array(0,dim=J)
+  } else {
+    if (bothStrands(object)){
+      pis <- createFF("oligo-pis-", dim=c(I, J, 3, 2))
+      fs <- createFF("oligo-fs-", dim=c(I, J, 2))
+    }else{
+      pis <- createFF("oligo-pis-", dim=c(I, J, 3))
+      fs <- createFF("oligo-fs-", dim=c(I, J))
+    }
+    snr <- ff(vmode="double", length=J, pattern = file.path(ldPath(), "oligo-snr-"))
   }
 
 #####  dimnames(fs)<-list(featureNames(object),

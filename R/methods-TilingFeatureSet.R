@@ -103,8 +103,9 @@ setMethod("getContainer", "TilingFeatureSet",
 
 setMethod("getM", "TilingFeatureSet",
           function(object){
-            chn <- channelNames(object)
-            if (!(chn %in% c("channel1", "channel2")))
+            ok <- channelNames(object) %in% c("channel1", "channel2")
+            ok <- all(ok)
+            if (!ok)
               stop("Object does not have 'channel1' and 'channel2'.")
             lc1 <- log2(assayDataElement(object, "channel1"))
             lc2 <- log2(assayDataElement(object, "channel2"))
@@ -113,8 +114,9 @@ setMethod("getM", "TilingFeatureSet",
 
 setMethod("getA", "TilingFeatureSet",
           function(object){
-            chn <- channelNames(object)
-            if (!(chn %in% c("channel1", "channel2")))
+            ok <- channelNames(object) %in% c("channel1", "channel2")
+            ok <- all(ok)
+            if (!ok)
               stop("Object does not have 'channel1' and 'channel2'.")
             lc1 <- log2(assayDataElement(object, "channel1"))
             lc2 <- log2(assayDataElement(object, "channel2"))
