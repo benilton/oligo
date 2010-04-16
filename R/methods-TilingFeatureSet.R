@@ -95,8 +95,6 @@ setMethod("getContainer", "TilingFeatureSet",
             tbl <- ifelse(probeType == "pm", "pmfeature", "bgfeature")
             conn <- db(object)
             sql <- paste("SELECT type FROM", tbl,
-                         "INNER JOIN featureSet",
-                         "USING (fsetid)",
                          "ORDER BY fid")
             dbGetQuery(conn, sql)[[1]]
           })

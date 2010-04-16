@@ -235,3 +235,7 @@ sampleNames were different.
 
 ** (1.11.34) fixed check for getM on TilingFeatureSet
              fixes for crlmm code (not to be seen by user, code rewrite)
+
+04-16-2010: B Carvalho
+
+** (1.11.36) changed getContainer to extract 'type' from (pm/bg)feature table
