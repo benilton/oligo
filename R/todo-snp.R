@@ -131,13 +131,13 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
   phenoData(out) <- phenoData(object)
   protocolData(out) <- protocolData(object)
   experimentData(out) <- experimentData(object)
+  sampleNames(out) <- sampleNames(object)
   return(out)
 }
 
 
-crlmm2 <- function(object, correction, recalibrate=TRUE,
-                   minLLRforCalls=c(5, 1, 5), verbose=TRUE,
-                   balance=1.5){
+crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
+                   verbose=TRUE, balance=1.5){
   
   ## make this a method for AlleleSet
   stopifnot(is(object, "AlleleSet"))
@@ -162,23 +162,21 @@ crlmm2 <- function(object, correction, recalibrate=TRUE,
     maleIndex <- object$gender=="male"
   }
   annotname <- annotation(object)
-  load(system.file(paste("extdata/", annotname, "CrlmmInfo.rda", sep=""), package=annotname))
-  myenv <- get(paste(annotname,"Crlmm",sep="")); rm(list=paste(annotname,"Crlmm",sep=""))
+  load(system.file(paste("extdata/", annotname, "CrlmmInfo.rda",
+                         sep=""), package=annotname))
+  myenv <- get(paste(annotname,"Crlmm",sep=""))
+  rm(list=paste(annotname,"Crlmm",sep=""))
+
   thePriors <- get("priors", myenv)
+  Index <- which(!get("hapmapCallIndex", myenv))
 
-  ## Index <- which(!get("hapmapCallIndex",myenv)  |  get("badCallIndex",myenv) | get("badRegions", myenv))
-
-  Index <- which(!get("hapmapCallIndex",myenv))
-
-  myCalls <- matrix(NA,dim(object)[1],dim(object)[2])
+  myCalls <- matrix(NA, dim(object)[1], dim(object)[2])
 
   myCalls[Index,] <- getInitialAffySnpCalls(correction, Index,
                                             verbose=verbose,
                                             sqsClass=class(object))
   
   fs <- correction$fs;
-  rm(correction)
-  
   rparams <- getAffySnpGenotypeRegionParams(object, myCalls, fs,
                                             subset=Index,
                                             verbose=verbose,
@@ -215,8 +213,7 @@ crlmm2 <- function(object, correction, recalibrate=TRUE,
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose, sqsClass=class(object))
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass=class(object))
   rm(myDist)
-  load(correctionFile)
-  fs <- correction$fs; rm(correction)
+  fs <- correction$fs
   if(recalibrate){
     if(verbose) cat("Recalibrating.")
     for(k in 1:3)
@@ -303,8 +300,9 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
   }
 ##  rm(tmp)
 
+  bs <- bothStrands(object)
   if (!ldStatus()){
-    if (bothStrands(object)){
+    if (bs){
       pis <- array(0,dim=c(I,J,3,2))
       fs <- array(0,dim=c(I,J,2))
     }else{
@@ -313,7 +311,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
     }
     snr <- array(0,dim=J)
   } else {
-    if (bothStrands(object)){
+    if (bs){
       pis <- createFF("oligo-pis-", dim=c(I, J, 3, 2))
       fs <- createFF("oligo-fs-", dim=c(I, J, 2))
     }else{
@@ -321,6 +319,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
       fs <- createFF("oligo-fs-", dim=c(I, J))
     }
     snr <- ff(vmode="double", length=J, pattern = file.path(ldPath(), "oligo-snr-"))
+    eapply(assayData(object), open)
   }
 
 #####  dimnames(fs)<-list(featureNames(object),
@@ -337,7 +336,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
   fix <- which(is.na(L))
   L[fix] <- median(L, na.rm=T)
   rm(fix)
-  if (bothStrands(object)){
+  if (bs){
     L <- cbind(L,L)
     l <- as.numeric(L[idx, ])
     L <- as.numeric(L)
@@ -350,7 +349,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
   for(j in 1:J){
     Y <- getM(object[,j])
     A <- getA(object[,j])
-    if (bothStrands(object)){
+    if (bs){
       Y <- Y[,1,]
       A <- A[,1,]
     }
@@ -363,7 +362,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
     sigmas <- rep(mad(c(Y[Y<mus[1]]-mus[1], Y[Y>mus[3]]-mus[3])),3)
     sigmas[2] <- sigmas[2]/2
 
-    if (bothStrands(object)){
+    if (bs){
       a <- as.numeric(A[idx, ])
       y <- as.numeric(Y[idx, ])
     }else{
@@ -437,7 +436,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
     LogLik <- rowSums(z)
     z <- sweep(z, 1, LogLik, "/")
 
-    if (bothStrands(object)){
+    if (bs){
       fs[,j,] <- matrix((pred3-pred1)/2,ncol=2)
       for(k in 1:3){
         pis[,j,k,] <- matrix(z[,(4-k)],ncol=2) ##4-k cause 3is1,2is2 and 1is3
@@ -451,7 +450,126 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
       snr[j] <- median(fs[,j])^2/(sigmas[1]^2+sigmas[2]^2)
     }
   }
-  fs[fs < 0] <- 0
+  if (!ldStatus()){
+    fs[fs < 0] <- 0
+    f0 <- median(fs)
+  }else{
+    ffvecapply(fs[i1:i2][fs[i1:i2] < 0] <- 0, X=fs, BATCHBYTES=ocProbesets()*J*8)
+    f0 <- rep(NA, J)
+    if (bs){
+      for (j in 1:J) f0[j] <- median(fs[, j,])
+    }else{
+      for (j in 1:J)  f0[j] <- median(fs[,j])
+    }
+    f0 <- median(f0)
+    eapply(assayData(object), close)
+    close(pis)
+    close(fs)
+    close(snr)
+  }
   if(verbose) cat("Done.\n")
-  return(list(f0=median(fs), fs=fs, pis=pis, snr=snr))
+  return(list(f0=f0, fs=fs, pis=pis, snr=snr))
+}
+
+getInitialAffySnpCalls2 <- function(object,subset=NULL,
+                                    concordanceCutoff=0.0001,
+                                    cutoffs=c(0.7,0.5,0.7),
+                                    returnProbs=FALSE,
+                                    verbose=FALSE,
+                                    sqsClass = "SnpQSet"){
+  if(is.null(subset)) subset <- 1:(dim(object$pis)[1])
+  if (sqsClass == "SnpQSet"){
+    pi1 <- object$pis[subset,,,1]
+    pi2 <- object$pis[subset,,,2]; rm(object); ## gc()
+
+    ## fixing SNPs that have probes only on one strand:
+    idx <- is.na(pi1[,1,1])
+    pi1[idx,,] <- pi2[idx,,]
+    idx <- is.na(pi2[,1,1])
+    pi2[idx,,] <- pi1[idx,,]
+    rm(idx); ## gc()
+  
+    if(verbose) cat("Picking good starting value: ")
+    if(verbose) cat("Computing entropy, ")
+    E1 <- rowEntropy(pi1)
+    E2 <- rowEntropy(pi2); ## gc()
+  
+    tmpN <- dim(pi1)
+    tmpcall1 <- tmpcall2 <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
+#####  rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
+#####  colnames(tmpcall1) <- colnames(tmpcall2) <- dimnames(pi1)[[2]]
+  ## gc()
+    if(verbose) cat("calculating calls, ")
+    for (i in 1:tmpN[1]){
+      for (j in 1:tmpN[2]){
+        tmpcall1[i, j] <- which.max(pi1[i,j,])
+        tmpcall2[i, j] <- which.max(pi2[i,j,])
+      }
+    }
+  
+    if(verbose) cat("determining non-concordant calls, ")
+    concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); ## gc()
+
+    if(verbose) cat("deciding which strand(s) to use")
+    tc1 <- tmpcall1 == 1
+    tc2 <- tmpcall1 == 2
+    tc3 <- tmpcall1 == 3
+    noABIndex1 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
+    tc1 <- tmpcall2 == 1
+    tc2 <- tmpcall2 == 2
+    tc3 <- tmpcall2 == 3
+    noABIndex2 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
+    rm(tc1, tc2, tc3); ## gc()
+  
+    E1[noABIndex1] <- -Inf
+    E2[noABIndex2] <- -Inf
+
+    jointprobs <- (pi1+pi2)/2
+
+    ## gc()
+    noInfoIndex <- intersect(noABIndex1, noABIndex2)
+  
+    rm(noABIndex1, noABIndex2)
+  
+    jointprobs[noInfoIndex,,] <- 1/3
+    rm(noInfoIndex)
+  
+    notBoth <- concordance < concordanceCutoff
+    E1bE2 <- E1 > E2
+    rm(E1, E2)
+    i1 <- notBoth & E1bE2
+    i2 <- notBoth & !E1bE2
+    rm(notBoth, E1bE2)
+    jointprobs[i1,,] <- pi1[i1,,]
+    rm(i1, pi1)
+    jointprobs[i2,,] <- pi2[i2,,]
+    rm(i2, pi2); ## gc()
+    
+    tmpN <- dim(jointprobs)
+    tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
+#####   rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
+#####   colnames(tmpcall) <- colnames(tmpmax) <- dimnames(jointprobs)[[2]]
+  ## gc()
+
+    if(verbose) cat(" finalizing"); ## gc()
+    
+    for (i in 1:tmpN[1]){
+      for (j in 1:tmpN[2]){
+        tmpcall[i, j] <- which.max(jointprobs[i, j, ])
+        tmpmax[i, j] <- jointprobs[i, j, tmpcall[i,j]]
+      }
+    }
+  }else{ ## if SnpQSet
+    tmpcall <- apply(object$pis[subset,, ], 1:2, which.max)
+    tmpmax  <- apply(object$pis[subset,, ], 1:2, max)
+  }
+  
+    for(i in 1:3)
+      tmpcall[tmpcall==i & tmpmax<cutoffs[i]] <- NA
+  if(verbose) cat("\nCompleted!\n")
+  if(sqsClass == "SnpQSet"){
+    if(returnProbs) return(list(calls=tmpcall,probs=jointprobs)) else return(tmpcall)
+  }else{
+    return(tmpcall)
+  }
 }
