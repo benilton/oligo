@@ -12,6 +12,8 @@ USER VISIBLE CHANGES
     explicitly load Biobase, affyio, preprocessCore
     if they need functions from these packages.
 
+    o Revised man page for rma.
+
 NEW FEATURES
 
     o Support to large datasets via ff package.

@@ -2,6 +2,7 @@
   version <- packageDescription("oligo", field="Version")
   message(getBar())
   message("Welcome to oligo version ", version)
+  message(getBar())
 }
 
 .onUnload <- function( libpath ){

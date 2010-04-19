@@ -239,3 +239,4 @@ sampleNames were different.
 04-16-2010: B Carvalho
 
 ** (1.11.36) changed getContainer to extract 'type' from (pm/bg)feature table
+** (1.11.38) approp. documented rma for gene/exon arrays
