@@ -337,14 +337,16 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   
   ## background correct
   if (background){
-    if (verbose) message("Background correcting...")
+    if (verbose) message("Background correcting... ", appendLF=FALSE)
     samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
-    ocLapply(samplesByNode, rmaBgCorrectLDSnode, object=pmMat, neededPkgs="oligo")
+    ocLapply(samplesByNode, rmaBgCorrectLDSnode, object=pmMat,
+	     neededPkgs="oligo")
+    if (verbose) message("OK")
   }
 
   ## normalize
   if (normalize){
-    if (verbose) message("Normalizing...")
+    if (verbose) message("Normalizing... ", appendLF=FALSE)
     if (!exists("samplesByNode")) 
       samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
     stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, object=pmMat, neededPkgs="oligo")
@@ -354,10 +356,11 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     rm(stats, total, totalN)
     ocLapply(samplesByNode, qnToTargetLDSnode, target=target, object=pmMat, neededPkgs="oligo")
     rm(samplesByNode, target)
+    if (verbose) message("OK")
   }
 
   ## summarize
-  if (verbose) message("Summarizing...")
+  if (verbose) message("Summarizing... ", appendLF=FALSE)
   rowsByProbesets <- split(1:nrow(pmMat), pnVec)
   pnsListByNode <- splitIndicesByNode(rowsByProbesets)
   pns <- names(rowsByProbesets)
@@ -369,5 +372,6 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   rm(dnms)
   dimnames(rmaResult) <- list(pns, colnames(pmMat))
   rm(pns)
+  if (verbose) message("OK")
   return(rmaResult)
 }

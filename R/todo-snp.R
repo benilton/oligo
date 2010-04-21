@@ -22,7 +22,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
   idx <- match(pns, rownames(pmMat))
   
   theClass <- class(pmMat)
-  if (theClass == "matrix"){
+  if ("matrix" %in% theClass){
     tmp <- pmMat[idx,]
   }else if ("ff_matrix" %in% theClass){
     tmp <- ffSubset(rows=idx, object=pmMat, prefix="oligo-alleleSet-tmp-")
@@ -36,7 +36,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
   colnames(tmp) <- colnames(pmMat)
 
   if (bothStrands){
-    if (theClass == "matrix"){
+    if ("matrix" %in% theClass){
       res <- new("AlleleSet",
                  antisenseAlleleA=tmp[aTa,, drop=FALSE],
                  senseAlleleA=tmp[(aTa+1),, drop=FALSE],
@@ -54,7 +54,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
                  senseAlleleB=senseAlleleB)
     }
   }else{
-    if (theClass == "matrix"){
+    if ("matrix" %in% theClass){
       res <- new("AlleleSet",
                  alleleA=tmp[aTa,, drop=FALSE],
                  alleleB=tmp[(aTa+1),, drop=FALSE])
@@ -92,7 +92,7 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
 
   theClass <- class(exprs(object))
 
-  if (theClass == "matrix"){
+  if ("matrix" %in% theClass){
     tmpExprs <- exprs(object[pmi,])
     dimnames(tmpExprs) <- NULL
     colnames(tmpExprs) <- sampleNames(object)
@@ -119,7 +119,7 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
   ##### SUMMARIZATION ####
   ########################
   exprs <- summarize(tmpExprs, probes=pnVec, method="medianpolish", verbose=verbose)
-  if (theClass == "ff_matrix"){
+  if ("ff_matrix" %in% theClass){
     finalizer(tmpExprs) <- "delete"
     finalizer(exprs) <- "delete"
     rm(tmpExprs)

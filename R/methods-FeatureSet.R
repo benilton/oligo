@@ -15,9 +15,9 @@ setMethod("pm", "FeatureSet",
           function(object, subset=NULL){
             theClass <- class(exprs(object))
             pmi <- pmindex(object, subset=subset)
-            if (theClass == "matrix"){
+            if ("matrix" %in% theClass){
               out <- exprs(object)[pmi,, drop=FALSE]
-            }else if (theClass == "ff_matrix"){
+            }else if ("ff_matrix" %in% theClass){
               out <- ffSubset(rows=pmi, object=exprs(object),
                               prefix="pm-")
             }
@@ -51,31 +51,48 @@ setMethod("mmSequence", "FeatureSet",
 
 ## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
-          function(x, which=c("pm", "mm", "both"),
-                   transfo=log2, range=0, ...){
+          function(x, which=c("pm", "mm", "bg", "both", "all"),
+                   transfo=log2, nsample=10000, ...){
             stopifnot(is.function(transfo))
-            which <- match.arg(which)
-            if (which == "pm"){
-              idx <- pmindex(x)
-            }else if (which == "mm"){
-              idx <- mmindex(x)
-            }else if (which == "both"){
-              idx <- 1:nrow(x)
-            }else{
-              stop("Invalid value for 'which'. Allowed values are: 'pm', 'mm', 'both'")
+            idx <- getProbeIndex(x, which)
+            if (length(idx) > nsample)
+                idx <- sort(sample(idx, nsample))
+
+            chns <- channelNames(x)
+            nchns <- length(chns)
+
+            dots <- list(...)
+            if (is.null(dots[["range"]])) dots[["range"]] <- 0
+            if (is.null(dots[["main"]])) changeMain <- TRUE
+            if (is.null(dots[["col"]])) dots[["col"]] <- darkColors(ncol(x))
+                
+            eset <- x[idx,]
+            rgs <- vector("list", nchns)
+            for (i in 1:nchns){
+                tmp <- log2(exprs(channel(eset, chns[i])))
+                rgs[[i]] <- range(apply(tmp, 2, range))
+                rm(tmp)
             }
-            toPlot <- exprs(x[idx,])
-            toPlot <- transfo(toPlot)
-            toPlot <- as.data.frame(toPlot)
-            boxplot(toPlot, range=range, ...)
+            rgs <- range(unlist(rgs))
+            dots[["ylim"]] <- rgs
+            
+            res <- vector("list", nchns)
+            par(mfrow=c(nchns, 1))
+            for (i in 1:nchns){
+                tmp <- transfo(exprs(channel(eset, chns[i])))
+                dots[["x"]] <- as.data.frame(tmp)
+                dots[["main"]] <- chns[i]
+                rm(tmp)
+                res[[i]] <- do.call("boxplot", dots)
+            }
+            invisible(res)
           })
   
 setMethod("boxplot", signature(x="ExpressionSet"),
           function(x, which, transfo=identity, range=0, ...){
             stopifnot(is.function(transfo))
             if(!missing(which)) warning("Argument 'which' ignored.")
-            toPlot <- exprs(x)
-            toPlot <- transfo(toPlot)
+            toPlot <- transfo(exprs(x))
             toPlot <- as.data.frame(toPlot)
             boxplot(toPlot, range=range, ...)
           })
@@ -85,6 +102,11 @@ setMethod("image", signature(x="FeatureSet"),
             if (missing(which)) which <- 1:ncol(x)
             if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
             geom <- geometry(getPD(x))
+
+            chns <- channelNames(x)
+            nchns <- length(chns)
+            par(mfrow=c(1, nchns))
+            
             if (tolower(manufacturer(x)) != "affymetrix"){
               conn <- db(x)
               tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
@@ -110,32 +132,120 @@ setMethod("image", signature(x="FeatureSet"),
           })
 
 
-setMethod("hist", "FeatureSet",
-          function(x, col=1:ncol(x), transfo=log2,
-                   which=c("pm", "mm", "both"),
-                   ylab="density", xlab="log intensity",
-                   type="l", ...){
-            stopifnot(is.function(transfo))
-            which <- match.arg(which)
-            if (which == "pm"){
-              idx <- pmindex(x)
-            }else if (which == "mm"){
-              idx <- mmindex(x)
-            }else if (which == "both"){
-              idx <- 1:nrow(x)
+setMethod("image", signature(x="FeatureSet"),
+          function(x, which, transfo=log2, col=gray((0:64)/64), ...){
+            if (missing(which)) which <- 1:ncol(x)
+            if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
+            geom <- geometry(getPD(x))
+
+            chns <- channelNames(x)
+            nchns <- length(chns)
+            par(mfrow=c(1, nchns))
+            
+            if (tolower(manufacturer(x)) != "affymetrix"){
+              conn <- db(x)
+              tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
+              theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
+              theInfo <- do.call("rbind", theInfo)
+              theInfo <- theInfo[order(theInfo[["fid"]]), ]
+              idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
+              for (i in which){
+                  tmpObj <- x[theInfo[["fid"]], i]
+                  for (j in 1:nchns){
+                      tmp <- matrix(NA, nr=geom[1], nc=geom[2])
+                      tmp[idx] <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
+                      tmp <- as.matrix(rev(as.data.frame(tmp)))
+                      image(tmp, col=col, xaxt="n", yaxt="n",
+                            main=paste(sampleNames(x)[i], chns[j],
+                            sep=" - "), ...)
+                      rm(tmp)
+                  }
+                  rm(tmpObj)
+              }
             }else{
-              stop("Invalid value for 'which'. Allowed values are: 'pm', 'mm', 'both'")
+              for (i in which){
+                  tmpObj <- x[, i]
+                  for (j in 1:nchns){
+                      tmp <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
+                      tmp <- matrix(tmp, ncol=geom[1], nrow=geom[2])
+                      tmp <- as.matrix(rev(as.data.frame(tmp)))
+                      image(tmp, col=col, xaxt="n", yaxt="n",
+                            main=paste(sampleNames(x)[i], chns[j],
+                            sep=" - "), ...)
+                      rm(tmp)
+                  }
+                  rm(tmpObj)
+              }
             }
-            tmp <- exprs(x[idx,])
-            idx <- is.na(tmp[,1])
-            if(any(idx))
-              tmp <- tmp[!idx,, drop=FALSE]
-            tmp <- transfo(tmp)
-            x.density <- apply(tmp, 2, density)
-            all.x <- sapply(x.density, "[[", "x")
-            all.y <- sapply(x.density, "[[", "y")
-            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-            invisible(x.density)
+            par(ask=FALSE)
+          })
+
+
+matDensity <- function(mat){
+    x.density <- apply(mat, 2, density, na.rm=TRUE)
+    all.x <- sapply(x.density, "[[", "x")
+    all.y <- sapply(x.density, "[[", "y")
+    list(x=all.x, y=all.y)
+}
+
+getProbeIndex <- function(x, type=c("pm", "mm", "bg", "both", "all")){
+    type <- match.arg(type)
+    if (type == "pm"){
+        idx <- pmindex(x)
+    }else if (type == "mm"){
+        idx <- mmindex(x)
+    }else if (type == "bg"){
+        idx <- bgindex(x)
+    }else if (type == "both"){
+        warning("Argument 'both' was replaced by 'all'. Please update your code.")
+        idx <- 1:nrow(x)
+    }else if (type == "all"){
+        idx <- 1:nrow(x)
+    }
+    idx
+}
+
+setMethod("hist", "FeatureSet",
+          function(x, transfo=log2, which=c("pm", "mm", "bg", "both", "all"),
+                   nsample=10000, ...){
+              stopifnot(is.function(transfo))
+              idx <- getProbeIndex(x, which)
+              if (length(idx) > nsample)
+                  idx <- sort(sample(idx, nsample))
+              
+              chns <- channelNames(x)
+              nchns <- length(chns)
+
+              ## estimate density for every sample on each channel
+              f <- function(chn, obj)
+                  matDensity(transfo(exprs(channel(obj, chn))))
+              tmp <- lapply(chns, f, x[idx,])
+
+              ## get lims
+              rgs <- lapply(tmp, sapply, range)
+              rgs <- do.call("rbind", rgs)
+              rgs <- apply(rgs, 2, range)
+
+              ## set graph options properly
+              dots <- list(...)
+              if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
+              if (is.null(dots[["xlab"]])) dots[["xlab"]] <- "log-intensity"
+              if (is.null(dots[["xlim"]])) dots[["xlim"]] <- rgs[,1]
+              if (is.null(dots[["ylim"]])) dots[["ylim"]] <- rgs[,2]
+              if (is.null(dots[["col"]]))
+                  dots[["col"]] <- darkColors(ncol(x))
+              if (is.null(dots[["type"]])) dots[["type"]] <- "l"
+              par(mfrow=c(nchns, 1))
+              changeMain <- is.null(dots[["main"]])
+              
+              for (i in 1:nchns){
+                  dots[["x"]] <- tmp[[i]][["x"]]
+                  dots[["y"]] <- tmp[[i]][["y"]]
+                  if (changeMain)
+                      dots[["main"]] <- chns[i]
+                  do.call("matplot", dots)
+              }
+              invisible(tmp)
           })
 
 setMethod("hist", "ExpressionSet",

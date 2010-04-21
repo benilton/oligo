@@ -20,12 +20,12 @@ setMethod("rma", "ExpressionFeatureSet",
             
             theClass <- class(exprs(object))
 
-            if (theClass == "matrix"){
+            if ("matrix" %in% theClass){
               pms <- exprs(object[pmi,])
               dimnames(pms) <- NULL
               colnames(pms) <- sampleNames(object)
               exprs <- basicRMA(pms, pnVec, normalize, background)
-            }else if (theClass == "ff_matrix"){
+            }else if ("ff_matrix" %in% theClass){
               pms <- ffSubset(rows=pmi, object=exprs(object), prefix="pm-")
               exprs <- basicRMAbo(pms, pnVec, background=background, normalize=normalize)
               finalizer(pms) <- "delete"

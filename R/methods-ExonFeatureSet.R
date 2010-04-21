@@ -22,13 +22,13 @@ setMethod("rma", "ExonFeatureSet",
             theClass <- class(exprs(object))
             pmi <- featureInfo[["fid"]]
             pnVec <- as.character(featureInfo[["fsetid"]])
-            if (theClass == "matrix"){
+            if ("matrix" %in% theClass){
               pms <- exprs(object)[pmi,, drop=FALSE]
               dimnames(pms) <- NULL
               colnames(pms) <- sampleNames(object)
               theExprs <- basicRMA(pms, pnVec, normalize, background)
               rm(pms)
-            }else if (theClass == "ff_matrix"){
+            }else if ("ff_matrix" %in% theClass){
               pms <- ffSubset(rows=pmi, object=exprs(object), prefix="pm-")
               theExprs <- basicRMAbo(pms, pnVec, background=background, normalize=normalize)
               finalizer(pms) <- "delete"
