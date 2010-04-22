@@ -89,55 +89,39 @@ setMethod("boxplot", signature(x="FeatureSet"),
           })
   
 setMethod("boxplot", signature(x="ExpressionSet"),
-          function(x, which, transfo=identity, range=0, ...){
+          function(x, which, transfo=identity, nsample=10000, ...){
             stopifnot(is.function(transfo))
             if(!missing(which)) warning("Argument 'which' ignored.")
-            toPlot <- transfo(exprs(x))
-            toPlot <- as.data.frame(toPlot)
-            boxplot(toPlot, range=range, ...)
-          })
-
-setMethod("image", signature(x="FeatureSet"),
-          function(x, which, transfo=log2, col=gray((0:64)/64), ...){
-            if (missing(which)) which <- 1:ncol(x)
-            if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
-            geom <- geometry(getPD(x))
-
-            chns <- channelNames(x)
-            nchns <- length(chns)
-            par(mfrow=c(1, nchns))
-            
-            if (tolower(manufacturer(x)) != "affymetrix"){
-              conn <- db(x)
-              tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
-              theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
-              theInfo <- do.call("rbind", theInfo)
-              theInfo <- theInfo[order(theInfo[["fid"]]), ]
-              idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
-              for (i in which){
-                theInfo[["signal"]] <- transfo(as.numeric(exprs(x[theInfo[["fid"]], i])))
-                tmp <- matrix(NA, nr=geom[1], nc=geom[2])
-                tmp[idx] <- theInfo[["signal"]]
-                tmp <- as.matrix(rev(as.data.frame(tmp)))
-                image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
-              }
+            if (nrow(x) > nsamples){
+              idx <- sort(sample(nrow(x), nsamples))
             }else{
-              for (i in which){
-                tmp <- matrix(transfo(exprs(x[,i])), ncol=geom[1], nrow=geom[2])
-                tmp <- as.matrix(rev(as.data.frame(tmp)))
-                image(tmp, col=col, main=sampleNames(x)[i], xaxt="n", yaxt="n", ...)
-              }
+              idx <- 1:nrow(x)
             }
-            par(ask=FALSE)
+            toPlot <- transfo(exprs(x[idx,]))
+            toPlot <- as.data.frame(toPlot)
+            dots <- list(...)
+            if (is.null(dots)[["cols"]])
+              dots[["cols"]] <- darkColors(ncol(x))
+            if (is.null(dots)[["range"]])
+              dots[["range"]] <- 0
+            do.call("boxplot", dots)
           })
 
-
 setMethod("image", signature(x="FeatureSet"),
-          function(x, which, transfo=log2, col=gray((0:64)/64), ...){
+          function(x, which, transfo=log2, ...){
             if (missing(which)) which <- 1:ncol(x)
             if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
+            dots <- list(...)
+            
+            if (is.null(dots[["col"]]))
+              dots[["col"]] <- colorRampPalette(c("blue", "white", "red"))(256)
+            if (is.null(dots[["xaxt"]]))
+              dots[["xaxt"]] <- "n"
+            if (is.null(dots[["yaxt"]]))
+              dots[["yaxt"]] <- "n"
+            
             geom <- geometry(getPD(x))
-
+            
             chns <- channelNames(x)
             nchns <- length(chns)
             par(mfrow=c(1, nchns))
@@ -150,31 +134,31 @@ setMethod("image", signature(x="FeatureSet"),
               theInfo <- theInfo[order(theInfo[["fid"]]), ]
               idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
               for (i in which){
-                  tmpObj <- x[theInfo[["fid"]], i]
-                  for (j in 1:nchns){
-                      tmp <- matrix(NA, nr=geom[1], nc=geom[2])
-                      tmp[idx] <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
-                      tmp <- as.matrix(rev(as.data.frame(tmp)))
-                      image(tmp, col=col, xaxt="n", yaxt="n",
-                            main=paste(sampleNames(x)[i], chns[j],
-                            sep=" - "), ...)
-                      rm(tmp)
-                  }
-                  rm(tmpObj)
+                tmpObj <- x[theInfo[["fid"]], i]
+                for (j in 1:nchns){
+                  dots[["main"]] <- paste(sampleNames(x)[i],
+                                          chns[j], sep=" - ")
+                  tmp <- matrix(NA, nr=geom[1], nc=geom[2])
+                  tmp[idx] <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
+                  tmp <- as.matrix(rev(as.data.frame(tmp)))
+                  do.call("image", dots)
+                  rm(tmp)
+                }
+                rm(tmpObj)
               }
             }else{
               for (i in which){
-                  tmpObj <- x[, i]
-                  for (j in 1:nchns){
-                      tmp <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
-                      tmp <- matrix(tmp, ncol=geom[1], nrow=geom[2])
-                      tmp <- as.matrix(rev(as.data.frame(tmp)))
-                      image(tmp, col=col, xaxt="n", yaxt="n",
-                            main=paste(sampleNames(x)[i], chns[j],
-                            sep=" - "), ...)
-                      rm(tmp)
+                tmpObj <- x[, i]
+                for (j in 1:nchns){
+                    dots[["main"]] <- paste(sampleNames(x)[i],
+                                            chns[j], sep=" - ")
+                    tmp <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
+                    tmp <- matrix(tmp, ncol=geom[1], nrow=geom[2])
+                    tmp <- as.matrix(rev(as.data.frame(tmp)))
+                    do.call("image", dots)
+                    rm(tmp)
                   }
-                  rm(tmpObj)
+                rm(tmpObj)
               }
             }
             par(ask=FALSE)
@@ -182,101 +166,139 @@ setMethod("image", signature(x="FeatureSet"),
 
 
 matDensity <- function(mat){
-    x.density <- apply(mat, 2, density, na.rm=TRUE)
-    all.x <- sapply(x.density, "[[", "x")
-    all.y <- sapply(x.density, "[[", "y")
-    list(x=all.x, y=all.y)
+  x.density <- apply(mat, 2, density, na.rm=TRUE)
+  all.x <- sapply(x.density, "[[", "x")
+  all.y <- sapply(x.density, "[[", "y")
+  list(x=all.x, y=all.y)
 }
 
 getProbeIndex <- function(x, type=c("pm", "mm", "bg", "both", "all")){
-    type <- match.arg(type)
-    if (type == "pm"){
-        idx <- pmindex(x)
-    }else if (type == "mm"){
-        idx <- mmindex(x)
-    }else if (type == "bg"){
-        idx <- bgindex(x)
-    }else if (type == "both"){
-        warning("Argument 'both' was replaced by 'all'. Please update your code.")
-        idx <- 1:nrow(x)
-    }else if (type == "all"){
-        idx <- 1:nrow(x)
-    }
-    idx
+  type <- match.arg(type)
+  if (type == "pm"){
+    idx <- pmindex(x)
+  }else if (type == "mm"){
+    idx <- mmindex(x)
+  }else if (type == "bg"){
+    idx <- bgindex(x)
+  }else if (type == "both"){
+    warning("Argument 'both' was replaced by 'all'. Please update your code.")
+    idx <- 1:nrow(x)
+  }else if (type == "all"){
+    idx <- 1:nrow(x)
+  }
+  idx
 }
 
 setMethod("hist", "FeatureSet",
           function(x, transfo=log2, which=c("pm", "mm", "bg", "both", "all"),
                    nsample=10000, ...){
-              stopifnot(is.function(transfo))
-              idx <- getProbeIndex(x, which)
-              if (length(idx) > nsample)
-                  idx <- sort(sample(idx, nsample))
-              
-              chns <- channelNames(x)
-              nchns <- length(chns)
-
-              ## estimate density for every sample on each channel
-              f <- function(chn, obj)
-                  matDensity(transfo(exprs(channel(obj, chn))))
-              tmp <- lapply(chns, f, x[idx,])
-
-              ## get lims
-              rgs <- lapply(tmp, sapply, range)
-              rgs <- do.call("rbind", rgs)
-              rgs <- apply(rgs, 2, range)
-
-              ## set graph options properly
-              dots <- list(...)
-              if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
-              if (is.null(dots[["xlab"]])) dots[["xlab"]] <- "log-intensity"
-              if (is.null(dots[["xlim"]])) dots[["xlim"]] <- rgs[,1]
-              if (is.null(dots[["ylim"]])) dots[["ylim"]] <- rgs[,2]
-              if (is.null(dots[["col"]]))
-                  dots[["col"]] <- darkColors(ncol(x))
-              if (is.null(dots[["type"]])) dots[["type"]] <- "l"
-              par(mfrow=c(nchns, 1))
-              changeMain <- is.null(dots[["main"]])
-              
-              for (i in 1:nchns){
-                  dots[["x"]] <- tmp[[i]][["x"]]
-                  dots[["y"]] <- tmp[[i]][["y"]]
-                  if (changeMain)
-                      dots[["main"]] <- chns[i]
-                  do.call("matplot", dots)
-              }
-              invisible(tmp)
+            stopifnot(is.function(transfo))
+            idx <- getProbeIndex(x, which)
+            if (length(idx) > nsample)
+              idx <- sort(sample(idx, nsample))
+            
+            chns <- channelNames(x)
+            nchns <- length(chns)
+            
+            ## estimate density for every sample on each channel
+            f <- function(chn, obj)
+              matDensity(transfo(exprs(channel(obj, chn))))
+            tmp <- lapply(chns, f, x[idx,])
+            
+            ## get lims
+            rgs <- lapply(tmp, sapply, range)
+            rgs <- do.call("rbind", rgs)
+            rgs <- apply(rgs, 2, range)
+            
+            ## set graph options properly
+            dots <- list(...)
+            if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
+            if (is.null(dots[["xlab"]])) dots[["xlab"]] <- "log-intensity"
+            if (is.null(dots[["xlim"]])) dots[["xlim"]] <- rgs[,1]
+            if (is.null(dots[["ylim"]])) dots[["ylim"]] <- rgs[,2]
+            if (is.null(dots[["col"]]))
+              dots[["col"]] <- darkColors(ncol(x))
+            if (is.null(dots[["type"]])) dots[["type"]] <- "l"
+            par(mfrow=c(nchns, 1))
+            changeMain <- is.null(dots[["main"]])
+            
+            for (i in 1:nchns){
+              dots[["x"]] <- tmp[[i]][["x"]]
+              dots[["y"]] <- tmp[[i]][["y"]]
+              if (changeMain)
+                dots[["main"]] <- chns[i]
+              do.call("matplot", dots)
+            }
+            invisible(tmp)
           })
 
 setMethod("hist", "ExpressionSet",
-          function(x, col=1:ncol(x), transfo=log2,
-                   which=1:nrow(x), ylab="density",
-                   xlab="log intensity",
-                   type="l", ...){
+          function(x, transfo=identity, nsample=10000, ...){
             stopifnot(is.function(transfo))
-            tmp <- exprs(x[which,])
-            idx <- is.na(tmp[,1])
-            if(any(idx))
-              tmp <- tmp[!idx,, drop=FALSE]
-            tmp <- transfo(tmp)
-            x.density <- apply(tmp, 2, density)
-            all.x <- sapply(x.density, "[[", "x")
-            all.y <- sapply(x.density, "[[", "y")
-            matplot(all.x, all.y, ylab=ylab, xlab=xlab, type=type, col=col, ...)
-            invisible(x.density)
+            if (nrow(x) > nsample){
+              idx <- sort(sample(nrow(x), nsample))
+            }else{
+              idx <- 1:nrow(x)
+            }
+            tmp <- transfo(exprs(x[idx,]))
+            res <- matDensity(tmp)
+
+            dots <- list(...)
+            if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
+            if (is.null(dots[["xlab"]])) dots[["xlab"]] <- "log-intensity"
+            if (is.null(dots[["xlim"]])) dots[["xlim"]] <- range(res[["x"]])
+            if (is.null(dots[["ylim"]])) dots[["ylim"]] <- range(res[["y"]])
+            if (is.null(dots[["col"]]))
+              dots[["col"]] <- darkColors(ncol(x))
+            if (is.null(dots[["type"]])) dots[["type"]] <- "l"
+
+            dots[["x"]] <- res[["x"]]
+            dots[["y"]] <- res[["y"]]
+            do.call("matplot", dots)
+
+            invisible(res)
           })
 
 setMethod("MAplot", "FeatureSet",
-          function(object, arrays=1:ncol(object), lowessPlot=FALSE, ...){
+          function(object, arrays=1:ncol(object), lowessPlot=FALSE, nsample=10000, ...){
             if (length(arrays) > 1) par(ask=TRUE)
-            ref <- rowMedians(log2(exprs(object)))
-            for (i in arrays){
-              tmp <- log2(exprs(object[,i]))
-              plot((tmp+ref)/2, tmp-ref, pch=".",
-                   xlab="A", ylab="M",
-                   main=sampleNames(object)[i], ...)
-              if (lowessPlot)
-                lines(lowess((tmp+ref)/2, tmp-ref), col="red")
+            chns <- channelNames(object)
+            nchns <- length(chns)
+            if (nchns > 2) stop("Don't know how to handle more than 2 channels.")
+            if (nrow(object) > nsample){
+              idx <- sort(sample(nrow(object), nsample))
+            }else{
+              idx <- 1:nrow(object)
+            }
+            dots <- list(...)
+            if (is.null(dots[["xlab"]]))
+              dots[["xlab"]] <- "average log-intensity"
+            if (is.null(dots[["ylab"]]))
+              dots[["ylab"]] <- "log-ratio"
+            if (is.null(dots[["pch"]]))
+              dots[["pch"]] <- "."
+            
+            small <- object[idx,]
+            
+            if (nchns == 1){
+              ref <- rowMedians(log2(exprs(small)))
+              for (i in arrays){
+                tmp <- log2(exprs(small[,i]))
+                dots[["x"]] <- (tmp+ref)/2
+                dots[["y"]] <- tmp-ref
+                dots[["main"]] <- sampleNames(small)[i]
+                do.call("plot", dots)
+                if (lowessPlot)
+                  lines(lowess(dots[["x"]], dots[["y"]]), col="red")
+              }
+            }else if (nchns == 2){
+              for (i in arrays){
+                dots[["x"]] <- (log2(exprs(channel(small, "channel1"))) + log2(exprs(channel(small, "channel1"))))/2
+                dots[["y"]] <-  log2(exprs(channel(small, "channel1"))) - log2(exprs(channel(small, "channel1")))
+                dots[["main"]] <- sampleNames(small)[i]
+                if (lowessPlot)
+                  lines(lowess(dots[["x"]], dots[["y"]]), col="red")
+              }
             }
             if (length(arrays) > 1) par(ask=FALSE)
           })

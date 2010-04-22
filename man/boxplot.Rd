@@ -1,20 +1,20 @@
-\name{boxplot}
-\alias{boxplot}
-\alias{boxplot,FeatureSet-method}
+\name{boxplot-methods}
+\docType{methods}
+\alias{boxplot-methods}
 \alias{boxplot,ExpressionSet-method}
+\alias{boxplot,FeatureSet-method}
 \title{Boxplot}
 \description{
   Boxplot for observed (log-)intensities in a FeatureSet-like object
-  (ExpressionFeatureSet, ExonFeatureSet, SnpFeatureSet, TilingFeatureSet).
+  (ExpressionFeatureSet, ExonFeatureSet, SnpFeatureSet,
+  TilingFeatureSet) and ExpressionSet.
 }
+
 \usage{
-boxplot(x, \dots)
-\S4method{boxplot}{FeatureSet}(x, which=c("pm", "mm", "both"), transfo=log2,
-range=0, \dots)
-\S4method{boxplot}{ExpressionSet}(x, which, transfo=identity,
-range=0, \dots)
+\S4method{boxplot}{FeatureSet}(x, which=c("pm", "mm", "bg", "both", "all"), transfo=log2, nsample=10000, \dots)
+
+\S4method{boxplot}{ExpressionSet}(x, which, transfo=identity, nsample=10000, \dots)
 }
-%- maybe also 'usage' for other objects documented here.
 
 \arguments{
   \item{x}{a \code{FeatureSet}-like object or \code{ExpressionSet}
@@ -23,19 +23,24 @@ range=0, \dots)
   plot.}
   \item{transfo}{a function to transform the data before plotting. See
     'Details'.}
-  \item{range}{this determines how far the plot whiskers extend out from
-    the box.  If 'range' is positive, the whiskers extend to the most
-    extreme data point which is no more than 'range' times the
-    interquartile range from the box. A value of zero causes the
-    whiskers to extend to the data extremes.}
-  \item{\dots}{arguments to be passed to plot}
+  \item{nsample}{number of units to sample and build the plot.}
+  \item{\dots}{arguments to be passed to the default boxplot method.}
 }
 
 \details{
   The 'transfo' argument will set the transformation to be used. For raw
   data, 'transfo=log2' is a common practice. For summarized data (which
   are often in log2-scale), no transformation is needed (therefore 'transfo=identity').
+}
+
+\note{
+  The boxplot methods for \code{FeatureSet} and \code{Expression} use a
+  sample (via \code{sample}) of the probes/probesets to produce the
+  plot. Therefore, the user interested in reproducibility is advised to
+  use \code{set.seed}.
   }
-\seealso{\code{\link{hist}}, \code{\link{image}}}
-%% Add examples
+
+\seealso{\code{\link{hist}}, \code{\link{image}}, \code{\link{sample}}, \code{\link{set.seed}}}
+
 \keyword{hplot}
+\keyword{methods}

@@ -59,6 +59,14 @@ a Copy Number tool specifically designed for these data.
   \S4method{rma}{SnpCnvFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL)
 }
 
+\arguments{
+  \item{object}{Exon/Expression/Gene/SnpCnv-FeatureSet object.}
+  \item{background}{Logical - perform RMA background correction?}
+  \item{normalize}{Logical - perform quantile normalization?}
+  \item{subset}{To be implemented.}
+  \item{target}{Level of summarization (only for Exon/Gene arrays)}
+  }
+
 \references{
   
   Rafael. A. Irizarry, Benjamin M. Bolstad, Francois Collin, Leslie

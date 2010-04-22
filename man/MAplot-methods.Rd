@@ -5,13 +5,14 @@
 \alias{MAplot,FeatureSet-method}
 \title{MA plots}
 \description{
-  Create MA plots using a reference array (based on medians).
+  Create MA plots using a reference array (if one channel) or using
+  channel2 as reference (if two channel).
 }
 \section{Methods}{
   \describe{
     \item{object = "FeatureSet"}{ExpressionFeatureSet}
   }
 }
-%% Add Examples
+
 \keyword{methods}
 

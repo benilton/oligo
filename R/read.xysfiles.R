@@ -23,8 +23,7 @@ smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
     nr <- nrow(.Call("R_read_xys_files", filenames[1],
                      FALSE)[["intensities"]])
 
-    tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)),
-                         dimnames=list(as.character(1:nr), sampleNames))
+    tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)))
     intensityFile <- filename(tmpExprs)
     
     samplesByNode <- splitIndicesByNode(1:length(filenames))

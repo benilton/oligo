@@ -199,11 +199,11 @@ crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
 
   if (bs){
     myDist <- getAffySnpDistance(object, params, fs)
-    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
+##    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
     myDist[,,-2,] <- balance*myDist[,,-2,]
   }else{
     myDist <- getAffySnpDistanceSingle(object, params, fs)
-    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
+##    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
     myDist[,,-2] <- balance*myDist[,,-2]
   }
 ## aqui
@@ -236,7 +236,7 @@ crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
       myDist[,,-2] <- balance*myDist[,,-2]
     }
 
-    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
+##    save(myDist, file=paste(prefix, "distFile.rda", sep=""))
 
     myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex, verbose=verbose, sqsClass = class(object))
     LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass = class(object))
