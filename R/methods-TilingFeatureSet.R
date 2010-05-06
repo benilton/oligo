@@ -1,7 +1,7 @@
 setMethod("pm", "TilingFeatureSet",
           function(object, subset=NULL){
             idx <- pmindex(object, subset=subset)
-            if (channelNames(object) %in% c("channel1", "channel2")){
+            if (all(channelNames(object) %in% c("channel1", "channel2"))){
               pm1 <- assayDataElement(object, "channel1")[idx,, drop=FALSE]
               pm2 <- assayDataElement(object, "channel2")[idx,, drop=FALSE]
               dims <- dim(pm1)
@@ -16,7 +16,7 @@ setMethod("pm", "TilingFeatureSet",
 setMethod("mm", "TilingFeatureSet",
           function(object, subset=NULL){
             idx <- mmindex(object, subset=subset)
-            if (channelNames(object) %in% c("channel1", "channel2")){
+            if (all(channelNames(object) %in% c("channel1", "channel2"))){
               mm1 <- assayDataElement(object, "channel1")[idx,, drop=FALSE]
               mm2 <- assayDataElement(object, "channel2")[idx,, drop=FALSE]
               dims <- dim(mm1)
@@ -31,7 +31,7 @@ setMethod("mm", "TilingFeatureSet",
 setMethod("bg", "TilingFeatureSet",
           function(object, subset=NULL){
             idx <- bgindex(object, subset=subset)
-            if (channelNames(object) %in% c("channel1", "channel2")){
+            if (all(channelNames(object) %in% c("channel1", "channel2"))){
               bg1 <- assayDataElement(object, "channel1")[idx,, drop=FALSE]
               bg2 <- assayDataElement(object, "channel2")[idx,, drop=FALSE]
               dims <- dim(bg1)
@@ -47,7 +47,7 @@ setMethod("bg", "TilingFeatureSet",
 setReplaceMethod("pm", signature(object="TilingFeatureSet", value="array"),
                  function(object, value){
                    idx <- pmindex(object)
-                   if (channelNames(object) %in% c("channel1", "channel2")){
+                   if (all(channelNames(object) %in% c("channel1", "channel2"))){
                      tmp <- assayDataElement(object, "channel1")
                      tmp[idx,] <- value[,,1]
                      out <- assayDataElementReplace(object, "channel1", tmp)
@@ -62,7 +62,7 @@ setReplaceMethod("pm", signature(object="TilingFeatureSet", value="array"),
 setReplaceMethod("mm", signature(object="TilingFeatureSet", value="array"),
                  function(object, value){
                    idx <- mmindex(object)
-                   if (channelNames(object) %in% c("channel1", "channel2")){
+                   if (all(channelNames(object) %in% c("channel1", "channel2"))){
                      tmp <- assayDataElement(object, "channel1")
                      tmp[idx,] <- value[,,1]
                      out <- assayDataElementReplace(object, "channel1", tmp)
@@ -77,7 +77,7 @@ setReplaceMethod("mm", signature(object="TilingFeatureSet", value="array"),
 setReplaceMethod("bg", signature(object="TilingFeatureSet", value="array"),
                  function(object, value){
                    idx <- bgindex(object)
-                   if (channelNames(object) %in% c("channel1", "channel2")){
+                   if (all(channelNames(object) %in% c("channel1", "channel2"))){
                      tmp <- assayDataElement(object, "channel1")
                      tmp[idx,] <- value[,,1]
                      out <- assayDataElementReplace(object, "channel1", tmp)

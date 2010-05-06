@@ -124,7 +124,8 @@ setMethod("image", signature(x="FeatureSet"),
             
             chns <- channelNames(x)
             nchns <- length(chns)
-            par(mfrow=c(1, nchns))
+            oldpar <- par()[c("mfrow", "mar", "mgp")]
+            par(mfrow=c(nchns, 1), mar=c(2.5,2.5,1.6,1.1), mgp=c(1.5,.5,0))
             
             if (tolower(manufacturer(x)) != "affymetrix"){
               conn <- db(x)
@@ -141,6 +142,7 @@ setMethod("image", signature(x="FeatureSet"),
                   tmp <- matrix(NA, nr=geom[1], nc=geom[2])
                   tmp[idx] <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
                   tmp <- as.matrix(rev(as.data.frame(tmp)))
+                  dots[["x"]] <- tmp
                   do.call("image", dots)
                   rm(tmp)
                 }
@@ -155,6 +157,7 @@ setMethod("image", signature(x="FeatureSet"),
                     tmp <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
                     tmp <- matrix(tmp, ncol=geom[1], nrow=geom[2])
                     tmp <- as.matrix(rev(as.data.frame(tmp)))
+                    dots[["x"]] <- tmp
                     do.call("image", dots)
                     rm(tmp)
                   }
@@ -162,6 +165,7 @@ setMethod("image", signature(x="FeatureSet"),
               }
             }
             par(ask=FALSE)
+            par(oldpar)
           })
 
 

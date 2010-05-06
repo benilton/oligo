@@ -1,3 +1,40 @@
+setMethod("pmChr", "GeneFeatureSet",
+          function(object){
+            conn <- db(object)
+            sql <- paste("SELECT fid, chrom",
+                         "FROM pmfeature",
+                         "INNER JOIN featureSet USING(fsetid)")
+            tmp <- dbGetQuery(conn, sql)
+            chromInfo <- dbGetQuery(conn, "SELECT * FROM chrom_dict")
+            tmp <- merge(tmp, chromInfo, by.x="chrom",
+                         by.y="chrom", all.x=TRUE, all.y=FALSE,
+                         sort=FALSE)
+            tmp <- tmp[order(tmp[["fid"]]),]
+            tmp[["chrom_id"]]
+          })
+
+setMethod("bgindex", "GeneFeatureSet",
+          function(object, subset=NULL){
+              conn <- db(object)
+              sql <- paste("SELECT fid FROM",
+                           "pmfeature, featureSet",
+                           "WHERE pmfeature.fsetid=featureSet.fsetid",
+                           "AND type > 1")
+              fid <- dbGetQuery(conn, sql)[[1]]
+              sort(fid)
+          })
+
+setMethod("bgSequence", "GeneFeatureSet",
+          function(object){
+              theFile <- file.path(system.file(package = annotation(object)), 
+                                   "data", "pmSequence.rda")
+              load(theFile)
+              bgi <- bgindex(object)
+              idx <- match(bgi, pmSequence[["fid"]])
+              pmSequence[idx, "sequence"]
+          })
+
+
 setMethod("probeNames", "GeneFeatureSet",
           function(object, subset=NULL){
             res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")

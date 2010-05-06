@@ -240,3 +240,7 @@ sampleNames were different.
 
 ** (1.11.36) changed getContainer to extract 'type' from (pm/bg)feature table
 ** (1.11.38) approp. documented rma for gene/exon arrays
+
+05-05-2010: B Carvalho
+
+** (1.13.1) fixed bugs: image / bg / bgindex / pmChr / bgSequence for Gene and Exon arrays

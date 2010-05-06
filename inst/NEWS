@@ -1,3 +1,12 @@
+CHANGES IN VERSION 1.13
+-----------------------
+
+BUG FIXES
+
+    o Fixed bugs in image / bg / bgindex / bgSequence
+    for Exon and Gene arrays (due to changes in annotation)
+
+
 CHANGES IN VERSION 1.11
 -----------------------
 
