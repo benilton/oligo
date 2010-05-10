@@ -418,6 +418,7 @@ static int countLinesGz(gzFile *file){
   while (!gzeof(file)){
     gzgets(file, buffer, LINEMAX);
     lines++;
+    if (buffer == NULL) lines--;
   }
   return lines;
 }
