@@ -480,13 +480,12 @@ static void read_one_gzxys(const char *filename, double *signal,
   while (gzgetc(fp) != '\n');
   while (gzgetc(fp) != '\n');
   count = 0;
+  Rprintf("Assuming %d rows\n", nrow);
   while (!gzeof(fp)){
-    Rprintf("Line %d\n", count);
     gzgets(fp, buffer, LINEMAX);
 
     // Get X only for the 1st file
     token = strtok(buffer, " \t");
-    Rprintf("Trying to read X\n");
     if (token == NULL)
       error("Incomplete line found.");
     if (i == 0)
@@ -494,7 +493,6 @@ static void read_one_gzxys(const char *filename, double *signal,
     
     // Get Y only for the 1st file
     token = strtok(NULL, " \t");
-    Rprintf("Trying to read Y\n");
     if (token == NULL)
       error("Incomplete line found.");
     if (i == 0)
@@ -502,7 +500,6 @@ static void read_one_gzxys(const char *filename, double *signal,
 
     // Get Signal for every file
     token = strtok(NULL, " \t");
-    Rprintf("Trying to read SIGNAL\n");
     if (token == NULL)
       error("Incomplete line found.");
     if (token[0] != 'N'){
