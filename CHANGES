@@ -244,3 +244,4 @@ sampleNames were different.
 05-05-2010: B Carvalho
 
 ** (1.13.1) fixed bugs: image / bg / bgindex / pmChr / bgSequence for Gene and Exon arrays
+** (1.13.1) added support to gzipped XYS files

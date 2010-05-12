@@ -1,6 +1,10 @@
 CHANGES IN VERSION 1.13
 -----------------------
 
+USER VISIBLE CHANGES
+
+    o Added support to read gzipped XYS files directly.
+
 BUG FIXES
 
     o Fixed bugs in image / bg / bgindex / bgSequence
