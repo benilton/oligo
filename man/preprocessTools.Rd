@@ -7,6 +7,8 @@
 \alias{backgroundCorrect-methods}
 \alias{backgroundCorrect,matrix-method}
 \alias{backgroundCorrect,ff_matrix-method}
+\alias{backgroundCorrect,ExpressionFeatureSet-method}
+\alias{backgroundCorrect,FeatureSet-method}
 \alias{normalize}
 \alias{normalize-methods}
 \alias{normalize,matrix-method}
@@ -24,9 +26,9 @@
   normalization and summarization methods.
 }
 \usage{
-backgroundCorrect(object, method="rma", copy=TRUE, verbose=TRUE)
-summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE)
-normalize(object, method="quantile", copy=TRUE, verbose=TRUE)
+backgroundCorrect(object, method="rma", copy=TRUE, verbose=TRUE, ...)
+summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE, ...)
+normalize(object, method="quantile", copy=TRUE, verbose=TRUE, ...)
 normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
 }
 \arguments{
@@ -39,6 +41,7 @@ normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
   \item{copy}{Logical flag determining if data must be copied before
     processing (TRUE), or if data can be overwritten (FALSE).}
   \item{verbose}{Logical flag for verbosity.}
+  \item{\dots}{Arguments to be passed to methods.}
 }
 \details{
   Number of rows of \code{object} must match the length of

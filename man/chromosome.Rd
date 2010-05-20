@@ -3,7 +3,9 @@
 \alias{chromosome<-}
 \alias{chromosome<-,AnnotatedDataFrame,character-method}
 \alias{pmChr}
+\alias{pmChr,ExonFeatureSet-method}
 \alias{pmChr,FeatureSet-method}
+\alias{pmChr,GeneFeatureSet-method}
 \title{Accessor for chromosome information}
 \description{
   Returns chromosome information.

@@ -16,8 +16,7 @@ Imports: affyio (>= 1.15.2),
          stats,
          utils
 Enhances: ff,
-          snow,
-          affyPLM
+          snow
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
           pd.mapping50k.xba240,

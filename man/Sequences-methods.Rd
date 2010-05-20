@@ -8,7 +8,9 @@
 \alias{pmSequence,FeatureSet-method}
 \alias{pmSequence,AffySNPPDInfo-method}
 \alias{bgSequence}
+\alias{bgSequence,ExonFeatureSet-method}
 \alias{bgSequence,FeatureSet-method}
+\alias{bgSequence,GeneFeatureSet-method}
 \alias{bgSequence,DBPDInfo-method}
 
 \title{Probe Sequeces}
