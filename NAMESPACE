@@ -82,3 +82,7 @@ export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
 ## Testing
 exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
 export(plotM)
+
+importClassesFrom(affyPLM, PLMset)
+exportClasses(PLMset)
+exportMethods(intensity, probesetNames)

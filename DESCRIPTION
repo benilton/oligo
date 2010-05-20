@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.13.1
+Version: 1.13.2
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho <carvalho@bclab.org>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <carvalho@bclab.org>
@@ -16,7 +16,8 @@ Imports: affyio (>= 1.15.2),
          stats,
          utils
 Enhances: ff,
-          snow
+          snow,
+          affyPLM
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
           pd.mapping50k.xba240,

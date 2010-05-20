@@ -10,3 +10,6 @@
 - subset argument to methods to use selectProbes()
 - add oligo version to FeatureSet objs
 - add crlmm pipeline from SnpFeatureSet (snprma is ready under snprma2)
+- add backgroundCorrect() for FeatureSet objs
+- add normalize() for FeatureSet objs
+- check accuracy of bgCorrect with 'mas' - compare against 'affy'
