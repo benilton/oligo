@@ -245,3 +245,4 @@ sampleNames were different.
 
 ** (1.13.1) fixed bugs: image / bg / bgindex / pmChr / bgSequence for Gene and Exon arrays
 ** (1.13.1) added support to gzipped XYS files
+** (1.13.3) fixed bugs with subsetting of Gene chips / docs

@@ -206,8 +206,14 @@ setMethod("boxplot", signature(x="FeatureSet"),
             if (is.null(dots[["range"]])) dots[["range"]] <- 0
             if (is.null(dots[["main"]])) changeMain <- TRUE
             if (is.null(dots[["col"]])) dots[["col"]] <- darkColors(ncol(x))
-                
+            
             eset <- x[idx,]
+
+            ## this fix is temporary
+            ## until we agree on how
+            ## to handle multiplicity by gene chips
+            featureNames(eset) <- featureNames(featureData(eset))
+            
             rgs <- vector("list", nchns)
             for (i in 1:nchns){
                 tmp <- log2(exprs(channel(eset, chns[i])))
@@ -348,7 +354,15 @@ setMethod("hist", "FeatureSet",
             ## estimate density for every sample on each channel
             f <- function(chn, obj)
               matDensity(transfo(exprs(channel(obj, chn))))
-            tmp <- lapply(chns, f, x[idx,])
+
+            eset <- x[idx,]
+            ## this fix is temporary
+            ## until we agree on how
+            ## to handle multiplicity by gene chips
+            featureNames(eset) <- featureNames(featureData(eset))
+
+            tmp <- lapply(chns, f, eset)
+            rm(eset)
             
             ## get lims
             rgs <- lapply(tmp, sapply, range)
@@ -424,6 +438,7 @@ setMethod("MAplot", "FeatureSet",
               dots[["pch"]] <- "."
             
             small <- object[idx,]
+            featureNames(small) <- featureNames(featureData(small))
             
             if (nchns == 1){
               ref <- rowMedians(log2(exprs(small)))
