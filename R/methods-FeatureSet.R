@@ -204,7 +204,7 @@ setMethod("boxplot", signature(x="FeatureSet"),
 
             dots <- list(...)
             if (is.null(dots[["range"]])) dots[["range"]] <- 0
-            if (is.null(dots[["main"]])) changeMain <- TRUE
+            changeMain <- is.null(dots[["main"]])
             if (is.null(dots[["col"]])) dots[["col"]] <- darkColors(ncol(x))
             
             eset <- x[idx,]
@@ -228,7 +228,8 @@ setMethod("boxplot", signature(x="FeatureSet"),
             for (i in 1:nchns){
                 tmp <- transfo(exprs(channel(eset, chns[i])))
                 dots[["x"]] <- as.data.frame(tmp)
-                dots[["main"]] <- chns[i]
+                if (changeMain)
+                    dots[["main"]] <- chns[i]
                 rm(tmp)
                 res[[i]] <- do.call("boxplot", dots)
             }
@@ -239,18 +240,22 @@ setMethod("boxplot", signature(x="ExpressionSet"),
           function(x, which, transfo=identity, nsample=10000, ...){
             stopifnot(is.function(transfo))
             if(!missing(which)) warning("Argument 'which' ignored.")
-            if (nrow(x) > nsamples){
-              idx <- sort(sample(nrow(x), nsamples))
+            if (nrow(x) > nsample){
+              idx <- sort(sample(nrow(x), nsample))
             }else{
               idx <- 1:nrow(x)
             }
             toPlot <- transfo(exprs(x[idx,]))
             toPlot <- as.data.frame(toPlot)
             dots <- list(...)
-            if (is.null(dots)[["cols"]])
-              dots[["cols"]] <- darkColors(ncol(x))
-            if (is.null(dots)[["range"]])
+            dots[["x"]] <- toPlot
+            rm(toPlot)
+            if (is.null(dots[["col"]]))
+              dots[["col"]] <- darkColors(ncol(x))
+            if (is.null(dots[["range"]]))
               dots[["range"]] <- 0
+            if (is.null(dots[["main"]]))
+                dots[["main"]] <- "exprs"
             do.call("boxplot", dots)
           })
 
