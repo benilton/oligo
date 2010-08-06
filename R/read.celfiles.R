@@ -8,31 +8,42 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
     tmpExprs <- createFF("intensities-", dim=c(nr, length(filenames)))
     intensityFile <- filename(tmpExprs)
     samplesByNode <- splitIndicesByNode(1:length(filenames))
-    ocLapply(samplesByNode, oligoReadCels, headdetails, filenames,
-            tmpExprs, neededPkgs="oligo")
+    datetime <- ocLapply(samplesByNode, oligoReadCels, headdetails,
+                         filenames, tmpExprs, neededPkgs="oligo")
+    datetime <- unlist(datetime)
   }else{
     intensityFile <- NA_character_
     tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
                       headdetails[[1]], headdetails[[2]], verbose,
                       PACKAGE="affyio")
+    datetime <- sapply(filenames, getCelDateTime)
   }
   dimnames(tmpExprs) <- dns
   rm(headdetails, dns)
-  return(list(exprMatrix=tmpExprs, intensityFile=intensityFile))
+  return(list(exprMatrix=tmpExprs, intensityFile=intensityFile, datetime=datetime))
 }
+
+getCelDateTime <- function(celFile)
+    read.celfile.header(celFile, info="full")[["DatHeader"]]
 
 oligoReadCels <- function(cols, headdetails, filenames, out){
   ## runs on the nodes
   if (length(cols) > 0){
     grpCols <- splitIndicesByLength(cols, ocSamples())
+    dates <- vector("list", length(grpCols))
     open(out)
-    for (theCols in grpCols)
+    i <- 1
+    for (theCols in grpCols){
       out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
                               FALSE, FALSE, headdetails[[1]],
                               headdetails[[2]], FALSE, PACKAGE="affyio")
+      dates[[i]] <- sapply(filenames(theCols), getCelDateTime)
+      i <- i + 1
+  }
     close(out)
     rm(grpCols, out)
     gc()
+    return(unlist(dates))
   }
   TRUE
 }
@@ -71,8 +82,9 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   results <- smartReadCEL(filenames, sampleNames, headdetails=headdetails)
   tmpExprs <- results[["exprMatrix"]]
   intensityFile <- results[["intensityFile"]]
+  datetime <- results[["datetime"]]
   rm(results)
-  datetime <- GetAffyTimeDateAsString(filenames, useAffyio=TRUE)
+##  datetime <- GetAffyTimeDateAsString(filenames, useAffyio=TRUE)
 
   arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
@@ -87,15 +99,15 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(exprs=tmpExprs)
   if (missing(phenoData))
-    phenoData <- basicPhenoData(tmpExprs, filenames)
+      phenoData <- basicPhData1(tmpExprs, filenames)
   slot(out, "phenoData") <- phenoData
   rm(phenoData)
   if (missing(featureData))
-    featureData <- basicFeatureData(tmpExprs)
+      featureData <- basicAnnotatedDataFrame(tmpExprs, TRUE)
   slot(out, "featureData") <- featureData
   rm(featureData)
   if (missing(protocolData))
-    protocolData <- basicProtocolData(tmpExprs)
+      protocolData <- basicPData(tmpExprs, filenames, datetime)
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Affymetrix"
@@ -142,10 +154,12 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   results <- smartReadCEL(channel1, sampleNames, headdetails=headdetails)
   channel1Intensities <- results[["exprMatrix"]]
   intensityFile1 <- results[["intensityFile"]]
+  datetime1 <- results[["datetime"]]
   rm(results)
   results <- smartReadCEL(channel2, sampleNames, headdetails=headdetails)
   channel2Intensities <- results[["exprMatrix"]]
   intensityFile2 <- results[["intensityFile"]]
+  datetime2 <- results[["datetime"]]
   rm(results, headdetails)
 
   theClass <- "TilingFeatureSet"
@@ -153,17 +167,20 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
   slot(out, "assayData") <- assayDataNew(channel1=channel1Intensities,
                                          channel2=channel2Intensities)
   if (missing(phenoData))
-    phenoData <- basicPhenoData2(channel1Intensities,
-                                 channel2Intensities,
-                                 channel1, channel2)
+      phenoData <- basicPhData2(channel1Intensities,
+                                channel2Intensities,
+                                channel1, channel2)
   slot(out, "phenoData") <- phenoData
   rm(phenoData)
   if (missing(featureData))
-    featureData <- basicFeatureData(channel1Intensities)
+      featureData <- basicAnnotatedDataFrame(channel1Intensities, TRUE)
   slot(out, "featureData") <- featureData
   rm(featureData)
   if (missing(protocolData))
-    protocolData <- basicProtocolData(channel1Intensities)
+    protocolData <- basicPData2(channel1Intensities,
+                                channel2Intensities,
+                                channel1, channel2,
+                                datetime1, datetime2)
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Affymetrix"

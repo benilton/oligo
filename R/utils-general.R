@@ -242,15 +242,11 @@ getFidMetaProbesetExtended <- function(object){
 
 
 ## Date/time extractors
-GetAffyTimeDateAsString <- function(filenames, useAffyio=TRUE){
-  if (useAffyio){
+GetAffyTimeDateAsString <- function(filenames){
     f <- function(x) read.celfile.header(x, "full")[["DatHeader"]]
-  }else{
-    f <- function(x) readCelHeader(x)[["datheader"]]
-  }
-  DatHeader = sapply(filenames, f)
-  gsub("(.* )([0-9]{2}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})(.*)",
-       "\\2", DatHeader)
+    DatHeader = sapply(filenames, f)
+    gsub("(.* )([0-9]{2}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})(.*)",
+         "\\2", DatHeader)
 }
 
 NgsDate2Posix <- function(txt){
@@ -282,37 +278,67 @@ AffyDate2Posix <- function(txt){
   out
 }
 
-basicPhenoData <- function(mat, filenames){
-  pdd <- data.frame(exprs=filenames)
-  vmd <- data.frame(labelDescription="Filenames",
-                    channel=factor("exprs", levels=c("exprs", "_ALL_")))
+basicPData <- function(mat, filenames, dates){
+  if (missing(dates))
+      dates <- rep(NA, length(filenames))
+  stopifnot(length(filenames) == length(dates))
+  pdd <- data.frame(exprs=filenames, dates=dates)
+  vmd <- data.frame(labelDescription=c(
+                    "Names of files used in 'exprs'",
+                    "Run dates for files used in 'exprs'"),
+                    channel=factor("_ALL_", levels=c("exprs", "_ALL_")))
   phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
   sampleNames(phenoData) <- colnames(mat)
   return(phenoData)
 }
 
-basicPhenoData2 <- function(mat1, mat2, filenames1, filenames2){
-  stopifnot(identical(colnames(mat1), colnames(mat2)))
+basicPData2 <- function(mat1, mat2, filenames1, filenames2,
+                            dates1, dates2){
+  if (missing(dates1)) dates1 <- rep(NA, length(filenames1))
+  if (missing(dates2)) dates2 <- rep(NA, length(filenames2))
+  stopifnot(identical(colnames(mat1), colnames(mat2)),
+            length(filenames1) == length(filenames2),
+            length(dates1) == length(dates2))
   pdd <- data.frame(filenamesChannel1=filenames1,
-                    filenamesChannel2=filenames2)
+                    filenamesChannel2=filenames2,
+                    dates1=dates1, dates2=dates2)
   vmd <- data.frame(labelDescription=c(
-                      "names of files used to create 'channel1'",
-                      "names of files used to create 'channel2'"),
-                    channel=factor(c("channel1", "channel2"),
+                      "Names of files used in 'channel1'",
+                      "Names of files used in 'channel2'",
+                      "Run dates for files used in 'channel1'",
+                      "Run dates for files used in 'channel2'"),
+                    channel=factor(rep(c("channel1", "channel2"), 2),
                       levels=c("channel1", "channel2", "_ALL_")))
   phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
   sampleNames(phenoData) <- colnames(mat1)
   return(phenoData)
 }
 
-basicFeatureData <- function(mat){
-  Biobase:::annotatedDataFrameFromMatrix(mat, byrow=TRUE)
+basicPhData1 <- function(mat){
+  pdd <- data.frame(index=1:ncol(mat))
+  vmd <- data.frame(labelDescription=c("Index"),
+                    channel=factor("_ALL_", levels=c("exprs", "_ALL_")))
+  phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
+  sampleNames(phenoData) <- colnames(mat)
+  return(phenoData)
 }
 
-basicProtocolData <- function(mat){
-  Biobase:::annotatedDataFrameFromMatrix(mat, byrow=FALSE)
+basicPhData2 <- function(mat1, mat2, filenames1, filenames2){
+  stopifnot(identical(colnames(mat1), colnames(mat2)),
+            length(filenames1) == length(filenames2))
+  pdd <- data.frame(index=1:ncol(mat1))
+  vmd <- data.frame(labelDescription=c("Index"),
+                    channel=factor("_ALL_",
+                      levels=c("channel1", "channel2", "_ALL_")))
+  phenoData <- new("AnnotatedDataFrame", data=pdd, varMetadata=vmd)
+  sampleNames(phenoData) <- colnames(mat1)
+  return(phenoData)
 }
-  
+
+basicAnnotatedDataFrame <- function(mat, byrow=FALSE){
+    Biobase:::annotatedDataFrameFromMatrix(mat, byrow=byrow)
+}
+
 ## colors I like in oligo
 darkColors <- function(n){
   cols <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E",

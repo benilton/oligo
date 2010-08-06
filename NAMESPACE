@@ -68,7 +68,7 @@ exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
               getPlatformDesign, getX, getY, hist, image, ## initialize,
               MAplot, mm, "mm<-", mmindex, mmSequence, pm, "pm<-", pmChr,
               pmAllele, pmindex, pmFragmentLength, pmOffset, pmPosition,
-              pmSequence, pmStrand, probeNames, rma)
+              pmSequence, pmStrand, probeNames, rma, runDate)
 
 export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        sequenceDesignMatrix, list.xysfiles, readSummaries,

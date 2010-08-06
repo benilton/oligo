@@ -19,6 +19,8 @@ setGeneric("genotype", function(object, ...) standardGeneric("genotype"))
 
 setGeneric("getContainer", function(object, probeType=c("pm", "bg")) standardGeneric("getContainer"))
 
+setGeneric("runDate", function(object) standardGeneric("runDate"))
+
 ##
 setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
 setGeneric("bgindex", function(object, ...) standardGeneric("bgindex"))

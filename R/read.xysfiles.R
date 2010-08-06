@@ -1,12 +1,20 @@
 oligoReadXys <- function(cols, headdetails, filenames, out){
   if (length(cols) > 0){
     grpCols <- splitIndicesByLength(cols, ocSamples())
+    dates <- vector("list", length(grpCols))
     open(out)
-    for (theCols in grpCols)
-      out[, theCols] <- .Call("R_read_xys_files", filenames[theCols], FALSE)[["intensities"]]
+    i <- 1
+    for (theCols in grpCols){
+        tmp <- .Call("R_read_xys_files", filenames[theCols], FALSE)
+        out[, theCols] <- tmp[["intensities"]]
+        dates[[i]] <- tmp[["date"]]
+        rm(tmp)
+        i <- i+1
+    }
     close(out)
-    rm(grpCols, out)
+    rm(grpCols, out, i)
     gc()
+    return(unlist(dates))
   }
   TRUE
 }
@@ -27,16 +35,18 @@ smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
     intensityFile <- filename(tmpExprs)
     
     samplesByNode <- splitIndicesByNode(1:length(filenames))
-    ocLapply(samplesByNode, oligoReadXys, NULL, filenames, tmpExprs, neededPkgs="oligo")
+    datetime <- ocLapply(samplesByNode, oligoReadXys, NULL, filenames,
+                         tmpExprs, neededPkgs="oligo")
+    datetime <- unlist(datetime)
   }else{
     intensityFile <- NA_character_
     tmp <- .Call("R_read_xys_files", filenames, verbose)
     tmpExprs <- tmp[["intensities"]]
     datetime <- tmp[["date"]]
     rm(tmp)
-    dimnames(tmpExprs) <- list(as.character(1:nrow(tmpExprs)), sampleNames)
   }
-  return(list(intensityFile=intensityFile, exprMatrix=tmpExprs))
+  dimnames(tmpExprs) <- list(as.character(1:nrow(tmpExprs)), sampleNames)
+  return(list(intensityFile=intensityFile, exprMatrix=tmpExprs, datetime=datetime))
 }
 
 
@@ -96,6 +106,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   results <- smartReadXYS(filenames, sampleNames)
   tmpExprs <- results[["exprMatrix"]]
   intensityFile <- results[["intensityFile"]]
+  datetime <- results[["datetime"]]
   rm(results)
   
   arrayType <- kind(get(pkgname))
@@ -112,15 +123,15 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(exprs=tmpExprs)
   if (missing(phenoData))
-    phenoData <- basicPhenoData(tmpExprs, filenames)
+      phenoData <- basicPhData1(tmpExprs)
   slot(out, "phenoData") <- phenoData
   rm(phenoData)
   if (missing(featureData))
-    featureData <- basicFeatureData(tmpExprs)
+      featureData <- basicAnnotatedDataFrame(tmpExprs, TRUE)
   slot(out, "featureData") <- featureData
   rm(featureData)
   if (missing(protocolData))
-    protocolData <- basicProtocolData(tmpExprs)
+      protocolData <- basicPData(tmpExprs, filenames, datetime)
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Nimblegen"
@@ -168,10 +179,12 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   results <- smartReadXYS(channel1, sampleNames)
   channel1Intensities <- results[["exprMatrix"]]
   intensityFile1 <- results[["intensityFile"]]
+  datetime1 <- results[["datetime"]]
   rm(results)
   results <- smartReadXYS(channel2, sampleNames)
   channel2Intensities <- results[["exprMatrix"]]
   intensityFile2 <- results[["intensityFile"]]
+  datetime2 <- results[["datetime"]]
   rm(results)
 
   theClass <- "TilingFeatureSet"
@@ -179,25 +192,25 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   slot(out, "assayData") <- assayDataNew(channel1=channel1Intensities,
                                          channel2=channel2Intensities)
   if (missing(phenoData))
-    phenoData <- basicPhenoData2(channel1Intensities,
-                                 channel2Intensities,
-                                 channel1, channel2)
+      phenoData <- basicPhData2(channel1Intensities,
+                                channel2Intensities,
+                                channel1, channel2)
   slot(out, "phenoData") <- phenoData
   rm(phenoData)
   if (missing(featureData))
-    featureData <- basicFeatureData(channel1Intensities)
+      featureData <- basicAnnotatedDataFrame(channel1Intensities, TRUE)
   slot(out, "featureData") <- featureData
   rm(featureData)
   if (missing(protocolData))
-    protocolData <- basicProtocolData(channel1Intensities)
+      protocolData <- basicPData2(channel1Intensities,
+                               channel2Intensities,
+                               channel1, channel2,
+                               datetime1, datetime2)
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Nimblegen"
   slot(out, "annotation") <- pkgname
   slot(out, "intensityFile") <- c(intensityFile1, intensityFile2)
-  if (validObject(out)){
+  if (validObject(out))
     return(out)
-  }else{
-    stop("Resulting object is invalid.")
-  }
 }

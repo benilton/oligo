@@ -1,3 +1,10 @@
+setMethod("runDate", "FeatureSet",
+          function(object){
+              prD <- protocolData(object)
+              idx <- grep("dates", varLabels(prD))
+              pData(prD)[, idx]
+          })
+
 ## testing
 setGeneric("intensity",
            function(object)

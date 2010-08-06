@@ -16,6 +16,15 @@ BUG FIXES
     o Fixed bugs in image / bg / bgindex / bgSequence
     for Exon and Gene arrays (due to changes in annotation)
 
+    o Added date/time of scan (for XYS/CEL files) to the 
+    protocolData slot. For 1 channel applications, the field
+    is called 'dates'; for 2 channel apps, there are 2 fields:
+    'dates1' and 'dates2'
+
+NEW FEATURES
+
+    o New method, runDate(), to extract scan dates from
+    FeatureSet objects
 
 CHANGES IN VERSION 1.11
 -----------------------
