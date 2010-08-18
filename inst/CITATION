@@ -1,0 +1,14 @@
+citEntry(entry = "Article",
+         "author" = "Benilton S Carvalho and Rafael A. Irizarry",
+         "title" = "A Framework for Oligonucleotide Microarray Preprocessing",
+         journal = "Bioinformatics",
+         volume = "",
+         number = "",
+         year = "2010",
+         issn = "1367-4803",
+         pages = "",
+         doi = "http://dx.doi.org/10.1093/bioinformatics/btq431",
+         publisher = "Oxford University Press",
+         address = "Oxford, UK",
+         textVersion = "Carvalho B. S., and Irizarry, R. A. 2004. A Framework for Oligonucleotide Microarray Preprocessing. Bioinformatics (Ahead of Print, 05 Aug 2010)."
+) 

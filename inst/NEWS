@@ -5,6 +5,8 @@ USER VISIBLE CHANGES
 
     o Added support to read gzipped XYS files directly.
 
+    o Added information for citation.
+
 BUG FIXES
 
     o Fixed bug in boxplot / hist / MAplot
