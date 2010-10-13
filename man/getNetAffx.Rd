@@ -1,6 +1,6 @@
 \name{getNetAffx}
 \alias{getNetAffx}
-\name{getNetAffx-methods}
+\alias{getNetAffx-methods}
 \alias{getNetAffx,ExpressionSet-method}
 \title{NetAffx Biological Annotations}
 
