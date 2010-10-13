@@ -1,0 +1,28 @@
+%% Standard header for documents
+%% involving R and LaTeX
+%% By Benilton Carvalho (2010)
+
+%% R stuff to use in LaTeX
+\newcommand{\R}{{\textsf{R}}}
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\term}[1]{{\emph{#1}}}
+\newcommand{\Rpackage}[1]{\textsf{#1}}
+\newcommand{\Rfunction}[1]{\texttt{#1}}
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\textit{#1}}}
+\newcommand{\Rfunarg}[1]{{\textit{#1}}}
+
+\usepackage{graphicx, setspace, Sweave, amsfonts, amsmath, multirow, hyperref, amssymb, rotating, subfigure, color}
+\usepackage[authoryear,round]{natbib}
+\usepackage[margin=1in]{geometry}
+
+%% Double spacing
+\doublespacing
+
+%% Format for Sinput/Soutput/Scode
+\definecolor{midnightblue}{rgb}{0.098,0.098,0.439}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl, baselinestretch=1, formatcom=\color{midnightblue}}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{baselinestretch=1, formatcom=\color{midnightblue}}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontshape=sl, baselinestretch=1}
+\fvset{listparameters={\setlength{\topsep}{0pt}}}

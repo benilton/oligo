@@ -37,7 +37,7 @@ oligoReadCels <- function(cols, headdetails, filenames, out){
       out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
                               FALSE, FALSE, headdetails[[1]],
                               headdetails[[2]], FALSE, PACKAGE="affyio")
-      dates[[i]] <- sapply(filenames(theCols), getCelDateTime)
+      dates[[i]] <- sapply(filenames[theCols], getCelDateTime)
       i <- i + 1
   }
     close(out)

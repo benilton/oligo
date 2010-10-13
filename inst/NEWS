@@ -12,6 +12,8 @@ USER VISIBLE CHANGES
 
     o Reading in uncompressed XYS files is much faster than in 1.12.2.
 
+    o Added vignette for Exon/Gene ST arrays (rma and NetAffx annot)
+
 BUG FIXES
 
     o Fixed bug in boxplot / hist / MAplot

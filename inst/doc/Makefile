@@ -1,4 +1,4 @@
-all: overview nimbleexpr affysnp experimental clean
+all: overview nimbleexpr affysnp experimental exongene clean
 
 overview: V1Overview.tex
 	cp -p ../scripts/V1Overview.pdf .
@@ -11,6 +11,9 @@ affysnp: V3AffySnpGenotype.tex
 
 experimental: V4Experimental.tex
 	cp -p ../scripts/V4Experimental.pdf .
+
+exongene: V4Experimental.tex
+	cp -p ../scripts/V5ExonGene.pdf .
 
 clean:
 	$(RM) -f *.out *.bbl *.log *.aux *.blg *.brf *.toc *.tex

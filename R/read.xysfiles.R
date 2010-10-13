@@ -205,8 +205,7 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
                                          channel2=channel2Intensities)
   if (missing(phenoData))
       phenoData <- basicPhData2(channel1Intensities,
-                                channel2Intensities,
-                                channel1, channel2)
+                                channel2Intensities)
   slot(out, "phenoData") <- phenoData
   rm(phenoData)
   if (missing(featureData))
