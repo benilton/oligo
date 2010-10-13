@@ -1,4 +1,4 @@
-CHANGES IN VERSION 1.13
+CHANGES IN VERSION 1.14
 -----------------------
 
 USER VISIBLE CHANGES
@@ -6,6 +6,9 @@ USER VISIBLE CHANGES
     o Added support to read gzipped XYS files directly.
 
     o Added information for citation.
+
+    o Added getNetAffx method to retrieve NetAffx annotation for
+    Exon ST and Gene ST arrays.
 
 BUG FIXES
 

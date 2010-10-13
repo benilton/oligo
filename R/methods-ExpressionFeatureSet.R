@@ -107,7 +107,7 @@ setMethod("rma", "ExpressionFeatureSet",
             out <- new("ExpressionSet")
             slot(out, "assayData") <- assayDataNew(exprs=exprs)
             slot(out, "phenoData") <- phenoData(object)
-            slot(out, "featureData") <- basicFeatureData(exprs)
+            slot(out, "featureData") <- basicAnnotatedDataFrame(exprs, byrow=TRUE)
             slot(out, "protocolData") <- protocolData(object)
             slot(out, "annotation") <- slot(object, "annotation")
             if (validObject(out)){
@@ -116,3 +116,28 @@ setMethod("rma", "ExpressionFeatureSet",
               stop("Resulting object is invalid.")
             }
           })
+
+
+setMethod("getNetAffx", "ExpressionSet",
+          function(object, type="probeset"){
+              type <- match.arg(type, c("probeset", "transcript"))
+              fname <- ifelse(type == "probeset",
+                              "Probeset",
+                              "Transcript")
+              fname <- paste("netaffx", fname, ".rda", sep="")
+              fname <- file.path(system.file("extdata", package=annotation(object)),
+                                 fname)
+
+              if (!file.exists(fname))
+                  stop("NetAffx Annotation not available in '",
+                       annotation(object), "'. Consider using 'biomaRt'.")
+
+              obj <- load(fname)
+              fdata <- get(obj)
+              rm(list=obj)
+              fns <- featureNames(object)
+              theSet <- fdata[fns,]
+              featureNames(theSet) <- fns
+              theSet
+          })
+

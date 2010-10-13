@@ -574,4 +574,3 @@ setMethod("getPlatformDesign",
             return(get(pdn,pos=paste("package:",pdn,sep="")))
           })
 getPD <- getPlatformDesign
-

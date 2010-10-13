@@ -76,7 +76,7 @@ setMethod("rma", "ExonFeatureSet",
             out <- new("ExpressionSet")
             slot(out, "assayData") <- assayDataNew(exprs=theExprs)
             slot(out, "phenoData") <- phenoData(object)
-            slot(out, "featureData") <- basicFeatureData(theExprs)
+            slot(out, "featureData") <- basicAnnotatedDataFrame(theExprs, byrow=TRUE)
             slot(out, "protocolData") <- protocolData(object)
             slot(out, "annotation") <- slot(object, "annotation")
             if (validObject(out)){

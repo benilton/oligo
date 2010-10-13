@@ -323,9 +323,8 @@ basicPhData1 <- function(mat){
   return(phenoData)
 }
 
-basicPhData2 <- function(mat1, mat2, filenames1, filenames2){
-  stopifnot(identical(colnames(mat1), colnames(mat2)),
-            length(filenames1) == length(filenames2))
+basicPhData2 <- function(mat1, mat2){
+  stopifnot(identical(colnames(mat1), colnames(mat2)))
   pdd <- data.frame(index=1:ncol(mat1))
   vmd <- data.frame(labelDescription=c("Index"),
                     channel=factor("_ALL_",
