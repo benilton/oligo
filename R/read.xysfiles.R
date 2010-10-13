@@ -1,11 +1,15 @@
-oligoReadXys <- function(cols, headdetails, filenames, out){
+oligoReadXys <- function(cols, headdetails, filenames, out, compressed){
   if (length(cols) > 0){
     grpCols <- splitIndicesByLength(cols, ocSamples())
     dates <- vector("list", length(grpCols))
     open(out)
     i <- 1
     for (theCols in grpCols){
-        tmp <- .Call("R_read_xys_files", filenames[theCols], FALSE)
+        if (compressed){
+            tmp <- .Call("R_read_gzxys_files", filenames[theCols], FALSE)
+        }else{
+            tmp <- .Call("R_read_xys_files", filenames[theCols], FALSE)
+        }
         out[, theCols] <- tmp[["intensities"]]
         dates[[i]] <- tmp[["date"]]
         rm(tmp)
@@ -22,6 +26,10 @@ oligoReadXys <- function(cols, headdetails, filenames, out){
 
 smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
   ## this runs on the master node
+
+    ## testing for compression
+    ## doing only for first file
+    compressed <- rawToChar(readBin(filenames[1], "raw", 2)) == '\037\x8b'
   if (isPackageLoaded("ff")){
     ## set filename here and location?
 
@@ -36,11 +44,15 @@ smartReadXYS <- function(filenames, sampleNames, verbose=TRUE){
     
     samplesByNode <- splitIndicesByNode(1:length(filenames))
     datetime <- ocLapply(samplesByNode, oligoReadXys, NULL, filenames,
-                         tmpExprs, neededPkgs="oligo")
+                         tmpExprs, compressed, neededPkgs="oligo")
     datetime <- unlist(datetime)
   }else{
     intensityFile <- NA_character_
-    tmp <- .Call("R_read_xys_files", filenames, verbose)
+    if (compressed){
+        tmp <- .Call("R_read_gzxys_files", filenames, verbose)
+    }else{
+        tmp <- .Call("R_read_xys_files", filenames, verbose)
+    }
     tmpExprs <- tmp[["intensities"]]
     datetime <- tmp[["date"]]
     rm(tmp)

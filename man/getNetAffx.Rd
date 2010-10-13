@@ -3,10 +3,6 @@
 \alias{getNetAffx-methods}
 \alias{getNetAffx,ExpressionSet-method}
 \title{NetAffx Biological Annotations}
-
-\title{
-  NetAffx Biological Annotations
-}
 \description{
   Gets NetAffx Biological Annotations saved in the annotation package
   (Exon and Gene ST Affymetrix arrays).

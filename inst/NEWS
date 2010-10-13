@@ -10,6 +10,8 @@ USER VISIBLE CHANGES
     o Added getNetAffx method to retrieve NetAffx annotation for
     Exon ST and Gene ST arrays.
 
+    o Reading in uncompressed XYS files is much faster than in 1.12.2.
+
 BUG FIXES
 
     o Fixed bug in boxplot / hist / MAplot
