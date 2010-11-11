@@ -5,7 +5,7 @@ Author: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>, Rafael A. Irizarry 
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
 Depends: R (>= 2.11.0),
          oligoClasses (>= 1.9.41)
-Imports: affyio (>= 1.15.2),
+Imports: affyio (>= 1.19.1),
          affxparser (>= 1.17.3),
          Biobase (>= 2.7.3),
          DBI (>= 0.2-4),

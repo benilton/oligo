@@ -191,3 +191,102 @@ read.celfiles2 <- function(channel1, channel2, pkgname, phenoData,
     stop("Resulting object is invalid.")
   }
 }
+
+## FOR AXIOM
+read.mc.celfiles <- function( ..., filenames, pkgname, phenoData,
+                             featureData, experimentData, protocolData,
+                             notes, verbose=TRUE, sampleNames,
+                             rm.mask=FALSE, rm.outliers=FALSE,
+                             rm.extra=FALSE, checkType=TRUE){
+    ## Very first implementation
+    ## not memory efficient
+    
+    ## add protocolData with scandate
+    filenames <- getFilenames(filenames=filenames, ...)
+    checkValidFilenames(filenames)
+
+    ## check type...
+    ## original fails because we cant read header yet
+    ## if (checkType)
+    ##     stopifnot(checkChipTypes(filenames, verbose, "affymetrix",
+    ##                              TRUE))
+
+    ## read all files:
+    allCels <- lapply(filenames, affyio::read.celfile,
+                      intensity.means.only=TRUE)
+
+    if (checkType){
+        chiptype <- unique(sapply(allCels, function(x) x[['HEADER']][['cdfName']]))
+        stopifnot(length(chiptype) == 1)
+    }
+    
+    ## Read in the first Array details
+    ## chiptype <- getCelChipType(filenames[1], TRUE)
+    
+    if (missing(pkgname))
+        pkgname <- cleanPlatformName(chiptype)
+    
+    if (requireAnnotation(pkgname, verbose=verbose)){
+        if (verbose)
+            message("Platform design info loaded.")
+    }else{
+        stop("The annotation package, ", pkgname, ", could not be loaded.")
+    }
+    
+    ## headdetails <- .Call("ReadHeader", as.character(filenames[1]),
+    ##                      PACKAGE="affyio")
+    
+    if (missing(sampleNames))
+        sampleNames <- basename(filenames)
+    
+    ## results <- smartReadCEL(filenames, sampleNames, headdetails=headdetails)
+    ## tmpExprs <- results[["exprMatrix"]]
+    ## intensityFile <- results[["intensityFile"]]
+    intensityFile1 <- ""
+    intensityFile2 <- ""
+    ## datetime <- results[["datetime"]]
+    ## rm(results)
+    channel1 <- sapply(allCels, function(x) x[['INTENSITY']][[1]][['MEAN']])
+    channel2 <- sapply(allCels, function(x) x[['INTENSITY']][[2]][['MEAN']])
+    datetime <- sapply(allCels, function(x) x[['HEADER']][['DatHeader']])
+    rm(allCels)
+    colnames(channel1) <- colnames(channel2) <- sampleNames
+    rownames(channel1) <- rownames(channel2) <- 1:nrow(channel1)
+    
+    arrayType <- kind(get(pkgname))
+    theClass <- switch(arrayType,
+                       tiling="TilingFeatureSet",
+                       expression="ExpressionFeatureSet",
+                       SNP="SnpFeatureSet",
+                       SNPCNV="SnpCnvFeatureSet",
+                       exon="ExonFeatureSet",
+                       gene="GeneFeatureSet",
+                       stop("Unknown array type: ", arrayType))
+  
+    out <- new(theClass)
+    slot(out, "assayData") <- assayDataNew(channel1=channel1, channel2=channel2)
+
+
+
+    if (missing(phenoData))
+        phenoData <- basicPhData2(channel1, channel2)
+    slot(out, "phenoData") <- phenoData
+    rm(phenoData)
+    if (missing(featureData))
+        featureData <- basicAnnotatedDataFrame(channel1, TRUE)
+    slot(out, "featureData") <- featureData
+    rm(featureData)
+    if (missing(protocolData))
+        protocolData <- basicPData2(channel1, channel2, filenames,
+                                    filenames, datetime, datetime)
+    slot(out, "protocolData") <- protocolData
+    rm(protocolData)
+    slot(out, "manufacturer") <- "Affymetrix"
+    slot(out, "annotation") <- pkgname
+    slot(out, "intensityFile") <- c(intensityFile1, intensityFile2)
+    if (validObject(out)){
+        return(out)
+    }else{
+        stop("Resulting object is invalid.")
+    }
+}
