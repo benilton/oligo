@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
-\section{Changes in series 1.15.x}{
+\section{Changes in series 1.15}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
       \item Using NEWS.Rd
