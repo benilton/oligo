@@ -1,3 +1,4 @@
+- add PLM to LDS and parallel
 - improve documentation
 - add examples, so package is tested whenever it's built and modifications do not break current code
 - add support for exon/rma and gene/rma (filtering + summarization)

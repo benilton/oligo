@@ -7,6 +7,15 @@
       \item Using NEWS.Rd
     }
   }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New summarization methods are available: PLM, PLMr, PLMrr
+  and PLMrc. These are implemented in the basicPLM function and also
+  available through the summarize() interface (method=c('plm', 'plmr',
+  'plmrr', 'plmrc')), but yet to be extended to large datasets and to be
+  parallelized.
+    }
+  }
 }
 
 \section{Changes in version 1.14}{

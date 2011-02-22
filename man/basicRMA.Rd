@@ -2,7 +2,7 @@
 \Rdversion{1.1}
 \alias{basicRMA}
 \title{
-  Simplified Interface to RMA
+  Simplified interface to RMA.
 }
 \description{
   Simple interface to RMA.
@@ -41,10 +41,10 @@ basicRMA(pmMat, pnVec, normalize = TRUE, background = TRUE, bgversion = 2, destr
 }
 \examples{
 set.seed(1)
-pms <- matrix(rnorm(1000), nc=20)
+pms <- 2^matrix(rnorm(1000), nc=20)
 colnames(pms) <- paste("sample", 1:20, sep="")
 pns <- rep(letters[1:10], each=5)
-res <- basicRMA(pms, pns, length(unique(pns)), TRUE, TRUE)
+res <- basicRMA(pms, pns, TRUE, TRUE)
 res[, 1:3]
 }
 \keyword{manip}

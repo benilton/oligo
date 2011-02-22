@@ -295,15 +295,21 @@ basicMedianPolishBO <- function(psToSumm, inObj, outObj, probes,
 }
 
 setMethod("summarize", "matrix",
-          function(object, probes=rownames(object), method="medianpolish", verbose=TRUE){
+          function(object, probes=rownames(object), method='medianpolish', verbose=TRUE){
             stopifnot(nrow(object) == length(probes))
-            method <- match.arg(method, "medianpolish")
+            method <- match.arg(method, summarizationMethods())
             if (method == "medianpolish"){
               return(basicRMA(object, pnVec=probes, normalize=FALSE,
                               background=FALSE, verbose=verbose))
+            } else {
+                ## all PLM methods plm / plmr / plmrr / plmrc
+                ## note that the summaries will be computed on log2(object)
+                return(basicPLM(object, pnVec=probes, normalize=FALSE,
+                                background=FALSE, method=method, verbose=verbose))
             }
           })
 
+## add PLM to ff_matrix
 setMethod("summarize", "ff_matrix",
           function(object, probes=rownames(object), method="medianpolish", verbose=TRUE){
             stopifnot(nrow(object) == length(probes))

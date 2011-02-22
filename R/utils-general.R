@@ -402,3 +402,41 @@ plotM <- function(x, snp, ...){
   plot(correctedM, ...)
   invisible(correctedM)
 }
+
+
+## PLM base
+basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
+                     transfo=log2, method=c('plm', 'plmr', 'plmrr', 'plmrc'),
+                     verbose=TRUE){
+    method <- match.arg(method)
+    funPLM <- switch(method,
+                     plm=rcModelPLM,
+                     plmr=rcModelPLMr,
+                     plmrr=rcModelPLMrr,
+                     plmrc=rcModelPLMrc)
+    if (background)
+        pmMat <- backgroundCorrect(pmMat)
+    if (normalize)
+        pmMat <- normalize(pmMat)
+    groups <- split(1:nrow(pmMat), pnVec)
+    nc <- ncol(pmMat)
+    if (verbose) message('Summarizing... ', appendLF=FALSE)
+    summaries <- lapply(groups,
+                        function(i, M, nc=ncol(M), fun){
+                            res <- fun(M[i,,drop=FALSE])
+                            list(Estimates=res[['Estimates']][1:nc],
+                                 StdErrors=res[['StdErrors']][1:nc],
+                                 Residuals=res[['Residuals']])
+                        }, transfo(pmMat), nc, funPLM)
+    if (verbose) message('OK')
+    rm(groups, nc)
+    estimates <- do.call(rbind, lapply(summaries, '[[', 'Estimates'))
+    stderrors <- do.call(rbind, lapply(summaries, '[[', 'StdErrors'))
+    residuals <- do.call(rbind, lapply(summaries, '[[', 'Residuals'))
+    rm(summaries)
+    colnames(estimates) <- colnames(stderrors) <- colnames(residuals) <- colnames(pmMat)
+    list(Estimates=estimates, StdErrors=stderrors, Residuals=residuals)
+}
+
+summarizationMethods <- function()
+    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc')

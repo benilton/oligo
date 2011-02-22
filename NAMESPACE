@@ -51,7 +51,8 @@ importFrom(oligoClasses, list.celfiles, requireAnnotation,
 
 importFrom(preprocessCore, normalize.quantiles,
            normalize.quantiles.determine.target,
-           normalize.quantiles.use.target, rma.background.correct)
+           normalize.quantiles.use.target, rma.background.correct,
+           rcModelPLM, rcModelPLMr, rcModelPLMrr, rcModelPLMrc)
 
 importFrom(splines, ns)
 
@@ -74,7 +75,7 @@ export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        sequenceDesignMatrix, list.xysfiles, readSummaries,
        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
        read.celfiles2, basicRMA, darkColors, seqColors,
-       getAffinitySplineCoefficients, getBaseProfile)
+       getAffinitySplineCoefficients, getBaseProfile, basicPLM)
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
