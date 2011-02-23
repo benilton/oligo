@@ -1,0 +1,22 @@
+* Documentation
+** Improve documentation
+** Use oligoData more often on documentation
+* Preprocessing
+** Parallel version of PLM
+** Add backgroundCorrect for FeatureSet objects
+** Add normalize for FeatureSet objects
+** Check accuracy of bgCorrect with 'mas' - compare against 'affy'
+* Testing
+** Use unit tests
+* Downstream support
+** Add filtering and summarization options (eg, exon/rma and gene/rma)
+** Add crlmm pipeline from SnpFeatureSet (snprma is ready, under snprma2)
+* Infrastructure
+** Add scanDate to protocolData (check affy)
+** Fix function for regular crlmm (instances of SnpQSet - replaced by AlleleSet - use bothStrands)
+** Add selectProbes
+*** by probeset name: include, exclude
+*** by type: pm/mm/bg/all
+*** selected fields: x/y/fix/fsetid/man_fsetid - meta_fsetid
+** Add subset argument to functions that may benefit from selectProbes()
+** Add oligo version to FeatureSet objs
