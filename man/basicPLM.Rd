@@ -51,9 +51,9 @@ pms <- 2^matrix(rnorm(1000), nc=20)
 colnames(pms) <- paste("sample", 1:20, sep="")
 pns <- rep(letters[1:10], each=5)
 res <- basicPLM(pms, pns, TRUE, TRUE)
-res[['Estimates']][, 1:3]
-res[['StdErrors']][, 1:3]
-res[['Residuals']][, 1:15]
+res[['Estimates']][1:4, 1:3]
+res[['StdErrors']][1:4, 1:3]
+res[['Residuals']][1:20, 1:3]
 }
 \keyword{manip}
 
