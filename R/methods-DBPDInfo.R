@@ -51,9 +51,19 @@ setMethod("probeNames", "DBPDInfo",
           function(object, subset=NULL) {
             if (!is.null(subset))
               warning("Subset not implemented (yet). Returning everything.")
-            sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
-            tmp <- dbGetQuery(db(object), sql)
-            tmp[order(tmp[["fid"]], tmp[["man_fsetid"]]), "man_fsetid"]
+            ## exon/gene arrays don't have a man_fsetid (it's actually
+            ## fsetid)
+            hasMFSID <- 'man_fsetid' %in% dbListFields(db(object), 'featureSet')
+            if (hasMFSID){
+                sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+                tmp <- dbGetQuery(db(object), sql)
+                res <- tmp[order(tmp[["fid"]], tmp[["man_fsetid"]]), "man_fsetid"]
+            }else{
+                sql <- "select fsetid, fid from pmfeature"
+                tmp <- dbGetQuery(db(object), sql)
+                res <- tmp[order(tmp[["fid"]], tmp[["fsetid"]]), "fsetid"]
+            }
+            res
           })
 
 setMethod("pmSequence", "AffySNPPDInfo",

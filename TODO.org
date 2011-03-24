@@ -11,6 +11,7 @@
 * Downstream support
 ** Add filtering and summarization options (eg, exon/rma and gene/rma)
 ** Add crlmm pipeline from SnpFeatureSet (snprma is ready, under snprma2)
+** Add option to save genotype dosages
 * Infrastructure
 ** Add scanDate to protocolData (check affy)
 ** Fix function for regular crlmm (instances of SnpQSet - replaced by AlleleSet - use bothStrands)

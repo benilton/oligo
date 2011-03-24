@@ -84,4 +84,4 @@ export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
 exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
 export(plotM)
 
-## exportMethods(intensity, probesetNames)
+exportMethods(intensity, probesetNames)
