@@ -4,7 +4,7 @@
 \section{Changes in version 1.15}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
-      \item Using NEWS.Rd
+      \item Using NEWS.Rd;
     }
   }
   \subsection{NEW FEATURES}{

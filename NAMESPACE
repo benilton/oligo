@@ -8,7 +8,8 @@ useDynLib("oligo")
 
 importClassesFrom(Biobase, ExpressionSet)
 
-importClassesFrom(methods, array, matrix)
+importClassesFrom(methods, array, matrix, ANY, character, integer,
+                  missing, numeric)
 
 importClassesFrom(oligoClasses, AffySNPPDInfo, DBPDInfo,
                   ExonFeatureSet, ExpressionFeatureSet,
@@ -17,9 +18,9 @@ importClassesFrom(oligoClasses, AffySNPPDInfo, DBPDInfo,
                   TilingPDInfo)
 
 importMethodsFrom(Biobase, annotation, "annotation<-", channelNames,
-                  combine, experimentData, exprs, featureData,
+                  combine, description, experimentData, exprs, featureData,
                   "featureData<-", featureNames, "featureNames<-",
-                  "notes<-", pData, phenoData, "phenoData<-", preproc,
+                  "notes<-", pData, "pData<-", phenoData, "phenoData<-", preproc,
                   "preproc<-", protocolData, rowMedians, sampleNames,
                   "sampleNames<-", varMetadata)
 
@@ -85,3 +86,8 @@ exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
 export(plotM)
 
 exportMethods(intensity, probesetNames)
+
+## PLM
+export("fitPLM", "NUSE", "RLE")
+exportMethods("image")
+exportClasses(PLMset)

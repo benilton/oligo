@@ -143,29 +143,6 @@ setMethod("boxplot", signature(x="FeatureSet"),
             invisible(res)
           })
   
-setMethod("boxplot", signature(x="ExpressionSet"),
-          function(x, which, transfo=identity, nsample=10000, ...){
-            stopifnot(is.function(transfo))
-            if(!missing(which)) warning("Argument 'which' ignored.")
-            if (nrow(x) > nsample){
-              idx <- sort(sample(nrow(x), nsample))
-            }else{
-              idx <- 1:nrow(x)
-            }
-            toPlot <- transfo(exprs(x[idx,]))
-            toPlot <- as.data.frame(toPlot)
-            dots <- list(...)
-            dots[["x"]] <- toPlot
-            rm(toPlot)
-            if (is.null(dots[["col"]]))
-              dots[["col"]] <- darkColors(ncol(x))
-            if (is.null(dots[["range"]]))
-              dots[["range"]] <- 0
-            if (is.null(dots[["main"]]))
-                dots[["main"]] <- "exprs"
-            do.call("boxplot", dots)
-          })
-
 setMethod("image", signature(x="FeatureSet"),
           function(x, which, transfo=log2, ...){
             if (missing(which)) which <- 1:ncol(x)
@@ -303,39 +280,16 @@ setMethod("hist", "FeatureSet",
             invisible(tmp)
           })
 
-setMethod("hist", "ExpressionSet",
-          function(x, transfo=identity, nsample=10000, ...){
-            stopifnot(is.function(transfo))
-            if (nrow(x) > nsample){
-              idx <- sort(sample(nrow(x), nsample))
-            }else{
-              idx <- 1:nrow(x)
-            }
-            tmp <- transfo(exprs(x[idx,]))
-            res <- matDensity(tmp)
-
-            dots <- list(...)
-            if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
-            if (is.null(dots[["xlab"]])) dots[["xlab"]] <- "log-intensity"
-            if (is.null(dots[["xlim"]])) dots[["xlim"]] <- range(res[["x"]])
-            if (is.null(dots[["ylim"]])) dots[["ylim"]] <- range(res[["y"]])
-            if (is.null(dots[["col"]]))
-              dots[["col"]] <- darkColors(ncol(x))
-            if (is.null(dots[["type"]])) dots[["type"]] <- "l"
-
-            dots[["x"]] <- res[["x"]]
-            dots[["y"]] <- res[["y"]]
-            do.call("matplot", dots)
-
-            invisible(res)
-          })
-
 setMethod("MAplot", "FeatureSet",
-          function(object, arrays=1:ncol(object), lowessPlot=FALSE, nsample=10000, ...){
+          function(object, arrays=1:ncol(object), lowessPlot=FALSE,
+                   smooth=TRUE, pairs=FALSE, nsample=10000, ...){
             if (length(arrays) > 1) par(ask=TRUE)
             chns <- channelNames(object)
             nchns <- length(chns)
-            if (nchns > 2) stop("Don't know how to handle more than 2 channels.")
+            if (pairs & nchns >= 2)
+                stop("Can't handle pairs on 2+ channels arrays.")
+            if (nchns > 2)
+                stop("Don't know how to handle more than 2 channels (yet).")
             if (nrow(object) > nsample){
               idx <- sort(sample(nrow(object), nsample))
             }else{
@@ -353,21 +307,34 @@ setMethod("MAplot", "FeatureSet",
             featureNames(small) <- featureNames(featureData(small))
             
             if (nchns == 1){
-              ref <- rowMedians(log2(exprs(small)))
-              for (i in arrays){
-                tmp <- log2(exprs(small[,i]))
-                dots[["x"]] <- (tmp+ref)/2
-                dots[["y"]] <- tmp-ref
-                dots[["main"]] <- sampleNames(small)[i]
-                do.call("plot", dots)
-                if (lowessPlot)
-                  lines(lowess(dots[["x"]], dots[["y"]]), col="red")
-              }
+                if (!pairs){
+                    ref <- rowMedians(log2(exprs(small)))
+                    for (i in arrays){
+                        tmp <- log2(exprs(small[,i]))
+                        dots[["x"]] <- (tmp+ref)/2
+                        dots[["y"]] <- tmp-ref
+                        dots[["main"]] <- sampleNames(small)[i]
+                        if (!smooth){
+                            do.call("plot", dots)
+                        }else{
+                            do.call("smoothScatter", dots)
+                        }
+                        if (lowessPlot)
+                            lines(lowess(dots[["x"]], dots[["y"]]), col="red")
+                    }
+                }else{
+                    stop("FIXME: Must implement pairs")
+                }
             }else if (nchns == 2){
               for (i in arrays){
                 dots[["x"]] <- (log2(exprs(channel(small, "channel1"))) + log2(exprs(channel(small, "channel1"))))/2
                 dots[["y"]] <-  log2(exprs(channel(small, "channel1"))) - log2(exprs(channel(small, "channel1")))
                 dots[["main"]] <- sampleNames(small)[i]
+                if (!smooth){
+                    do.call("plot", dots)
+                }else{
+                    do.call("smoothScatter", dots)
+                }
                 if (lowessPlot)
                   lines(lowess(dots[["x"]], dots[["y"]]), col="red")
               }
