@@ -5,25 +5,20 @@ setMethod("runDate", "FeatureSet",
               pData(prD)[, idx]
           })
 
-## testing
-setGeneric("intensity",
-           function(object)
-           standardGeneric("intensity"))
-
 setMethod("intensity", "FeatureSet",
           function(object)
               exprs(object))
 
-setGeneric("probesetNames",
-           function(object)
-           standardGeneric("probesetNames"))
+setReplaceMethod("intensity", signature(object="FeatureSet", value="matrix"),
+                 function(object, value){
+                   assayDataElementReplace(object, "exprs", value)
+                 })
 
 setMethod("probesetNames", "FeatureSet",
           function(object)
           unique(probeNames(object))
           )
           
-
 setMethod("backgroundCorrect", "FeatureSet",
           function(object, method="rma", copy=TRUE, verbose=TRUE, ...){
               method <- match.arg(method, c("rma", "mas"))

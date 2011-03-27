@@ -3,6 +3,7 @@
 \alias{boxplot-methods}
 \alias{boxplot,ExpressionSet-method}
 \alias{boxplot,FeatureSet-method}
+\alias{boxplot,PLMset-method}
 \title{Boxplot}
 \description{
   Boxplot for observed (log-)intensities in a FeatureSet-like object

@@ -2,6 +2,8 @@ setGeneric("getX", function(object, type) standardGeneric("getX"))
 setGeneric("getY", function(object, type) standardGeneric("getY"))
 setGeneric("bg", function(object, subset=NULL) standardGeneric("bg"))
 
+setGeneric("intensity", function(object) standardGeneric("intensity"))
+setGeneric("intensity<-", function(object, value) standardGeneric("intensity<-"))
 setGeneric("pm", function(object, subset=NULL, ...) standardGeneric("pm"))
 setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
 setGeneric("mm", function(object, subset=NULL) standardGeneric("mm"))
@@ -21,8 +23,8 @@ setGeneric("getContainer", function(object, probeType=c("pm", "bg")) standardGen
 
 setGeneric("runDate", function(object) standardGeneric("runDate"))
 
-##
 setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
+setGeneric("probesetNames", function(object) standardGeneric("probesetNames"))
 setGeneric("bgindex", function(object, ...) standardGeneric("bgindex"))
 setGeneric("pmindex", function(object, ...) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object, ...) standardGeneric("mmindex"))
@@ -58,7 +60,4 @@ setGeneric("normalizeToTarget",
            function(object, target, method="quantile", copy=TRUE, verbose=TRUE)
            standardGeneric("normalizeToTarget"))
 
-
-setGeneric("getNetAffx",
-           function(object, type="probeset")
-           standardGeneric("getNetAffx"))
+setGeneric("getNetAffx", function(object, type="probeset") standardGeneric("getNetAffx"))
