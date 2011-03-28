@@ -19,21 +19,6 @@ setMethod("probesetNames", "FeatureSet",
           unique(probeNames(object))
           )
           
-setMethod("backgroundCorrect", "FeatureSet",
-          function(object, method="rma", copy=TRUE, verbose=TRUE, ...){
-              method <- match.arg(method, c("rma", "mas"))
-              if (verbose) message("Background correcting... ",
-                                   appendLF=FALSE)
-              if (method == "rma"){
-                  pm(object) <- backgroundCorrect(pm(object), method="rma",
-                                                  copy=TRUE, verbose=FALSE)
-              }else if (method == "mas"){
-                  stop("Don't know what to do with ", class(object),
-                       " for MAS background correction")
-              }
-              object
-          })
-
 ## should geometry go to oligoClasses?
 ## or the opposite?
 setMethod("geometry", "FeatureSet",
@@ -51,6 +36,20 @@ setReplaceMethod("bg", signature(object="FeatureSet", value="matrix"),
                  function(object, value){
                    tmp <- exprs(object)
                    tmp[bgindex(object),] <- value
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
+
+setReplaceMethod("bg", signature(object="FeatureSet", value="ff_matrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   open(tmp)
+                   open(value)
+                   finalizer(value) <- "delete"
+                   for (i in 1:ncol(tmp))
+                       tmp[bgindex(object), i] <- value[, i]
+                   close(value)
+                   close(tmp)
+                   rm(value)
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
@@ -74,6 +73,21 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
+setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   open(tmp)
+                   open(value)
+                   finalizer(value) <- "delete"
+                   nc <- ncol(tmp)
+                   for (i in 1:nc)
+                       tmp[pmindex(object), i] <- value[,i]
+                   close(value)
+                   close(tmp)
+                   rm(value)
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
+
 setMethod("mm", "FeatureSet",
           function(object, subset=NULL){
             exprs(object)[mmindex(object, subset=subset),] ## subset 
@@ -85,7 +99,22 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
                    tmp[mmindex(object),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
-		 
+
+setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
+                 function(object, value){
+                   tmp <- exprs(object)
+                   open(tmp)
+                   open(value)
+                   finalizer(value) <- "delete"
+                   nc <- ncol(tmp)
+                   for (i in 1:nc)
+                       tmp[mmindex(object), i] <- value[,i]
+                   close(value)
+                   close(tmp)
+                   rm(value)
+                   assayDataElementReplace(object, "exprs", tmp)
+                 })
+
 setMethod("pmSequence", "FeatureSet",
           function(object) pmSequence(getPD(object)))
 

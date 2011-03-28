@@ -100,71 +100,62 @@
 ###########################################################
 
 
-
-
-
-###
-###
 ### check the model and supplied constraint.type vector (or list)
 ### output a constraint.type vector 
-###
-
-verify.constraint.types <- function(model,constraint.type){
+verify.constraint.types <- function(model, constraint.type){
 
   if (!(is.vector(constraint.type) | is.list(constraint.type))){
     stop("constraint.type must be a vector or list.")
   }
   model.terms <- terms(model)
   ct.type <- NULL
-  if (!any(is.element(c("Default","default"),names(constraint.type)))){
-    cat("Warning: No default constraint specified. Assuming 'contr.treatment'.\n")
-    ct.type <- c(ct.type,"default"="contr.treatment")
+  nmsConstr <- tolower(names(constraint.type))
+  if (!is.element("default", nmsConstr)){
+      warning("No default constraint specified. Assuming 'contr.treatment'.")
+      ct.type <- c(ct.type, "default"="contr.treatment")
   }
 
-  if (length(names(constraint.type)) != length(constraint.type)){
+  if (length(nmsConstr) != length(constraint.type)){
     stop("constraint.type is incorrectly named\n")
   }
 
-  if (any(is.element("",names(constraint.type)))){
+  if (any(is.element("", nmsConstr))){
     stop("Some elements are not named in constraint.type")
   }
 
-  if (any(!is.element(constraint.type,c("contr.treatment","contr.sum")))){
+  if (any(!is.element(constraint.type, c("contr.treatment","contr.sum")))){
     stop("Constraints must be either 'contr.treatment' or 'contr.sum'")
   }
   
 
   if (is.list(constraint.type)){
-    constraint.type <- do.call(c,constraint.type)
+    constraint.type <- do.call(c, constraint.type)
   }
   
 
-  return(c(ct.type,constraint.type))
+  return(c(ct.type, constraint.type))
 
 }
 
 
 
 ##  verify.constraint.types(PM ~ -1 + probes + samples,c(blah="blah"))
-
-
-verify.variable.types <- function(model,variable.type){
+verify.variable.types <- function(model, variable.type){
 
   vt <- NULL
 
   if (!(is.vector(variable.type) | is.list(variable.type))){
     stop("variable.type must be a vector or list.")
   }
-  
-  if (!any(is.element(c("Default","default"),names(variable.type)))){
-    cat("Warning: No default variable type so assuming 'factor'\n")
-    vt <- c(vt,"default"="factor")
+  nmsVT <- tolower(names(variable.type))
+  if (!is.element("default", nmsVT)){
+      warning("No default variable type so assuming 'factor'.")
+      vt <- c(vt, "default"="factor")
   }
 
-  if (length(names(variable.type)) != length(variable.type)){
-    stop("variable.type is incorrectly named\n")
+  if (length(nmsVT) != length(variable.type)){
+    stop("variable.type is incorrectly named.")
   }
-
 
   if (is.list(variable.type)){
     variable.type <- do.call(c,variable.type)
@@ -178,22 +169,22 @@ verify.variable.types <- function(model,variable.type){
     stop("variable.type must be either 'factor' or 'covariate'")
   }
 
-  for (cur.vt in c("probes","probe.type","samples")){
-    if (is.element(cur.vt,names(variable.type))){
+  for (cur.vt in c("probes", "probe.type", "samples")){
+    if (is.element(cur.vt, nmsVT)){
       if (variable.type[cur.vt] == "covariate"){
         stop(cur.vt, " must not be specified as being a 'covariate'. It must be treated as 'factor'.")
       }
     }
   }
 
-  for (cur.vt in c("mm","MM","pm","PM"))
-    if (is.element(cur.vt,names(variable.type))){
+  for (cur.vt in c("mm", "pm"))
+    if (is.element(cur.vt, nmsVT)){
       if (variable.type[cur.vt] == "factor")
         stop(cur.vt," variable must be a 'covariate'.")
     }
 
   
-  return(c(vt,variable.type))
+  return(c(vt, variable.type))
 
 }
 
@@ -218,15 +209,22 @@ verify.model.param <- function(object,model,subset=NULL,model.param=list()){
     return (defaults)
   }
 
-  if (any(!is.element(names(model.param),c("trans.fn","se.type","psi.type","psi.k","max.its","init.method","weights.chip","weights.probe")))){
-    stop("model.param should only have items named: ,",paste("trans.fn","se.type","psi.type","psi.k","max.its","init.method","weights.chip","weights.probe",sep=", "))
+  nmMP <- c("trans.fn", "se.type", "psi.type", "psi.k", "max.its",
+            "init.method", "weights.chip", "weights.probe")
+  
+  if (any(!is.element(names(model.param), nmMP))){
+    stop("model.param should only have items named: ,",
+    paste("trans.fn", "se.type", "psi.type", "psi.k", "max.its",
+    "init.method", "weights.chip", "weights.probe", sep=", "))
   }
 
   
   for (item in names(model.param)){
     if (item == "trans.fn"){
-      if (!is.element(model.param[item][[1]],c("log2","loge","ln","log10","sqrt","cuberoot"))){
-        stop("trans.fn in model.param should be one of: ",paste("log2","loge","ln","log10","sqrt","cuberoot",sep=", "))
+      if (!is.element(model.param[item][[1]], c("log2", "loge", "ln",
+    "log10", "sqrt", "cuberoot"))){
+        stop("trans.fn in model.param should be one of: ",
+             paste("log2", "loge", "ln", "log10", "sqrt", "cuberoot", sep=", "))
       } else {
         defaults[item] <- model.param[item]
       }
@@ -432,7 +430,8 @@ verify.output.param <- function(output.param=list()){
 ###
 ### There are other rules governing what is and what is not a permissible model. Please see other documentation for those rules.
 
-PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment")){
+PLM.designmatrix3 <- function(object, model=PM ~ -1 + probes + samples,
+                              variable.type=c(default="factor"), constraint.type=c(default="contr.treatment")){
 
   ## a function for working out which constraints are applied to a named term
   ## note that "probes", "probe.type" have
@@ -567,7 +566,6 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   max.probe.type.trt.factor <- 0
   probe.type.levels <- list()
   probe.trt.factor <- rep(0,dim(intensity(object))[2])
-##  probe.trt.factor <- rep(0,dim(exprs(object))[2])
   max.probe.trt.factor <- 0
   probe.trt.levels <- list()
   ## now check to see what else we have in the model
@@ -928,12 +926,7 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
       the.frame <- as.data.frame(the.frame)
       colnames(the.frame) <- the.frame.names  
       
-      ##print(the.formula)
-      ##print(the.frame)
-                                        #print(as.list(ct))
-                                        #print(model.matrix(as.formula(the.formula),the.frame))
       chip.covariates <- model.matrix(as.formula(the.formula),the.frame)
-
         
       if (qr(chip.covariates)$rank < ncol(chip.covariates)){
         stop("chip-level effects appear to be singular: singular fits are not implemented in fitPLM")
@@ -974,22 +967,21 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   
   list(mmorpm.covariate=mmorpm.covariate,response.variable=response.variable,which.parameter.types=as.integer(which.parameter.types),strata=as.integer(strata),constraints=as.integer(constraints),probe.type.trt.factor=as.integer(probe.type.trt.factor),max.probe.type.trt.factor=max.probe.type.trt.factor,probe.type.levels=probe.type.levels,probe.trt.factor=as.integer(probe.trt.factor),max.probe.trt.factor=max.probe.trt.factor,probe.trt.levels=probe.trt.levels,chipcovariates =chip.covariates)
   
-
-
 }
 
 
 #PLM.designmatrix3(Dilution,model=MM ~ PM -1 + probes+ liver+scanner)
 #PLM.designmatrix3(Dilution,model=MM ~ PM -1 + probes+ probe.type:liver)
 
-verify.bg.param <- function(R.model, background.method,background.param = list()){
+verify.bg.param <- function(R.model, background.method, background.param = list()){
 
   bg.code <- get.background.code(background.method)
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
-  LESN.param <-list(baseline=0.25,theta=4)
+  bg.dens <- function(x){density(x, kernel="epanechnikov", n=2^14)}
+  LESN.param <-list(baseline=0.25, theta=4)
   LESN.param <- convert.LESN.param(LESN.param)
   
-  default.b.param <- list(type="separate",densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param,ideal=NULL)
+  default.b.param <- list(type="separate", densfun=body(bg.dens),
+                          rho=new.env(), lesnparam=LESN.param, ideal=NULL)
 
   if (R.model$response.variable == 0){
     response.variable <- "PMMM"
@@ -1005,7 +997,7 @@ verify.bg.param <- function(R.model, background.method,background.param = list()
     }
   }
 
-  if (is.element(as.character(response.variable),c("PMMM","pmmm"))){
+  if (is.element(as.character(response.variable),c("PMMM", "pmmm"))){
     if (length(names(background.param)) !=0){
       if (is.element(names(background.param),"type")){
         if (is.element(background.param["type"],c("pmonly","mmonly"))){
@@ -1060,24 +1052,27 @@ verify.bg.param <- function(R.model, background.method,background.param = list()
 }
 
 
-verify.norm.param <- function(R.model, normalize.method,normalize.param = list()){
-
+verify.norm.param <- function(R.model, normalize.method, normalize.param=list()){
 
   get.default.parameters <- function(normalize.method){
-
     if (normalize.method == "quantile"){
       default.n.param <- list(type="separate")
     } else if (normalize.method == "quantile.probeset"){
-      default.n.param <- list(type="separate",use.median=FALSE,use.log2=TRUE)
+      default.n.param <- list(type="separate", use.median=FALSE, use.log2=TRUE)
     } else if (normalize.method == "scaling"){
-      default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0,log.scalefactors=FALSE)
+      default.n.param <- list(type="separate", scaling.baseline=-4,
+                              scaling.trim=0.0, log.scalefactors=FALSE)
     } else if (normalize.method == "quantile.robust"){
-      default.n.param <- list(type="separate",use.median=FALSE,use.log2=FALSE,weights=NULL,remove.extreme = "variance", n.remove = as.integer(1))
+      default.n.param <- list(type="separate", use.median=FALSE,
+                              use.log2=FALSE, weights=NULL,
+                              remove.extreme="variance",
+                              n.remove=as.integer(1))
     }    
   }
 
 
-  validate.supplied.parameters <- function(normalize.method,supplied.parameters,defaults){
+  validate.supplied.parameters <- function(normalize.method,
+                                           supplied.parameters, defaults){
     if (!all(is.element(names(supplied.parameters),names(defaults)))){
       stop("At least one of the supplied normalization parameters is not known for this normalization method")
     }
@@ -1087,8 +1082,6 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
       stop("Supplied option",defaults["type"]," for 'type' is not valid")
     }
 
-
-      
     if (normalize.method == "quantile.probeset"){
       if (!is.logical(defaults[["use.median"]])){
         stop("use.median should be TRUE or FALSE")
@@ -1131,17 +1124,13 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
       } else if (!is.null(defaults[["weights"]])){
         stop("Problem with the supplied weights option. Doesn't look valid.")
       }
-
       
     }
     defaults
   }
 
 
-  
-  
-
-  oligoPLM.norm.methods <- c("quantile","scaling","quantile.probeset","quantile.robust")
+  oligoPLM.norm.methods <- c("quantile", "scaling", "quantile.probeset", "quantile.robust")
   
   if (!is.element(normalize.method,oligoPLM.norm.methods)){
     stop(paste("Don't know the normalization method",normalize.method,"Please use one of the known methods:","quantile","scaling","quantile.probeset","quantile.robust",sep=" "))
@@ -1182,16 +1171,13 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
   default.n.param
 }
 
-
-
 fitPLM <- function(object, model=PM ~ -1 + probes + samples,
                    variable.type=c(default="factor"),
                    constraint.type=c(default="contr.treatment"),
                    subset=NULL, background=TRUE, normalize=TRUE,
-                   background.method="RMA.2",normalize.method="quantile",
+                   background.method="RMA.2", normalize.method="quantile",
                    background.param=list(), normalize.param=list(),
-                   output.param=NULL,
-                   model.param=NULL,
+                   output.param=NULL, model.param=NULL,
                    verbosity.level=0){
 
   if (!is(object, "FeatureSet")) {
@@ -1205,9 +1191,6 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
   if (is.null(output.param)) output.param <- verify.output.param()
   if (is.null(model.param)) model.param <- verify.model.param(object, model)
   
-  b.param <- background.param
-  n.param <- normalize.param
-  
   variable.type <- verify.variable.types(model, variable.type)
   constraint.type <- verify.constraint.types(model, constraint.type)
 
@@ -1215,7 +1198,7 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
   modelparam <- verify.model.param(object, model, model.param=model.param)
   R.model <- PLM.designmatrix3(object, model, variable.type=variable.type, constraint.type=constraint.type)
 
-  background.param <- verify.bg.param(R.model, background.method, background.param = background.param)
+  background.param <- verify.bg.param(R.model, background.method, background.param=background.param)
   normalize.param <- verify.norm.param(R.model, normalize.method, normalize.param=normalize.param)
    
   if (!is.null(subset)){
@@ -1250,7 +1233,6 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
   pns <- pns[i]
   rm(i)
 
-  
   Fitresults <- .Call("R_rlm_PLMset_c",
                       pms, mms, pns,
                       length(unique(pns)),
@@ -1287,12 +1269,11 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
       ncol= geometry(object)[2],
       narrays=ncol(object),
       model.description = list(which.function="fitPLM",
-        preprocessing=list(bg.method=background.method,bg.param=background.param,
-          background=background,norm.method=normalize.method,
-          norm.param=normalize.param,normalize=normalize),
-        modelsettings =list(constraint.type=constraint.type,
-          variable.type=variable.type,model.param=modelparam),
-        outputsettings=output, R.model=R.model),
+      preprocessing=list(bg.method=background.method, bg.param=background.param,
+      background=background,norm.method=normalize.method,
+      norm.param=normalize.param,normalize=normalize),
+      modelsettings =list(constraint.type=constraint.type,
+      variable.type=variable.type,model.param=modelparam),
+      outputsettings=output, R.model=R.model),
       manufacturer=tolower(manufacturer(object)))
-
 }

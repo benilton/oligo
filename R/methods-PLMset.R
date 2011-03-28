@@ -99,28 +99,28 @@
 ###########################################################
 
 
-  #creating the PLMset object
+## creating the PLMset object
 
 setClass("PLMset",
            representation(probe.coefs="list",
                           se.probe.coefs="list",
-                          chip.coefs = "matrix",
-                          se.chip.coefs = "matrix",
-                          const.coefs = "matrix",
-                          se.const.coefs = "matrix",
+                          chip.coefs="matrix",
+                          se.chip.coefs="matrix",
+                          const.coefs="matrix",
+                          se.const.coefs="matrix",
                           cdfName="character",
                           nrow="numeric",
                           ncol="numeric",
                           model.description="list",
-                          model.call = "call",
+                          model.call="call",
                           weights="list",
                           residuals="list",
                           residualSE="matrix",
                           normVec="matrix", varcov="list",
-                          phenoData = "AnnotatedDataFrame",
-                          experimentData = "MIAME",
-                          annotation = "character",
-			  narrays = "numeric",
+                          phenoData="AnnotatedDataFrame",
+                          experimentData="MIAME",
+                          annotation="character",
+			  narrays="numeric",
                           manufacturer="character"),
            prototype=list(
              probe.coefs=list(),                           #matrix(nr=0,nc=0),
@@ -135,8 +135,8 @@ setClass("PLMset",
              residualSE=matrix(nr=0,nc=0),
              normVec=matrix(nr=0,nc=0),
              varcov=list(),
-             experimentData = new("MIAME"),
-             phenoData = new("AnnotatedDataFrame",
+             experimentData=new("MIAME"),
+             phenoData=new("AnnotatedDataFrame",
                dimLabels=c("sampleNames", "sampleColumns")),
              model.description=list(),
              annotation="",
@@ -464,8 +464,8 @@ setMethod("image", signature(x="PLMset"),
                 ## this line flips the matrix around so it is correct
                 weightmatrix <-as.matrix(rev(as.data.frame(weightmatrix)))
                 if (add.legend){
-                  layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                  par(mar = c(4, 4, 5, 3))
+                  layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                  par(mar=c(4, 4, 5, 3))
                 }
                 if( missing(main) ){
                   main.cur=sampleNames(x)[i]
@@ -476,10 +476,10 @@ setMethod("image", signature(x="PLMset"),
                       yaxt='n',main=main.cur,zlim=c(0,1))
                 ##title(sampleNames(x)[i])
                 if (add.legend){
-                  par(mar = c(4, 0, 5, 3))
-                  pseudoColorBar(seq(0,1,0.1), horizontal = FALSE, col = col.weights, main = "")
+                  par(mar=c(4, 0, 5, 3))
+                  pseudoColorBar(seq(0,1,0.1), horizontal=FALSE, col=col.weights, main="")
                   layout(1)
-                  par(mar = c(5, 4, 4, 2) + 0.1)
+                  par(mar=c(5, 4, 4, 2) + 0.1)
                 }
                 
               }
@@ -515,8 +515,8 @@ setMethod("image", signature(x="PLMset"),
                 residsmatrix<- as.matrix(rev(as.data.frame(residsmatrix)))
                 if (use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix)+1)
                   if(missing(main)){
@@ -531,10 +531,10 @@ setMethod("image", signature(x="PLMset"),
                           max(log2(abs(resid.range)+1))))
 
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1)),0.1), horizontal = FALSE, col = col.resids, main = "",log.ticks=TRUE)
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1)),0.1), horizontal=FALSE, col=col.resids, main="",log.ticks=TRUE)
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                   
                   
@@ -543,8 +543,8 @@ setMethod("image", signature(x="PLMset"),
                 } else {
                   
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   if(missing(main)){
                     main.cur=sampleNames(x)[i]
@@ -554,10 +554,10 @@ setMethod("image", signature(x="PLMset"),
                   image(residsmatrix,col=col.resids,xaxt='n',
                         yaxt='n',main=main.cur,zlim=c(-max(abs(resid.range)),max(abs(resid.range))))
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(abs(resid.range)),max(abs(resid.range)),0.1), horizontal = FALSE, col = col.resids, main = "")
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(-max(abs(resid.range)),max(abs(resid.range)),0.1), horizontal=FALSE, col=col.resids, main="")
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                 }
               }
@@ -580,8 +580,8 @@ setMethod("image", signature(x="PLMset"),
 
                 if (use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
                   if(missing(main)){
@@ -592,15 +592,15 @@ setMethod("image", signature(x="PLMset"),
                   image(residsmatrix,col=col.pos.resids,xaxt='n',
                         yaxt='n',main=main.cur,zlim=c(0,max(log2(pmax(resid.range,0)+1))))
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(0,max(log2(pmax(resid.range,0)+1)),0.1), horizontal = FALSE, col = col.pos.resids, main = "",log.ticks=TRUE)
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(0,max(log2(pmax(resid.range,0)+1)),0.1), horizontal=FALSE, col=col.pos.resids, main="",log.ticks=TRUE)
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                 } else {
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   if (missing(main)){
                     main.cur <- sampleNames(x)[i]
@@ -611,10 +611,10 @@ setMethod("image", signature(x="PLMset"),
                   image(residsmatrix,col=col.pos.resids,xaxt='n',
                         yaxt='n',main=main.cur,zlim=c(0,max(resid.range)))
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(0,max(resid.range),0.1), horizontal = FALSE, col = col.pos.resids, main = "")
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(0,max(resid.range),0.1), horizontal=FALSE, col=col.pos.resids, main="")
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                 }
               }
@@ -638,8 +638,8 @@ setMethod("image", signature(x="PLMset"),
 
                 if(use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
                   if(missing(main)){
@@ -650,16 +650,16 @@ setMethod("image", signature(x="PLMset"),
                   image(residsmatrix,col=col.neg.resids,xaxt='n',
                         yaxt='n',main=main.cur,zlim=c(-log2(abs(min(resid.range))+1),0))
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(log2(abs(pmin(resid.range,0))+1)),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "",log.ticks=TRUE)
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(-max(log2(abs(pmin(resid.range,0))+1)),0,0.1), horizontal=FALSE, col=col.neg.resids, main="",log.ticks=TRUE)
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                   
                 } else {
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                    par(mar = c(4, 4, 5, 3))
+                    layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                    par(mar=c(4, 4, 5, 3))
                   }
                   if(missing(main)){
                     main.cur <- sampleNames(x)[i]
@@ -669,10 +669,10 @@ setMethod("image", signature(x="PLMset"),
                   image(residsmatrix,col=col.neg.resids,xaxt='n',
                         yaxt='n',main=main.cur,zlim=c(-abs(min(resid.range)),0))
                   if (add.legend){
-                    par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(min(resid.range),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "")
+                    par(mar=c(4, 0, 5, 3))
+                    pseudoColorBar(seq(min(resid.range),0,0.1), horizontal=FALSE, col=col.neg.resids, main="")
                     layout(1)
-                    par(mar = c(5, 4, 4, 2) + 0.1)
+                    par(mar=c(5, 4, 4, 2) + 0.1)
                   } 
                 }
                 
@@ -695,8 +695,8 @@ setMethod("image", signature(x="PLMset"),
                 residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
 
                 if (add.legend){
-                  layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
-                  par(mar = c(4, 4, 5, 3))
+                  layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
+                  par(mar=c(4, 4, 5, 3))
                 }
                 if(missing(main)){
                   main.cur=sampleNames(x)[i]
@@ -708,10 +708,10 @@ setMethod("image", signature(x="PLMset"),
                 image(residsmatrix,col=col.resids,xaxt='n',
                       yaxt='n',main=main.cur,zlim=c(-1,1))
                 if (add.legend){
-                  par(mar = c(4, 0, 5, 3))
-                  pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = col.resids, main = "")
+                  par(mar=c(4, 0, 5, 3))
+                  pseudoColorBar(seq(-1,1,2), horizontal=FALSE, col=col.resids, main="")
                   layout(1)
-                  par(mar = c(5, 4, 4, 2) + 0.1)
+                  par(mar=c(5, 4, 4, 2) + 0.1)
                 } 
                 
               }
@@ -1118,42 +1118,31 @@ if (!isGeneric("model.description"))
 setMethod("model.description", "PLMset", function(object)
           object@model.description)
 
-
-
-
-
-
-
-
-
-
-
-
-pseudoPalette <-function (low = "white", high = c("green", "red"), mid = NULL,
-                      k = 50)
+pseudoPalette <-function (low="white", high=c("green", "red"), mid=NULL,
+                      k=50)
 {
     low <- col2rgb(low)/255
     high <- col2rgb(high)/255
     if (is.null(mid)) {
-      r <- seq(low[1], high[1], len = k)
-      g <- seq(low[2], high[2], len = k)
-      b <- seq(low[3], high[3], len = k)
+      r <- seq(low[1], high[1], len=k)
+      g <- seq(low[2], high[2], len=k)
+      b <- seq(low[3], high[3], len=k)
     }
     if (!is.null(mid)) {
         k2 <- round(k/2)
         mid <- col2rgb(mid)/255
-        r <- c(seq(low[1], mid[1], len = k2), seq(mid[1], high[1],
-            len = k2))
-        g <- c(seq(low[2], mid[2], len = k2), seq(mid[2], high[2],
-            len = k2))
-        b <- c(seq(low[3], mid[3], len = k2), seq(mid[3], high[3],
-            len = k2))
+        r <- c(seq(low[1], mid[1], len=k2), seq(mid[1], high[1],
+            len=k2))
+        g <- c(seq(low[2], mid[2], len=k2), seq(mid[2], high[2],
+            len=k2))
+        b <- c(seq(low[3], mid[3], len=k2), seq(mid[3], high[3],
+            len=k2))
     }
     rgb(r, g, b)
   }
 
-pseudoColorBar <- function (x, horizontal = TRUE, col = heat.colors(50), scale = 1:length(x),
-    k = 11, log.ticks=FALSE,...)
+pseudoColorBar <- function (x, horizontal=TRUE, col=heat.colors(50), scale=1:length(x),
+    k=11, log.ticks=FALSE,...)
 {
     if (is.numeric(x)) {
         x <- x
@@ -1163,10 +1152,10 @@ pseudoColorBar <- function (x, horizontal = TRUE, col = heat.colors(50), scale =
       colmap <- x
       low <- range(scale)[1]
       high <- range(scale)[2]
-      x <- seq(low, high, length = length(x))
+      x <- seq(low, high, length=length(x))
     }
     if (length(x) > k){
-      x.small <- seq(x[1], x[length(x)], length = k)
+      x.small <- seq(x[1], x[length(x)], length=k)
       if (log.ticks){
         x.small <- sign(x.small)*(2^abs(x.small) -1)
         x <- sign(x)*(2^abs(x) -1)
@@ -1180,17 +1169,17 @@ pseudoColorBar <- function (x, horizontal = TRUE, col = heat.colors(50), scale =
       }
     }
     if (horizontal) {
-        image(x, 1, matrix(x, length(x), 1), axes = FALSE, xlab = "",
-            ylab = "", col = colmap, ...)
-        axis(1, at = rev(x.small), labels = signif(rev(x.small),
-            2), srt = 270)
+        image(x, 1, matrix(x, length(x), 1), axes=FALSE, xlab="",
+            ylab="", col=colmap, ...)
+        axis(1, at=rev(x.small), labels=signif(rev(x.small),
+            2), srt=270)
     }
     if (!horizontal) {
-      image(1, x, matrix(x, 1, length(x)), axes = FALSE, xlab = "",
-            ylab = "", col = colmap, ...)
-      par(las = 1)
-      axis(4, at = rev(x.small), labels = signif(rev(x.small),2))
-      par(las = 0)
+      image(1, x, matrix(x, 1, length(x)), axes=FALSE, xlab="",
+            ylab="", col=colmap, ...)
+      par(las=1)
+      axis(4, at=rev(x.small), labels=signif(rev(x.small),2))
+      par(las=0)
     }
     box()
 }

@@ -44,7 +44,7 @@ setGeneric("getY", function(object, type) standardGeneric("getY"))
 ###
 
 setGeneric("backgroundCorrect",
-           function(object, method="rma", copy=TRUE, verbose=TRUE, ...)
+           function(object, method="rma", extra, verbose=TRUE, ...)
            standardGeneric("backgroundCorrect"))
 
 setGeneric("normalize",

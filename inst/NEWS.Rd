@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
-\section{Changes in version 1.15}{
+\section{Changes in version 1.16}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
       \item Using NEWS.Rd;
@@ -13,7 +13,13 @@
   and PLMrc. These are implemented in the basicPLM function and also
   available through the summarize() interface (method=c('plm', 'plmr',
   'plmrr', 'plmrc')), but yet to be extended to large datasets and to be
-  parallelized.
+  parallelized;
+      \item fitPLM(), NUSE() and RLE() are now available;
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item 'pm<-', 'mm<-', 'bg<-' now work with ff_matrix replacements
     }
   }
 }

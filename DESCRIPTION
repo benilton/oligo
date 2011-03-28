@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.15.8
+Version: 1.15.9
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
@@ -39,6 +39,9 @@ Collate: AllGenerics.R
          methods-SnpCnvFeatureSet.R
          methods-TilingFeatureSet.R
          methods-DBPDInfo.R
+         methods-background.R
+         methods-normalization.R
+         methods-summarization.R
          read.celfiles.R
          read.xysfiles.R
          utils-general.R

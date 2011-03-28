@@ -7,7 +7,8 @@
 ** Add normalize for FeatureSet objects
 ** Check accuracy of bgCorrect with 'mas' - compare against 'affy'
 ** Move all normalization methods from affyPLM to oligo !!!
-** Add a function to show available norm methods !!!
+** Add a function to show available norm/bg/summ methods !!!
+** Add bg-LESN for ff !
 * Testing
 ** Use unit tests
 * Downstream support
@@ -25,3 +26,4 @@
 *** selected fields: x/y/fix/fsetid/man_fsetid - meta_fsetid
 ** Add subset argument to functions that may benefit from selectProbes()
 ** Add oligo version to FeatureSet objs
+** Optimize (par) pm<- mm<- bg<- for ff_matrix objs
