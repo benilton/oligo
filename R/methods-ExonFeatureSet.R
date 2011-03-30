@@ -85,3 +85,63 @@ setMethod("rma", "ExonFeatureSet",
               stop("Resulting object is invalid.")
             }
           })
+
+
+gcCounts <- function(seq)
+    as.integer(Biostrings::letterFrequency(seq, letters='CG'))
+    
+getExonRefDABG <- function(x){
+    sql <- paste('SELECT fid FROM mmfeature',
+                 'INNER JOIN featureSet USING(fsetid)',
+                 'WHERE type=5')
+    conn <- db(x)
+    tmp <- dbGetQuery(conn, sql)
+    env <- new.env()
+    data(mmSequence, package=annotation(x), envir=env)
+    idx <- match(tmp[['fid']], env[['mmSequence']][['fid']])
+    seq <- env[['mmSequence']][idx, 'sequence']
+    rm(env)
+    counts <- gcCounts(seq)
+    lst <- split(data.frame(exprs(x)[tmp[['fid']],]), factor(counts, levels=0:max(counts)))
+    lapply(lst, as.matrix)
+}
+
+computeDABG <- function(x){
+    mmRef <- getExonRefDABG(x)
+    pmCounts <- gcCounts(pmSequence(x))
+    pms <- pm(x)
+    ns <- sapply(mmRef, nrow)
+    rgCounts <- range(as.integer(names(ns[ns > 0])))
+    pmCounts[pmCounts < rgCounts[1]] <- rgCounts[1]
+    pmCounts[pmCounts > rgCounts[2]] <- rgCounts[2]
+    theClass <- class(exprs(x))
+    if ("matrix" %in% theClass){
+        return(.Call("R_DABG_P", pms, mmRef, pmCounts))
+    }else{
+        res <- createFF("oligo-dabg-", dim(pms))
+        rowsByNode <- splitIndicesByNode(1:nrow(pms))
+        ocLapply(rowsByNode,
+                 function(ss, pmMat, mmRef, pmCounts, outMat){
+                     if (length(ss) > 0){
+                         ps <- splitIndicesByLength(ss, ocProbesets())
+                         open(pmMat)
+                         open(outMat)
+                         for (pps in ps)
+                             outMat[pps,] <- .Call("R_DABG_P", pmMat[pps,], mmRef, pmCounts[pps])
+                         close(outMat)
+                         close(pmMat)
+                     }
+                    NULL
+                }, pmMat=pms, mmRef=mmRef, pmCounts=pmCounts, outMat=res,
+                 neededPkgs="oligo")
+        return(res)
+    }
+}
+
+setMethod("paCalls", "ExonFeatureSet",
+          function(object, method="DABG", verbose=TRUE){
+              if (verbose) message("Computing DABG calls... ", appendLF=FALSE)
+              res <- computeDABG(object)
+              if (verbose) message("OK")
+              return(res)
+          })

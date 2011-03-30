@@ -61,3 +61,5 @@ setGeneric("normalizeToTarget",
            standardGeneric("normalizeToTarget"))
 
 setGeneric("getNetAffx", function(object, type="probeset") standardGeneric("getNetAffx"))
+
+setGeneric("paCalls", function(object, method, verbose=TRUE) standardGeneric("paCalls"))

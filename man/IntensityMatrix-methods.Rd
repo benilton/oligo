@@ -18,6 +18,9 @@
 \alias{mm<-,FeatureSet,matrix-method}
 \alias{pm<-,FeatureSet,matrix-method}
 \alias{bg<-,FeatureSet,matrix-method}
+\alias{mm<-,FeatureSet,ff_matrix-method}
+\alias{pm<-,FeatureSet,ff_matrix-method}
+\alias{bg<-,FeatureSet,ff_matrix-method}
 \alias{mm<-,TilingFeatureSet,array-method}
 \alias{pm<-,TilingFeatureSet,array-method}
 \alias{bg<-,TilingFeatureSet,array-method}

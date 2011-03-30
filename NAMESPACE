@@ -63,6 +63,7 @@ importFrom(stats, coef, cov, density, dnorm, fitted, kmeans, lm,
 importFrom(utils, packageDescription, read.delim, read.table,
            setTxtProgressBar, txtProgressBar, write.table)
 
+importFrom(Biostrings, letterFrequency)
 
 ## EXPORTS
 
@@ -89,5 +90,5 @@ exportMethods(intensity, probesetNames)
 
 ## PLM
 export("fitPLM", "NUSE", "RLE")
-exportMethods("image")
+exportMethods("image", "paCalls")
 exportClasses(PLMset)
