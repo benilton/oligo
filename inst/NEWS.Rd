@@ -12,8 +12,7 @@
       \item New summarization methods are available: PLM, PLMr, PLMrr
   and PLMrc. These are implemented in the basicPLM function and also
   available through the summarize() interface (method=c('plm', 'plmr',
-  'plmrr', 'plmrc')), but yet to be extended to large datasets and to be
-  parallelized;
+  'plmrr', 'plmrc'));
   \item fitPLM(), NUSE() and RLE() are now available;
   \item Presence/Absence calls are available through paCalls();
     }

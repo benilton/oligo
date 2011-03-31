@@ -114,3 +114,110 @@ setMethod("summarize", "ff_matrix",
             return(out)
           })
 
+basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
+                     bgversion=2, destructive=FALSE, verbose=TRUE, ...){
+  pns <- unique(pnVec)
+  nPn <- length(unique(pnVec))
+  pnVec <- split(0:(length(pnVec)-1), pnVec)
+  
+  if (destructive){
+    theExprs <- .Call("rma_c_complete", pmMat, pnVec, nPn, normalize,
+                      background, bgversion, verbose, PACKAGE="oligo")
+  }else{
+    theExprs <- .Call("rma_c_complete_copy", pmMat, pnVec, nPn,
+                      normalize, background, bgversion,
+                      verbose, PACKAGE="oligo")
+  }
+  colnames(theExprs) <- colnames(pmMat)
+  return(theExprs)
+}
+
+## PLM base
+plm1Probeset <- function(i, M, funPLM, nc=ncol(M)){
+    res <- funPLM(M[i,,drop=FALSE])
+    list(Estimates=res[['Estimates']][1:nc],
+         StdErrors=res[['StdErrors']][1:nc],
+         Residuals=res[['Residuals']])
+}
+
+runPLM <- function(PM, pnVec, funPLM){
+    groups <- split(1:nrow(PM), pnVec)
+    summaries <- lapply(groups, plm1Probeset, M=PM, funPLM=funPLM, nc=ncol(PM))
+    estimates <- do.call(rbind, lapply(summaries, '[[', 'Estimates'))
+    stderrors <- do.call(rbind, lapply(summaries, '[[', 'StdErrors'))
+    residuals <- matrix(NA, nr=nrow(PM), nc=ncol(PM))
+    residuals[unlist(groups, use.names=FALSE),] <- do.call(rbind, lapply(summaries, '[[', 'Residuals'))
+    rm(summaries)
+    colnames(estimates) <- colnames(stderrors) <- colnames(residuals) <- colnames(PM)
+    rownames(residuals) <- NULL
+    list(Estimates=estimates, StdErrors=stderrors, Residuals=residuals)
+}
+
+basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
+                     transfo=log2, method=c('plm', 'plmr', 'plmrr', 'plmrc'),
+                     verbose=TRUE){
+    method <- match.arg(method)
+    funPLM <- switch(method,
+                     plm=rcModelPLM,
+                     plmr=rcModelPLMr,
+                     plmrr=rcModelPLMrr,
+                     plmrc=rcModelPLMrc)
+    if (background)
+        pmMat <- backgroundCorrect(pmMat)
+    if (normalize)
+        pmMat <- normalize(pmMat)
+    theClass <- class(pmMat)
+    
+    if (verbose) message('Summarizing... ', appendLF=FALSE)
+    if ('matrix' %in% theClass){
+        res <- runPLM(transfo(pmMat), pnVec, funPLM)
+        if (verbose) message('OK')
+        return(res)
+    }else if('ff_matrix' %in% theClass){
+        estimates <- createFF(paste("oligo-", method, "-Estimates-", sep=""),
+                           dim=c(length(unique(pnVec)), ncol(pmMat)))
+        stderrors <- createFF(paste("oligo-", method, "-StdErrors-", sep=""),
+                           dim=c(length(unique(pnVec)), ncol(pmMat)))
+        residuals <- createFF(paste("oligo-", method, "-Residuals-", sep=""),
+                           dim=dim(pmMat))
+        psets <- sort(unique(pnVec))
+        ocLapply(splitIndicesByNode(psets),
+                 function(psets2proc, inMat, estimates, stderrors, residuals,
+                          transfo, fun, pnVec, psetsOut){
+                     if (length(psets2proc) > 0){
+                         open(inMat)
+                         open(estimates)
+                         open(stderrors)
+                         open(residuals)
+                         ## batches of probesets to process - vector of names
+                         batches <- splitIndicesByLength(psets2proc, ocProbesets())
+                         for (i in 1:length(batches)){
+                             psBatch <- batches[[i]]
+                             idx <- which(pnVec %in% psBatch)
+                             rowPsSumm <- match(sort(unique(psBatch)), psetsOut)
+                             tmp <- runPLM(transfo(inMat[idx,,drop=F]), pnVec[idx], fun)
+                             estimates[rowPsSumm,] <- tmp[['Estimates']]
+                             stderrors[rowPsSumm,] <- tmp[['StdErrors']]
+                             residuals[idx,] <- tmp[['Residuals']]
+                             rm(tmp)
+                         }
+                         close(inMat)
+                         close(estimates)
+                         close(stderrors)
+                         close(residuals)
+                     }
+                     NULL
+                 },
+                 pmMat, estimates, stderrors,
+                 residuals, transfo, funPLM,
+                 pnVec, psets, neededPkgs="oligo")
+        rownames(estimates) <- rownames(stderrors) <- psets
+        rownames(residuals) <- rownames(pmMat)
+    }
+    if (verbose) message('OK')
+    colnames(estimates) <- colnames(stderrors) <- colnames(residuals) <- colnames(pmMat)
+    list(Estimates=estimates, StdErrors=stderrors, Residuals=residuals)
+}
+
+summarizationMethods <- function()
+    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc')
