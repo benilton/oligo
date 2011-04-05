@@ -305,65 +305,13 @@ setMethod("hist", "FeatureSet",
           })
 
 setMethod("MAplot", "FeatureSet",
-          function(object, arrays=1:ncol(object), lowessPlot=FALSE,
-                   smooth=TRUE, pairs=FALSE, nsample=10000, ...){
-            if (length(arrays) > 1) par(ask=TRUE)
-            chns <- channelNames(object)
-            nchns <- length(chns)
-            if (pairs & nchns >= 2)
-                stop("Can't handle pairs on 2+ channels arrays.")
-            if (nchns > 2)
-                stop("Don't know how to handle more than 2 channels (yet).")
-            if (nrow(object) > nsample){
-              idx <- sort(sample(nrow(object), nsample))
-            }else{
-              idx <- 1:nrow(object)
-            }
-            dots <- list(...)
-            if (is.null(dots[["xlab"]]))
-              dots[["xlab"]] <- "average log-intensity"
-            if (is.null(dots[["ylab"]]))
-              dots[["ylab"]] <- "log-ratio"
-            if (is.null(dots[["pch"]]))
-              dots[["pch"]] <- "."
-            
-            small <- object[idx,]
-            featureNames(small) <- featureNames(featureData(small))
-            
-            if (nchns == 1){
-                if (!pairs){
-                    ref <- rowMedians(log2(exprs(small)))
-                    for (i in arrays){
-                        tmp <- log2(exprs(small[,i]))
-                        dots[["x"]] <- (tmp+ref)/2
-                        dots[["y"]] <- tmp-ref
-                        dots[["main"]] <- sampleNames(small)[i]
-                        if (!smooth){
-                            do.call("plot", dots)
-                        }else{
-                            do.call("smoothScatter", dots)
-                        }
-                        if (lowessPlot)
-                            lines(lowess(dots[["x"]], dots[["y"]]), col="red")
-                    }
-                }else{
-                    stop("FIXME: Must implement pairs")
-                }
-            }else if (nchns == 2){
-              for (i in arrays){
-                dots[["x"]] <- (log2(exprs(channel(small, "channel1"))) + log2(exprs(channel(small, "channel1"))))/2
-                dots[["y"]] <-  log2(exprs(channel(small, "channel1"))) - log2(exprs(channel(small, "channel1")))
-                dots[["main"]] <- sampleNames(small)[i]
-                if (!smooth){
-                    do.call("plot", dots)
-                }else{
-                    do.call("smoothScatter", dots)
-                }
-                if (lowessPlot)
-                  lines(lowess(dots[["x"]], dots[["y"]]), col="red")
-              }
-            }
-            if (length(arrays) > 1) par(ask=FALSE)
+          function(object, what=pm, transfo=log2, groups, refSamples, which,
+                   pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
+                   main="vs pseudo-median reference chip", pairs=FALSE, ...){
+              stopifnot(is.function(what))
+              maplot(x=what(object), transfo=transfo, groups=groups,
+                     refSamples=refSamples, which=which, pch=pch,
+                     summaryFun=summaryFun, main=main, pairs=pairs, ...)
           })
 
 setMethod("getX", "FeatureSet",

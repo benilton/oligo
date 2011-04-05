@@ -15,6 +15,7 @@
   'plmrr', 'plmrc'));
   \item fitPLM(), NUSE() and RLE() are now available;
   \item Presence/Absence calls are available through paCalls();
+  \item MAplot method with advanced options;
     }
   }
   \subsection{BUG FIXES}{

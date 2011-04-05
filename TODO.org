@@ -1,6 +1,7 @@
 * Documentation
 ** Improve documentation
 ** Use oligoData more often on documentation
+** Document MAplot as function!!!
 * Preprocessing
 ** Parallel version of PLM
 ** Add backgroundCorrect for FeatureSet objects
@@ -15,7 +16,7 @@
 ** Add filtering and summarization options (eg, exon/rma and gene/rma)
 ** Add crlmm pipeline from SnpFeatureSet (snprma is ready, under snprma2)
 ** Add option to save genotype dosages
-** Add MAplot for FeatureSet/ExpressionSet supporting ref, groups, samples (which), smooth/plot, pairs !!!
+** Add MAplot for FeatureSet/ExpressionSet supporting ref, groups, samples (which), smooth/plot, pairs !!! DONE! Write DOCS
 ** Add Mbox (actually a function to compute M and make a boxplot - needed?) !!!
 * Infrastructure
 ** Add scanDate to protocolData (check affy)

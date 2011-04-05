@@ -51,3 +51,13 @@ setMethod("hist", "ExpressionSet",
             invisible(res)
           })
 
+
+setMethod("MAplot", "ExpressionSet",
+          function(object, what=exprs, transfo=identity, groups, refSamples, which,
+                   pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
+                   main="vs pseudo-median reference chip", pairs=FALSE, ...){
+              stopifnot(is.function(what))
+              maplot(x=what(object), transfo=transfo, groups=groups,
+                     refSamples=refSamples, which=which, pch=pch,
+                     summaryFun=summaryFun, main=main, pairs=pairs, ...)
+          })

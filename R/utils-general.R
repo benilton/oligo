@@ -384,3 +384,212 @@ plotM <- function(x, snp, ...){
   plot(correctedM, ...)
   invisible(correctedM)
 }
+
+
+## MA plot functions
+maplot <- function (x, transfo=log2, groups, refSamples,
+                    which, pch=".", summaryFun=rowMedians,
+                    plotFun=smoothScatter,
+                    main="vs pseudo-median reference chip",
+                    pairs=FALSE, ...){
+    transfo <- match.fun(transfo)
+    stopifnot(is.function(transfo))
+    summaryFun <- match.fun(summaryFun)
+    stopifnot(is.function(summaryFun))
+
+    ## Checking for errors
+    if (!missing(refSamples)){
+        if (pairs)
+            stop("Cannot combine pairs=TRUE with 'refSamples'")
+        if (!is.numeric(refSamples))
+            stop("'refSamples' must be integer(s)")
+        refSamples <- as.integer(refSamples)
+        rg <- range(refSamples)
+        if (min(refSamples) < 1 | max(refSamples) > ncol(x))
+            stop("Ensure 'refSamples' are integers between 1 and ", ncol(x), ".")
+    }
+
+    if (!missing(which)){
+        if (!is.numeric(which))
+            stop("'which' must be integer(s)")
+        which <- as.integer(which)
+        rg <- range(which)
+        if (min(which) < 1 | max(which) > ncol(x))
+            stop("Ensure 'which' contains integers between 1 and ", ncol(x), ".")
+    }
+
+    if (!missing(groups)){
+        stopifnot(is.factor(groups))
+        stopifnot(length(groups) == ncol(x))
+        ## if groups is given, 'which' refers to group
+        if (!missing(which))
+            if (max(which) > length(levels(groups)))
+                stop("'which' must be smaller than ", length(levels(groups)))
+        ## if groups is given, 'refSamples' refers to group(s) of
+        ## reference
+        if (!missing(refSamples))
+            if (max(refSamples) > length(levels(groups)))
+                stop("'refSamples' must be smaller than ", length(levels(groups)))
+    }
+    ## END OF ERROR CHECK
+    
+##    x <- transfo(exprs(object))
+    x <- transfo(x)
+    
+    if (missing(groups)){
+        if (missing(which))
+            which <- 1:ncol(x)
+        if (!pairs) {
+            if (missing(refSamples)) {
+                medianchip <- summaryFun(x)
+            } else if (length(refSamples) > 1) {
+                medianchip <- summaryFun(x[, refSamples])
+            } else {
+                medianchip <- x[, refSamples]
+            }
+            
+            M <- sweep(x, 1, medianchip, FUN = "-")
+            A <- 1/2 * sweep(x, 1, medianchip, FUN = "+")
+            for (i in which) {
+                if (missing(refSamples)){
+                    main <- paste(colnames(x)[i], main)
+                }else{
+                    if (length(refSamples) == 1) {
+                        if (i != refSamples)
+                            main <- paste(colnames(x)[i], "vs", colnames(x)[refSamples])
+                    } else {
+                        main <- paste(colnames(x)[i], main)
+                    }
+                }
+                basicMvAplot(A[, i], M[, i], main=main, xlab="A",
+                             ylab="M", plotFun=plotFun, pch=pch, ...)
+            }
+        } else {
+            basicMvApairsPlot(x[, which], transfo=transfo, plotFun=plotFun, ...)
+        } ## end if (!pairs)
+    } else { ## if groups
+        groups.list <- split(1:ncol(x), groups)
+        grouped.data <- matrix(0, nrow(x), length(groups.list))
+        colnames(grouped.data) <- names(groups.list)
+        for (i in 1:length(groups.list))
+            grouped.data[, i] <- rowMeans(x[, groups.list[[i]], drop = FALSE])
+        if (missing(which))
+            which <- 1:length(groups.list)
+
+        if (!pairs) {
+            if (missing(refSamples)) {
+                medianchip <- summaryFun(grouped.data)
+            } else if (length(refSamples) == 1) {
+                medianchip <- grouped.data[, refSamples]
+            } else {
+                medianchip <- summaryFun(grouped.data[, refSamples])
+            }
+
+            M <- sweep(grouped.data, 1, medianchip, FUN = "-")
+            A <- 1/2 * sweep(grouped.data, 1, medianchip, FUN = "+")
+            for (i in which) {
+                if (missing(refSamples)){
+                    main <- paste(levels(groups)[i], main)
+                }else{
+                    if (length(refSamples) == 1) {
+                        if (i != refSamples)
+                            main <- paste(levels(groups)[i], "vs", levels(groups)[refSamples])
+                    } else {
+                        main <- paste(levels(groups)[i], main)
+                    }
+                }
+                basicMvAplot(A[, i], M[, i], main=main, xlab="A",
+                             ylab="M", pch=pch, plotFun=plotFun, ...)
+            }
+        } else {
+            basicMvApairsPlot(grouped.data[, which], transfo=transfo, plotFun=plotFun, ...)
+        } ## end if(!pairs)
+    }
+}
+
+basicMvAplot <- function(A, M, subset=sample(length(M), min(c(1e4, length(M)))),
+                    show.statistics=TRUE, span=2/3,
+                    family.loess="gaussian", cex=2,
+                    plotFun=smoothScatter, addLoess=TRUE, lwd=1, lty=1,
+                    loess.col="red", ...){
+    
+    fn.call <- list(...)
+    nmdots <- names(fn.call)
+    sigma <- IQR(M)
+    mean <- median(M)
+    yloc <- ifelse(is.element("ylim", nmdots), max(fn.call[['ylim']]), max(M))
+    xloc <- ifelse(is.element("xlim", nmdots), max(fn.call[['xlim']]), max(A))
+
+    plotFun(A, M, cex=cex, ...)
+    
+    if (addLoess) {
+        aux <- loess(M[subset]~A[subset], degree=1, span=span, 
+                     family=family.loess)[['fitted']]
+        o <- order(A[subset])
+        A <- A[subset][o]
+        M <- aux[o]
+        o <- which(!duplicated(A))
+        lines(approx(A[o], M[o]), col=loess.col, lwd=lwd, lty=lty)
+    }
+    abline(0, 0, col="blue")
+    if (show.statistics){
+        txt <- paste("IQR:", format(sigma, digits = 3))
+        txt2 <- paste("Median:", format(mean, digits = 3))
+        text(xloc, yloc, paste(txt2, txt, sep="\n"), cex=cex, adj=c(1, 1))
+    }
+}
+
+basicMvApairsPlot <- function (x, labels=colnames(x), transfo=log2, span=2/3, 
+                       family.loess="gaussian", digits=3,
+                       main="MVA plot", xlab="A", ylab="M",
+                       cex=2, plotFun=smoothScatter, addLoess=TRUE,
+                       parParams=list(mgp=c(0, .2, 0), mar=rep(1, 4), oma=c(1, 2, 2, 1)), ...){
+
+    x <- transfo(x)
+    J <- ncol(x)
+    frame()
+    old.par <- par(no.readonly=TRUE)
+    on.exit(par(old.par))
+    par(mfrow=c(J, J))
+    do.call(par, parParams)
+    for (j in 1:(J - 1)) {
+        par(mfg=c(j, j))
+        plot(1, 1, type="n", xaxt="n", yaxt="n", xlab="", ylab="")
+        text(1, 1, labels[j], cex=cex)
+        for (k in (j + 1):J) {
+            par(mfg=c(j, k))
+            yy <- x[, j] - x[, k]
+            xx <- (x[, j] + x[, k])/2
+            sigma <- IQR(yy)
+            mean <- median(yy)
+            basicMvAplot(xx, yy, tck=0, plotFun=plotFun, addLoess=addLoess,
+                    show.statistics=FALSE,  pch=".", xlab="", ylab="", tck=0, span=span,  ...)
+            par(mfg=c(k, j))
+            qs <- unique(quantile(xx, seq(0, 1, .1)))
+            grps <- cut(xx, qs, include.lowest=TRUE)
+            ng <- length(qs)
+            boxplot(yy~grps, range=0, xaxt='n', yaxt='n', xlab='', ylab='', xlim=c(0, ng), ...)
+            ## txt <- paste("IQR:", format(sigma, digits=digits))
+            ## txt2 <- paste("Median:", format(mean, digits=digits))
+            ## plot(c(0, 1), c(0, 1), type="n", ylab="", xlab="", xaxt="n", yaxt="n")
+            ## text(0.5, 0.5, paste(txt2, txt, sep="\n"), cex=cex)
+        }
+    }
+    par(mfg=c(J, J))
+    plot(1, 1, type="n", xaxt="n", yaxt="n", xlab="",  ylab="")
+    text(1, 1, labels[J], cex=cex)
+    mtext(xlab, 1, outer=TRUE, cex=1.5)
+    mtext(ylab, 2, outer=TRUE, cex=1.5)
+    mtext(main, 3, outer=TRUE, cex=1.5)
+    invisible()
+}
+
+setMethod("MAplot", "matrix",
+          function(object, what=identity, transfo=identity, groups, refSamples, which,
+                   pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
+                   main="vs pseudo-median reference chip", pairs=FALSE, ...){
+              stopifnot(is.function(what))
+              maplot(x=what(object), transfo=transfo, groups=groups,
+                     refSamples=refSamples, which=which, pch=pch,
+                     summaryFun=summaryFun, main=main, pairs=pairs, ...)
+          })
