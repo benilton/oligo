@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.15.12
+Version: 1.15.13
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>

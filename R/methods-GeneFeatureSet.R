@@ -80,3 +80,17 @@ setMethod("rma", "GeneFeatureSet",
               stop("Resulting object is invalid.")
             }
           })
+
+setMethod("paCalls", "GeneFeatureSet",
+          function(object, method=c("DABG", "PSDABG"), verbose=TRUE){
+              if (missing(method))
+                  method <- "DABG"
+              method <- match.arg(method, c("DABG", "PSDABG"))
+              paFun <- switch(method,
+                              DABG=computeDABG,
+                              PSDABG=computePSDABG)
+              if (verbose) message("Computing DABG calls... ", appendLF=FALSE)
+              res <- paFun(object)
+              if (verbose) message("OK")
+              return(res)
+          })

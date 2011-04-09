@@ -2,6 +2,7 @@
 \alias{MAplot}
 \alias{MAplot-methods}
 \alias{MAplot,FeatureSet-method}
+\alias{MAplot,TilingFeatureSet-method}
 \alias{MAplot,PLMset-method}
 \alias{MAplot,ExpressionSet-method}
 \alias{MAplot,matrix-method}
@@ -12,19 +13,33 @@
 }
 
 \usage{
-## FeatureSet object
-MAplot(object, what=pm, transfo=log2, groups, refSamples, which,
-       pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
-       main="vs pseudo-median reference chip", pairs=FALSE, ...)
+MAplot(object, ...)
 
-## PLMset object
-MAplot(object, what=coefs, transfo=identity, groups, refSamples, which, pch=".",
-       summaryFun=rowMedians, main="vs pseudo-median reference chip", pairs=FALSE, ...)
+\S4method{MAplot}{FeatureSet}(object, what=pm, transfo=log2, groups,
+       refSamples, which, pch=".", summaryFun=rowMedians,
+       plotFun=smoothScatter, main="vs pseudo-median reference chip",
+       pairs=FALSE, ...)
 
-## matrix object
-MAplot(object, what=identity, transfo=identity, groups, refSamples, which,
-       pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
-       main="vs pseudo-median reference chip", pairs=FALSE, ...)
+\S4method{MAplot}{TilingFeatureSet}(object, what=pm, transfo=log2, groups,
+       refSamples, which, pch=".", summaryFun=rowMedians,
+       plotFun=smoothScatter, main="vs pseudo-median reference chip",
+       pairs=FALSE, ...)
+
+\S4method{MAplot}{PLMset}(object, what=coefs, transfo=identity, groups,
+       refSamples, which, pch=".", summaryFun=rowMedians,
+       plotFun=smoothScatter, main="vs pseudo-median reference chip",
+       pairs=FALSE, ...)
+
+\S4method{MAplot}{matrix}(object, what=identity, transfo=identity,
+       groups, refSamples, which, pch=".", summaryFun=rowMedians,
+       plotFun=smoothScatter, main="vs pseudo-median reference chip",
+       pairs=FALSE, ...)
+
+\S4method{MAplot}{ExpressionSet}(object, what=exprs, transfo=identity,
+       groups, refSamples, which, pch=".", summaryFun=rowMedians,
+       plotFun=smoothScatter, main="vs pseudo-median reference chip",
+       pairs=FALSE, ...)
+
 }
 \arguments{
   \item{object}{\code{FeatureSet}, \code{PLMset} or \code{ExpressionSet}

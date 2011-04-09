@@ -128,3 +128,58 @@ setMethod("pmPosition", "TilingFeatureSet",
             tmp <- tmp[order(tmp[["fid"]]),]
             tmp[["position"]]
           })
+
+
+setMethod("MAplot", "TilingFeatureSet",
+          function(object, what=pm, transfo=log2, groups, refSamples, which,
+                   pch=".", summaryFun=rowMedians, plotFun=smoothScatter,
+                   main="vs pseudo-median reference chip", pairs=FALSE, ...){
+              stopifnot(is.function(what))
+              if (all(channelNames(object) %in% c("channel1", "channel2"))){
+                  dots <- list(...)
+                  if (is.null(dots[['summarizeChannels']])){
+                      summarizeChannels <- function(x) x[,,1]/x[,,2]
+                  }else{
+                      summarizeChannels <- dots[['summarizeChannels']]
+                      stopifnot(is.function(summarizeChannels))
+                      testArray <- array(rnorm(24), dim=c(4, 3, 2))
+                      testRes <- summarizeChannels(testArray)
+                      rm(testArray)
+                      if (!is.matrix(testRes))
+                          stop("'summarizeChannels' does not return a matrix")
+                      if (!all(dim(testRes) == c(4, 3)))
+                          stop("'summarizeChannels' returns a matrix with incompatible dimensions.")
+                      rm(testRes)
+                      dots[['summarizeChannels']] <- NULL
+                  }
+                  dots[['x']] <- summarizeChannels(what(object))
+                  dots[['transfo']] <- transfo
+                  dots[['groups']] <- groups
+                  dots[['refSamples']] <- refSamples
+                  dots[['which']] <- which
+                  dots[['pch']] <- pch
+                  dots[["summaryFun"]] <- summaryFun
+                  dots[["main"]] <- main
+                  dots[["pairs"]] <- pairs
+                  do.call(maplot, dots)
+              }else{
+                  callNextMethod()
+              }
+          })
+
+f <- function(...){
+    dots <- list(...)
+    nms <- names(dots)
+    message("GOT: ", paste(nms, collapse="; ", sep=" "))
+}
+
+g <- function(...){
+    dots <- list(...)
+    if (is.null(dots[['x']])){
+        dots[['x']] <- 'x'
+    }
+    if ('y' %in% names(dots)){
+        dots[['y']] <- NULL
+    }
+    do.call(f, dots)
+}

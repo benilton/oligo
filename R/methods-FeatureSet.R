@@ -90,7 +90,7 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
 
 setMethod("mm", "FeatureSet",
           function(object, subset=NULL){
-            exprs(object)[mmindex(object, subset=subset),] ## subset 
+            exprs(object)[mmindex(object, subset=subset),, drop=FALSE] ## subset 
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),

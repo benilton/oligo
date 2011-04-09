@@ -90,24 +90,41 @@ setMethod("rma", "ExonFeatureSet",
 gcCounts <- function(seq)
     as.integer(Biostrings::letterFrequency(seq, letters='CG'))
     
-getExonRefDABG <- function(x){
-    sql <- paste('SELECT fid FROM mmfeature',
-                 'INNER JOIN featureSet USING(fsetid)',
-                 'WHERE type=5')
+getRefDABG <- function(x){
     conn <- db(x)
+    sql <- paste('SELECT type FROM type_dict',
+                 'WHERE type_id="control->bgp->antigenomic"')
+    bgCode <- as.integer(dbGetQuery(conn, sql)[[1]])
+    if (length(bgCode) != 1)
+        stop("Can't find proper id for control-bgp-antigenomic probes")
+    
+    sql <- paste('SELECT fid FROM pmfeature',
+                 'INNER JOIN featureSet USING(fsetid)',
+                 'WHERE', paste('type=', bgCode, sep=''))
     tmp <- dbGetQuery(conn, sql)
     env <- new.env()
-    data(mmSequence, package=annotation(x), envir=env)
-    idx <- match(tmp[['fid']], env[['mmSequence']][['fid']])
-    seq <- env[['mmSequence']][idx, 'sequence']
+    data(pmSequence, package=annotation(x), envir=env)
+    idx <- match(tmp[['fid']], env[['pmSequence']][['fid']])
+    seq <- env[['pmSequence']][idx, 'sequence']
     rm(env)
     counts <- gcCounts(seq)
-    lst <- split(data.frame(exprs(x)[tmp[['fid']],]), factor(counts, levels=0:max(counts)))
+    lst <- split(data.frame(exprs(x)[tmp[['fid']],, drop=FALSE]),
+                 factor(counts, levels=0:max(counts)))
     lapply(lst, as.matrix)
 }
 
+computePSDABG <- function(x){
+    paProbe <- -log(paCalls(x, method="DABG", verbose=FALSE))
+    pns <- probeNames(x)
+    n <- ncol(paProbe)+1
+    theSum <- 2*rowsum(cbind(paProbe, 1), pns, reorder=FALSE)
+    res <- pchisq(theSum[, -n, drop=FALSE], theSum[,n], lower.tail=FALSE)
+    colnames(res) <- sampleNames(x)
+    return(res)
+}
+
 computeDABG <- function(x){
-    mmRef <- getExonRefDABG(x)
+    mmRef <- getRefDABG(x)
     pmCounts <- gcCounts(pmSequence(x))
     pms <- pm(x)
     ns <- sapply(mmRef, nrow)
@@ -116,7 +133,7 @@ computeDABG <- function(x){
     pmCounts[pmCounts > rgCounts[2]] <- rgCounts[2]
     theClass <- class(exprs(x))
     if ("matrix" %in% theClass){
-        return(.Call("R_DABG_P", pms, mmRef, pmCounts))
+        res <- .Call("R_DABG_P", pms, mmRef, pmCounts)
     }else{
         res <- createFF("oligo-dabg-", dim(pms))
         rowsByNode <- splitIndicesByNode(1:nrow(pms))
@@ -134,14 +151,22 @@ computeDABG <- function(x){
                     NULL
                 }, pmMat=pms, mmRef=mmRef, pmCounts=pmCounts, outMat=res,
                  neededPkgs="oligo")
-        return(res)
     }
+    fid <- as.character(dbGetQuery(db(x), 'SELECT fid FROM pmfeature')[[1]])
+    dimnames(res) <- list(fid, sampleNames(x))
+    res
 }
 
 setMethod("paCalls", "ExonFeatureSet",
-          function(object, method="DABG", verbose=TRUE){
+          function(object, method, verbose=TRUE){
+              if (missing(method))
+                  method <- "DABG"
+              method <- match.arg(method, c("DABG", "PSDABG"))
+              paFun <- switch(method,
+                              DABG=computeDABG,
+                              PSDABG=computePSDABG)
               if (verbose) message("Computing DABG calls... ", appendLF=FALSE)
-              res <- computeDABG(object)
+              res <- paFun(object)
               if (verbose) message("OK")
               return(res)
           })

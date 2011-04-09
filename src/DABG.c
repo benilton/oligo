@@ -32,7 +32,7 @@ SEXP R_DABG_P(SEXP X, SEXP Y, SEXP G){
     for (j=0; j < S; j++){
       count = 0;
       for (k = 0; k < M; k++){
-	if (Xp[i + j*N] < ref[k + j*M])
+	if (Xp[i + j*N] <= ref[k + j*M])
 	  count++;
       }
       Rp[i + j*N] = (double) count/M;

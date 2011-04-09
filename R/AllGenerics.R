@@ -17,6 +17,7 @@ setGeneric("hist", function(x, ...) standardGeneric("hist"))
 setGeneric("image", function(x, ...) standardGeneric("image"))
 setGeneric("rma", function(object, ...) standardGeneric("rma"))
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
+
 setGeneric("genotype", function(object, ...) standardGeneric("genotype"))
 
 setGeneric("getContainer", function(object, probeType=c("pm", "bg")) standardGeneric("getContainer"))
@@ -62,4 +63,4 @@ setGeneric("normalizeToTarget",
 
 setGeneric("getNetAffx", function(object, type="probeset") standardGeneric("getNetAffx"))
 
-setGeneric("paCalls", function(object, method, verbose=TRUE) standardGeneric("paCalls"))
+setGeneric("paCalls", function(object, method, ..., verbose=TRUE) standardGeneric("paCalls"))

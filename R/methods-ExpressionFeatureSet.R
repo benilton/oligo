@@ -71,3 +71,62 @@ setMethod("getNetAffx", "ExpressionSet",
               theSet
           })
 
+
+## original code from affy
+paMAS5 <- function(object, verbose=TRUE,
+                   tau=0.015, alpha1=0.04, alpha2=0.06,
+                   ignore.saturated=TRUE) {
+
+    stopifnot(alpha1 > 0, alpha1 < alpha2, alpha2 < 1)
+    if(verbose) message("Getting probe level data... ", appendLF=FALSE);
+    pms <- pm(object)
+    mms <- mm(object)
+    if (verbose) message("OK.")
+
+    ## Saturation:
+    ## shouldn't be a problem with new scanners
+    ## or those that have had an engineer visit
+    sat <- ifelse(ignore.saturated, 46000, -1)
+
+    pns <- probeNames(object)
+    o <- order(pns)
+    pns <- pns[o]
+    pms <- pms[o,,drop=FALSE]
+    mms <- mms[o,,drop=FALSE]
+    np <- nrow(mms)
+    unique.pns <- sort(unique(pns))
+    nps <- length(unique.pns)
+    nsamples <- ncol(pms)
+
+    if(verbose) message("Computing p-values... ", appendLF=FALSE)
+    p <- sapply(1:nsamples,
+                function(x){
+                    .C("DetectionPValue", as.double(pms[,x]),
+                       as.double(mms[,x]), as.character(pns),
+                       as.integer(np), as.double(tau),
+                       as.double(sat), dpval=double(nps),
+                       nps, PACKAGE="oligo")$dpval
+                })
+    rownames(p) <- unique.pns
+    colnames(p) <- sampleNames(object)
+    if (verbose) message("OK.")
+    if (verbose) message("Making P/M/A Calls... ", appendLF=FALSE)
+    calls <- matrix("A", nc=ncol(p), nr=nrow(p))
+    calls[p < alpha1] <- "P"
+    calls[p <= alpha2 & p >= alpha1] <- "M"
+    dimnames(calls) <- list(rownames(p), sampleNames(object))
+    if (verbose) message("OK.")
+    list(calls=calls, p=p)
+}
+
+
+setMethod("paCalls", "ExpressionFeatureSet",
+          function(object, method, ..., verbose=TRUE){
+              stopifnot(tolower(manufacturer(object)) == 'affymetrix')
+              if (missing(method))
+                  method <- "MAS5"
+              method <- match.arg(method, "MAS5")
+              paFun <- switch(method, MAS5=paMAS5)
+              res <- paFun(object, ..., verbose=verbose)
+              return(res)
+          })

@@ -542,8 +542,12 @@ genotypeOne <- function(files, outDir, batch_size=40000,
   Index <- Index-breaks[index.grps]
   index.grps <- split(Index, index.grps)
   rm(breaks)
-  
-  n.chunks <- nrow(analysis)-3
+
+  ## This started failing on Apr 6 '11 for SNP 5 arrays
+  ## They should be processed with 'crlmm' anyways
+  ## FIXME: for 2.9
+  ## n.chunks <- nrow(analysis)-3
+  n.chunks <- length(index.grps)
   n.files <- as.integer(analysis[which(analysis[,1] == "nsamples"), 2])
   
   if (verbose){
