@@ -65,7 +65,7 @@ importFrom(utils, packageDescription, read.delim, read.table,
 
 importFrom(Biostrings, letterFrequency)
 
-importFrom(ff, ff)
+importFrom(ff, ff, ffvecapply, clone, filename, is.ff, 'finalizer<-', vmode)
 ##importFrom(ff, open, finalizer, close, 'finalizer<-', delete)
 
 ## EXPORTS
