@@ -261,49 +261,52 @@ readSummaries <- function(type, tmpdir){
   if (!(type %in% validOptions))
     stop(paste("Invalid 'type' argument.\nValid options are '",
                paste(validOptions, collapse="', '"), "'.", sep=""))
-  
-  if (type %in% c("alleleA", "alleleB", "fs", "initialCalls")){
-    if (type == "initialCalls"){
-      dataType <- integer()
-    }else{
-      dataType <- numeric()
-    }
-    analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
-    files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
-    n.files <- length(files)
-    n.samples <- as.integer(analysis[match("nsamples", analysis[,1]), 2])
-    tmp <- NULL
-    for (i in 1:n.files){
-      nrows <- as.integer(analysis[3+i, 2])
-      tmp <- rbind(tmp, matrix(readBin(files[i], dataType, nrows*n.samples), nrow=nrows))
-    }
-    pkgname <- analysis[1, 2]
-    requireAnnotation(pkgname)
-    tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
-    tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
-    tmpdf[is.na(tmpdf$physical_pos), "physical_pos"] <- 0
-    tmpdf <- tmpdf[order(tmpdf$man_fsetid),]
-    tmpdf[["index"]] <- 1:nrow(tmpdf)
-    tmpdf <- tmpdf[order(tmpdf$chrom, tmpdf$physical_pos, tmpdf$man_fsetid),]
-    tmpidx <- tmpdf[["index"]]
-    rownames(tmp) <- tmpdf[["man_fsetid"]]
-    colnames(tmp) <- as.character(read.table(file.path(tmpdir, "crlmm-calls.txt"), nrows=1, colClasses=rep("character", ncol(tmp))))
-  }else if (type %in% c("calls", "conf", "llr", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense", "antisense-f", "sense-f")){
-    target <- file.path(tmpdir,
-                        ifelse(type %in% c("calls", "conf", "llr"),
-                               paste("crlmm-", type, ".txt", sep=""),
-                               paste(type, ".txt", sep="")))
-    header <- as.character(read.delim(target, nrow=1, colClasses="character", header=FALSE))
-    nsamples <- length(header)
-    what <- c("character", rep(ifelse(type == "calls", "integer", "numeric"), nsamples))
-    tmp <- as.matrix(read.delim(target, colClasses=what, skip=1, row.names=1, header=FALSE))
-    colnames(tmp) <- header
-  }else if (type == "snr"){
-    header <- as.character(read.delim(file.path(tmpdir, "crlmm-calls.txt"),
-                                      nrow=1, colClasses="character", header=FALSE))
-    nsamples <- length(header)
-    tmp <- readBin(file.path(tmpdir, "snr"), numeric(), nsamples)
-    names(tmp) <- header
+
+  analysis <- read.table(file.path(tmpdir, "analysis.txt"), stringsAsFactors=FALSE)
+  pkgname <- as.character(analysis[1, 2])
+
+  if (!(pkgname %in% c('pd.genomewidesnp.5', 'pd.genomewidesnp.6'))){
+      if (type %in% c("alleleA", "alleleB", "fs", "initialCalls")){
+          if (type == "initialCalls"){
+              dataType <- integer()
+          }else{
+              dataType <- numeric()
+          }
+          files <- file.path(tmpdir, paste(type, analysis[-(1:3), 1], sep="-"))
+          n.files <- length(files)
+          n.samples <- as.integer(analysis[match("nsamples", analysis[,1]), 2])
+          tmp <- NULL
+          for (i in 1:n.files){
+              nrows <- as.integer(analysis[3+i, 2])
+              tmp <- rbind(tmp, matrix(readBin(files[i], dataType, nrows*n.samples), nrow=nrows))
+          }
+          pkgname <- analysis[1, 2]
+          requireAnnotation(pkgname)
+          tmpdf <- getSnpLocInfo(pkgname)
+          rownames(tmp) <- tmpdf[["man_fsetid"]]
+          colnames(tmp) <- as.character(read.table(file.path(tmpdir, "crlmm-calls.txt"), nrows=1, colClasses=rep("character", ncol(tmp))))
+      }else if (type %in% c("calls", "conf", "llr", "alleleA-sense", "alleleA-antisense", "alleleB-sense", "alleleB-antisense", "antisense-f", "sense-f")){
+          target <- file.path(tmpdir,
+                              ifelse(type %in% c("calls", "conf", "llr"),
+                                     paste("crlmm-", type, ".txt", sep=""),
+                                     paste(type, ".txt", sep="")))
+          header <- as.character(read.delim(target, nrow=1, colClasses="character", header=FALSE))
+          nsamples <- length(header)
+          what <- c("character", rep(ifelse(type == "calls", "integer", "numeric"), nsamples))
+          tmp <- as.matrix(read.delim(target, colClasses=what, skip=1, row.names=1, header=FALSE))
+          colnames(tmp) <- header
+      }else if (type == "snr"){
+          header <- as.character(read.delim(file.path(tmpdir, "crlmm-calls.txt"),
+                                            nrow=1, colClasses="character", header=FALSE))
+          nsamples <- length(header)
+          tmp <- readBin(file.path(tmpdir, "snr"), numeric(), nsamples)
+          names(tmp) <- header
+      }
+  }else{
+      vo <- c('alleleA', 'alleleB', 'fs', 'f0', 'initialCalls', 'calls', 'conf', 'llr', 'snr')
+      type <- match.arg(type, vo)
+      obj <- load(file.path(tmpdir, paste(type, '.RData', sep='')))
+      tmp <- get(obj)[]
   }
   return(tmp)
 }
@@ -343,14 +346,20 @@ getCrlmmSummaries <- function(tmpdir){
 ### CLEANUP 11/11/08
 ########################
 
-readChipTypesFromCels <- function(celFiles)
-  sapply(celFiles, function(x) readCelHeader(x)[["chiptype"]])
+## readChipTypesFromCels <- function(celFiles)
+##   sapply(celFiles, function(x) readCelHeader(x)[["chiptype"]])
 
-normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference=TRUE, check=TRUE, verbose=TRUE){
+readChipTypesFromCels <- function(celFiles)
+    sapply(celFiles, function(x) read.celfile.header(x)[['cdfName']])
+
+normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname,
+                         reference=TRUE, check=TRUE, verbose=TRUE){
+    
   ## Check existence of directory (destination)
   ## The destDir must not exist (yet)
   ## If it exists, abort
-  if (file.exists(destDir)) stop(message(destDir, " already exists."))
+  if (file.exists(destDir))
+      stop(message(destDir, " already exists. Use the name of a non-existing directoty."))
   destDir <- gsub("/$", "", destDir)
   dir.create(destDir)
 
@@ -370,67 +379,35 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
   n.snps <- dbGetQuery(conn, "SELECT row_count FROM table_info WHERE tbl='featureSet'")[[1]]
 
   ## Get all PM probes
-  ## Some are not annotated (Affymetrix files) and will get a 0 for the moment
-  ## Order by CHROM, POS, SNP, ALLELE
-  tmp <- dbGetQuery(conn, paste("SELECT fid, man_fsetid, allele, featureSet.chrom, featureSet.physical_pos",
-                                "FROM pmfeature, featureSet",
-                                "WHERE pmfeature.fsetid = featureSet.fsetid"))
-  tmp[is.na(tmp$chrom), "chrom"] <- 0
-  tmp[is.na(tmp$physical_pos), "physical_pos"] <- 0
-  tmp <- tmp[order(tmp$chrom, tmp$physical_pos, tmp$man_fsetid, tmp$allele),]
-  rownames(tmp) <- NULL
-
+  ## Some are not annotated (Affymetrix files) and will get a 0 for the
+  ## moment - need to sort later
+  ## Order by SNP name
+  tmp <- getProbeInfo(pkgname)
   pnVec <- paste(tmp[["man_fsetid"]],
                  c("A", "B")[tmp[["allele"]]+1],
                  sep=":")
 
-  tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
+  tmp[["allele"]] <- NULL
   nSnpAlleleCombinations <- length(unique(pnVec))
 
   ## TODO: isn't info equal to tmp without the probe info?
   ## Info: SNP information
-  info <- getSnpLocInfo(pkgname)
-  
-  snps <- info[["man_fsetid"]]
+  snps <- getSnpNames(pkgname)
   samples <- basename(celFiles)
   save(snps, samples, file=file.path(destDir, "RowsAndColumns.rda"))
   
-  ## Break info in subsets
-  ## First by chromosome
-  ## Then by batch_size within chromosome
-  split.rowids <- lapply(split(1:nrow(info), info[["chrom"]]),
-                         function(x)
-                         split(x, rep(1:length(x),
-                                      each=batch_size,
-                                      length.out=length(x))))
-  rm(info); gc()
-  split.rowids <- unlist(split.rowids, recursive=FALSE)
+  analysis <- data.frame(fields=c("annotation", "nsamples", "batch_size"),
+                         values=c(pkgname, length(celFiles), batch_size))
+  write.table(analysis, file.path(destDir, "analysis.txt"),
+              row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t")
 
-  ## Fix chromosome names, so files do not get messed up.
-  ## Without this, files are ordered as:
-  ## chr0.1 / chr1.1 / chr1.2 / chr10.1 / chr2 etc
-  ## With the fix:
-  ## chr0.1 / chr01.1 / chr01.2 / chr02.1 / ... / chr09 / chr10
-  names(split.rowids) <- gsub("^([0-9]\\.)", "0\\1", names(split.rowids))
-
-  ## Suffixes for files
-  filenames <- names(split.rowids)
-
-  ## Setup files that will store
-  ## the output...
-  ## NOTE: with NetCDF, we'd need only 1 of each
-  analysis <- data.frame(fields=c("annotation", "nsamples", "batch_size", filenames),
-             values=c(pkgname, length(celFiles), batch_size,
-               sapply(split.rowids, length)))
-  write.table(analysis, file.path(destDir, "analysis.txt"), row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t")
-  
-  alleleA.files <- file.path(destDir, paste("alleleA-", filenames, sep=""))
-  alleleB.files <- file.path(destDir, paste("alleleB-", filenames, sep=""))
-  initialCalls.files <- file.path(destDir, paste("initialCalls-", filenames, sep=""))
-  llr.files <- file.path(destDir, paste("llr0-", filenames, sep=""))
-  fs.files <- file.path(destDir, paste("fs-", filenames, sep=""))
-  f0.file <- file.path(destDir, "f0")
-  snr.file <- file.path(destDir, "snr")
+  dims <- c(length(snps), length(celFiles))
+  alleleA <- ff(vmode='double', dim=dims, pattern=file.path(destDir, 'alleleA-'))
+  alleleB <- ff(vmode='double', dim=dims, pattern=file.path(destDir, 'alleleB-'))
+  initialCalls <- ff(vmode='integer', dim=dims, pattern=file.path(destDir, 'initialCalls-'))
+  fs <- ff(vmode='double', dim=dims, pattern=file.path(destDir, 'fs-'))
+  f0 <- ff(vmode='double', dim=dims[2], pattern=file.path(destDir, 'f0-'))
+  snr <- ff(vmode='double', dim=dims[2], pattern=file.path(destDir, 'snr-'))
 
   ## Get feature IDs and load/create reference
   if (reference){
@@ -442,8 +419,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
       message(length(tmp$fid)/2^20, "GB RAM required.")
     }
     nqdt <- normalize.quantiles.determine.target
-    reference <- nqdt(readCelIntensities(celFiles,
-                                         indices=tmp$fid))
+    reference <- nqdt(readCEL(celFiles, tmp$fid))
     if (verbose) message("Normalization vector created.")
   }
   reference <- sort(reference)
@@ -456,46 +432,39 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname, reference
   ## just making an alias from preprocessCore
   ## to make line shorter
   n2t <- normalize.quantiles.use.target
+
   for (i in 1:length(celFiles)){
     ## Read one file at a time
     ## no summarization across samples (probes are replicates)
     ## take medians of probesets (using Ben's code, which is faster)
     ## Summarized data now in 2 columns (A and B)
-    pms <- n2t(readCelIntensities(celFiles[i], indices=tmp$fid),
-               reference, copy=FALSE)
-
-    theSumm <- matrix(basicRMA(pms, pnVec, FALSE, FALSE),
-                      ncol=2, byrow=TRUE)
-    rm(pms); gc()
+    pms <- n2t(readCEL(celFiles[i], tmp$fid), reference, copy=FALSE)
+    tmpRes <- basicRMA(pms, pnVec, background=FALSE, normalize=FALSE, verbose=FALSE)
+    rm(pms)
+    theSumm <- matrix(tmpRes, ncol=2, byrow=TRUE)
+    rm(tmpRes)
     correction <- fitAffySnpMixture56(theSumm, verbose=FALSE)
-    for (j in 1:length(filenames)){
-      conn <- file(alleleA.files[j], "ab")
-      writeBin(theSumm[split.rowids[[j]], 1], conn)
-      close(conn)
-      conn <- file(alleleB.files[j], "ab")
-      writeBin(theSumm[split.rowids[[j]], 2], conn)
-      close(conn)
-      conn <- file(initialCalls.files[j], "ab")
-      writeBin(correction$initial[split.rowids[[j]]], conn)
-      close(conn)
-      conn <- file(fs.files[j], "ab")
-      writeBin(correction$fs[split.rowids[[j]]], conn)
-      close(conn)
-    }
-    conn <- file(f0.file, "ab")
-    writeBin(correction$f0, conn)
-    close(conn)
-    conn <- file(snr.file, "ab")
-    writeBin(correction$snr, conn)
-    close(conn)
-    rm(correction, theSumm); gc()
+    alleleA[,i] <- theSumm[,1]
+    alleleB[,i] <- theSumm[,2]
+    rm(theSumm)
+    initialCalls[,i] <- correction$initial
+    fs[,i] <- correction$fs
+    f0[i] <- correction$f0
+    snr[i] <- correction$snr
+    rm(correction); gc()
     if (verbose) setTxtProgressBar(pb, i)
   }
+  close(alleleA)
+  close(alleleB)
+  close(initialCalls)
+  close(fs)
+  close(f0)
+  close(snr)
+
+  filesNorm <- list(alleleA=alleleA, alleleB=alleleB,
+                      initialCalls=initialCalls, fs=fs, f0=f0, snr=snr)
+  
   if (verbose) close(pb)
-  filesNorm <- list(alleleA=alleleA.files,
-                    alleleB=alleleB.files,
-                    initialCalls=initialCalls.files,
-                    fs=fs.files, f0=f0.file, snr=snr.file)
   pkgNorm <- pkgname
   save(filesNorm, pkgNorm, file=file.path(destDir, "NormalizationSummarizationOutput.rda"))
   return(filesNorm)
@@ -505,6 +474,7 @@ genotypeOne <- function(files, outDir, batch_size=40000,
                         balance=1.5, minLLRforCalls=c(5, 1, 5),
                         recalibrate=TRUE, verbose=TRUE, pkgname,
                         reference=TRUE, d0s=80){
+    oligoDEBUG <- getOption('oligoDEBUG', FALSE)
   if (missing(outDir)) stop("Output directory must be given.")
   if (!file.exists(outDir)){
     normOut <- normalizeOne(files, outDir, pkgname=pkgname, reference=reference)
@@ -523,7 +493,8 @@ genotypeOne <- function(files, outDir, batch_size=40000,
     rm(list=c("pkgNorm", "filesNorm"))
   }
 
-  load(system.file(paste("extdata/", pkgname, "CrlmmInfo.rda", sep=""), package=pkgname))
+  fn <- paste(pkgname, 'CrlmmInfo.rda', sep='')
+  load(system.file("extdata", fn, package=pkgname))
 
   ## myenv should take abou 65MB RAM
   ## I'll assume this is OK for now
@@ -532,204 +503,186 @@ genotypeOne <- function(files, outDir, batch_size=40000,
   thePriors <- get("priors", myenv)
 
   tmpdf <- getSnpLocInfo(pkgname)
-  tmpidx <- tmpdf[["index"]]
+  XIndex <- tmpdf[['chrom']] == 'X'
 
-  Index <- which(!get("hapmapCallIndex", myenv))
+  ## These do not have Hapmap Data
+  Index <- !get("hapmapCallIndex", myenv)
+
+  batches <- splitIndicesByLength(1:nrow(tmpdf), batch_size)
   
   analysis <- read.table(file.path(outDir, "analysis.txt"), stringsAsFactors=FALSE)
-  breaks <- cumsum(c(0, as.integer(analysis[-(1:3),2])))
-  index.grps <- cut(Index, breaks, include.lowest=TRUE, labels=FALSE)
-  Index <- Index-breaks[index.grps]
-  index.grps <- split(Index, index.grps)
-  rm(breaks)
-
-  ## This started failing on Apr 6 '11 for SNP 5 arrays
-  ## They should be processed with 'crlmm' anyways
-  ## FIXME: for 2.9
-  ## n.chunks <- nrow(analysis)-3
-  n.chunks <- length(index.grps)
+  n.chunks <- length(batches)
   n.files <- as.integer(analysis[which(analysis[,1] == "nsamples"), 2])
-  
   if (verbose){
     message("Genotyping.")
     pb <- txtProgressBar(min=1, max=n.chunks, initial=1, style=3)
   }
-  last <- 0
-  for (i in 1:n.chunks){
-    index <- index.grps[[i]]
-    nrows <- as.integer(analysis[i+3,2])
-    overall_pos <- (last+1):(last+nrows)
-    last <- max(overall_pos)
-    
-    alleleA <- matrix(readBin(normOut$alleleA[i], numeric(),
-                              nrows*n.files), nrow=nrows)
-    alleleB <- matrix(readBin(normOut$alleleB[i], numeric(),
-                              nrows*n.files), nrow=nrows)
-    fs <- matrix(readBin(normOut$fs[i], numeric(), nrows*n.files),
-                         nrow=nrows)
-    initialCalls <- matrix(readBin(normOut$initialCalls[i], integer(),
-                                   nrows*n.files), nrow=nrows)
-    initialCalls[-index,] <- NA
-    rparams <- getGenotypeRegionParams(alleleA[index,]-alleleB[index,],
-                                       initialCalls[index,],
-                                       fs[index,], verbose=FALSE)
-    rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE, d0s=d0s)
-    params <- get("params", myenv)
-    params$centers <- params$centers[overall_pos,]
-    params$scales <- params$scales[overall_pos,]
-    params$N <- params$N[overall_pos,]
-    params  <- replaceAffySnpParamsSingle(params, rparams, index)
 
-    #############
-    #############
-    #############
-    fileParsCentersBefore <- file.path(outDir, "centersBefore.txt")
-    fileParsScalesBefore <- file.path(outDir, "scalesBefore.txt")
-    fileParsNBefore <- file.path(outDir, "nBefore.txt")
-    tmpSave <- params$centers
-    dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                             c("AA", "AB", "BB"))
-    suppressWarnings(write.table(tmpSave, fileParsCentersBefore, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    tmpSave <- params$scales
-    dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                             c("AA", "AB", "BB"))
-    suppressWarnings(write.table(tmpSave, fileParsScalesBefore, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    tmpSave <- params$N
-    dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                             c("AA", "AB", "BB"))
-    suppressWarnings(write.table(tmpSave, fileParsNBefore, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    #############
-    #############
-    #############
-    
+  alleleA <- normOut[['alleleA']]
+  alleleB <- normOut[['alleleB']]
+  initialCalls <- normOut[['initialCalls']]
+  fs <- normOut[['fs']]
+  f0 <- normOut[['f0']]
+  snr <- normOut[['snr']]
 
-    myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, params, fs)
-    dimnames(myDist) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                             basename(files),
-                             c("AA", "AB", "BB"))
-    
-    ## Temporarily saving
-    fileDistBeforeAA <- file.path(outDir, "distBeforeAA.txt")
-    suppressWarnings(write.table(myDist[,, 1], fileDistBeforeAA, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    fileDistBeforeAB <- file.path(outDir, "distBeforeAB.txt")
-    suppressWarnings(write.table(myDist[,, 2], fileDistBeforeAB, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    fileDistBeforeBB <- file.path(outDir, "distBeforeBB.txt")
-    suppressWarnings(write.table(myDist[,, 3], fileDistBeforeBB, append=TRUE,
-                                 quote=FALSE, sep="\t", col.names=(i==1)))
-    ## end
-    
-    ##SAVE THE ABOVE
-    myDist[,,-2] <- balance*myDist[,,-2]
-    XIndex <- integer()
-    if (length(grep("chrX", normOut$initialCalls[i])) > 0)
-      XIndex <- 1:nrows
-
-    maleIndex <- rep(FALSE, n.files)
-    initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
-    LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
-
-    if (recalibrate){
-      for(k in 1:3)
-        initialCalls[ initialCalls == k & LLR < minLLRforCalls[k]] <- NA
-
-      rparams <- getGenotypeRegionParams(alleleA-alleleB,
-                                         initialCalls,
-                                         fs, verbose=FALSE)
-      rparams <- updateAffySnpParamsSingle(rparams, thePriors, d0s=d0s)
-
-      #############
-      #############
-      #############
-      fileParsCentersAfter <- file.path(outDir, "centersAfter.txt")
-      fileParsScalesAfter <- file.path(outDir, "scalesAfter.txt")
-      fileParsNAfter <- file.path(outDir, "nAfter.txt")
-      tmpSave <- rparams$centers
-      dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                            c("AA", "AB", "BB"))
-      suppressWarnings(write.table(tmpSave, fileParsCentersAfter, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-      tmpSave <- rparams$scales
-      dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                            c("AA", "AB", "BB"))
-      suppressWarnings(write.table(tmpSave, fileParsScalesAfter, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-      tmpSave <- rparams$N
-      dimnames(tmpSave) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                            c("AA", "AB", "BB"))
-      suppressWarnings(write.table(tmpSave, fileParsNAfter, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-      #############
-      #############
-      #############
-
-      ## Assess movement
-      move <- rparams$centers-params$centers
-      dimnames(move) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                             c("AA", "AB", "BB"))
-      fileMove <- file.path(outDir, "move.txt")
-      suppressWarnings(write.table(move, fileMove, append=TRUE,
-                                   quote=FALSE, sep="\t",
-                                   col.names=(i==1)))
-      ## END
-      
-      myDist <- getAffySnpDistanceSingle56(alleleA-alleleB, rparams, fs)
-      dimnames(myDist) <- list(tmpdf[["man_fsetid"]][overall_pos],
-                               basename(files),
-                               c("AA", "AB", "BB"))
-
-      fileDistAfterAA <- file.path(outDir, "distAfterAA.txt")
-      suppressWarnings(write.table(myDist[,, 1], fileDistAfterAA, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-      fileDistAfterAB <- file.path(outDir, "distAfterAB.txt")
-      suppressWarnings(write.table(myDist[,, 2], fileDistAfterAB, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-      fileDistAfterBB <- file.path(outDir, "distAfterBB.txt")
-      suppressWarnings(write.table(myDist[,, 3], fileDistAfterBB, append=TRUE,
-                                   quote=FALSE, sep="\t", col.names=(i==1)))
-
-      ### SAVE THE ABOVE
-      myDist[,,-2] <- balance*myDist[,,-2]
-      initialCalls <- getAffySnpCalls56(myDist, XIndex, maleIndex, verbose=FALSE)
-      LLR <- getAffySnpConfidence56(myDist, initialCalls, XIndex, maleIndex, verbose=FALSE)
-      rm(myDist)
+  ## these are for debugging
+    if (oligoDEBUG){
+        dim1 <- c(nrow(tmpdf), 3)
+        centersB4 <- ff(vmode='double', dim=dim1,
+                        pattern=file.path(outDir, 'centersB4-'))
+        scalesB4 <- ff(vmode='double', dim=dim1,
+                       pattern=file.path(outDir, 'scalesB4-'))
+        nB4 <- ff(vmode='double', dim=dim1,
+                  pattern=file.path(outDir, 'nB4-'))
+        distB4 <- ff(vmode='double', dim=c(nrow(tmpdf), n.files, 3),
+                     pattern=file.path(outDir, 'distB4-'))
+        centersAftr <- ff(vmode='double', dim=dim1,
+                          pattern=file.path(outDir, 'centersAftr-'))
+        scalesAftr <- ff(vmode='double', dim=dim1,
+                         pattern=file.path(outDir, 'scalesAftr-'))
+        nAftr <- ff(vmode='double', dim=dim1,
+                    pattern=file.path(outDir, 'nAftr-'))
+        distAftr <- ff(vmode='double', dim=c(nrow(tmpdf), n.files, 3),
+                       pattern=file.path(outDir, 'distAftr-'))
+        moveSz <- ff(vmode='double', dim=dim1,
+                     pattern=file.path(outDir, 'moveSz-'))
+        dbgs <- c("centersB4", "scalesB4", "nB4", "distB4",
+                  "centersAftr","scalesAftr", "nAftr", "distAftr", "moveSz")
+        sapply(dbgs, function(x) open(get(x)))
     }
-    callsConfidence <- LLR2conf(initialCalls, LLR, readBin(normOut$snr, numeric(), n.files), pkgname)
+    ## end debug
 
-    rownames(initialCalls) <- rownames(LLR) <- rownames(callsConfidence) <- tmpdf[["man_fsetid"]][overall_pos]
-    colnames(initialCalls) <- colnames(LLR) <- colnames(callsConfidence) <- basename(files)
+  dim2 <- c(nrow(tmpdf), n.files)
+  calls <- ff(vmode='integer', dim=dim2,
+                 pattern=file.path(outDir, 'crlmm-calls-'))
+  conf <- ff(vmode='double', dim=dim2,
+                 pattern=file.path(outDir, 'crlmm-confs-'))
+  llr <- ff(vmode='double', dim=dim2,
+                 pattern=file.path(outDir, 'crlmm-llr-'))
+  objs <- c("alleleA", "alleleB", "initialCalls", "fs", "f0", "snr",
+            "calls", "conf", "llr")
+  sapply(objs, function(x) open(get(x)))
 
-    suppressWarnings(write.table(initialCalls,
-                                 file.path(outDir, "crlmm-calls.txt"),
-                                 append=TRUE, quote=FALSE, sep="\t",
-                                 col.names=(i==1)))
-    suppressWarnings(write.table(LLR,
-                                 file.path(outDir, "crlmm-llr.txt"),
-                                 append=TRUE, quote=FALSE, sep="\t",
-                                 col.names=(i==1)))
-    suppressWarnings(write.table(callsConfidence,
-                                 file.path(outDir, "crlmm-conf.txt"),
-                                 append=TRUE, quote=FALSE, sep="\t",
-                                 col.names=(i==1)))
+  i <- 1
+  for (snps in batches){
+      ## these do not have hapmap calls
+      index <- which(Index[snps])
     
-    if (verbose)
-      setTxtProgressBar(pb, i)
+      initialCalls[-index,] <- NA
+      rparams <- getGenotypeRegionParams(alleleA[index,, drop=FALSE]-alleleB[index,,drop=FALSE],
+                                         initialCalls[index,,drop=FALSE],
+                                         fs[index,,drop=FALSE], verbose=FALSE)
+      rparams <- updateAffySnpParamsSingle(rparams, thePriors, verbose=FALSE, d0s=d0s)
+
+      ## get params only for the snps in batch
+      params <- get("params", myenv)
+      params$centers <- params$centers[snps,]
+      params$scales <- params$scales[snps,]
+      params$N <- params$N[snps,]
+      params  <- replaceAffySnpParamsSingle(params, rparams, index)
+
+      if (oligoDEBUG){
+          centersB4[snps,] <- params$centers
+          scalesB4[snps,] <- params$scales
+          nB4[snps,] <- params$N
+      }
+
+      theA <- alleleA[snps,, drop=FALSE]
+      theB <- alleleB[snps,, drop=FALSE]
+      theFS <- fs[snps,, drop=FALSE]
+
+      myDist <- getAffySnpDistanceSingle56(theA-theB, params, theFS)
+    
+      if (oligoDEBUG){
+          distB4[snps,,] <- myDist
+      }
+
+      myDist[,,-2] <- balance*myDist[,,-2]
+      xindex <- which(XIndex[snps])
+
+      maleIndex <- rep(FALSE, n.files)
+      tmpIC <- getAffySnpCalls56(myDist, xindex, maleIndex, verbose=FALSE)
+
+      LLR <- getAffySnpConfidence56(myDist, tmpIC, xindex, maleIndex, verbose=FALSE)
+      
+      if (recalibrate){
+          for(k in 1:3)
+              tmpIC[ tmpIC == k & LLR < minLLRforCalls[k]] <- NA
+
+          rparams <- getGenotypeRegionParams(theA-theB, tmpIC, theFS, verbose=FALSE)
+          rparams <- updateAffySnpParamsSingle(rparams, thePriors, d0s=d0s)
+
+          if (oligoDEBUG){
+              centersAftr[snps,] <- rparams$centers
+              scalesAftr[snps,] <- rparams$scales
+              nAftr[snps,] <- rparams$N
+              moveSz[snps,] <- rparams$centers-params$centers
+          }
+      
+          myDist <- getAffySnpDistanceSingle56(theA-theB, rparams, theFS)
+
+          if (oligoDEBUG){
+              distAftr[snps,,] <- myDist
+          }
+
+          myDist[,,-2] <- balance*myDist[,,-2]
+          tmpIC <- getAffySnpCalls56(myDist, xindex, maleIndex, verbose=FALSE)
+          initialCalls[snps,] <- tmpIC
+          LLR <- getAffySnpConfidence56(myDist, tmpIC, xindex, maleIndex, verbose=FALSE)
+          rm(myDist)
+      } ##recalibrate
+
+      calls[snps,] <- tmpIC
+      llr[snps,] <- LLR
+      conf[snps,] <- LLR2conf(tmpIC, LLR, snr[], pkgname)
+
+      if (verbose)
+          setTxtProgressBar(pb, i)
+      i <- i+1
   }
-  if (verbose) close(pb)
-  return(TRUE)
+  rownames(calls) <- rownames(llr) <- rownames(conf) <- tmpdf[['man_fsetid']]
+  colnames(calls) <- colnames(llr) <- colnames(conf) <- files
+  rownames(alleleA) <- rownames(alleleB) <- rownames(initialCalls) <- tmpdf[['man_fsetid']]
+  colnames(alleleA) <- colnames(alleleB) <- colnames(initialCalls) <- files
+  dimnames(fs) <- list(tmpdf[['man_fsetid']], files)
+  ## names(f0) <- names(snr) <- files
+  for (obj in objs){
+      save(list=obj, file=file.path(outDir, paste(obj, '.RData', sep='')))
+      close(get(obj))
+  }
+    if (oligoDEBUG){
+        for (obj in dbgs){
+            save(list=obj, file=file.path(outDir, paste(obj, '.RData', sep='')))
+            close(get(obj))
+        }
+    }
+  
+  return(list(alleleA=alleleA, alleleB=alleleB, initialCalls=initialCalls,
+              fs=fs, f0=f0, snr=snr, calls=calls,
+              conf=conf, llr=llr))
+}
+
+getSnpNames <- function(pkgname){
+    conn <- db(get(pkgname))
+    sql <- paste("SELECT man_fsetid FROM featureSet",
+                 "WHERE man_fsetid LIKE 'SNP%'")
+    snps <- dbGetQuery(conn, sql)[[1]]
+    sort(snps)
 }
 
 getSnpLocInfo <- function(pkgname){
-  tmpdf <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid, chrom, physical_pos FROM featureSet WHERE man_fsetid LIKE 'SNP%'")
-  tmpdf[is.na(tmpdf$chrom), "chrom"] <- 0
-  tmpdf[is.na(tmpdf$physical_pos), "physical_pos"] <- 0
-  tmpdf <- tmpdf[order(tmpdf$man_fsetid),]
-  tmpdf[["index"]] <- 1:nrow(tmpdf)
-  tmpdf <- tmpdf[order(tmpdf$chrom, tmpdf$physical_pos, tmpdf$man_fsetid),]
-  return(tmpdf)
+  tmpdf <- dbGetQuery(db(get(pkgname)),
+                      paste("SELECT man_fsetid, chrom",
+                            "FROM featureSet WHERE man_fsetid LIKE 'SNP%'"))
+##   i <- is.na(tmpdf[['chrom']])
+##   tmpdf[i, 'chrom'] <- 0
+##   tmpdf[["index"]] <- 1:nrow(tmpdf)
+  tmpdf[order(tmpdf[['man_fsetid']]),]
 }
 
+getProbeInfo <- function(pkgname){
+    tmp <- dbGetQuery(db(get(pkgname)),
+                      paste("SELECT fid, man_fsetid, allele",
+                            "FROM pmfeature INNER JOIN featureSet USING(fsetid)"))
+    tmp[order(tmp$man_fsetid, tmp$allele),]
+}

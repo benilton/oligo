@@ -1,3 +1,92 @@
+liteNormalization2 <- function(celFiles, destDir, batch_size=40000,
+                               verbose=TRUE, check=FALSE){
+  ## Check existence of directory (destination)
+  ## The destDir should not exist (yet)
+  if (file.exists(destDir))
+      stop(message(destDir, " already exists. Use the name of a non-existing directoty."))
+  dir.create(destDir)
+
+  if (check){
+      if (length(chiptype <- unique(readChipTypesFromCels(celFiles))) > 1)
+          stop("CEL files do not have the same chip type")
+  }else{
+      chiptype <- readChipTypesFromCels(celFiles[1])
+  }
+  
+  ## Determine pkg and number of files to read at once
+  pkgname <- cleanPlatformName(chiptype)
+  stopifnot(requireAnnotation(pkgname))
+  conn <- db(get(pkgname))
+  nfeat <- dbGetQuery(conn, "SELECT row_count FROM table_info WHERE tbl='pmfeature'")[[1]]
+  nCels <- length(celFiles)
+
+  ## how many CELs simultaneously?
+  nfiles <- max((batch_size * 20 * length(celFiles)) %/% nfeat, 1)
+  batches <- splitIndicesByLength(1:nCels, nfiles)
+
+  normData <- ff(vmode='double', dim=c(nfeat, nCels),
+                 pattern=file.path(destDir, 'normData-'))
+  open(normData)
+
+  ## Get probe data
+  sql <- paste("SELECT fid, man_fsetid, allele, strand",
+               "FROM pmfeature INNER JOIN featureSet",
+               "WHERE man_fsetid LIKE 'SNP%'")
+  snpInfo <- dbGetQuery(conn, sql)
+  pnVec <- paste(snpInfo[['man_fsetid']],
+                 c('A', 'B')[snpInfo[['allele']]+1],
+                 c('S', 'A')[snpInfo[['strand']]+1])
+  snpInfo[['man_fsetid']] <- snpInfo[['allele']] <- snpInfo[['strand']] <- NULL
+  i <- order(pnVec)
+  snpInfo <- snpInfo[i,]
+  snpInfo[['pnVec']] <- pnVec[i]
+  rm(i)
+  rownames(snpInfo) <- NULL
+
+  
+  ## load reference
+  load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
+  reference <- sort(reference)
+
+  if (verbose){
+    message("Normalization.")
+    pb <- txtProgressBar(min=1, max=length(batches), style=3, initial=1)
+  }
+  n2t <- normalize.quantiles.use.target
+  for (i in 1:length(batches)){
+      cels <- batches[[i]]
+      normData[,cels] <- n2t(readCEL(celFiles[cels], snpInfo[['fid']]),
+                             reference, copy=FALSE)
+      rm(cels)
+      if (verbose) setTxtProgressBar(pb, i)
+  }
+  if (verbose) close(pb)
+
+  nsnps <- dbGetQuery(conn, 'SELECT COUNT(*) FROM featureSet WHERE man_fsetid LIKE "SNP%"')[[1]]
+  dim1 <- c(nsnps, length(celFiles))
+  alleleAA <- ff(vmode='double', dim=dim1, pattern=file.path(destDir, 'alleleA-antisense-'))
+  alleleAS <- ff(vmode='double', dim=dim1, pattern=file.path(destDir, 'alleleA-sense-'))
+  alleleBA <- ff(vmode='double', dim=dim1, pattern=file.path(destDir, 'alleleB-antisense-'))
+  alleleBS <- ff(vmode='double', dim=dim1, pattern=file.path(destDir, 'alleleB-sense-'))
+
+  ## FINISH THIS LATER
+  ## rowsNorm: rows in normData by pnVec
+  rowsNorm <- split(1:nrow(normData), pnVec)
+  batches <- splitIndicesByLength(rowsNorm, batch_size)
+
+  
+  close(normData)
+  close(alleleAA)
+  close(alleleAS)
+  close(alleleBA)
+  close(alleleBS)
+  
+}
+
+
+
+
+
 liteNormalization <- function(celFiles, destDir, batch_size=40000, verbose=TRUE){
   ## Check existence of directory (destination)
   ## The destDir should not exist (yet)
@@ -893,4 +982,162 @@ saveAppendMatrix <- function(x, fname, i){
   suppressWarnings(write.table(x, fname, append=TRUE,
                                quote=FALSE, sep="\t",
                                col.names=(i==1)))
+}
+
+
+justCRLMMv4 <- function(filenames, tmpdir, batch_size=40000,
+                        minLLRforCalls=c(5, 1, 5), recalibrate=TRUE,
+                        balance=1.5, verbose=TRUE, pkgname){
+  stopifnot(!(missing(tmpdir)|file.exists(tmpdir)))
+  tmpdir <- gsub("\\/$", "",  tmpdir)
+  
+  ## PHENODATA
+  ## gender is not a key thing here
+  ## algorithm behaves robustly...
+  phenoData <- new("AnnotatedDataFrame",
+                   data=data.frame(gender=rep("female",
+                   length(filenames))))
+  
+  
+  if (length(chiptype <- unique(readChipTypesFromCels(filenames))) > 1){
+      print(table(chiptype))
+      stop("CEL files do not have the same chip type")
+  }
+
+  if (missing(pkgname))
+    pkgname <- cleanPlatformName(chiptype)
+  requireAnnotation(pkgname, verbose=verbose)
+
+  sql.tmp <- "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' AND chrom = 'X'"
+  snps.chrX <- dbGetQuery(db(get(pkgname)), sql.tmp)[[1]]
+  rm(sql.tmp)
+  sns <- basename(filenames)
+  liteNormalization(filenames, destDir=tmpdir, batch_size=batch_size, verbose=verbose)
+  filenames <- file.path(tmpdir, paste("normalized-", basename(filenames), sep=""))
+
+  analysis <- data.frame(v1=c("annotation", "nsamples", "batch_size"),
+                         v2=c(pkgname, length(filenames), batch_size),
+                         stringsAsFactors=FALSE)
+  write.table(analysis, file.path(tmpdir, "analysis.txt"), row.names=FALSE,
+              col.names=FALSE, quote=FALSE, sep="\t")
+
+  snps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
+  snps <- split(snps, rep(1:length(snps), each=batch_size, length.out=length(snps)))
+
+  theSNR <- matrix(NA, nrow=length(snps), ncol=length(filenames))
+
+  prefix <- "SELECT fid, man_fsetid, pmfeature.allele, pmfeature.strand FROM featureSet, pmfeature WHERE man_fsetid IN ("
+  suffix <- ") AND pmfeature.fsetid = featureSet.fsetid ORDER BY fid"
+  allSnps <- dbGetQuery(db(get(pkgname)), "SELECT man_fsetid FROM featureSet WHERE man_fsetid LIKE 'SNP%' ORDER BY man_fsetid")[[1]]
+
+
+  if (verbose){
+    message("Genotyping.")
+    pb <- txtProgressBar(min=1, max=length(snps), style=3, initial=1)
+  }
+  
+  for (i in 1:length(snps)){
+    mid <- paste("'", snps[[i]],"'",  collapse=", ", sep="")
+    sql <- paste(prefix, mid, suffix)
+    tmp <- dbGetQuery(db(get(pkgname)), sql)
+    pnVec <- paste(tmp[["man_fsetid"]],
+                   c("A", "B")[tmp[["allele"]]+1],
+                   c("S", "A")[tmp[["strand"]]+1], sep="")
+    idx <- order(pnVec)
+    tmp[["man_fsetid"]] <- tmp[["allele"]] <- tmp[["strand"]] <- NULL
+
+    pms <- readCelIntensities(filenames, indices=tmp[["fid"]])
+    pms <- pms[idx,, drop=FALSE]
+    dimnames(pms) <- NULL
+    colnames(pms) <- sns
+    theSumm <- basicRMA(pms, pnVec[idx], normalize=FALSE, background=FALSE, verbose=FALSE)
+    colnames(theSumm) <- sns
+    sqs <- sqsFrom(theSumm)
+
+    saveAppendMatrix(allele(sqs, "A", "antisense"),
+                     file.path(tmpdir, "alleleA-antisense.txt"), i)
+    saveAppendMatrix(allele(sqs, "B", "antisense"),
+                     file.path(tmpdir, "alleleB-antisense.txt"), i)
+    saveAppendMatrix(allele(sqs, "A", "sense"),
+                     file.path(tmpdir, "alleleA-sense.txt"), i)
+    saveAppendMatrix(allele(sqs, "B", "sense"),
+                     file.path(tmpdir, "alleleB-sense.txt"), i)
+
+    annotation(sqs) <- pkgname
+    phenoData(sqs) <- phenoData
+    rm(pms, mid, sql, tmp, pnVec, idx)
+
+    ### TRYING CRLMM HERE
+    correction <- fitAffySnpMixture(sqs, verbose=FALSE)
+    theF <- correction$fs
+    rownames(theF) <- featureNames(sqs)
+    saveAppendMatrix(theF[,,1],
+                     file.path(tmpdir, "antisense-f.txt"), i)
+    saveAppendMatrix(theF[,,2],
+                     file.path(tmpdir, "sense-f.txt"), i)
+    rm(theF)
+    theSNR[i, ] <- correction$snr
+
+    load(system.file(paste("extdata/", pkgname, "CrlmmInfo.rda", sep=""), package=pkgname))
+    myenv <- get(paste(pkgname,"Crlmm",sep="")); rm(list=paste(pkgname,"Crlmm",sep=""))
+    thePriors <- get("priors", myenv)
+    snpsIn <- match(featureNames(sqs), allSnps)
+    myenv$hapmapCallIndex <- myenv$hapmapCallIndex[snpsIn]
+    myenv$params$centers <- myenv$params$centers[snpsIn,,]
+    myenv$params$scales <- myenv$params$scales[snpsIn,,]
+    myenv$params$N <- myenv$params$N[snpsIn,]
+
+    Index <- which(!get("hapmapCallIndex",myenv))
+    myCalls <- matrix(NA,dim(sqs)[1],dim(sqs)[2])
+    myCalls[Index,] <- getInitialAffySnpCalls(correction,Index,verbose=FALSE)
+    rparams <- getAffySnpGenotypeRegionParams(sqs, myCalls, correction$fs,
+                                              subset=Index,verbose=FALSE)
+    oneStrand <- apply(is.na(getM(sqs[,1])[,1,]), 1,
+                       function(v) ifelse(length(ll <- which(v))==0, 0, ll))
+    rparams <- updateAffySnpParams(rparams, thePriors, oneStrand, verbose=FALSE)
+    params  <- replaceAffySnpParams(get("params",myenv), rparams, Index)
+    myDist <- getAffySnpDistance(sqs, params, correction$fs)
+    myDist[,,-2,] <- balance*myDist[,,-2,]
+    
+    XIndex <- which(snps[i] %in% snps.chrX)
+    myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex=NULL,verbose=FALSE)
+    LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE)
+
+    if(recalibrate){
+      for(k in 1:3)
+        myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
+      rm(LLR)
+      myCalls[, theSNR[i,] < 3.675] <- NA
+      rparams <- getAffySnpGenotypeRegionParams(sqs, myCalls,
+                                                correction$fs,
+                                                verbose=FALSE)
+                                                rm(myCalls)
+      rparams <- updateAffySnpParams(rparams, thePriors, oneStrand)
+      myDist <- getAffySnpDistance(sqs, rparams, correction$fs, verbose=FALSE)
+##      save(myDist, file=paste(randomName, "DONT-REMOVEME", i, sep="."))
+      myDist[,,-2,] <- balance*myDist[,,-2,]
+      rm(oneStrand)
+      myCalls <- getAffySnpCalls(myDist,XIndex, maleIndex=NULL, verbose=FALSE)
+      LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex=NULL,verbose=FALSE)
+      pacc <- as.matrix(LLR2conf(myCalls, LLR, matrix(theSNR[i,], nrow=1), pkgname))
+      dimnames(myCalls) <- dimnames(LLR) <- dimnames(pacc) <- list(snps[[i]], sns)
+      saveAppendMatrix(myCalls, file.path(tmpdir, "crlmm-calls.txt"), i)
+      saveAppendMatrix(LLR, file.path(tmpdir, "crlmm-llr.txt"), i)
+      saveAppendMatrix(pacc, file.path(tmpdir, "crlmm-conf.txt"), i)
+    }
+    
+    rm(myDist, correction, Index, k, LLR, myCalls, myenv, params, rparams, snpsIn, sqs, XIndex, pacc)
+    if (verbose) setTxtProgressBar(pb, i)
+  }
+  if (verbose) close(pb)
+
+  ## remove normalized CEL
+  cat("Removing temporary files ... ")
+  sapply(list.celfiles(tmpdir, full.names=T), unlink)
+  cat("OK.\n")
+
+  snr <- matrix(exp(colMeans(log(theSNR))), nrow=1)
+  writeBin(as.numeric(snr), file.path(tmpdir, "snr"))
+  colnames(snr) <- sns
+  write.table(snr, file.path(tmpdir, "crlmm-snr.txt"), quote=FALSE, sep="\t", col.names=TRUE, row.names=FALSE)
 }

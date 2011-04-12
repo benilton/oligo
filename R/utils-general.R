@@ -593,3 +593,12 @@ setMethod("MAplot", "matrix",
                      refSamples=refSamples, which=which, pch=pch,
                      summaryFun=summaryFun, main=main, pairs=pairs, ...)
           })
+
+readCEL <- function(cels, fid){
+    g <- function(x) read.celfile(x, TRUE)[['INTENSITY']][['MEAN']]
+    if (missing(fid)){
+        sapply(cels, g)
+    }else{
+        sapply(cels, function(x) g(x)[fid])
+    }
+}

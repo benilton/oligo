@@ -87,13 +87,15 @@ paCalls(object, method, ..., verbose=TRUE)
   Benilton Carvalho
 }
 \examples{
+\dontrun{
 if (require(oligoData) & require(pd.huex.1.0.st.v2)){
   data(affyExonFS)
-  ## Get only 1 samples for example
-  dabgP = paCalls(affyExonFS[, 1])
-  dabgPS = paCalls(affyExonFS[, 1], "PSDABG")
+  ## Get only 2 samples for example
+  dabgP = paCalls(affyExonFS[, 1:2])
+  dabgPS = paCalls(affyExonFS[, 1:2], "PSDABG")
   head(dabgP) ## for probe
   head(dabgPS) ## for probeset
+}
 }
 }
 \keyword{manip}

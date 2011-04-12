@@ -33,7 +33,7 @@ importMethodsFrom(oligoClasses, allele, bothStrands, calls, db,
 importFrom(affxparser, createCel, readCelHeader, readCelIntensities,
            updateCel)
 
-importFrom(affyio, read.celfile.header)
+importFrom(affyio, read.celfile.header, read.celfile)
 
 importFrom(Biobase, assayDataElement, assayDataElementReplace,
            assayDataNew)
@@ -64,6 +64,9 @@ importFrom(utils, packageDescription, read.delim, read.table,
            setTxtProgressBar, txtProgressBar, write.table)
 
 importFrom(Biostrings, letterFrequency)
+
+importFrom(ff, ff)
+##importFrom(ff, open, finalizer, close, 'finalizer<-', delete)
 
 ## EXPORTS
 

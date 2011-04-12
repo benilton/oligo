@@ -190,7 +190,7 @@ SEXP rma_c_call(SEXP PMmat,  SEXP PM_rowIndexList, SEXP N_probes, SEXP norm_flag
     Rprintf("Calculating Expression\n");
   }
 
-  outvec = do_RMA2(PMmat, PM_rowIndexList);
+  PROTECT(outvec = do_RMA2(PMmat, PM_rowIndexList));
 
   /* now lets put names on the matrix */
 
@@ -204,7 +204,7 @@ SEXP rma_c_call(SEXP PMmat,  SEXP PM_rowIndexList, SEXP N_probes, SEXP norm_flag
   SET_VECTOR_ELT(dimnames,0,names);
   setAttrib(outvec, R_DimNamesSymbol, dimnames);
   
-  UNPROTECT(3);
+  UNPROTECT(4);
   return outvec;
 }
 

@@ -72,7 +72,7 @@ get.summary.code <- function(name){
                      "rlm", "log.average", "log.median", "median.log",
                      "log.2nd.largest", "lm")
     name <- match.arg(name, summMethods)
-    code <- c(1:9)[name ==summary.names]
+    code <- c(1:9)[name == summMethods]
     code
 }
 

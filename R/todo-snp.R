@@ -454,6 +454,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
     fs[fs < 0] <- 0
     f0 <- median(fs)
   }else{
+      i1 <- i2 <- NULL
     ffvecapply(fs[i1:i2][fs[i1:i2] < 0] <- 0, X=fs, BATCHBYTES=ocProbesets()*J*8)
     f0 <- rep(NA, J)
     if (bs){
