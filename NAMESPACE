@@ -68,6 +68,8 @@ importFrom(Biostrings, letterFrequency)
 importFrom(ff, ff, ffvecapply, clone, filename, is.ff, 'finalizer<-', vmode)
 ##importFrom(ff, open, finalizer, close, 'finalizer<-', delete)
 
+import(zlibbioc)
+
 ## EXPORTS
 
 exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
