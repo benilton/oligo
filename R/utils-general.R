@@ -452,16 +452,16 @@ maplot <- function (x, transfo=log2, groups, refSamples,
             A <- 1/2 * sweep(x, 1, medianchip, FUN = "+")
             for (i in which) {
                 if (missing(refSamples)){
-                    main <- paste(colnames(x)[i], main)
+                    themain <- paste(colnames(x)[i], main)
                 }else{
                     if (length(refSamples) == 1) {
                         if (i != refSamples)
-                            main <- paste(colnames(x)[i], "vs", colnames(x)[refSamples])
+                            themain <- paste(colnames(x)[i], "vs", colnames(x)[refSamples])
                     } else {
-                        main <- paste(colnames(x)[i], main)
+                        themain <- paste(colnames(x)[i], main)
                     }
                 }
-                basicMvAplot(A[, i], M[, i], main=main, xlab="A",
+                basicMvAplot(A[, i], M[, i], main=themain, xlab="A",
                              ylab="M", plotFun=plotFun, pch=pch, ...)
             }
         } else {
