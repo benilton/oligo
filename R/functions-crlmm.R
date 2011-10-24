@@ -5,14 +5,21 @@
 
 rowEntropy <- function(p) rowMeans(rowSums(log2(p^p), dims=2))
 
-getSnpFragmentLength <- function(object){
-  snps <- paste("(", paste("'", featureNames(object), "'", collapse=", ", sep=""), ")")
-  sql <- paste("SELECT man_fsetid, fragment_length FROM featureSet WHERE man_fsetid IN", snps)
-  tmp <- dbGetQuery(db(get(annotation(object))), sql)
-  idx <- match(featureNames(object), tmp[["man_fsetid"]])
-  return(tmp[idx, "fragment_length"])
+getSnpFragmentLength <- function(object, enzyme){
+    ## returns data.frame with 3 columns:
+    ## SNP | Enzyme | Length
+    conn <- db(get(annotation(object)))
+    snps <- paste("(", paste("'", featureNames(object), "'", collapse=", ", sep=""), ")")
+    sql <- paste("SELECT man_fsetid, enzyme, length",
+                 "FROM fragmentLength",
+                 "INNER JOIN featureSet USING(fsetid)",
+                 "WHERE man_fsetid IN", snps)
+    if (!missing(enzyme)){
+        stopifnot(length(enzyme) == 1)
+        sql <- paste(sql, "AND enzyme =", enzyme)
+    }
+    dbGetQuery(conn, sql)
 }
-
 
 snpGenderCall <- function(object){
   XIndex <- getChrXIndex(object)
@@ -85,7 +92,12 @@ fitAffySnpMixture <- function(object, df1=3, df2=5,
 #####  names(snr) <- sampleNames(object)
   
   if(verbose) cat("Fitting mixture model to ", J, " arrays. Epsilon must reach ", eps, ".\n",sep="")
+  ## getSnpFragmentLength now returns a table SNP | enzyme | length
+  ## and it is possible that there are 2+ lengths by SNPxEnzyme combo
+  ## 21 Oct 2011
   L <- getSnpFragmentLength(object)
+  L <- aggregate(L$length, by=list(SNP=L$man_fsetid), mean)
+  L <- L[match(featureNames(object), L$SNP), 2]
   fix <- which(is.na(L))
   L[fix] <- median(L, na.rm=T)
   rm(fix)

@@ -126,18 +126,14 @@ bgMASFS <- function(object, griddim=16){
 #################
 ## This is visible for user
 
-bgCorrectMethods <- function()
+backgroundCorrectionMethods <- function()
     c('rma', 'mas', 'LESN')
 
 setMethod("backgroundCorrect", "matrix",
-          function(object, method=bgCorrectMethods(), extra, verbose=TRUE){
-            method <- match.arg(method, bgCorrectMethods())
+          function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE){
+            method <- match.arg(method, backgroundCorrectionMethods())
             if (verbose) cat("Background correcting... ")
             if (method == "rma"){
-                copy <- TRUE
-                if (!missing(extra))
-                    if ('copy' %in% names(extra))
-                        copy <- extra[['copy']]
                 out <- rma.background.correct(object, copy=copy)
             } else if (method == "mas"){
                 if (missing(extra))
@@ -176,16 +172,13 @@ setMethod("backgroundCorrect", "matrix",
           })
 
 setMethod("backgroundCorrect", "ff_matrix",
-          function(object, method=bgCorrectMethods(), extra, verbose=TRUE){
-            method <- match.arg(method, bgCorrectMethods())
+          function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE){
+            method <- match.arg(method, backgroundCorrectionMethods())
             if (verbose) cat("Background correcting... ")
             if (method == "rma"){
-                copy <- TRUE
-                if (!missing(extra))
-                    if ('copy' %in% names(extra))
-                        copy <- extra[['copy']]
                 out <- rmaBgCorrectLDSmaster(object, copy=copy)
             } else if (method == "mas"){
+                ## TODO
                 stop("To implement: mas on ff")
             } else if (method == "LESN"){
                 method <- 2
@@ -207,11 +200,15 @@ setMethod("backgroundCorrect", "ff_matrix",
 
 
 setMethod("backgroundCorrect", "FeatureSet",
-          function(object, method=bgCorrectMethods(), extra, verbose=TRUE, ...){
-              method <- match.arg(method, bgCorrectMethods())
+          function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...){
+              method <- match.arg(method, backgroundCorrectionMethods())
+              if (copy)
+                  object <- cloneFS(object)
               if (method == "rma"){
-                  pm(object) <- backgroundCorrect(pm(object), method="rma",
-                                                  extra, verbose=FALSE)
+                  pm(object) <- backgroundCorrect(pm(object),
+                                                  method="rma",
+                                                  copy=FALSE, extra=extra,
+                                                  verbose=verbose)
               }else if (method == "mas"){
                   griddim <- 16
                   if (!missing(extra))
@@ -219,7 +216,10 @@ setMethod("backgroundCorrect", "FeatureSet",
                           griddim <- extra[["griddim"]]
                   out <- bgMASFS(object, griddim=griddim)
               }else if (method == "LESN"){
-                  pm(object) <- backgroundCorrect(pm(object), method="LESN", extra, verbose=FALSE)
+                  pm(object) <- backgroundCorrect(pm(object),
+                                                  method="LESN",
+                                                  copy=FALSE, extra=extra,
+                                                  verbose=verbose)
               }
               object
           })

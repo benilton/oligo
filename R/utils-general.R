@@ -335,6 +335,20 @@ seqColors <- function(n){
   fff(n)
 }
 
+seqColors2 <- function(n){
+    cols <- c("#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59",
+              "#EF6548", "#D7301F", "#B30000", "#7F0000")
+    fff <- colorRampPalette(cols)
+    fff(n)
+}
+
+divColors <- function(n){
+    cols <- c("#053061", "#2166AC", "#4393C3", "#92C5DE", "#D1E5F0",
+              "#FDDBC7", "#F4A582", "#D6604D", "#B2182B", "#67001F")
+    fff <- colorRampPalette(cols)
+    fff(n)
+}
+
 ## gcrma-like stuff
 ## from jean
 
@@ -601,4 +615,32 @@ readCEL <- function(cels, fid){
     }else{
         sapply(cels, function(x) g(x)[fid])
     }
+}
+
+txtMsg <- function(..., domain=NULL, appendLF=FALSE)
+    message(..., domain=domain, appendLF=appendLF)
+
+msgOK <- function()
+    message("OK")
+
+cloneFS <- function(fs){
+    nms <- sort(assayDataElementNames(fs))
+    if (is(assayDataElement(fs, nms[1]), "ff_matrix")){
+        if (nms[1] == "exprs" & length(nms) == 1){
+            c1 <- clone(assayDataElement(fs, nms),
+                           pattern=file.path(ldPath(), 'oligo-exprs-'))
+            ad <- assayDataNew(exprs=c1)
+            slot(fs, "assayData") <- ad
+        }else if (all (nms == c("channel1", "channel2"))){
+            c1 <- clone(assayDataElement(fs, 'channel1'),
+                        pattern=file.path(ldPath(), 'oligo-channel1-'))
+            c2 <- clone(assayDataElement(fs, 'channel2'),
+                        pattern=file.path(ldPath(), 'oligo-channel2-'))
+            ad <- assayDataNew(channel1=c1, channel2=c2)
+            slot(fs, "assayData") <- ad
+        }else{
+            stop("Don't know how to clone elements: ", nms)
+        }
+    }
+    return(fs)
 }

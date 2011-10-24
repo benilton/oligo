@@ -10,17 +10,21 @@
   \subsection{NEW FEATURES}{
     \itemize{
       \item New summarization methods are available: PLM, PLMr, PLMrr
-  and PLMrc. These are implemented in the basicPLM function and also
-  available through the summarize() interface (method=c('plm', 'plmr',
-  'plmrr', 'plmrc'));
-  \item fitPLM(), NUSE() and RLE() are now available;
-  \item Presence/Absence calls are available through paCalls();
-  \item MAplot method with advanced options;
+      and PLMrc. These are implemented in the basicPLM function and also
+      available through the summarize() interface (method=c('plm', 'plmr',
+      'plmrr', 'plmrc'));
+      \item fitPLM(), NUSE() and RLE() are now available;
+      \item Presence/Absence calls are available through paCalls();
+      \item MAplot method with advanced options;
     }
   }
   \subsection{BUG FIXES}{
     \itemize{
-      \item 'pm<-', 'mm<-', 'bg<-' now work with ff_matrix replacements
+      \item 'pm<-', 'mm<-', 'bg<-' now work with ff_matrix replacements;
+      \item boxplot() now uses the correct (default) ylim if transfo !=
+      log2;
+      \item Fixed documentation for hist(), boxplot(), fitPLM();
+      \item Fixed image for PLMset on NimbleGen arrays;
     }
   }
 }

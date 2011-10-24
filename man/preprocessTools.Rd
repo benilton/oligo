@@ -1,4 +1,6 @@
 \name{summarize}
+\alias{backgroundCorrectionMethods}
+\alias{normalizationMethods}
 \alias{summarize}
 \alias{summarize-methods}
 \alias{summarize,matrix-method}
@@ -12,24 +14,30 @@
 \alias{normalize-methods}
 \alias{normalize,matrix-method}
 \alias{normalize,ff_matrix-method}
+\alias{normalize,FeatureSet-method}
 \alias{normalizeToTarget}
 \alias{normalizeToTarget-methods}
 \alias{normalizeToTarget,matrix-method}
 \alias{normalizeToTarget,ff_matrix-method}
 
 \title{
-  Tools for microarray preprocessing
+  Tools for microarray preprocessing.
 }
+
 \description{
-  Preprocess microarray data. Includes background correction,
+  These are tools to preprocess microarray data. They include background correction,
   normalization and summarization methods.
 }
+
 \usage{
-backgroundCorrect(object, method="rma", extra, verbose=TRUE, ...)
+backgroundCorrectionMethods()
+normalizationMethods()
+backgroundCorrect(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
 summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE, ...)
-normalize(object, method="quantile", copy=TRUE, verbose=TRUE, ...)
+normalize(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
 normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
 }
+
 \arguments{
   \item{object}{Object containing probe intensities to be preprocessed.}
   \item{method}{String determining which method to use at that
@@ -43,17 +51,23 @@ normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
   \item{verbose}{Logical flag for verbosity.}
   \item{\dots}{Arguments to be passed to methods.}
 }
+
 \details{
   Number of rows of \code{object} must match the length of
   \code{probes}.
-  Currently, only the following methods are implemented:
-  - backgroundCorrectiong: rma.background
-  - normalize: quantile
-  - summarization: median-polish
 }
+
 \value{
-  Expression matrix with \code{length(unique(probes))} rows and
-  \code{ncol(object)} columns.
+  \code{backgroundCorrectionMethods} and \code{normalizationMethods}
+  will return a character vector with the methods implemented currently.
+  
+  \code{backgroundCorrect}, \code{normalize} and
+  \code{normalizeToTarget} will return a matrix with same dimensions as
+  the input matrix. If they are applied to a FeatureSet object, the PM
+  matrix will be used as input.
+
+  The \code{summarize} method will return a matrix with
+  \code{length(unique(probes))} rows and \code{ncol(object)} columns.
 }
 
 \examples{
@@ -69,5 +83,17 @@ intensities[1:20, 1:3]
 expression[1:20, 1:3]
 target <- rnorm(np*nps)
 normalizedToTarget <- normalizeToTarget(intensities, target)
+
+if (require(oligoData) & require(pd.hg18.60mer.expr)){
+  ## Example of normalization with real data
+  data(nimbleExpressionFS)
+  boxplot(nimbleExpressionFS, main='Original')
+  for (mtd in normalizationMethods()){
+    message('Normalizing with ', mtd)
+    res <- normalize(nimbleExpressionFS, method=mtd, verbose=FALSE)
+    boxplot(res, main=mtd)
+  }
+}
+
 }
 \keyword{manip}

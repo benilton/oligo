@@ -1,8 +1,8 @@
 .onAttach <- function(libname, pkgname) {
   version <- packageDescription("oligo", field="Version")
-  message(getBar())
-  message("Welcome to oligo version ", version)
-  message(getBar())
+  packageStartupMessage(getBar())
+  packageStartupMessage("Welcome to oligo version ", version)
+  packageStartupMessage(getBar())
 }
 
 .onUnload <- function( libpath ){

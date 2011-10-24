@@ -4,8 +4,7 @@ Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
 Depends: R (>= 2.13.0),
-         oligoClasses (>= 1.13.9),
-         preprocessCore (>= 1.13.5)
+         oligoClasses (>= 1.13.9)
 Imports: affyio (>= 1.19.4),
          affxparser (>= 1.23.1),
          Biobase (>= 2.11.8),
@@ -14,6 +13,7 @@ Imports: affyio (>= 1.19.4),
          ff,
          graphics,
          methods,
+         preprocessCore (>= 1.13.5),
          splines,
          stats,
          utils,
@@ -61,4 +61,4 @@ Collate: AllGenerics.R
          methods-PLMset.R
          zzz.R
 LazyLoad: Yes
-biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, DNAMethylation, ExonArray, GeneExpression, Bioinformatics, DataImport, Transcription, ChIPchip, CopyNumberVariants, CpGIsland
+biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP, DifferentialExpression, ExonArray, GeneExpression, Bioinformatics, DataImport

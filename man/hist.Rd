@@ -1,5 +1,6 @@
-\name{hist-methods}
+\name{hist}
 \docType{methods}
+\alias{hist}
 \alias{hist-methods}
 \alias{hist,FeatureSet-method}
 \alias{hist,ExpressionSet-method}

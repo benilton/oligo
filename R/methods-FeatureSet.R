@@ -147,7 +147,7 @@ setMethod("boxplot", signature(x="FeatureSet"),
             
             rgs <- vector("list", nchns)
             for (i in 1:nchns){
-                tmp <- log2(exprs(channel(eset, chns[i])))
+                tmp <- transfo(exprs(channel(eset, chns[i])))
                 rgs[[i]] <- range(apply(tmp, 2, range))
                 rm(tmp)
             }
@@ -155,7 +155,14 @@ setMethod("boxplot", signature(x="FeatureSet"),
             dots[["ylim"]] <- rgs
             
             res <- vector("list", nchns)
-            par(mfrow=c(nchns, 1))
+            doPlot <- dots[['plot']]
+            if (is.null(doPlot)){
+                doPlot <- TRUE
+            }else{
+                doPlot <- as.logical(doPlot)
+            }
+            if (doPlot & nchns > 1)
+                par(mfrow=c(nchns, 1))
             for (i in 1:nchns){
                 tmp <- transfo(exprs(channel(eset, chns[i])))
                 dots[["x"]] <- as.data.frame(tmp)
@@ -311,7 +318,7 @@ setMethod("MAplot", "FeatureSet",
               stopifnot(is.function(what))
               maplot(x=what(object), transfo=transfo, groups=groups,
                      refSamples=refSamples, which=which, pch=pch,
-                     summaryFun=summaryFun, main=main, pairs=pairs, ...)
+                     summaryFun=summaryFun, plotFun=plotFun, main=main, pairs=pairs, ...)
           })
 
 setMethod("getX", "FeatureSet",
@@ -413,3 +420,21 @@ setMethod("getPlatformDesign",
             return(get(pdn,pos=paste("package:",pdn,sep="")))
           })
 getPD <- getPlatformDesign
+
+getFragmentLength <- function(object, enzyme, type=c('snp', 'cn')){
+    ## returns data.frame with 3 columns:
+    ## SNP-CNP | Enzyme | Length
+    conn <- db(get(annotation(object)))
+    type <- match.arg(type)
+    suffix <- ifelse(type=='snp', '', 'CNV')
+    probetbl <- paste('pmfeature', suffix, sep='')
+    fltbl <- paste('fragmentLength', suffix, sep='')
+    fsettbl <- paste('featureSet', suffix, sep='')
+    sql <- paste('SELECT man_fsetid, enzyme, length', 'FROM',
+                 fltbl, 'INNER JOIN', fsettbl, 'USING(fsetid)')
+    if (!missing(enzyme)){
+        stopifnot(length(enzyme) == 1)
+        sql <- paste(sql, 'WHERE enzyme =', enzyme)
+    }
+    dbGetQuery(conn, sql)
+}

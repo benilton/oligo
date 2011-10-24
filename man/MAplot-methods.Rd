@@ -80,7 +80,7 @@ MAplot(object, ...)
   }
 }
 \value{Plot}
-\author{Benilton Carvalho - heavily based on Ben Bolstad's original
+\author{Benilton Carvalho - based on Ben Bolstad's original
   MAplot function.}
 \seealso{\code{\link{plot}}, \code{\link{smoothScatter}}}
 \examples{

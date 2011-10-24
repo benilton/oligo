@@ -1,5 +1,6 @@
-\name{boxplot-methods}
+\name{boxplot}
 \docType{methods}
+\alias{boxplot}
 \alias{boxplot-methods}
 \alias{boxplot,ExpressionSet-method}
 \alias{boxplot,FeatureSet-method}

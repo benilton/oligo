@@ -3,7 +3,7 @@
 \title{Fit a Probe Level Model to Affymetrix Genechip Data.}
 \description{
   This function converts an
-  \code{\link[affy:AffyBatch-class]{AffyBatch}} into an 
+  \code{\link[oligoClasses:FeatureSet-class]{FeatureSet}} into an 
   \code{\link{PLMset}} by fitting a specified robust linear model to the
   probe level data.
 }
@@ -20,7 +20,7 @@ fitPLM(object,model=PM ~ -1 + probes +samples,
 }
 
 \arguments{
-  \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
+  \item{object}{an \code{\link[oligoClasses:FeatureSet-class]{FeatureSet}} object}
   \item{model}{A formula describing the model to fit. This is slightly
     different from the standard method of specifying formulae in R. Read
     the description below}
@@ -47,23 +47,34 @@ fitPLM(object,model=PM ~ -1 + probes +samples,
 }
 \details{
   This function fits robust Probe Level linear Models to all the probesets in
-  an \code{\link[affy:AffyBatch-class]{AffyBatch}}. This is carried out
+  an \code{\link[oligoClasses:FeatureSet-class]{FeatureSet}}. This is carried out
   on a probeset by probeset basis. The user has quite a lot of control
   over which model is used and what outputs are stored. For more details
-  please read the vignette. 
+  please read the vignette and the original documentation in the affyPLM
+  package.
 }
+
+\note{
+  This is the initial port of \code{fitPLM} to oligo. Some features
+  found on the original work by Ben Bolstad (in the affyPLM package) may
+  not be yet available. If you found one of this missing
+  characteristics, please contact Benilton Carvalho.
+}
+
 \value{
   An \code{\link{PLMset}}
 }
 
-\author{Ben Bolstad \email{bmb@bmbolstad.com}}
+\author{This is a port from Ben Bolstad's work implemented in the
+  affyPLM package. Problems with the implementation in oligo should be
+  reported to Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>}
 
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
     Oligonucleotide Array Data: Background, Normalization and
     Summarization}. PhD Dissertation. University of California,
   Berkeley.}
 
-\seealso{\code{\link[oligo]{rma}}}
+\seealso{\code{\link[oligo]{rma}}, \code{\link[oligo]{summarize}}}
 
 \examples{
 if (require(oligoData)){

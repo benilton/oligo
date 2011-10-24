@@ -34,7 +34,7 @@ setGeneric("pmSequence", function(object, ...) standardGeneric("pmSequence"))
 setGeneric("mmSequence", function(object) standardGeneric("mmSequence"))
 setGeneric("pmOffset", function(object) standardGeneric("pmOffset"))
 setGeneric("pmChr", function(object) standardGeneric("pmChr"))
-setGeneric("pmFragmentLength", function(object) standardGeneric("pmFragmentLength"))
+setGeneric("pmFragmentLength", function(object, enzyme, type=c('snp', 'cn')) standardGeneric("pmFragmentLength"))
 setGeneric("pmAllele", function(object) standardGeneric("pmAllele"))
 setGeneric("pmStrand", function(object) standardGeneric("pmStrand"))
 setGeneric("pmPosition", function(object) standardGeneric("pmPosition"))
@@ -45,11 +45,11 @@ setGeneric("getY", function(object, type) standardGeneric("getY"))
 ###
 
 setGeneric("backgroundCorrect",
-           function(object, method="rma", extra, verbose=TRUE, ...)
+           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
            standardGeneric("backgroundCorrect"))
 
 setGeneric("normalize",
-           function(object, method="quantile", copy=TRUE, verbose=TRUE, ...)
+           function(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
            standardGeneric("normalize"))
 
 setGeneric("summarize",

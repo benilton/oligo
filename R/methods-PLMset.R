@@ -332,24 +332,28 @@ setMethod("image", signature(x="PLMset"),
                    use.log=TRUE, add.legend=FALSE, standardize=FALSE, col=NULL, main, ...){
             
             if (is.null(col)){
-              col.weights <- terrain.colors(25)
-              col.resids <- pseudoPalette(low="blue", high="red", mid="white")
-              col.pos.resids <- pseudoPalette(low="white", high="red")
-              col.neg.resids <- pseudoPalette(low="blue", high="white")
+              col.weights <- rev(seqColors(25))
+              col.resids <- divColors(25)
+              col.pos.resids <- seqColors2(25)
+              col.neg.resids <- rev(seqColors(25))
+              col.sign.resids <- c('blue', 'red')
             } else {
               col.weights <- col
               col.resids <- col
               col.pos.resids <- col
               col.neg.resids <- col
+              col.sign.resids <- col
             }
             
             type <- match.arg(type)
 
             ## get dims
             if (tolower(x@manufacturer) == 'affymetrix'){
+                affy <- TRUE
                 rows <-  x@nrow
                 cols <-  x@ncol
             }else{
+                affy <- FALSE
                 cols <-  x@nrow
                 rows <-  x@ncol
             }
@@ -375,7 +379,7 @@ setMethod("image", signature(x="PLMset"),
                 idx <- order(factor(tmp[['fsetid']], levels=rns))
             }
             tmp <- tmp[idx,]
-            xycoor <- cbind(tmp[['x']], tmp[['y']]) + (x@manufacturer == "affymetrix")
+            xycoor <- cbind(tmp[['x']], tmp[['y']]) + affy
             nPM <- nrow(xycoor)
             
             ## pensar em solucao, pq nem todo design tem MM
@@ -395,7 +399,7 @@ setMethod("image", signature(x="PLMset"),
                         idx <- order(factor(tmp[['fsetid']], levels=rns))
                     }
                     tmp <- tmp[idx,]
-                    xycoor2 <- cbind(tmp[['x']], tmp[['y']]) + (x@manufacturer == "affymetrix")
+                    xycoor2 <- cbind(tmp[['x']], tmp[['y']]) + affy
                 }else{
                     xycoor2 <- xycoor
                 }
@@ -462,7 +466,11 @@ setMethod("image", signature(x="PLMset"),
                 }
 
                 ## this line flips the matrix around so it is correct
-                weightmatrix <-as.matrix(rev(as.data.frame(weightmatrix)))
+                if (affy){
+                    weightmatrix <- as.matrix(rev(as.data.frame(weightmatrix)))
+                }else{
+                    weightmatrix <- as.matrix(rev(as.data.frame(t(weightmatrix))))
+                }
                 if (add.legend){
                   layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
                   par(mar=c(4, 4, 5, 3))
@@ -512,7 +520,11 @@ setMethod("image", signature(x="PLMset"),
                 
                 ## this line
                 ## flips the matrix around so it is correct
-                residsmatrix<- as.matrix(rev(as.data.frame(residsmatrix)))
+                if (affy){
+                    residsmatrix<- as.matrix(rev(as.data.frame(residsmatrix)))
+                }else{
+                    residsmatrix<- as.matrix(rev(as.data.frame(t(residsmatrix))))
+                }
                 if (use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
@@ -576,8 +588,11 @@ setMethod("image", signature(x="PLMset"),
                 }
 
                 ##this line flips the matrix around so it is correct
-                residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
-
+                if (affy){
+                    residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+                }else{
+                    residsmatrix <- as.matrix(rev(as.data.frame(t(residsmatrix))))
+                }
                 if (use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
@@ -634,8 +649,11 @@ setMethod("image", signature(x="PLMset"),
 
                   
                 ## this line flips the matrix around so it is correct
-                residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
-
+                if (affy){
+                    residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+                }else{
+                    residsmatrix <- as.matrix(rev(as.data.frame(t(residsmatrix))))
+                }
                 if(use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
@@ -692,8 +710,11 @@ setMethod("image", signature(x="PLMset"),
                 }
 
                 ## this line flips the matrix around so it is correct
-                residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
-
+                if (affy){
+                    residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+                }else{
+                    residsmatrix <- as.matrix(rev(as.data.frame(t(residsmatrix))))
+                }
                 if (add.legend){
                   layout(matrix(c(1, 2), 1, 2), width=c(9, 1))
                   par(mar=c(4, 4, 5, 3))
@@ -705,7 +726,7 @@ setMethod("image", signature(x="PLMset"),
 
                 }
                 
-                image(residsmatrix,col=col.resids,xaxt='n',
+                image(residsmatrix,col=col.sign.resids,xaxt='n',
                       yaxt='n',main=main.cur,zlim=c(-1,1))
                 if (add.legend){
                   par(mar=c(4, 0, 5, 3))
@@ -728,11 +749,16 @@ if( !isGeneric("boxplot") )
  
 
 setMethod("boxplot",signature(x="PLMset"),
-          function(x,type=c("NUSE","weights","residuals"),range=0,...){
+          function(x, type=c("NUSE","weights","residuals"), ...){
            
             compute.nuse <- function(which)
                 1/sqrt(colSums(x@weights[[1]][which,]))
-            
+
+            dots <- list(...)
+            if (is.null(dots[['col']]))
+                dots[['col']] <- darkColors(x@narrays)
+            if (is.null(dots[['range']]))
+                dots[['range']] <- 0
             
             type <- match.arg(type)
             model <- x@model.description$modelsettings$model
@@ -740,7 +766,6 @@ setMethod("boxplot",signature(x="PLMset"),
                 if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
                     grp.rma.se1.median <- rowMedians(se(x), na.rm=TRUE)
                     grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
-                    boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
                 } else {
                     ## not the default model try constructing them using weights.
                     which <-indexProbesProcessed(x)
@@ -753,31 +778,28 @@ setMethod("boxplot",signature(x="PLMset"),
                     }
                     grp.rma.se1.median <- rowMedians(ses)
                     grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
-                    boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
                 }
             } else if (type == "weights"){
-              ow <- options("warn")
-              options(warn=-1)
               if (x@model.description$R.model$response.variable == -1){
-                boxplot(data.frame(x@weights[[2]]), range=range, ...)
+                  dots[['x']] <- data.frame(x@weights[[2]])
               } else if (x@model.description$R.model$response.variable == 1){
-                boxplot(data.frame(x@weights[[1]]), range=range, ...)
+                  dots[['x']] <- data.frame(x@weights[[1]])
               } else {
-                boxplot(data.frame(rbind(x@weights[[1]],x@weights[[2]])), range=range, ...)
+                  dots[['x']] <- data.frame(rbind(x@weights[[1]],x@weights[[2]]))
               }
-              options(ow)
             } else if (type == "residuals"){
-              ow <- options("warn")
-              options(warn=-1)
               if (x@model.description$R.model$response.variable == -1){
-                boxplot(data.frame(x@residuals[[2]]), range=range, ...)
+                  dots[['x']] <- data.frame(x@residuals[[2]])
               } else if (x@model.description$R.model$response.variable == 1){
-                boxplot(data.frame(x@residuals[[1]]), range=range, ...)
+                  dots[['x']] <- data.frame(x@residuals[[1]])
               } else {
-                boxplot(data.frame(rbind(x@residuals[[1]],x@residuals[[2]])), range=range, ...)
+                  dots[['x']] <- data.frame(rbind(x@residuals[[1]],x@residuals[[2]]))
               }
-              options(ow)
             }
+            ow <- options("warn")
+            options(warn=-1)
+            do.call(boxplot, dots)
+            options(ow)
           })
 
 
@@ -904,7 +926,13 @@ setMethod("Mbox",signature("PLMset"),
             if (object@model.description$R.model$which.parameter.types[3] == 1){
                 medianchip <- rowMedians(coefs(object))
                 M <- sweep(coefs(object),1,medianchip, FUN='-')
-                boxplot(data.frame(M),range=range,...)
+                dots <- list(...)
+                if (is.null(dots[['range']]))
+                    dots[['range']] <- 0
+                if (is.null(dots[['col']]))
+                    dots[['col']] <- darkColors(ncol(M))
+                dots[['x']] <- data.frame(M)
+                do.call(boxplot, dots)
             } else {
               stop("It doesn't appear that a model with sample effects was used.")
             }
@@ -1196,8 +1224,6 @@ if (!isGeneric("nuse"))
   setGeneric("nuse",function(x,...)
              standardGeneric("nuse"))
 
-
-
 setMethod("nuse",signature(x="PLMset"),
           function(x,type=c("plot","values","stats","density"),ylim=c(0.9,1.2),...){
 
@@ -1223,24 +1249,37 @@ setMethod("nuse",signature(x="PLMset"),
             if (type == "values"){
                 return(grp.rma.rel.se1.mtx)
             } else if (type == "density"){
-                plotDensity(grp.rma.rel.se1.mtx,xlim=ylim,...)
+                res <- matDensity(grp.rma.rel.se1.mtx)
+                dots <- list(...)
+                dots[['ylim']] <- ylim
+                dots[['x']] <- res[['x']]
+                dots[['y']] <- res[['y']]
+                do.call('matplot', dots)
             } else if (type=="stats"){
                 Medians <- rowMedians(t(grp.rma.rel.se1.mtx))
-                Quantiles <- apply(grp.rma.rel.se1.mtx,2,quantile,prob=c(0.25,0.75))
+                Quantiles <- apply(grp.rma.rel.se1.mtx, 2,
+                                   quantile, prob=c(0.25,0.75),
+                                   na.rm=TRUE)
                 nuse.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])
                 rownames(nuse.stats) <- c("median","IQR")
                 return(nuse.stats)
             }
-            if (type == "plot"){	
-                boxplot(data.frame(grp.rma.rel.se1.mtx),ylim=ylim,range=0,...)
+            if (type == "plot"){
+                dots <- list(...)
+                if (is.null(dots[['range']]))
+                    dots[['range']] <- 0
+                if (is.null(dots[['ylim']]))
+                    dots[['ylim']] <- c(.9, 1.2)
+                if (is.null(dots[['col']]))
+                    dots[['col']] <- darkColors(ncol(grp.rma.rel.se1.mtx))
+                dots[['x']] <- data.frame(grp.rma.rel.se1.mtx)
+                do.call(boxplot, dots)
             }
           })
 
 if (!isGeneric("NUSE"))
   setGeneric("NUSE",function(x,...)
              standardGeneric("NUSE"))
-
-
 
 setMethod("NUSE",signature(x="PLMset"),
           function(x,type=c("plot","values","stats","density"),ylim=c(0.9,1.2),add.line=TRUE,...){
@@ -1253,19 +1292,9 @@ setMethod("NUSE",signature(x="PLMset"),
             }
           })
 
-
-
-
-
-
-
-            
 if (!isGeneric("RLE"))
   setGeneric("RLE",function(x,...)
              standardGeneric("RLE"))
-
-
-
 
 setMethod("RLE",signature(x="PLMset"),
             function(x,type=c("plot","values","stats","density"),ylim=c(-0.75,0.75),add.line=TRUE,...){
@@ -1285,7 +1314,12 @@ setMethod("RLE",signature(x="PLMset"),
                             rownames(RLE.stats) <- c("median","IQR")
                             return(RLE.stats)
                         } else if (type =="density"){
-                            plotDensity(sweep(coefs(x),1,medianchip,FUN='-'),xlim=ylim,...)
+                            res <- matDensity(sweep(coefs(x), 1, medianchip, FUN='-'))
+                            dots <- list(...)
+                            dots[['ylim']] <- ylim
+                            dots[['x']] <- res[['x']]
+                            dots[['y']] <- res[['y']]
+                            do.call('matplot', dots)
                         }
                     } else {
                         stop("It doesn't appear that a model with sample effects was used.")

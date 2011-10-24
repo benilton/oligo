@@ -52,7 +52,9 @@ importFrom(oligoClasses, list.celfiles, requireAnnotation,
 
 importFrom(preprocessCore, normalize.quantiles,
            normalize.quantiles.determine.target,
-           normalize.quantiles.use.target, rma.background.correct,
+           normalize.quantiles.use.target,
+           normalize.quantiles.in.blocks, normalize.quantiles.robust,
+           rma.background.correct,
            rcModelPLM, rcModelPLMr, rcModelPLMrr, rcModelPLMrc)
 
 importFrom(splines, ns)
@@ -81,19 +83,21 @@ exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
 export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        sequenceDesignMatrix, list.xysfiles, readSummaries,
        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
-       read.celfiles2, basicRMA, darkColors, seqColors,
-       getAffinitySplineCoefficients, getBaseProfile, basicPLM)
+       read.celfiles2, basicRMA, darkColors, seqColors, seqColors2,
+       divColors, getAffinitySplineCoefficients, getBaseProfile,
+       basicPLM)
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
  
 ## Testing
-exportMethods(backgroundCorrect, normalize, summarize, normalizeToTarget)
-export(plotM)
+exportMethods(backgroundCorrect, normalize, summarize,
+              normalizeToTarget)
+export(plotM, backgroundCorrectionMethods, normalizationMethods)
 
 exportMethods(intensity, probesetNames)
 
 ## PLM
-export("fitPLM", "NUSE", "RLE")
+export("fitPLM", "NUSE", "RLE", coefs, se)
 exportMethods("image", "paCalls")
 exportClasses(PLMset)

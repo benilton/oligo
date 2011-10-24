@@ -121,11 +121,39 @@ setMethod("pmOffset", "AffySNPPDInfo",
           })
 
 setMethod("pmFragmentLength", "AffySNPPDInfo",
-          function(object){
-            sql <- "select fid, fragment_length from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
-            tmp <- dbGetQuery(db(object), sql)
-            idx <- order(tmp[["fid"]])
-            tmp[idx, "fragment_length"]
+          function(object, enzyme, type=c('snp', 'cn')){
+              type <- match.arg(type)
+              suffix <- ifelse(type=='snp', '', 'CNV')
+              probetbl <- paste('pmfeature', suffix, sep='')
+              fltbl <- paste('fragmentLength', suffix, sep='')
+              fsettbl <- paste('featureSet', suffix, sep='')
+              conn <- db(object)
+              sql0 <- paste('SELECT fsetid, fid FROM', probetbl,
+                            'INNER JOIN', fsettbl, 'USING(fsetid)')
+              sql1 <- paste('SELECT DISTINCT fsetid, enzyme, length FROM', fltbl)
+              if (!missing(enzyme)){
+                  stopifnot(length(enzyme) == 1)
+                  sql1 <- paste(sql1, 'WHERE enzyme =', enzyme)
+              }
+              probeInfo <- dbGetQuery(conn, sql0)
+              probeInfo <- probeInfo[order(probeInfo$fid),]
+              probeInfo[['row']] <- 1:nrow(probeInfo)
+              flInfo <- dbGetQuery(conn, sql1)
+              flInfo <- flInfo[complete.cases(flInfo),]
+              enz <- unique(flInfo$enzyme)
+              f <- function(.x){
+                  tmpIn <- merge(probeInfo, subset(flInfo, enzyme==.x),
+                                 all.x=TRUE, sort=FALSE)
+                  tmpIn[['enzyme']] <- NULL
+                  tmpIn[['fsetid']] <- NULL
+                  tmpIn <- tmpIn[order(tmpIn$fid),]
+                  tmpIn[['fid']] <- NULL
+                  rownames(tmpIn) <- NULL
+                  tmpIn
+              }
+              out <- lapply(enz, f)
+              names(out) <- enz
+              out
           })
 
 setMethod("pmAllele", "AffySNPPDInfo",

@@ -2,12 +2,15 @@
 \docType{class}
 \alias{PLMset-class}
 \alias{PLMset}
-\alias{image,PLMset-method}
 \alias{show,PLMset-method}
 \alias{NUSE}
 \alias{RLE}
 \alias{NUSE,PLMset-method}
 \alias{RLE,PLMset-method}
+\alias{coefs}
+\alias{se}
+\alias{coefs,PLMset-method}
+\alias{se,PLMset-method}
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
@@ -64,14 +67,16 @@ chip.}
 }
 \section{Methods}{
   \describe{
-    \item{image}{\code{signature(x = "PLMset")}: creates an image
-      of the robust linear model fit weights for each sample.}
     \item{boxplot}{\code{signature(x = "PLMset")}: Boxplot of Normalized
       Unscaled Standard Errors (NUSE).}
     \item{NUSE}{\code{signature(x = "PLMset")} : Boxplot of Normalized
       Unscaled Standard Errors (NUSE) or NUSE values.}
     \item{RLE}{\code{signature(x = "PLMset")} : Relative Log Expression
       boxplot or values.}
+    \item{coefs}{\code{signature(object = "PLMset")}: Extractor for chip
+      coefficients}
+    \item{se}{\code{signature(object = "PLMset")}: Extractor for the
+	standard errors for chip coefficients}
  }
 }
 \note{This class is better described in the vignette.}
