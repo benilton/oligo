@@ -76,7 +76,7 @@ setMethod("normalize", "matrix",
 setMethod("normalize", "ff_matrix",
           function(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...){
             method <- match.arg(method)
-            if (verbose) txtMessage("Normalizing... ")
+            if (verbose) txtMsg("Normalizing... ")
             if (copy){
               out <- clone(object, pattern=file.path(ldPath(), "oligo-qn-"))
             }else{

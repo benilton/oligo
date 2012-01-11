@@ -1,6 +1,13 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
+\section{Changes in version 1.18}{
+  \subsection{BUG FIXES}{
+    \item Fixed message method when normalizing with large dataset
+    support;
+  }
+}
+
 \section{Changes in version 1.16}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
