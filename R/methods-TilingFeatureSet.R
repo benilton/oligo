@@ -129,6 +129,16 @@ setMethod("pmPosition", "TilingFeatureSet",
             tmp[["position"]]
           })
 
+setMethod("pmStrand","TilingFeatureSet",function(object)
+{
+	conn <- db(object)
+	sql <- paste("SELECT fid, strand", "FROM pmfeature", "INNER JOIN chrom_dict", "USING(chrom)")
+	tmp <- dbGetQuery(conn, sql)
+	tmp <- tmp[order(tmp[["fid"]]),]
+        return(tmp[["strand"]])
+}
+)
+
 
 setMethod("MAplot", "TilingFeatureSet",
           function(object, what=pm, transfo=log2, groups, refSamples, which,

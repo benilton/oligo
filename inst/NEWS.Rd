@@ -2,6 +2,9 @@
 \title{News for Package 'oligo'}
 
 \section{Changes in version 1.18}{
+  \subsection{USER VISIBLE CHANGES}{
+    \item pmStrand() now available for Affy-Tiling arrays (by Kristof De Beuf);
+  }
   \subsection{BUG FIXES}{
     \item Fixed message method when normalizing with large dataset
     support;
