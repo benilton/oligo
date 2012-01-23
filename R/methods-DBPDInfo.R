@@ -30,7 +30,7 @@ setMethod("getY", "DBPDInfo",
 
 ## from oligoClasses
 setMethod("pmindex", "DBPDInfo",
-          function(object, subset=NULL) { 
+          function(object, subset=NULL, target=NULL) { 
             if (!is.null(subset))
               warning("Subset not implemented (yet). Returning everything.")
             tmp <- dbGetQuery(db(object),
@@ -38,8 +38,16 @@ setMethod("pmindex", "DBPDInfo",
             sort(tmp)
           })
 
+setMethod("pmindex", "stArrayDBPDInfo",
+          function(object, subset=NULL, target='core'){
+            if (!is.null(subset))
+              warning("Subset not implemented (yet). Returning everything.")
+            tmp <- stArrayPmInfo(object, target=target, sortBy=NULL)[['fid']]
+            sort(tmp)
+          })
+
 setMethod("mmindex", "DBPDInfo",
-          function(object, subset=NULL){
+          function(object, subset=NULL, target='core'){
             if (!is.null(subset))
               warning("Subset not implemented (yet). Returning everything.")
             tmp <- dbGetQuery(db(object),
@@ -48,24 +56,29 @@ setMethod("mmindex", "DBPDInfo",
           })
 
 setMethod("probeNames", "DBPDInfo",
-          function(object, subset=NULL) {
+          function(object, subset=NULL, target=NULL) {
             if (!is.null(subset))
               warning("Subset not implemented (yet). Returning everything.")
             ## exon/gene arrays don't have a man_fsetid (it's actually
             ## fsetid)
-            hasMFSID <- 'man_fsetid' %in% dbListFields(db(object), 'featureSet')
-            if (hasMFSID){
-                sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
-                tmp <- dbGetQuery(db(object), sql)
-                res <- tmp[order(tmp[["fid"]], tmp[["man_fsetid"]]), "man_fsetid"]
-            }else{
-                sql <- "select fsetid, fid from pmfeature"
-                tmp <- dbGetQuery(db(object), sql)
-                res <- tmp[order(tmp[["fid"]], tmp[["fsetid"]]), "fsetid"]
-            }
+            sql <- "select man_fsetid, fid from featureSet, pmfeature where pmfeature.fsetid=featureSet.fsetid"
+            tmp <- dbGetQuery(db(object), sql)
+            res <- tmp[order(tmp[["fid"]], tmp[["man_fsetid"]]), "man_fsetid"]
             res
           })
 
+## Use selectors
+## Check order (getFid* returns everything sorted by fsetid)
+##             (usually, oligo uses everything sorted by fid)
+setMethod("probeNames", "stArrayDBPDInfo",
+          function(object, subset=NULL, target='core') {
+            if (!is.null(subset))
+              warning("Subset not implemented (yet). Returning everything.")
+            tmp <- stArrayPmInfo(object, target=target, sortBy=NULL)
+            as.character(tmp[order(tmp[["fid"]], tmp[["fsetid"]]), "fsetid"])
+          })
+
+## TODO: fix *Sequence to account for target
 setMethod("pmSequence", "AffySNPPDInfo",
           function(object){
             sql <- "select seq from sequence, pmfeature where pmfeature.fid=sequence.fid order by pmfeature.fid"

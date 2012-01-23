@@ -24,8 +24,8 @@ setGeneric("getContainer", function(object, probeType=c("pm", "bg")) standardGen
 
 setGeneric("runDate", function(object) standardGeneric("runDate"))
 
-setGeneric("probeNames", function(object, subset=NULL) standardGeneric("probeNames"))
-setGeneric("probesetNames", function(object) standardGeneric("probesetNames"))
+setGeneric("probeNames", function(object, subset=NULL, ...) standardGeneric("probeNames"))
+setGeneric("probesetNames", function(object, ...) standardGeneric("probesetNames"))
 setGeneric("bgindex", function(object, ...) standardGeneric("bgindex"))
 setGeneric("pmindex", function(object, ...) standardGeneric("pmindex"))
 setGeneric("mmindex", function(object, ...) standardGeneric("mmindex"))

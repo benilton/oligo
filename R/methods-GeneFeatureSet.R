@@ -35,21 +35,17 @@ setMethod("bgSequence", "GeneFeatureSet",
           })
 
 
-setMethod("probeNames", "GeneFeatureSet",
-          function(object, subset=NULL){
-            res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
-            idx <- order(res[["fid"]])
-            as.character(res[idx, "fsetid"])
-          })
+## setMethod("probeNames", "GeneFeatureSet",
+##           function(object, subset=NULL){
+##             res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
+##             idx <- order(res[["fid"]])
+##             as.character(res[idx, "fsetid"])
+##           })
 
 setMethod("rma", "GeneFeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL, target="core"){
             target <- match.arg(target, c("core", "probeset"))
-            if (target == "core"){
-              featureInfo <- getFidMetaProbesetCore(object)
-            }else if (target == "probeset"){
-              featureInfo <- getFidProbeset(object)
-            }
+            featureInfo <- stArrayPmInfo(object, target=target)
             theClass <- class(exprs(object))
             pmi <- featureInfo[["fid"]]
             pnVec <- as.character(featureInfo[["fsetid"]])

@@ -1178,7 +1178,7 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
                    background.method="RMA.2", normalize.method="quantile",
                    background.param=list(), normalize.param=list(),
                    output.param=NULL, model.param=NULL,
-                   verbosity.level=0){
+                   verbosity.level=0, target='core'){
 
   if (!is(object, "FeatureSet")) {
     stop(paste("argument is", class(object), "fitPLM requires FeatureSet"))
@@ -1204,7 +1204,7 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
   if (!is.null(subset)){
     n.probesets <- length(subset)
   } else {
-    n.probesets <- length(probesetNames(object))
+    n.probesets <- length(probesetNames(object, target=target))
   }
 
   ## to avoid having to pass location information to the c code, we will just call the R code method
@@ -1215,14 +1215,14 @@ fitPLM <- function(object, model=PM ~ -1 + probes + samples,
   if (is.element(background.method, c("gcrma", "GCRMA")) & background){
       stop("background correction via gcrma not yet implemented.")
   }
-  pms <- pm(object, subset)
+  pms <- pm(object, subset, target=target)
 
   if ('mmfeature' %in% dbListTables(db(get(pkgname)))){
       mms <- mm(object, subset)
   }else{
       mms <- matrix(0, 0, 0)
   }
-  pns <- probeNames(object, subset)
+  pns <- probeNames(object, subset, target=target)
   i <- order(pns)
   pms <- pms[i,, drop=FALSE]
   if (nrow(mms) != nrow(pms)){

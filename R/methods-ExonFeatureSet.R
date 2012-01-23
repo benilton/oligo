@@ -34,27 +34,19 @@ setMethod("bgSequence", "ExonFeatureSet",
               pmSequence[idx, "sequence"]
           })
 
-setMethod("probeNames", "ExonFeatureSet",
-          function(object, subset=NULL){
-            res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
-            idx <- order(res[["fid"]])
-            as.character(res[idx, "fsetid"])
-          })
+## setMethod("probeNames", "ExonFeatureSet",
+##           function(object, subset=NULL){
+##             res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
+##             idx <- order(res[["fid"]])
+##             as.character(res[idx, "fsetid"])
+##           })
 
 setMethod("rma", "ExonFeatureSet",
           function(object, background=TRUE, normalize=TRUE, subset=NULL, target="core"){
             target <- match.arg(target, c("core", "full", "extended", "probeset"))
             ## getFid...() will return results
-            ## sorted by man_fsetid
-            if (target == "core"){
-              featureInfo <- getFidMetaProbesetCore(object)
-            }else if (target == "full"){
-              featureInfo <- getFidMetaProbesetFull(object)
-            }else if (target == "extended"){
-              featureInfo <- getFidMetaProbesetExtended(object)
-            }else if (target == "probeset"){
-              featureInfo <- getFidProbeset(object)
-            }
+            ## sorted by fsetid
+            featureInfo <- stArrayPmInfo(object, target=target)
             theClass <- class(exprs(object))
             pmi <- featureInfo[["fid"]]
             pnVec <- as.character(featureInfo[["fsetid"]])
@@ -115,7 +107,7 @@ getRefDABG <- function(x){
 
 computePSDABG <- function(x){
     paProbe <- -log(paCalls(x, method="DABG", verbose=FALSE))
-    pns <- probeNames(x)
+    pns <- probeNames(x, target='probeset')
     n <- ncol(paProbe)+1
     theSum <- 2*rowsum(cbind(paProbe, 1), pns, reorder=FALSE)
     res <- pchisq(theSum[, -n, drop=FALSE], theSum[,n], lower.tail=FALSE)

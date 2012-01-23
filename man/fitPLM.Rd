@@ -16,7 +16,7 @@ fitPLM(object,model=PM ~ -1 + probes +samples,
        normalize.method="quantile", background.param=list(),
        normalize.param=list(), output.param=NULL,
        model.param=NULL,
-       verbosity.level=0)
+       verbosity.level=0, target="core")
 }
 
 \arguments{
@@ -43,7 +43,11 @@ fitPLM(object,model=PM ~ -1 + probes +samples,
     from the routine.}
   \item{model.param}{A list of parameters controlling model procedure}
   \item{verbosity.level}{An integer specifying how much to print
-    out. Higher values indicate more verbose. A value of 0 will print nothing}
+    out. Higher values indicate more verbose. A value of 0 will print
+    nothing}
+  \item{target}{Level of summarization to be used when handling ST array
+  (Exon/Gene). Allowed values for such array types are: \code{core} (Exon/Gene),
+  \code{full} (Exon), \code{extended} (Exon), \code{probeset} (Exon/Gene)}
 }
 \details{
   This function fits robust Probe Level linear Models to all the probesets in

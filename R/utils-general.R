@@ -186,42 +186,68 @@ getNgsColorsInfo <- function(path=".", pattern1="_532", pattern2="_635", ...){
 
 ## Selectors for probes - useful for exon/gene arrays
 
-getFidProbeset <- function(object){
+getFidProbeset <- function(object, sortBy='fsetid'){
+    if (!is.null(sortBy))
+        sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
   conn <- db(object)
   sql <- "SELECT fid, fsetid FROM pmfeature"
   featureInfo <- dbGetQuery(conn, sql)
-  featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
-  rownames(featureInfo) <- NULL
+  if (!is.null(sortBy)){
+      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+      rownames(featureInfo) <- NULL
+  }
   return(featureInfo)
 }
 
-getFidMetaProbesetCore <- function(object){
+getFidMetaProbesetCore <- function(object, sortBy='fsetid'){
+    if (!is.null(sortBy))
+        sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-  featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
-  rownames(featureInfo) <- NULL
+  if (!is.null(sortBy)){
+      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+      rownames(featureInfo) <- NULL
+  }
   return(featureInfo)
 }
 
-getFidMetaProbesetFull <- function(object){
+getFidMetaProbesetFull <- function(object, sortBy='fsetid'){
+    if (!is.null(sortBy))
+        sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN full_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-  featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
-  rownames(featureInfo) <- NULL
+  if (!is.null(sortBy)){
+      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+      rownames(featureInfo) <- NULL
+  }
   return(featureInfo)
 }
 
-getFidMetaProbesetExtended <- function(object){
+getFidMetaProbesetExtended <- function(object, sortBy='fsetid'){
+    if (!is.null(sortBy))
+        sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
   conn <- db(object)
   sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN extended_mps USING(fsetid)"
   featureInfo <- dbGetQuery(conn, sql)
-  featureInfo <- featureInfo[order(featureInfo[["fsetid"]]),]
-  rownames(featureInfo) <- NULL
+  if (!is.null(sortBy)){
+      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+      rownames(featureInfo) <- NULL
+  }
   return(featureInfo)
 }
 
+stArrayPmInfo <- function(object, target='core', sortBy='fsetid'){
+    ## *PmInfo returns a data.frame with 'fid' and 'fsetid'
+    target <- match.arg(target, c('probeset', 'core', 'full', 'extended'))
+    theFun <- switch(target,
+                     probeset=getFidProbeset,
+                     core=getFidMetaProbesetCore,
+                     full=getFidMetaProbesetFull,
+                     extended=getFidMetaProbesetExtended)
+    theFun(object, sortBy=sortBy)
+}
 
 ## Date/time extractors
 GetAffyTimeDateAsString <- function(filenames){

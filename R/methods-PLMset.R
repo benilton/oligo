@@ -810,6 +810,7 @@ setMethod("show", "PLMset",
             cat("size of arrays=", object@nrow, "x", object@ncol,"\n",sep="")
             
             ## Location from cdf env
+            ## TODO: BC - This must check the ST arrays for MPS
             num.ids <- length(unique(probeNames(get(annotation(object)))))
 
             cat("cdf=", object@cdfName,

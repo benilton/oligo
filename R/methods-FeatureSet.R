@@ -15,9 +15,10 @@ setReplaceMethod("intensity", signature(object="FeatureSet", value="matrix"),
                  })
 
 setMethod("probesetNames", "FeatureSet",
-          function(object)
-          unique(probeNames(object))
+          function(object, target=NULL)
+          unique(probeNames(object, target=target))
           )
+
           
 ## should geometry go to oligoClasses?
 ## or the opposite?
@@ -53,10 +54,12 @@ setReplaceMethod("bg", signature(object="FeatureSet", value="ff_matrix"),
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
+## TODO: repeat target for mm()
+
 setMethod("pm", "FeatureSet",
-          function(object, subset=NULL){
+          function(object, subset=NULL, target='core'){
             theClass <- class(exprs(object))
-            pmi <- pmindex(object, subset=subset)
+            pmi <- pmindex(object, subset=subset, target=target)
             if ("matrix" %in% theClass){
               out <- exprs(object)[pmi,, drop=FALSE]
             }else if ("ff_matrix" %in% theClass){
@@ -243,10 +246,10 @@ matDensity <- function(mat){
   list(x=all.x, y=all.y)
 }
 
-getProbeIndex <- function(x, type=c("pm", "mm", "bg", "both", "all")){
+getProbeIndex <- function(x, type=c("pm", "mm", "bg", "both", "all"), target='core'){
   type <- match.arg(type)
   if (type == "pm"){
-    idx <- pmindex(x)
+    idx <- pmindex(x, target=target)
   }else if (type == "mm"){
     idx <- mmindex(x)
   }else if (type == "bg"){
@@ -374,27 +377,28 @@ setMethod("pmChr", "FeatureSet",
           })
 
 setMethod("pmindex", "FeatureSet",
-          function(object, subset=NULL){
-            pmindex(getPlatformDesign(object), subset=subset)
+          function(object, subset=NULL, target='core'){
+            pmindex(getPlatformDesign(object), subset=subset, target=target)
           })
 
 setMethod("mmindex", "FeatureSet",
-          function(object, subset=NULL){
+          function(object, subset=NULL, target='core'){
             mmindex(getPD(object), subset=subset)
           })
 
 setMethod("probeNames", "FeatureSet",
-          function(object, subset=NULL) {
+          function(object, subset=NULL, target='core') {
             if (!is.null(subset))
               warning("ignoring subset arg, feature not implemented")
-            probeNames(getPlatformDesign(object))
+            probeNames(getPlatformDesign(object), target=target)
           })
 
 setMethod("bgindex", "FeatureSet",
-          function(object, subset=NULL){
+          function(object, subset=NULL, target='core'){
             bgindex(getPD(object), subset=subset)
           })
 
+## TODO: fix pmPosition to account for target
 setMethod("pmPosition", "FeatureSet",
           function(object){
             conn <- db(object)
