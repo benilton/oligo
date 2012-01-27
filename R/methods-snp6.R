@@ -382,7 +382,7 @@ normalizeOne <- function(celFiles, destDir, batch_size=40000, pkgname,
   ## Some are not annotated (Affymetrix files) and will get a 0 for the
   ## moment - need to sort later
   ## Order by SNP name
-  tmp <- getProbeInfo(pkgname)
+  tmp <- getSnpProbeInfo(pkgname)
   pnVec <- paste(tmp[["man_fsetid"]],
                  c("A", "B")[tmp[["allele"]]+1],
                  sep=":")
@@ -680,7 +680,7 @@ getSnpLocInfo <- function(pkgname){
   tmpdf[order(tmpdf[['man_fsetid']]),]
 }
 
-getProbeInfo <- function(pkgname){
+getSnpProbeInfo <- function(pkgname){
     tmp <- dbGetQuery(db(get(pkgname)),
                       paste("SELECT fid, man_fsetid, allele",
                             "FROM pmfeature INNER JOIN featureSet USING(fsetid)"))
