@@ -48,51 +48,58 @@ getProbeIndex <- function(object, probeType='pm', target='core', subset, sortBy=
 availProbeInfo <- function(object, probeType='pm', target='core'){
     ## FIXME: ST arrays have bg probes in pm tbl
     ## FIXME: ST arrays have targets in pm tbl (but same fields as pms?)
-    dbListFields(db(object), paste(probeType, 'feature', sep=''))
-}
-
-getProbeInfo <- function(object, field, probeType='pm', target='core',
-                         subset, sortBy='fid'){
-    ## FIXME!!!
-    probeType <- match.arg(probeType, getProbeTypes(object))
-    target <- match.arg(target, getProbeTargets(object, probeType=probeType))
-    avail2sort <- c('fid', 'man_fsetid')
-    sortBy <- match.arg(sortBy, avail2sort)
-    conn <- db(object)
-    tbl <- match.arg(paste(probeType, 'feature', sep=''), dbListTables(conn))
-    field <- match.arg(field, dbListFields(conn, tbl))
-    if (class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')){
-        ## FIXME: ST Arrays
-        flds <- unique(paste(c('fid', 'fsetid as man_fsetid', field), collapse=', '))
-        sql <- paste('SELECT', flds, 'FROM', tbl)
-        info <- dbGetQuery(conn, sql)
-    }else{
-        flds <- unique(paste(c('fid', 'man_fsetid', field), collapse=', '))
-        sql <- paste('SELECT', flds, 'FROM', tbl)
-        info <- dbGetQuery(conn, sql)
-    }
-    if (!missing(subset))
-        info <- subset(info, man_fsetid %in% subset)
-    info[order(info[[sortBy]], info[[setdiff(avail2sort, sortBy)]]),]
-}
-
-hyperTable <- function(object, probeType='pm', field=c('fid', 'man_fsetid')){
     isST <- class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')
     conn <- db(object)
     probeTable <- paste(probeType, 'feature', sep='')
-    field <- unique(c('man_fsetid', 'fid', field))
-    field[field == 'fid'] <- 'pmfeature.fid'
-    field[field == 'fsetid'] <- 'featureSet.man_fsetid'
-
-    ## For ST arrays, man_fsetid is fsetid
-    if (isST & ('man_fsetid' %in% field)){
-        field <- gsub('man_fsetid', 'fsetid', field)
-        changed <- TRUE
+    ptFields <- dbListFields(conn, probeTable)
+    probesetTable <- 'featureSet'
+    psFields <- dbListFields(conn, probesetTable)
+    if (isST & target!='probeset') psFields <- setdiff(psFields, 'transcript_cluster_id')
+    out <- list(ptFields, psFields)
+    names(out) <- c(probeTable, probesetTable)
+    if (isST & target!='probeset'){
+        mpsTable <- paste(target, 'mps', sep='_')
+        mpFields <- dbListFields(conn, mpsTable)
+        out[[3]] <- mpFields
+        names(out) <- c(probeTable, probesetTable, mpsTable)
     }
+    out
+}
+
+getProbeInfo <- function(object, field, probeType='pm', target='core',
+                         subset, sortBy=c('fid', 'man_fsetid', 'none')){
+    sortBy <- match.arg(sortBy) 
+    conn <- db(object)
+   
+    ## With ST arrays:
+    ## 1) fsetid is both fsetid and man_fsetid
+    ## 2) transcript_cluster_id is in both *mps and featureSet tables
+    ## 3) chrom/level/type_dict tables exist
+    isST <- class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')
+
+    if (missing(field)) field <- 'fid'
     
-    fields <- paste(field, collapse=', ')
-    sql <- paste('SELECT', fields, 'FROM', probeTable,
-                 'INNER JOIN featureSet USING(fsetid)')
+    probeTable <- paste(probeType, 'feature', sep='')
+    if (isST & target!='probeset'){
+        fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
+        fields <- paste(fields, collapse=', ')
+        mpsTable <- paste(target, 'mps', sep='_')
+        fields <- gsub('transcript_cluster_id',
+                       paste(mpsTable, '.transcript_cluster_id as transcript_cluster_id', sep=''),
+                       fields)
+        tables <- paste('pmfeature, featureSet,', mpsTable)
+        sql <- paste('SELECT', fields, 'FROM', tables,
+                     'WHERE pmfeature.fsetid=featureSet.fsetid AND',
+                     paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
+        rm(fields, mpsTable, tables)
+    }else{
+        fields <- unique(c('fid', 'man_fsetid', field))
+        fields <- paste(fields, collapse=', ')
+        sql <- paste('SELECT', fields, 'FROM',
+                     probeTable, 'INNER JOIN featureSet',
+                     'USING(fsetid)')
+        rm(fields)
+    }
     info <- dbGetQuery(conn, sql)
     field2dict <- c('chrom', 'level', 'type')
     addMerge <- field2dict[field2dict %in% field]
@@ -102,11 +109,14 @@ hyperTable <- function(object, probeType='pm', field=c('fid', 'man_fsetid')){
             sql <- paste("SELECT * FROM",dict)
             info <- merge(info, dbGetQuery(conn, sql), all.x=TRUE, sort=FALSE)
             info[[item]] <- NULL
+            rm(dict, sql)
         }
     names(info) <- gsub('\\_id$', '', names(info))
-    ## For ST arrays, change fsetid back to man_fsetid (if originally
-    ## asked for man_fsetid)
-    if (changed)
-        names(info) <- gsub('fsetid', 'man_fsetid', names(info))
+    if (sortBy!='none'){
+        i2 <- setdiff(c('fid', 'man_fsetid'), sortBy)
+        info <- info[order(info[[sortBy]], info[[i2]]),]
+        rownames(info) <- NULL
+        rm(i2)
+    }
     info
 }
