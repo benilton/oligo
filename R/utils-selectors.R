@@ -22,28 +22,28 @@ getProbeTargets <- function(object, probeType='pm'){
            bg=c('genomic', 'antigenomic'))
 }
 
-getProbeIndex <- function(object, probeType='pm', target='core', subset, sortBy='fid'){
-    probeType <- match.arg(probeType, getProbeTypes(object))
-    target <- match.arg(target, getProbeTargets(object, probeType=probeType))
-    sortBy <- match.arg(sortBy, c('fid', 'man_fsetid'))
-    if (class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')){
-        ## ST Arrays
-        info <- switch(target,
-               core=oligo:::getFidMetaProbesetCore(object, NULL),
-               full=oligo:::getFidMetaProbesetFull(object, NULL),
-               extended=oligo:::getFidMetaProbesetExtended(object, NULL),
-               probeset=oligo:::getFidProbeset(object, NULL))
-        names(info) <- c('fid', 'man_fsetid')
-    }else{
-        sql <- paste('SELECT fid, man_fsetid FROM',
-                     paste(probeType, 'feature', sep=''))
-        info <- dbGetQuery(db(object), sql)
-    }
-    sortCol <- which(names(info) == sortBy)
-    if (!missing(subset))
-        info <- subset(info, man_fsetid %in% subset)
-    info[order(info[[sortCol]], info[[-sortCol]]), 'fid']
-}
+## getProbeIndex <- function(object, probeType='pm', target='core', subset, sortBy='fid'){
+##     probeType <- match.arg(probeType, getProbeTypes(object))
+##     target <- match.arg(target, getProbeTargets(object, probeType=probeType))
+##     sortBy <- match.arg(sortBy, c('fid', 'man_fsetid'))
+##     if (class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')){
+##         ## ST Arrays
+##         info <- switch(target,
+##                core=oligo:::getFidMetaProbesetCore(object, NULL),
+##                full=oligo:::getFidMetaProbesetFull(object, NULL),
+##                extended=oligo:::getFidMetaProbesetExtended(object, NULL),
+##                probeset=oligo:::getFidProbeset(object, NULL))
+##         names(info) <- c('fid', 'man_fsetid')
+##     }else{
+##         sql <- paste('SELECT fid, man_fsetid FROM',
+##                      paste(probeType, 'feature', sep=''))
+##         info <- dbGetQuery(db(object), sql)
+##     }
+##     sortCol <- which(names(info) == sortBy)
+##     if (!missing(subset))
+##         info <- subset(info, man_fsetid %in% subset)
+##     info[order(info[[sortCol]], info[[-sortCol]]), 'fid']
+## }
 
 availProbeInfo <- function(object, probeType='pm', target='core'){
     ## FIXME: ST arrays have bg probes in pm tbl
@@ -81,17 +81,18 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     
     probeTable <- paste(probeType, 'feature', sep='')
     if (isST & target!='probeset'){
-        fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
-        fields <- paste(fields, collapse=', ')
-        mpsTable <- paste(target, 'mps', sep='_')
-        fields <- gsub('transcript_cluster_id',
-                       paste(mpsTable, '.transcript_cluster_id as transcript_cluster_id', sep=''),
-                       fields)
-        tables <- paste('pmfeature, featureSet,', mpsTable)
-        sql <- paste('SELECT', fields, 'FROM', tables,
-                     'WHERE pmfeature.fsetid=featureSet.fsetid AND',
-                     paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
-        rm(fields, mpsTable, tables)
+      ## FIXME: if 'field' contains man_fsetid, return that as well
+      fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
+      fields <- paste(fields, collapse=', ')
+      mpsTable <- paste(target, 'mps', sep='_')
+      fields <- gsub('transcript_cluster_id',
+                     paste(mpsTable, '.transcript_cluster_id as transcript_cluster_id', sep=''),
+                     fields)
+      tables <- paste('pmfeature, featureSet,', mpsTable)
+      sql <- paste('SELECT', fields, 'FROM', tables,
+                   'WHERE pmfeature.fsetid=featureSet.fsetid AND',
+                   paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
+      rm(fields, mpsTable, tables)
     }else{
         fields <- unique(c('fid', 'man_fsetid', field))
         fields <- paste(fields, collapse=', ')
@@ -111,6 +112,7 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
             info[[item]] <- NULL
             rm(dict, sql)
         }
+    ## FIXME: below will also change trnscript_cluster_id
     names(info) <- gsub('\\_id$', '', names(info))
     if (sortBy!='none'){
         i2 <- setdiff(c('fid', 'man_fsetid'), sortBy)
