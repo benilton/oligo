@@ -85,7 +85,7 @@ export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
        read.celfiles2, basicRMA, darkColors, seqColors, seqColors2,
        divColors, getAffinitySplineCoefficients, getBaseProfile,
-       basicPLM)
+       basicPLM, getProbeInfo)
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
