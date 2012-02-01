@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.19.7
+Version: 1.19.8
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho, Rafael Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber, Harris Jaffee, Jim MacDonald
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
@@ -29,7 +29,8 @@ Suggests: hapmap100kxba,
           genefilter,
           limma,
           RColorBrewer,
-          oligoData
+          oligoData,
+          RUnit
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level. It currently supports Affymetrix (CEL files) and NimbleGen arrays (XYS files).
 License: LGPL (>= 2)
 Collate: AllGenerics.R
