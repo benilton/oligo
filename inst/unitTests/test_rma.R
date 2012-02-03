@@ -6,8 +6,6 @@ test_rma <- function(){
   ngsExpressionFeatureSet <- read.xysfiles(xysFiles)
   summarized <- rma(ngsExpressionFeatureSet)
   rm(ngsExpressionFeatureSet)
-##  set.seed(1)
-##  idx <- sample(nrow(summarized), 1000)
 load(system.file('unitTests', 'i0.rda', package='oligo'))
   t0 <- exprs(summarized)[i0,]
   rm(summarized)
