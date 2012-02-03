@@ -670,3 +670,21 @@ cloneFS <- function(fs){
     }
     return(fs)
 }
+
+
+#### Pair -> XYS
+pair2xys <- function(pairFile){
+  hdr <- readLines(pairFile, n=1)
+  pair <- read.table(pairFile, header=TRUE, comment.char='#', sep='\t', stringsAsFactors=FALSE)
+  ## For the moment, this gets only the PM probes
+  out <- merge(expand.grid(X=1:1050, Y=1:4200), pair[, c('X', 'Y', 'PM')], all.x=TRUE)
+  out$COUNT <- with(out, ifelse(is.na(PM), NA, 1L))
+  out <- out[order(out$Y, out$X),]
+  rownames(out) <- NULL
+  names(out) <- c('X', 'Y', 'SIGNAL', 'COUNT')
+  fout <- gsub("\\.pair$", "\\.xys", pairFile)
+  writeLines(hdr, fout)
+  suppressWarnings(write.table(out, file=fout, sep='\t', quote=FALSE, append=TRUE, row.names=FALSE))
+  fout
+}
+
