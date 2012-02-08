@@ -10,6 +10,7 @@
 ** Move all normalization methods from affyPLM to oligo !!!
 ** Add a function to show available norm/bg/summ methods !!!
 ** Add bg-LESN for ff !
+** Consider having only backgroundCorrect(), normalize() and summarize()
 * Testing
 ** Use unit tests
 * Downstream support
