@@ -59,7 +59,6 @@ Collate: AllGenerics.R
          methods-snp6.R
          methods-genotype.R
          PLM_internal.R
-         fitPLM.R
          methods-PLMset.R
          zzz.R
 LazyLoad: Yes

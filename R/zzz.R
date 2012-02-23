@@ -10,8 +10,3 @@
 }
 
 .oligoPkgEnv <- new.env(parent=emptyenv())
-
-.onLoad <- function(libname, pkgname) {
-  ## load the Lapack library needed for some parts of fitPLM
-  .C("Lapack_Init", PACKAGE="oligo")
-}

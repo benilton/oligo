@@ -117,9 +117,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "preprocessCore_background_stubs.h"
-#include "preprocessCore_normalization_stubs.h"
-#include "preprocessCore_summarization_stubs.h"
+#include "preprocessCore_background_stubs.c"
+#include "preprocessCore_normalization_stubs.c"
+#include "preprocessCore_summarization_stubs.c"
 
 #include "R_subColSummarize.h"
 #include "R_subColSummarize_stubs.c"
