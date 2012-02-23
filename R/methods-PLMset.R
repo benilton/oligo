@@ -58,9 +58,9 @@ setReplaceMethod('coefs.probe', 'oligoPLM',
                      object
                  })
 
-setGeneric('weights', function(object) standardGeneric('weights'))
+##setGeneric('weights', function(object) standardGeneric('weights'))
 setMethod('weights', 'oligoPLM',
-          function(object){
+          function(object, ...){
               object@weights
           })
 
@@ -194,20 +194,25 @@ if( !isGeneric("boxplot") )
 
 ## fix names(theMat)
 setMethod("boxplot",signature(x="oligoPLM"),
-          function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ...){
+          function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ylim, ...){
             type <- match.arg(type)
             if (type == 'NUSE'){
                 theMat <- NUSE(x, type='values')
+                candYL <- c(.95, 1.10)
             }else if (type == 'RLE'){
                 theMat <- RLE(x, type='values')
+                candYL <- c(-.75, .75)
             }else if (type == 'weights'){
                 theMat <- weights(x)
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
+                candYL <- c(0, 1)
             }else{
                 theMat <- resids(x)
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
+                candYL <- c(-1, 1)
             }
+            if (missing(ylim)) ylim <- candYL
             theMat <- as.data.frame(theMat)
-            boxplot(theMat, col=col, range=range, ...)
+            boxplot(theMat, col=col, range=range, ylim=ylim, ...)
           })
 

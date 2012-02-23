@@ -387,7 +387,7 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
                 narrays=ncol(chipEffects),
                 nprobes=nrow(probeInfo),
                 nprobesets=nrow(chipEffects))
-    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale, NUSE, RLE)
+    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale)
     if (S4)
         out <- do.call(new, out)
     out
