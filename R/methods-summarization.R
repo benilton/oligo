@@ -410,7 +410,7 @@ RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
 
 NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
                  range=0, col=darkColors(ncol(obj)), ...){
-    if (is.null(obj$chipStdErrors))
+    if (is.null(se(obj)))
         stop('This Probe Level Model does not allow for computation of NUSE')
     NUSE <- sweep(se(obj), 1, rowMedians(se(obj)), '/')
     type <- match.arg(type)
