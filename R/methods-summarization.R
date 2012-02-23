@@ -327,42 +327,52 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     }
 }
 
-f <- function(object, target='core'){
-    probeInfo <- getProbeInfo(object, target='core', field=c('fid', 'fsetid'), sortBy='man_fsetid')
+fitProbeLevelModel <- function(object, target='core', subset, method='plm'){
+    ## essential to be sorted by man_fsetid, so weights/residuals can be
+    ## matched to original FS object
+    probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
+                              sortBy='man_fsetid', subset=subset)
     pnVec <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
     tmpMat <- backgroundCorrect(tmpMat, method='rma')
     tmpMat <- normalize(tmpMat, method='quantile')
-    fit <- runSummarize(tmpMat, pnVec, method='plm')
+    fit <- runSummarize(tmpMat, pnVec, method=method)
     rm(tmpMat)
 
-    ## Chip effects
+    ## Chip effects - number of probesets X number samples
     chipEffects <- do.call(rbind, lapply(fit, '[[', 'chipEffects'))
     dimnames(chipEffects) <- list(unique(pnVec), sampleNames(object))
+    if (method != 'medianpolish'){
+        RLE <- sweep(chipEffects, 1, rowMedians(chipEffects), '-')
+    }else{
+        RLE <- NULL
+    }
 
-    ## Probe effects
-    probeEffects <- do.call(c, lapply(fit, '[[', 'probeEffects'))
-    names(probeEffects) <- pnVec
+    ## Probe effects - number of probes
+    probeEffects <- vector('numeric', nrow(object))
+    probeEffects[probeInfo$fid] <- do.call(c, lapply(fit, '[[', 'probeEffects'))
+    ## names(probeEffects) <- pnVec
 
-    ## Weights/residuals
-    Weights <- do.call(rbind, lapply(fit, '[[', 'Weights'))
-    Residuals <- do.call(rbind, lapply(fit, '[[', 'Residuals'))
-    dimnames(Weights) <- dimnames(Residuals) <- list(pnVec, sampleNames(object))
+    ## Weights/residuals - number of probes X number samples
+    Weights <- Residuals <- array(NA, dim(object))
+    Weights[probeInfo$fid,] <- do.call(rbind, lapply(fit, '[[', 'Weights'))
+    Residuals[probeInfo$fid,] <- do.call(rbind, lapply(fit, '[[', 'Residuals'))
+    ## dimnames(Weights) <- dimnames(Residuals) <- list(pnVec, sampleNames(object))
 
     ## Chip StdErrors
     chipStdErrors <- do.call(rbind, lapply(fit, '[[', 'chipStdErrors'))
     dimnames(chipStdErrors) <- list(unique(pnVec), sampleNames(object))
-
-    NUSE <- sweep(chipStdErrors, 1, rowMedians(chipStdErrors), '/')
-    RLE <- sweep(chipEffects, 1, rowMedians(chipEffects), '-')
-
-    blah = do.call(rbind, lapply(lapply(fit, '[[', 'Weights'), function(z) 1/sqrt(colSums(z))))
-    bleh = sweep(blah, 1, rowMedians(blah), '/')
+    if (method != 'medianpolish'){
+        NUSE <- sweep(chipStdErrors, 1, rowMedians(chipStdErrors), '/')
+    }else{
+        NUSE <- NULL
+    }
 
     ## Probes StdErrors
-    probesStdErrors <- do.call(c, lapply(fit, '[[', 'probesStdErrors'))
-    names(probesStdErrors) <- pnVec
+    probesStdErrors <- vector('numeric', nrow(object))
+    probesStdErrors[probeInfo$fid] <- do.call(c, lapply(fit, '[[', 'probesStdErrors'))
+    ## names(probesStdErrors) <- pnVec
 
     ## Scale
     Scale <- do.call(c, lapply(fit, '[[', 'Scale'))
@@ -370,13 +380,36 @@ f <- function(object, target='core'){
 
     rm(fit)
 
+    ## fix residuals/weights to have the array dims
+
     out <- list(chipEffects=chipEffects,
                 probeEffects=probeEffects,
                 Weights=Weights,
                 Residuals=Residuals,
                 chipStdErrors=chipStdErrors,
                 probesStdErrors=probesStdErrors,
-                Scale=Scale)
-    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale)
+                Scale=Scale,
+                NUSE=NUSE,
+                RLE=RLE,
+                method=method)
+    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale, NUSE, RLE)
     out
+}
+
+getRLE <- function(obj, type=c('plot', 'stats'), ...){
+    if (is.null(obj$chipEffects))
+        stop('This Probe Level Model does not allow for computation of RLE')
+    RLE <- sweep(obj$chipEffects, 1, rowMedians(obj$chipEffects), '-')
+    if (type=='plot')
+        boxplot(as.data.frame(RLE), ...)
+    invisible(RLE)
+}
+
+getNUSE <- function(obj, type=c('plot', 'stats'), ...){
+    if (is.null(obj$chipStdErrors))
+        stop('This Probe Level Model does not allow for computation of NUSE')
+    NUSE <- sweep(obj$chipStdErrors, 1, rowMedians(obj$chipStdErrors), '/')
+    if (type == 'plot')
+        boxplot(as.data.frame(RLE), ...)
+    invisible(NUSE)
 }
