@@ -32,7 +32,7 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
                        ...){
   dnms <- dimnames(pmMat)
   dimnames(pmMat) <- NULL
-  
+
   ## background correct
   if (background){
     if (verbose) message("Background correcting... ", appendLF=FALSE)
@@ -45,7 +45,7 @@ basicRMAbo <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   ## normalize
   if (normalize){
     if (verbose) message("Normalizing... ", appendLF=FALSE)
-    if (!exists("samplesByNode")) 
+    if (!exists("samplesByNode"))
       samplesByNode <- splitIndicesByNode(1:ncol(pmMat))
     stats <- ocLapply(samplesByNode, qnTargetStatsLDSnode, object=pmMat, neededPkgs="oligo")
     totalN <- sum(sapply(stats, "[[", "n"))
@@ -108,7 +108,7 @@ setMethod("summarize", "ff_matrix",
               dimnames(object) <- dnmsIn
               dimnames(out) <- list(names(probeRowByProbesets),
                                     colnames(object))
-              
+
             }
             if (verbose) message("OK")
             return(out)
@@ -119,7 +119,7 @@ basicRMA <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
   pns <- unique(pnVec)
   nPn <- length(unique(pnVec))
   pnVec <- split(0:(length(pnVec)-1), pnVec)
-  
+
   if (destructive){
     theExprs <- .Call("rma_c_complete", pmMat, pnVec, nPn, normalize,
                       background, bgversion, verbose, PACKAGE="oligo")
@@ -167,7 +167,7 @@ basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     if (normalize)
         pmMat <- normalize(pmMat)
     theClass <- class(pmMat)
-    
+
     if (verbose) message('Summarizing... ', appendLF=FALSE)
     if ('matrix' %in% theClass){
         res <- runPLM(transfo(pmMat), pnVec, funPLM)
@@ -220,4 +220,107 @@ basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
 }
 
 summarizationMethods <- function()
-    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc')
+    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc',
+      'wplm', 'wplmr', 'wplmrr', 'wplmrc')
+
+###########
+###########
+
+## The other rcModel* functions return a scale parameter
+## This equalizes output:
+## - Estimates
+## - Weights
+## - Residuals
+## - StdErrors
+## - Scale
+rcModelMedianPolish0 <- function(...)
+    c(rcModelMedianPolish(...), list(Scale=NULL))
+
+rcModelPLMr0 <- function(...)
+    c(rcModelPLMr(...), list(Scale=NULL))
+
+rcModelPLMrr0 <- function(...)
+    c(rcModelPLMrr(...), list(Scale=NULL))
+
+rcModelPLMrc0 <- function(...)
+    c(rcModelPLMrc(...), list(Scale=NULL))
+
+rcModelWPLMr0 <- function(...)
+    c(rcModelWPLMr(...), list(Scale=NULL))
+
+rcModelWPLMrr0 <- function(...)
+    c(rcModelWPLMrr(...), list(Scale=NULL))
+
+rcModelWPLMrc0 <- function(...)
+    c(rcModelWPLMrc(...), list(Scale=NULL))
+
+
+runSummarize <- function(mat, pnVec, transfo=log2,
+                         method=summarizationMethods(),
+                         ...){
+    stopifnot(length(pnVec) == nrow(mat),
+              is.character(pnVec),
+              is.function(transfo))
+    method <- match.arg(method)
+    theFun <- switch(method,
+                     medianpolish=rcModelMedianPolish0,
+                     plm=rcModelPLM,
+                     plmr=rcModelPLMr0,
+                     plmrr=rcModelPLMrr0,
+                     plmrc=rcModelPLMrc0,
+                     wplm=rcModelWPLM0,
+                     wplmr=rcModelWPLMr0,
+                     wplmrr=rcModelWPLMrr0,
+                     wplmrc=rcModelWPLMrc0)
+
+    psets <- sort(unique(pnVec))
+    output <- foreach(set=psets) %dopar% {
+        ## handle ff objects in here
+        theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...)
+    }
+
+}
+
+## Y: nr x nc - nr: number of *probes* in probeset; nc: number of samples
+
+## rcModelPLM/rcModelWPLM
+## - Estimates: nr + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nr + nc
+## - Scale....: 1
+
+## rcModelMedianPolish
+## - Estimates: nr + nc
+## - Weights..: NULL
+## - Residuals: nr x nc
+## - StdErrors: NULL
+## - Scale....: NULL
+
+## rcModelPLM/rcModelWPLM (row.effects given)
+## - Estimates: 00 + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: 00 + nc
+## - Scale....: nc
+
+## rcModelPLM/rcModelWPLM (input.scale given)
+## - Estimates: nr + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nr + nc
+## - Scale....: 1
+
+## rcModelPLM/rcModelWPLM (row.effects+input.scale given)
+## - Estimates: 00 + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: 00 + nc
+## - Scale....: nc
+
+## rcModelPLMr/rcModelPLMrr/rcModelPLMrc
+## - Estimates: nr + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nr + nc
+## - Scale....: NULL
