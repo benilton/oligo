@@ -4,7 +4,8 @@ Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho, Rafael Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber, Harris Jaffee, Jim MacDonald
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
 Depends: R (>= 2.13.0),
-         oligoClasses (>= 1.13.9)
+         oligoClasses (>= 1.13.9),
+         foreach
 Imports: affyio (>= 1.19.4),
          affxparser (>= 1.23.1),
          Biobase (>= 2.11.8),

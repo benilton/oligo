@@ -226,60 +226,7 @@ summarizationMethods <- function()
 ###########
 ###########
 
-## The other rcModel* functions return a scale parameter
-## This equalizes output:
-## - Estimates
-## - Weights
-## - Residuals
-## - StdErrors
-## - Scale
-rcModelMedianPolish0 <- function(...)
-    c(rcModelMedianPolish(...), list(Scale=NULL))
 
-rcModelPLMr0 <- function(...)
-    c(rcModelPLMr(...), list(Scale=NULL))
-
-rcModelPLMrr0 <- function(...)
-    c(rcModelPLMrr(...), list(Scale=NULL))
-
-rcModelPLMrc0 <- function(...)
-    c(rcModelPLMrc(...), list(Scale=NULL))
-
-rcModelWPLMr0 <- function(...)
-    c(rcModelWPLMr(...), list(Scale=NULL))
-
-rcModelWPLMrr0 <- function(...)
-    c(rcModelWPLMrr(...), list(Scale=NULL))
-
-rcModelWPLMrc0 <- function(...)
-    c(rcModelWPLMrc(...), list(Scale=NULL))
-
-
-runSummarize <- function(mat, pnVec, transfo=log2,
-                         method=summarizationMethods(),
-                         ...){
-    stopifnot(length(pnVec) == nrow(mat),
-              is.character(pnVec),
-              is.function(transfo))
-    method <- match.arg(method)
-    theFun <- switch(method,
-                     medianpolish=rcModelMedianPolish0,
-                     plm=rcModelPLM,
-                     plmr=rcModelPLMr0,
-                     plmrr=rcModelPLMrr0,
-                     plmrc=rcModelPLMrc0,
-                     wplm=rcModelWPLM0,
-                     wplmr=rcModelWPLMr0,
-                     wplmrr=rcModelWPLMrr0,
-                     wplmrc=rcModelWPLMrc0)
-
-    psets <- sort(unique(pnVec))
-    output <- foreach(set=psets) %dopar% {
-        ## handle ff objects in here
-        theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...)
-    }
-
-}
 
 ## Y: nr x nc - nr: number of *probes* in probeset; nc: number of samples
 
@@ -324,3 +271,112 @@ runSummarize <- function(mat, pnVec, transfo=log2,
 ## - Residuals: nr x nc
 ## - StdErrors: nr + nc
 ## - Scale....: NULL
+
+
+## The other rcModel* functions return a scale parameter
+## This equalizes output:
+## - Estimates (chip and probe)
+## - Weights
+## - Residuals
+## - StdErrors (chip and probe)
+## - Scale
+
+outputEqualizer <- function(lst){
+    nsamples <- ncol(lst$Residuals)
+    nprobes <- nrow(lst$Residuals)
+    idx <- 1:nsamples
+    ## stderr
+    chipStdErrors <- probesStdErrors <- NULL
+    if (nsamples+nprobes == length(lst$StdErrors)){
+        chipStdErrors <- lst$StdErrors[idx]
+        probesStdErrors <- lst$StdErrors[-(idx)]
+    } else if (length(lst$StdErrors) == nsamples){
+        chipStdErrors <- lst$StdErrors[idx]
+    }
+    list(chipEffects=lst$Estimates[idx],
+         probeEffects=lst$Estimates[-(idx)],
+         Weights=lst$Weights,
+         Residuals=lst$Residuals,
+         chipStdErrors=chipStdErrors,
+         probesStdErrors=probesStdErrors,
+         Scale=lst$Scale)
+}
+
+
+runSummarize <- function(mat, pnVec, transfo=log2,
+                         method=summarizationMethods(),
+                         ...){
+    stopifnot(length(pnVec) == nrow(mat),
+              is.character(pnVec),
+              is.function(transfo))
+    method <- match.arg(method)
+    theFun <- switch(method,
+                     medianpolish=rcModelMedianPolish,
+                     plm=rcModelPLM,
+                     plmr=rcModelPLMr,
+                     plmrr=rcModelPLMrr,
+                     plmrc=rcModelPLMrc,
+                     wplm=rcModelWPLM,
+                     wplmr=rcModelWPLMr,
+                     wplmrr=rcModelWPLMrr,
+                     wplmrc=rcModelWPLMrc)
+    psets <- unique(pnVec)
+    output <- foreach(set=psets, .packages='oligo') %dopar% {
+        ## handle ff objects in here
+        outputEqualizer(theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...))
+    }
+}
+
+f <- function(object, target='core'){
+    probeInfo <- getProbeInfo(object, target='core', field=c('fid', 'fsetid'), sortBy='man_fsetid')
+    pnVec <- as.character(probeInfo$man_fsetid)
+
+    tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
+    tmpMat <- backgroundCorrect(tmpMat, method='rma')
+    tmpMat <- normalize(tmpMat, method='quantile')
+    fit <- runSummarize(tmpMat, pnVec, method='plm')
+    rm(tmpMat)
+
+    ## Chip effects
+    chipEffects <- do.call(rbind, lapply(fit, '[[', 'chipEffects'))
+    dimnames(chipEffects) <- list(unique(pnVec), sampleNames(object))
+
+    ## Probe effects
+    probeEffects <- do.call(c, lapply(fit, '[[', 'probeEffects'))
+    names(probeEffects) <- pnVec
+
+    ## Weights/residuals
+    Weights <- do.call(rbind, lapply(fit, '[[', 'Weights'))
+    Residuals <- do.call(rbind, lapply(fit, '[[', 'Residuals'))
+    dimnames(Weights) <- dimnames(Residuals) <- list(pnVec, sampleNames(object))
+
+    ## Chip StdErrors
+    chipStdErrors <- do.call(rbind, lapply(fit, '[[', 'chipStdErrors'))
+    dimnames(chipStdErrors) <- list(unique(pnVec), sampleNames(object))
+
+    NUSE <- sweep(chipStdErrors, 1, rowMedians(chipStdErrors), '/')
+    RLE <- sweep(chipEffects, 1, rowMedians(chipEffects), '-')
+
+    blah = do.call(rbind, lapply(lapply(fit, '[[', 'Weights'), function(z) 1/sqrt(colSums(z))))
+    bleh = sweep(blah, 1, rowMedians(blah), '/')
+
+    ## Probes StdErrors
+    probesStdErrors <- do.call(c, lapply(fit, '[[', 'probesStdErrors'))
+    names(probesStdErrors) <- pnVec
+
+    ## Scale
+    Scale <- do.call(c, lapply(fit, '[[', 'Scale'))
+    names(Scale) <- unique(pnVec)
+
+    rm(fit)
+
+    out <- list(chipEffects=chipEffects,
+                probeEffects=probeEffects,
+                Weights=Weights,
+                Residuals=Residuals,
+                chipStdErrors=chipStdErrors,
+                probesStdErrors=probesStdErrors,
+                Scale=Scale)
+    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale)
+    out
+}

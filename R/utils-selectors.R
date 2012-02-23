@@ -68,9 +68,9 @@ availProbeInfo <- function(object, probeType='pm', target='core'){
 
 getProbeInfo <- function(object, field, probeType='pm', target='core',
                          subset, sortBy=c('fid', 'man_fsetid', 'none')){
-    sortBy <- match.arg(sortBy) 
+    sortBy <- match.arg(sortBy)
     conn <- db(object)
-   
+
     ## With ST arrays:
     ## 1) fsetid is both fsetid and man_fsetid
     ## 2) transcript_cluster_id is in both *mps and featureSet tables
@@ -78,23 +78,25 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     isST <- class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')
 
     if (missing(field)) field <- 'fid'
-    
+
     probeTable <- paste(probeType, 'feature', sep='')
     if (isST & target!='probeset'){
-      ## FIXME: if 'field' contains man_fsetid, return that as well
-      fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
-      fields <- paste(fields, collapse=', ')
-      mpsTable <- paste(target, 'mps', sep='_')
-      fields <- gsub('transcript_cluster_id',
-                     paste(mpsTable, '.transcript_cluster_id as transcript_cluster_id', sep=''),
-                     fields)
-      tables <- paste('pmfeature, featureSet,', mpsTable)
-      sql <- paste('SELECT', fields, 'FROM', tables,
-                   'WHERE pmfeature.fsetid=featureSet.fsetid AND',
-                   paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
-      rm(fields, mpsTable, tables)
+        ## FIXME: if 'field' contains man_fsetid, return that as well
+        fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
+        fields[fields == 'fsetid'] <- 'pmfeature.fsetid'
+        fields <- paste(fields, collapse=', ')
+        mpsTable <- paste(target, 'mps', sep='_')
+        fields <- gsub('transcript_cluster_id',
+                       paste(mpsTable, '.transcript_cluster_id as transcript_cluster_id', sep=''),
+                       fields)
+        tables <- paste('pmfeature, featureSet,', mpsTable)
+        sql <- paste('SELECT', fields, 'FROM', tables,
+                     'WHERE pmfeature.fsetid=featureSet.fsetid AND',
+                     paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
+        rm(fields, mpsTable, tables)
     }else{
         fields <- unique(c('fid', 'man_fsetid', field))
+        fields[fields == 'fsetid'] <- paste(probeTable, 'fsetid', sep='.')
         fields <- paste(fields, collapse=', ')
         sql <- paste('SELECT', fields, 'FROM',
                      probeTable, 'INNER JOIN featureSet',
