@@ -187,11 +187,6 @@ setMethod("show", "oligoPLM",
               message("Annotation..........: ", annotation(object))
           })
 
-
-if( !isGeneric("boxplot") )
-    setGeneric("boxplot", function(x,...)
-               standardGeneric("boxplot"))
-
 ## fix names(theMat)
 setMethod("boxplot",signature(x="oligoPLM"),
           function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ylim, ...){

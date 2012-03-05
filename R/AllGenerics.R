@@ -14,7 +14,6 @@ setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntise
 setGeneric("logRatioSense", function(object) standardGeneric("logRatioSense"))
 
 setGeneric("hist", function(x, ...) standardGeneric("hist"))
-setGeneric("image", function(x, ...) standardGeneric("image"))
 setGeneric("rma", function(object, ...) standardGeneric("rma"))
 setGeneric("MAplot", function(object, ...) standardGeneric("MAplot"))
 

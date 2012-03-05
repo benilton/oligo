@@ -38,7 +38,9 @@ importFrom(affyio, read.celfile.header, read.celfile)
 importFrom(Biobase, assayDataElement, assayDataElementReplace,
            assayDataNew)
 
-importFrom(graphics, boxplot, hist, image, lines, matplot, par, plot)
+importFrom(graphics, hist, lines, matplot, par, plot)
+
+importFrom(BiocGenerics, boxplot, image, residuals)
 
 importFrom(grDevices, colorRampPalette, gray)
 
@@ -60,7 +62,7 @@ importFrom(preprocessCore, normalize.quantiles,
 importFrom(splines, ns)
 
 importFrom(stats, coef, cov, density, dnorm, fitted, kmeans, lm,
-           lowess, mad, median, pchisq, quantile, residuals)
+           lowess, mad, median, pchisq, quantile)
 
 importFrom(utils, packageDescription, read.delim, read.table,
            setTxtProgressBar, txtProgressBar, write.table)
