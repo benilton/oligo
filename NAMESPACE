@@ -40,7 +40,7 @@ importFrom(Biobase, assayDataElement, assayDataElementReplace,
 
 importFrom(graphics, hist, lines, matplot, par, plot)
 
-importFrom(BiocGenerics, boxplot, image, residuals)
+importFrom(BiocGenerics, boxplot, image, ncol, residuals)
 
 importFrom(grDevices, colorRampPalette, gray)
 
