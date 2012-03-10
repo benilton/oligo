@@ -328,6 +328,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
                      wplmrr=rcModelWPLMrr,
                      wplmrc=rcModelWPLMrc)
     psets <- unique(pnVec)
+    set <- NULL ## get rid of 'no visible binding...
     output <- foreach(set=psets, .packages='oligo') %dopar% {
         ## ideally, this would handle multiple probesets at a time...
         ##  if this happens, change the iterator
