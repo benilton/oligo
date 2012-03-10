@@ -230,19 +230,33 @@ summarizationMethods <- function()
 
 ## Y: nr x nc - nr: number of *probes* in probeset; nc: number of samples
 
-## rcModelPLM/rcModelWPLM
-## - Estimates: nr + nc
+## rcModelPLM/rcModelWPLM (supported)
+## - Estimates: nc + nr
 ## - Weights..: nr x nc
 ## - Residuals: nr x nc
-## - StdErrors: nr + nc
+## - StdErrors: nc + nr
 ## - Scale....: 1
 
-## rcModelMedianPolish
-## - Estimates: nr + nc
+## rcModelMedianPolish (supported)
+## - Estimates: nc + nr
 ## - Weights..: NULL
 ## - Residuals: nr x nc
 ## - StdErrors: NULL
 ## - Scale....: NULL
+
+## rcModelPLMr/rcModelPLMrr/rcModelPLMrc (supported)
+## - Estimates: nc + nr
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nc + nr
+## - Scale....: NULL
+
+## rcModelPLM/rcModelWPLM (input.scale given) (supported)
+## - Estimates: nc + nr
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nc + nr
+## - Scale....: 1
 
 ## rcModelPLM/rcModelWPLM (row.effects given)
 ## - Estimates: 00 + nc
@@ -251,26 +265,12 @@ summarizationMethods <- function()
 ## - StdErrors: 00 + nc
 ## - Scale....: nc
 
-## rcModelPLM/rcModelWPLM (input.scale given)
-## - Estimates: nr + nc
-## - Weights..: nr x nc
-## - Residuals: nr x nc
-## - StdErrors: nr + nc
-## - Scale....: 1
-
 ## rcModelPLM/rcModelWPLM (row.effects+input.scale given)
 ## - Estimates: 00 + nc
 ## - Weights..: nr x nc
 ## - Residuals: nr x nc
 ## - StdErrors: 00 + nc
 ## - Scale....: nc
-
-## rcModelPLMr/rcModelPLMrr/rcModelPLMrc
-## - Estimates: nr + nc
-## - Weights..: nr x nc
-## - Residuals: nr x nc
-## - StdErrors: nr + nc
-## - Scale....: NULL
 
 
 ## The other rcModel* functions return a scale parameter
@@ -306,6 +306,13 @@ outputEqualizer <- function(lst){
 runSummarize <- function(mat, pnVec, transfo=log2,
                          method=summarizationMethods(),
                          ...){
+    ## Error checking
+    dots <- list(...)
+    if (!is.null(dots$input.scale))
+        if (!all.equal(dots$input.scale, 1))
+            stop('Currently, "input.scale" should be either 1 or missing.')
+    if (!is.null(dots$row.effects))
+        stop('This function does not support yet the use of "row.effects"')
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
@@ -322,7 +329,11 @@ runSummarize <- function(mat, pnVec, transfo=log2,
                      wplmrc=rcModelWPLMrc)
     psets <- unique(pnVec)
     output <- foreach(set=psets, .packages='oligo') %dopar% {
+        ## ideally, this would handle multiple probesets at a time...
+        ##  if this happens, change the iterator
         ## handle ff objects in here
+        ##  if input is ff, it works fine
+        ##  output should be ff as well... need to work on this
         outputEqualizer(theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...))
     }
 }
@@ -387,73 +398,10 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
                 narrays=ncol(chipEffects),
                 nprobes=nrow(probeInfo),
                 nprobesets=nrow(chipEffects))
-    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale)
+    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors,
+       probesStdErrors, Scale)
     if (S4)
         out <- do.call(new, out)
     out
 }
 
-fitPLM <- function(...)
-    .Deprecated('fitProbeLevelModel')
-
-
-RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
-                range=0, col=darkColors(ncol(obj)), ...){
-    RLE <- sweep(coefs(obj), 1, rowMedians(coefs(obj)), '-')
-    type <- match.arg(type)
-    if (type=='plot'){
-        boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
-        abline(h=0, lty=2)
-    }
-    invisible(RLE)
-}
-
-NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
-                 range=0, col=darkColors(ncol(obj)), ...){
-    if (is.null(se(obj)))
-        stop('This Probe Level Model does not allow for computation of NUSE')
-    NUSE <- sweep(se(obj), 1, rowMedians(se(obj)), '/')
-    type <- match.arg(type)
-    if (type == 'plot'){
-        boxplot(as.data.frame(NUSE), ylab='NUSE', range=range, ylim=ylim, col=col, ...)
-        abline(h=1, lty=2)
-    }
-    invisible(NUSE)
-}
-
-setMethod('image', 'oligoPLM',
-          function(x, which=1, type=c('weights', 'resids', 'pos.resids', 'neg.resids', 'sign.resids'), col, main, ...){
-              type <- match.arg(type)
-              if (type == 'weights'){
-                  theMat <- weights(x)[, which]
-                  candCols <- rev(seqColors(2560))
-                  candMain <- 'Weights'
-              }else if (type == 'resids'){
-                  theMat <- resids(x)[, which]
-                  candCols <- divColors(2560)
-                  candMain <- 'Residuals'
-              }else if (type == 'pos.resids'){
-                  theMat <- pmax(resids(x)[, which], 0)
-                  candCols <- seqColors2(2560)
-                  candMain <- 'Positive Residuals'
-              }else if (type == 'neg.resids'){
-                  theMat <- pmin(resids(x)[, which], 0)
-                  candCols <- rev(seqColors(2560))
-                  candMain <- 'Negative Residuals'
-              }else{
-                  theMat <- sign(resids(x)[, which])
-                  candCols <- divColors(2)
-                  candMain <- 'Sign of Residuals'
-              }
-              dim(theMat) <- x@geometry
-              if (missing(col)){
-                  col <- candCols
-                  rm(candCols)
-              }
-              if (missing(main)){
-                  main <- candMain
-                  rm(candMain)
-              }
-              image(theMat, col=col, yaxt='n', xaxt='n', main=main, ...)
-          }
-)
