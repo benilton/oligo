@@ -60,9 +60,9 @@ bgStretch <- function(pmMat, baseline=0.25,
 
 bgLESN <- function(pmMat, method=2, baseline=0.25, theta=4){
   if (method==2){
-    bgStretch(pmMat, baseline, type="loggaussian", theta=2*theta^2) 
+    bgStretch(pmMat, baseline, type="loggaussian", theta=2*theta^2)
   } else if (method == 1){
-    bgStretch(pmMat, baseline, type="logexponential", theta) 
+    bgStretch(pmMat, baseline, type="logexponential", theta)
   } else {
     bgShift(pmMat, baseline)
   }
@@ -132,7 +132,7 @@ backgroundCorrectionMethods <- function()
 setMethod("backgroundCorrect", "matrix",
           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE){
             method <- match.arg(method, backgroundCorrectionMethods())
-            if (verbose) cat("Background correcting... ")
+            if (verbose) message("Background correcting... ", appendLF=FALSE)
             if (method == "rma"){
                 out <- rma.background.correct(object, copy=copy)
             } else if (method == "mas"){

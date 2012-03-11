@@ -326,7 +326,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
 ##     }
 ##     out <- unlist(out, recursive=FALSE)
     out <- theFun(y=transfo(mat), pnVec)
-    if (verbose) message('OK.')
+    if (verbose) message('OK')
     outputEqualizer(out, colnames(mat))
 }
 
