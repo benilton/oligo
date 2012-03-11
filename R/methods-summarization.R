@@ -288,15 +288,19 @@ getFromListAsVector <- function(lst, elem, idx){
     lapply(lst, function(x, idx) x[[elem]][idx], idx)
 }
 
-outputEqualizer <- function(lst){
+outputEqualizer <- function(lst, sampleNames=NULL){
     nsamples <- ncol(lst[[1]]$Residuals)
     idx <- 1:nsamples
     theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
+    colnames(theChipCoefs) <- sampleNames
     theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
     theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
+    colnames(theChipSE) <- sampleNames
     theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
     theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
+    colnames(theWeights) <- sampleNames
     theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
+    colnames(theResiduals) <- sampleNames
     theScales <- unlist(lapply(lst, '[[', 'Scale'))
 
     list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
@@ -333,7 +337,7 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
     tmpMat <- backgroundCorrect(tmpMat, method='rma')
     tmpMat <- normalize(tmpMat, method='quantile')
     ## rownames below is really important for parallelization
-    rownames(tmpMat) <- probeInfo$man_fsetid
+    dimnames(tmpMat) <- list(probeInfo$man_fsetid, sampleNames(object))
     fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method)
     rm(tmpMat)
 
