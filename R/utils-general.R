@@ -75,7 +75,7 @@ checkValidFilenames <- function(filenames) {
                  paste("\t", filenames[is.na(dirs)], collapse="\n"), sep="\n")
     stop(msg, call.=FALSE)
   }
-  
+
   ## must be files, not dir
   if (any(dirs)){
     msg <- paste("These are directories:",
@@ -148,7 +148,7 @@ basecontent <- function(seq) {
   havena = !all(good)
   if(havena)
     seq = seq[good]
-  
+
   rv = .Call("basecontent", seq, PACKAGE="oligo")
 
   if(havena) {
@@ -157,7 +157,7 @@ basecontent <- function(seq) {
     colnames(rv) = colnames(z)
     rv[good, ] = z
   }
-  
+
   return(rv)
 }
 
@@ -472,10 +472,10 @@ maplot <- function (x, transfo=log2, groups, refSamples,
                 stop("'refSamples' must be smaller than ", length(levels(groups)))
     }
     ## END OF ERROR CHECK
-    
+
 ##    x <- transfo(exprs(object))
     x <- transfo(x)
-    
+
     if (missing(groups)){
         if (missing(which))
             which <- 1:ncol(x)
@@ -487,7 +487,7 @@ maplot <- function (x, transfo=log2, groups, refSamples,
             } else {
                 medianchip <- x[, refSamples]
             }
-            
+
             M <- sweep(x, 1, medianchip, FUN = "-")
             A <- 1/2 * sweep(x, 1, medianchip, FUN = "+")
             for (i in which) {
@@ -552,7 +552,7 @@ basicMvAplot <- function(A, M, subset=sample(length(M), min(c(1e4, length(M)))),
                     family.loess="gaussian", cex=2,
                     plotFun=smoothScatter, addLoess=TRUE, lwd=1, lty=1,
                     loess.col="red", ...){
-    
+
     fn.call <- list(...)
     nmdots <- names(fn.call)
     sigma <- IQR(M)
@@ -561,9 +561,9 @@ basicMvAplot <- function(A, M, subset=sample(length(M), min(c(1e4, length(M)))),
     xloc <- ifelse(is.element("xlim", nmdots), max(fn.call[['xlim']]), max(A))
 
     plotFun(A, M, cex=cex, ...)
-    
+
     if (addLoess) {
-        aux <- loess(M[subset]~A[subset], degree=1, span=span, 
+        aux <- loess(M[subset]~A[subset], degree=1, span=span,
                      family=family.loess)[['fitted']]
         o <- order(A[subset])
         A <- A[subset][o]
@@ -579,7 +579,7 @@ basicMvAplot <- function(A, M, subset=sample(length(M), min(c(1e4, length(M)))),
     }
 }
 
-basicMvApairsPlot <- function (x, labels=colnames(x), transfo=log2, span=2/3, 
+basicMvApairsPlot <- function (x, labels=colnames(x), transfo=log2, span=2/3,
                        family.loess="gaussian", digits=3,
                        main="MVA plot", xlab="A", ylab="M",
                        cex=2, plotFun=smoothScatter, addLoess=TRUE,
@@ -688,3 +688,20 @@ pair2xys <- function(pairFile){
   fout
 }
 
+
+### parallel stuff
+iExprsProbesets <- function(x, ...){
+    rns <- rownames(x)
+    grps <- split(1:length(rns), rns)
+    it <- idiv(length(grps), ...)
+    i <- 1
+    nextEl <- function(){
+        n <- nextElem(it)
+        set <- seq(i, length=n)
+        i <<- i+n
+        x[unlist(grps[set]),, drop=FALSE]
+    }
+    obj <- list(nextElem=nextEl)
+    class(obj) <- c('iExprsProbesets', 'abstractiter', 'iter')
+    obj
+}

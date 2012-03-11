@@ -219,9 +219,12 @@ basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     list(Estimates=estimates, StdErrors=stderrors, Residuals=residuals)
 }
 
+## summarizationMethods <- function()
+##     c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc',
+##       'wplm', 'wplmr', 'wplmrr', 'wplmrc')
+
 summarizationMethods <- function()
-    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc',
-      'wplm', 'wplmr', 'wplmrr', 'wplmrc')
+    c('medianpolish', 'plm')
 
 ###########
 ###########
@@ -281,62 +284,42 @@ summarizationMethods <- function()
 ## - StdErrors (chip and probe)
 ## - Scale
 
+getFromListAsVector <- function(lst, elem, idx){
+    lapply(lst, function(x, idx) x[[elem]][idx], idx)
+}
+
 outputEqualizer <- function(lst){
-    nsamples <- ncol(lst$Residuals)
-    nprobes <- nrow(lst$Residuals)
+    nsamples <- ncol(lst[[1]]$Residuals)
     idx <- 1:nsamples
-    ## stderr
-    chipStdErrors <- probesStdErrors <- NULL
-    if (nsamples+nprobes == length(lst$StdErrors)){
-        chipStdErrors <- lst$StdErrors[idx]
-        probesStdErrors <- lst$StdErrors[-(idx)]
-    } else if (length(lst$StdErrors) == nsamples){
-        chipStdErrors <- lst$StdErrors[idx]
-    }
-    list(chipEffects=lst$Estimates[idx],
-         probeEffects=lst$Estimates[-(idx)],
-         Weights=lst$Weights,
-         Residuals=lst$Residuals,
-         chipStdErrors=chipStdErrors,
-         probesStdErrors=probesStdErrors,
-         Scale=lst$Scale)
+    theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
+    theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
+    theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
+    theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
+    theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
+    theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
+    theScales <- unlist(lapply(lst, '[[', 'Scale'))
+
+    list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
+         Weights=theWeights, Residuals=theResiduals,
+         chipStdErrors=theChipSE, probesStdErrors=theProbeSE,
+         Scale=theScales)
 }
 
 
 runSummarize <- function(mat, pnVec, transfo=log2,
-                         method=summarizationMethods(),
-                         ...){
-    ## Error checking
-    dots <- list(...)
-    if (!is.null(dots$input.scale))
-        if (!all.equal(dots$input.scale, 1))
-            stop('Currently, "input.scale" should be either 1 or missing.')
-    if (!is.null(dots$row.effects))
-        stop('This function does not support yet the use of "row.effects"')
+                         method=summarizationMethods()){
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
     method <- match.arg(method)
     theFun <- switch(method,
-                     medianpolish=rcModelMedianPolish,
-                     plm=rcModelPLM,
-                     plmr=rcModelPLMr,
-                     plmrr=rcModelPLMrr,
-                     plmrc=rcModelPLMrc,
-                     wplm=rcModelWPLM,
-                     wplmr=rcModelWPLMr,
-                     wplmrr=rcModelWPLMrr,
-                     wplmrc=rcModelWPLMrc)
-    psets <- unique(pnVec)
-    set <- NULL ## get rid of 'no visible binding...
-    output <- foreach(set=psets, .packages='oligo') %dopar% {
-        ## ideally, this would handle multiple probesets at a time...
-        ##  if this happens, change the iterator
-        ## handle ff objects in here
-        ##  if input is ff, it works fine
-        ##  output should be ff as well... need to work on this
-        outputEqualizer(theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...))
+                     medianpolish=subrcModelMedianPolish,
+                     plm=subrcModelPLM)
+    out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
+        theFun(y=transfo(submat), rownames(submat))
     }
+    out <- unlist(out, recursive=FALSE)
+    outputEqualizer(out)
 }
 
 fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=TRUE){
@@ -344,42 +327,24 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
     ## matched to original FS object
     probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
                               sortBy='man_fsetid', subset=subset)
-    pnVec <- as.character(probeInfo$man_fsetid)
+    probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
+    ## rownames below is really important for parallelization
+    rownames(tmpMat) <- probeInfo$man_fsetid
     tmpMat <- backgroundCorrect(tmpMat, method='rma')
     tmpMat <- normalize(tmpMat, method='quantile')
-    fit <- runSummarize(tmpMat, pnVec, method=method)
+    fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method)
     rm(tmpMat)
 
-    ## Chip effects - number of probesets X number samples
-    chipEffects <- do.call(rbind, lapply(fit, '[[', 'chipEffects'))
-    dimnames(chipEffects) <- list(unique(pnVec), sampleNames(object))
-
-    ## Probe effects - number of probes
-    probeEffects <- vector('numeric', nrow(object))
-    probeEffects[probeInfo$fid] <- do.call(c, lapply(fit, '[[', 'probeEffects'))
-    ## names(probeEffects) <- pnVec
-
-    ## Weights/residuals - number of probes X number samples
+    chipEffects <- fit$chipEffects
+    probeEffects <- fit$probeEffects
     Weights <- Residuals <- array(NA, dim(object))
-    Weights[probeInfo$fid,] <- do.call(rbind, lapply(fit, '[[', 'Weights'))
-    Residuals[probeInfo$fid,] <- do.call(rbind, lapply(fit, '[[', 'Residuals'))
-    ## dimnames(Weights) <- dimnames(Residuals) <- list(pnVec, sampleNames(object))
-
-    ## Chip StdErrors
-    chipStdErrors <- do.call(rbind, lapply(fit, '[[', 'chipStdErrors'))
-    dimnames(chipStdErrors) <- list(unique(pnVec), sampleNames(object))
-
-    ## Probes StdErrors
-    probesStdErrors <- vector('numeric', nrow(object))
-    probesStdErrors[probeInfo$fid] <- do.call(c, lapply(fit, '[[', 'probesStdErrors'))
-    ## names(probesStdErrors) <- pnVec
-
-    ## Scale
-    Scale <- do.call(c, lapply(fit, '[[', 'Scale'))
-    names(Scale) <- unique(pnVec)
-
+    Weights[probeInfo$fid,] <- fit$Weights
+    Residuals[probeInfo$fid,] <- fit$Residuals
+    chipStdErrors <- fit$chipStdErrors
+    probeStdErrors <- fit$probesStdErrors
+    Scale <- fit$Scale
     rm(fit)
 
     ## fix residuals/weights to have the array dims
