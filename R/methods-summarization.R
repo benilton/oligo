@@ -288,21 +288,29 @@ getFromListAsVector <- function(lst, elem, idx){
     lapply(lst, function(x, idx) x[[elem]][idx], idx)
 }
 
-outputEqualizer <- function(lst, sampleNames=NULL){
-    nsamples <- ncol(lst[[1]]$Residuals)
-    idx <- 1:nsamples
+outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
+    idx <- 1:ncol(lst[[1]]$Residuals)
+    if (verbose) txtMsg('Extracting "Estimates"... ')
     theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
     colnames(theChipCoefs) <- sampleNames
     theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
+    if (verbose) msgOK()
+    if (verbose) txtMsg('Extracting "Std Errors"... ')
     theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
     colnames(theChipSE) <- sampleNames
     theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
+    if (verbose) msgOK()
+    if (verbose) txtMsg('Extracting "Weights"... ')
     theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
     colnames(theWeights) <- sampleNames
+    if (verbose) msgOK()
+    if (verbose) txtMsg('Extracting "Residuals"... ')
     theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
     colnames(theResiduals) <- sampleNames
+    if (verbose) msgOK()
+    if (verbose) txtMsg('Extracting "Scale"... ')
     theScales <- unlist(lapply(lst, '[[', 'Scale'))
-
+    if (verbose) msgOK()
     list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
          Weights=theWeights, Residuals=theResiduals,
          chipStdErrors=theChipSE, probesStdErrors=theProbeSE,
@@ -327,10 +335,10 @@ runSummarize <- function(mat, pnVec, transfo=log2,
 ##     out <- unlist(out, recursive=FALSE)
     out <- theFun(y=transfo(mat), pnVec)
     if (verbose) message('OK')
-    outputEqualizer(out, colnames(mat))
+    outputEqualizer(out, colnames(mat), verbose=verbose)
 }
 
-fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=TRUE){
+fitProbeLevelModel <- function(object, target='core', subset, method='plm', verbose=TRUE, S4=TRUE){
     ## essential to be sorted by man_fsetid, so weights/residuals can be
     ## matched to original FS object
     probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
@@ -338,11 +346,11 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
     probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
-    tmpMat <- backgroundCorrect(tmpMat, method='rma')
-    tmpMat <- normalize(tmpMat, method='quantile')
+    tmpMat <- backgroundCorrect(tmpMat, method='rma', verbose=verbose)
+    tmpMat <- normalize(tmpMat, method='quantile', verbose=verbose)
     ## rownames below is really important for parallelization
     dimnames(tmpMat) <- list(probeInfo$man_fsetid, sampleNames(object))
-    fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method)
+    fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method, verbose=verbose)
     rm(tmpMat)
 
     chipEffects <- fit$chipEffects
