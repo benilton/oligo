@@ -330,10 +330,10 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
     probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
-    ## rownames below is really important for parallelization
-    rownames(tmpMat) <- probeInfo$man_fsetid
     tmpMat <- backgroundCorrect(tmpMat, method='rma')
     tmpMat <- normalize(tmpMat, method='quantile')
+    ## rownames below is really important for parallelization
+    rownames(tmpMat) <- probeInfo$man_fsetid
     fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method)
     rm(tmpMat)
 
@@ -343,7 +343,7 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=T
     Weights[probeInfo$fid,] <- fit$Weights
     Residuals[probeInfo$fid,] <- fit$Residuals
     chipStdErrors <- fit$chipStdErrors
-    probeStdErrors <- fit$probesStdErrors
+    probesStdErrors <- fit$probesStdErrors
     Scale <- fit$Scale
     rm(fit)
 
