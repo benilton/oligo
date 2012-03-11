@@ -323,7 +323,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
         theFun(y=transfo(submat), rownames(submat))
     }
     out <- unlist(out, recursive=FALSE)
-    outputEqualizer(out)
+    outputEqualizer(out, colnames(mat))
 }
 
 fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=TRUE){
