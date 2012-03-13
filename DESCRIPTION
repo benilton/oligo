@@ -9,6 +9,7 @@ Authors@R: c(person("Benilton", "Carvalho", role=c("aut", "cre"), email="Benilto
             person("Wolfgang", "Huber", role="ctb"),
             person("Jim", "MacDonald", role="ctb"),
             person("Harris", "Jaffee", role="ctb"))
+Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
 Depends: R (>= 2.14.0),
          oligoClasses (>= 1.13.9),
          foreach
