@@ -288,6 +288,7 @@ getFromListAsVector <- function(lst, elem, idx){
     lapply(lst, function(x, idx) x[[elem]][idx], idx)
 }
 
+<<<<<<< HEAD
 outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
     idx <- 1:ncol(lst[[1]]$Residuals)
     if (verbose) txtMsg('Extracting...', appendLF=TRUE)
@@ -312,6 +313,19 @@ outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
     if (verbose) txtMsg('  Scale....... ')
     theScales <- unlist(lapply(lst, '[[', 'Scale'))
     if (verbose) msgOK()
+=======
+outputEqualizer <- function(lst){
+    nsamples <- ncol(lst[[1]]$Residuals)
+    idx <- 1:nsamples
+    theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
+    theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
+    theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
+    theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
+    theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
+    theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
+    theScales <- unlist(lapply(lst, '[[', 'Scale'))
+
+>>>>>>> improving speed for fitProbeLevelModel
     list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
          Weights=theWeights, Residuals=theResiduals,
          chipStdErrors=theChipSE, probesStdErrors=theProbeSE,
@@ -320,9 +334,13 @@ outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
 
 
 runSummarize <- function(mat, pnVec, transfo=log2,
+<<<<<<< HEAD
                          method=summarizationMethods(),
                          verbose=TRUE){
     if (verbose) message('Summarizing.... ', appendLF=FALSE)
+=======
+                         method=summarizationMethods()){
+>>>>>>> improving speed for fitProbeLevelModel
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
@@ -330,6 +348,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     theFun <- switch(method,
                      medianpolish=subrcModelMedianPolish,
                      plm=subrcModelPLM)
+<<<<<<< HEAD
 ##     out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
 ##         theFun(y=transfo(submat), rownames(submat))
 ##     }
@@ -337,6 +356,13 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     out <- theFun(y=transfo(mat), pnVec)
     if (verbose) message('OK')
     outputEqualizer(out, colnames(mat), verbose=verbose)
+=======
+    out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
+        theFun(y=transfo(submat), rownames(submat))
+    }
+    out <- unlist(out, recursive=FALSE)
+    outputEqualizer(out)
+>>>>>>> improving speed for fitProbeLevelModel
 }
 
 fitProbeLevelModel <- function(object, target='core', subset, method='plm', verbose=TRUE, S4=TRUE){
@@ -347,11 +373,19 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', verb
     probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
+<<<<<<< HEAD
     tmpMat <- backgroundCorrect(tmpMat, method='rma', verbose=verbose)
     tmpMat <- normalize(tmpMat, method='quantile', verbose=verbose)
     ## rownames below is really important for parallelization
     dimnames(tmpMat) <- list(probeInfo$man_fsetid, sampleNames(object))
     fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method, verbose=verbose)
+=======
+    ## rownames below is really important for parallelization
+    rownames(tmpMat) <- probeInfo$man_fsetid
+    tmpMat <- backgroundCorrect(tmpMat, method='rma')
+    tmpMat <- normalize(tmpMat, method='quantile')
+    fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method)
+>>>>>>> improving speed for fitProbeLevelModel
     rm(tmpMat)
 
     chipEffects <- fit$chipEffects
@@ -360,7 +394,11 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm', verb
     Weights[probeInfo$fid,] <- fit$Weights
     Residuals[probeInfo$fid,] <- fit$Residuals
     chipStdErrors <- fit$chipStdErrors
+<<<<<<< HEAD
     probesStdErrors <- fit$probesStdErrors
+=======
+    probeStdErrors <- fit$probesStdErrors
+>>>>>>> improving speed for fitProbeLevelModel
     Scale <- fit$Scale
     rm(fit)
 
