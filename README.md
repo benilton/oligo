@@ -40,6 +40,6 @@ Contact
 -------
 
 Benilton Carvalho
-<firstName.lastName> AT cancer <dot> org <dot> uk
+<myFirstName.myLastName> AT cancer <dot> org <dot> uk
 
 [1]: http://github.com/benilton/oligo/issues
