@@ -1,6 +1,7 @@
 \name{summarize}
 \alias{backgroundCorrectionMethods}
 \alias{normalizationMethods}
+\alias{summarizationMethods}
 \alias{summarize}
 \alias{summarize-methods}
 \alias{summarize,matrix-method}
@@ -32,6 +33,7 @@
 \usage{
 backgroundCorrectionMethods()
 normalizationMethods()
+summarizationMethods()
 backgroundCorrect(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
 summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE, ...)
 normalize(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
@@ -60,7 +62,7 @@ normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
 \value{
   \code{backgroundCorrectionMethods} and \code{normalizationMethods}
   will return a character vector with the methods implemented currently.
-  
+
   \code{backgroundCorrect}, \code{normalize} and
   \code{normalizeToTarget} will return a matrix with same dimensions as
   the input matrix. If they are applied to a FeatureSet object, the PM
@@ -78,6 +80,7 @@ intensities <- matrix(rnorm(ns*nps*np, 8000, 400), nc=ns)
 ids <- rep(as.character(1:nps), each=np)
 bgCorrected <- backgroundCorrect(intensities)
 normalized <- normalize(bgCorrected)
+summarizationMethods()
 expression <- summarize(normalized, probes=ids)
 intensities[1:20, 1:3]
 expression[1:20, 1:3]

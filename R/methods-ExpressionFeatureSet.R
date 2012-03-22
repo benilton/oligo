@@ -17,7 +17,7 @@ setMethod("rma", "ExpressionFeatureSet",
             pnVec <- pnVec[idx]
             pmi <- pmi[idx]
             rm(idx)
-            
+
             theClass <- class(exprs(object))
 
             if ("matrix" %in% theClass){
@@ -33,7 +33,7 @@ setMethod("rma", "ExpressionFeatureSet",
             }else{
               stop("basicRMA not implemented for '", theClass, "' objects.")
             }
-            
+
             out <- new("ExpressionSet")
             slot(out, "assayData") <- assayDataNew(exprs=exprs)
             slot(out, "phenoData") <- phenoData(object)
@@ -111,7 +111,7 @@ paMAS5 <- function(object, verbose=TRUE,
     colnames(p) <- sampleNames(object)
     if (verbose) message("OK.")
     if (verbose) message("Making P/M/A Calls... ", appendLF=FALSE)
-    calls <- matrix("A", nc=ncol(p), nr=nrow(p))
+    calls <- matrix("A", ncol=ncol(p), nrow=nrow(p))
     calls[p < alpha1] <- "P"
     calls[p <= alpha2 & p >= alpha1] <- "M"
     dimnames(calls) <- list(rownames(p), sampleNames(object))

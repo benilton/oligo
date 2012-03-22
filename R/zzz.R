@@ -1,5 +1,5 @@
 .onAttach <- function(libname, pkgname) {
-  version <- packageDescription("oligo", field="Version")
+  version <- packageDescription("oligo", fields="Version")
   packageStartupMessage(getBar())
   packageStartupMessage("Welcome to oligo version ", version)
   packageStartupMessage(getBar())

@@ -145,7 +145,7 @@ runPLM <- function(PM, pnVec, funPLM){
     summaries <- lapply(groups, plm1Probeset, M=PM, funPLM=funPLM, nc=ncol(PM))
     estimates <- do.call(rbind, lapply(summaries, '[[', 'Estimates'))
     stderrors <- do.call(rbind, lapply(summaries, '[[', 'StdErrors'))
-    residuals <- matrix(NA, nr=nrow(PM), nc=ncol(PM))
+    residuals <- matrix(NA, nrow=nrow(PM), ncol=ncol(PM))
     residuals[unlist(groups, use.names=FALSE),] <- do.call(rbind, lapply(summaries, '[[', 'Residuals'))
     rm(summaries)
     colnames(estimates) <- colnames(stderrors) <- colnames(residuals) <- colnames(PM)
