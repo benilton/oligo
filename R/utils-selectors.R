@@ -46,6 +46,8 @@ getProbeTargets <- function(object, probeType='pm'){
 ## }
 
 availProbeInfo <- function(object, probeType='pm', target='core'){
+    if (!require(annotation(object), character.only=TRUE))
+        stop("The annotation package '", annotation(object), "' is not available.")
     ## FIXME: ST arrays have bg probes in pm tbl
     ## FIXME: ST arrays have targets in pm tbl (but same fields as pms?)
     isST <- class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')
@@ -68,6 +70,8 @@ availProbeInfo <- function(object, probeType='pm', target='core'){
 
 getProbeInfo <- function(object, field, probeType='pm', target='core',
                          subset, sortBy=c('fid', 'man_fsetid', 'none')){
+    if (!require(annotation(object), character.only=TRUE))
+        stop("The annotation package '", annotation(object), "' is not available.")
     sortBy <- match.arg(sortBy)
     conn <- db(object)
 
@@ -106,6 +110,7 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     }
 
     info <- dbGetQuery(conn, sql)
+    ## TODO: Add subset here!
 
     ## Getting data from dictionaries
     ## .. chrom: chromosome: mapping to proper chr ids
@@ -126,10 +131,11 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     ##   like chrom_id, type_id, level_id
     nmsOrig <- names(info)
     iTID <- grep('transcript_cluster_id', nmsOrig)
+    origValue <- NULL
     if (length(iTID) > 0) origValue <- nmsOrig[iTID]
     nmsOrig <- gsub('\\_id$', '', nmsOrig)
-    if (length(iTID) > 0) nms[iTID] <- origValue
-    names(info) <- nms
+    if (length(iTID) > 0) nmsOrig[iTID] <- origValue
+    names(info) <- nmsOrig
     rm(nmsOrig, iTID, origValue)
 
     ## Sorting

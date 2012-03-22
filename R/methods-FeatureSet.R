@@ -19,14 +19,6 @@ setMethod("probesetNames", "FeatureSet",
           unique(probeNames(object, target=target))
           )
 
-          
-## should geometry go to oligoClasses?
-## or the opposite?
-setMethod("geometry", "FeatureSet",
-          function(object)
-          geometry(getPD(object))
-          )
-
 setMethod("bg", "FeatureSet",
           function(object, subset=NULL){
             bgi <- bgindex(object, subset=subset)
@@ -93,7 +85,7 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
 
 setMethod("mm", "FeatureSet",
           function(object, subset=NULL){
-            exprs(object)[mmindex(object, subset=subset),, drop=FALSE] ## subset 
+            exprs(object)[mmindex(object, subset=subset),, drop=FALSE] ## subset
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
@@ -140,14 +132,14 @@ setMethod("boxplot", signature(x="FeatureSet"),
             if (is.null(dots[["range"]])) dots[["range"]] <- 0
             changeMain <- is.null(dots[["main"]])
             if (is.null(dots[["col"]])) dots[["col"]] <- darkColors(ncol(x))
-            
+
             eset <- x[idx,]
 
             ## this fix is temporary
             ## until we agree on how
             ## to handle multiplicity by gene chips
             featureNames(eset) <- featureNames(featureData(eset))
-            
+
             rgs <- vector("list", nchns)
             for (i in 1:nchns){
                 tmp <- transfo(exprs(channel(eset, chns[i])))
@@ -156,7 +148,7 @@ setMethod("boxplot", signature(x="FeatureSet"),
             }
             rgs <- range(unlist(rgs))
             dots[["ylim"]] <- rgs
-            
+
             res <- vector("list", nchns)
             doPlot <- dots[['plot']]
             if (is.null(doPlot)){
@@ -176,27 +168,27 @@ setMethod("boxplot", signature(x="FeatureSet"),
             }
             invisible(res)
           })
-  
+
 setMethod("image", signature(x="FeatureSet"),
           function(x, which, transfo=log2, ...){
             if (missing(which)) which <- 1:ncol(x)
             if(length(which) > 1) par(ask=TRUE) else par(ask=FALSE)
             dots <- list(...)
-            
+
             if (is.null(dots[["col"]]))
               dots[["col"]] <- colorRampPalette(c("blue", "white", "red"))(256)
             if (is.null(dots[["xaxt"]]))
               dots[["xaxt"]] <- "n"
             if (is.null(dots[["yaxt"]]))
               dots[["yaxt"]] <- "n"
-            
+
             geom <- geometry(getPD(x))
-            
+
             chns <- channelNames(x)
             nchns <- length(chns)
             oldpar <- par()[c("mfrow", "mar", "mgp")]
             par(mfrow=c(nchns, 1), mar=c(2.5,2.5,1.6,1.1), mgp=c(1.5,.5,0))
-            
+
             if (tolower(manufacturer(x)) != "affymetrix"){
               conn <- db(x)
               tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
@@ -270,10 +262,10 @@ setMethod("hist", "FeatureSet",
             idx <- getProbeIndex(x, which)
             if (length(idx) > nsample)
               idx <- sort(sample(idx, nsample))
-            
+
             chns <- channelNames(x)
             nchns <- length(chns)
-            
+
             ## estimate density for every sample on each channel
             f <- function(chn, obj)
               matDensity(transfo(exprs(channel(obj, chn))))
@@ -286,12 +278,12 @@ setMethod("hist", "FeatureSet",
 
             tmp <- lapply(chns, f, eset)
             rm(eset)
-            
+
             ## get lims
             rgs <- lapply(tmp, sapply, range)
             rgs <- do.call("rbind", rgs)
             rgs <- apply(rgs, 2, range)
-            
+
             ## set graph options properly
             dots <- list(...)
             if (is.null(dots[["ylab"]])) dots[["ylab"]] <- "density"
@@ -303,7 +295,7 @@ setMethod("hist", "FeatureSet",
             if (is.null(dots[["type"]])) dots[["type"]] <- "l"
             par(mfrow=c(nchns, 1))
             changeMain <- is.null(dots[["main"]])
-            
+
             for (i in 1:nchns){
               dots[["x"]] <- tmp[[i]][["x"]]
               dots[["y"]] <- tmp[[i]][["y"]]
