@@ -1,19 +1,19 @@
 all: overview nimbleexpr affysnp experimental exongene clean
 
 overview: V1Overview.tex
-	cp -p ../scripts/V1Overview.pdf .
+	cp -p ../inst/scripts/V1Overview.pdf .
 
 nimbleexpr: V2NExpression.tex
-	cp -p ../scripts/V2NExpression.pdf .
+	cp -p ../inst/scripts/V2NExpression.pdf .
 
 affysnp: V3AffySnpGenotype.tex
-	cp -p ../scripts/V3AffySnpGenotype.pdf .
+	cp -p ../inst/scripts/V3AffySnpGenotype.pdf .
 
 experimental: V4Experimental.tex
-	cp -p ../scripts/V4Experimental.pdf .
+	cp -p ../inst/scripts/V4Experimental.pdf .
 
 exongene: V4Experimental.tex
-	cp -p ../scripts/V5ExonGene.pdf .
+	cp -p ../inst/scripts/V5ExonGene.pdf .
 
 clean:
 	$(RM) -f *.out *.bbl *.log *.aux *.blg *.brf *.toc *.tex
