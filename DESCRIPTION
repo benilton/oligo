@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.19.21
+Version: 1.19.22
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
@@ -22,6 +22,7 @@ Imports: affyio (>= 1.23.2),
 Enhances: ff, doMC, doMPI
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
+          pd.hugene.1.0.st.v1,
           pd.mapping50k.xba240,
           pd.huex.1.0.st.v2,
           pd.hg18.60mer.expr,
