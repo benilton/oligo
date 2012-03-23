@@ -14,7 +14,6 @@
 * Testing
 ** Use unit tests
 * Downstream support
-** Add filtering and summarization options (eg, exon/rma and gene/rma)
 ** Add crlmm pipeline from SnpFeatureSet (snprma is ready, under snprma2)
 ** Add option to save genotype dosages
 ** Add Mbox (actually a function to compute M and make a boxplot - needed?) !!!
