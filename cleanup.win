@@ -1,4 +1,4 @@
 #!/bin/sh
 
 rm -f src/*o
-rm -f R/*~ *~ config.*
+rm -f R/*~ *~ config.* man/*~

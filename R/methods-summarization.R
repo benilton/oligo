@@ -339,11 +339,11 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     outputEqualizer(out, colnames(mat), verbose=verbose)
 }
 
-fitProbeLevelModel <- function(object, target='core', subset, method='plm', verbose=TRUE, S4=TRUE){
+fitProbeLevelModel <- function(object, target='core', method='plm', verbose=TRUE, S4=TRUE, ...){
     ## essential to be sorted by man_fsetid, so weights/residuals can be
     ## matched to original FS object
     probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
-                              sortBy='man_fsetid', subset=subset)
+                              sortBy='man_fsetid', ...)
     probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
