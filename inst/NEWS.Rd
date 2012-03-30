@@ -1,6 +1,29 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
+\section{Changes in version 1.20}{
+  \subsection{USER VISIBLE CHANGES}{
+    \itemize{
+      \item New getProbeInfo() function added, to simplify probe
+  selection without using SQL.
+      \item New fitProbeLevelModel() function added. It allows
+      probe-level models ('plm' and 'medianpolish'), which can be used for
+  QC.
+      \item fitPLM, coefs and resids are now Deprecated. Use
+  fitProbeLevelModel, coef and residuals respectively. 'coef' and
+  'residuals' follow the standards used elsewhere in R.
+      \item Now using foreach for parallelization.
+      }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item Addressed issue in which probes without chr info would be
+  removed from pmChr, leading to results whose dimensions did not match
+  PM matrix (on TilingFeatureSet).
+    }
+  }
+}
+
 \section{Changes in version 1.18}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
@@ -63,7 +86,7 @@
         invalid GeneFeatureSet objects
       \item Fixed bugs in image / bg / bgindex / bgSequence
         for Exon and Gene arrays (due to changes in annotation)
-      \item Added date/time of scan (for XYS/CEL files) to the 
+      \item Added date/time of scan (for XYS/CEL files) to the
         protocolData slot. For 1 channel applications, the field
         is called 'dates'; for 2 channel apps, there are 2 fields:
         'dates1' and 'dates2'

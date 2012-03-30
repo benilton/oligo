@@ -10,11 +10,14 @@
   on a (meta)probeset by (meta)probeset basis.
 }
 \usage{
-fitProbeLevelModel(object, target = "core", method = "plm", verbose = TRUE, S4 = TRUE, ...)
+fitProbeLevelModel(object, background=TRUE, normalize=TRUE, target="core", method="plm", verbose=TRUE, S4=TRUE, ...)
 }
 
 \arguments{
-  \item{object}{\code{\link[oligoClasses:FeatureSet]{FeatureSet}} object.}
+  \item{object}{\code{\link[oligoClasses:FeatureSet]{FeatureSet}}
+    object.}
+  \item{background}{Do background correction?}
+  \item{normalize}{Do normalization?}
   \item{target}{character vector describing the summarization
     target. Valid values are: 'probeset', 'core' (Gene/Exon), 'full'
     (Exon), 'extended' (Exon).}
