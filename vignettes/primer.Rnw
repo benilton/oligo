@@ -1,0 +1,10 @@
+%\VignetteIndexEntry{oligo - Primer}
+%\VignetteKeywords{expression, exon, gene, tiling, SNP}
+%\VignettePackage{oligo}
+
+%%% The real .Rnw is under inst/scripts.
+%%% It cannot be added here because it
+%%% takes too much time
+\documentclass[12pt]{article}
+\begin{document}
+\end{document}
