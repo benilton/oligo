@@ -38,7 +38,6 @@ genAntigenomic <- function(pkg){
     featureInfo$man_fsetid <- as.character(featureInfo$man_fsetid)
     featureInfo
 }
-
 core <- lapply(lapply(pkgs, genFidCore), getRandom)
 pset <- lapply(lapply(pkgs, genFidProbeset), getRandom)
 agen <- lapply(lapply(pkgs, genAntigenomic), getRandom)
