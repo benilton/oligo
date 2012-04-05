@@ -1,6 +1,0 @@
-%\VignetteIndexEntry{04 - Experimental Features}
-%\VignetteKeywords{High-performance computing}
-%\VignettePackage{oligo}
-\documentclass{article}
-\begin{document}
-\end{document}

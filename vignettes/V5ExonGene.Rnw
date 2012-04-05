@@ -1,6 +1,0 @@
-%\VignetteIndexEntry{05 - Exon ST and Gene ST Arrays}
-%\VignetteKeywords{gene, exon, affymetrix, rma}
-%\VignettePackage{oligo}
-\documentclass{article}
-\begin{document}
-\end{document}

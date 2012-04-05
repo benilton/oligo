@@ -16,6 +16,7 @@ test_selector <- function(){
     message('Getting probe info: antigenomic backgroung probes')
     agenExon <- getProbeInfo(affyExonFS, field=fld, target='probeset', subset= type == 'control->bgp->antigenomic')[out][iagen0[[pkgs[1]]],]
     rownames(coreExon) <- rownames(psetExon) <- rownames(agenExon) <- NULL
+
     message('Loading sample dataset: Gene')
     data(affyGeneFS)
     message('Getting probe info: core')
@@ -25,6 +26,7 @@ test_selector <- function(){
     message('Getting probe info: antigenomic backgroung probes')
     agenGene <- getProbeInfo(affyGeneFS, field=fld, target='probeset', subset= type == 'control->bgp->antigenomic')[out][iagen0[[pkgs[2]]],]
     rownames(coreGene) <- rownames(psetGene) <- rownames(agenGene) <- NULL
+
     core <- list(coreExon, coreGene)
     pset <- list(psetExon, psetGene)
     agen <- list(agenExon, agenGene)
