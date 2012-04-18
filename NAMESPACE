@@ -90,7 +90,7 @@ import(zlibbioc)
 
 ## EXPORTS
 
-exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, getContainer,
+exportMethods(boxplot, bg, "bg<-", bgSequence, db, exprs, "exprs<-", getContainer,
               getPlatformDesign, getX, getY, hist, image, MAplot, mm,
               "mm<-", mmindex, mmSequence, pm, "pm<-", pmChr, pmAllele,
               pmindex, pmFragmentLength, pmOffset, pmPosition,
