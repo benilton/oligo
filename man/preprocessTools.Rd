@@ -34,21 +34,24 @@
 backgroundCorrectionMethods()
 normalizationMethods()
 summarizationMethods()
-backgroundCorrect(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
+backgroundCorrect(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE)
 summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE, ...)
-normalize(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
-normalizeToTarget(object, target, method="quantile", copy=TRUE, verbose=TRUE)
+normalize(object, method=normalizationMethods(), copy=TRUE, subset=NULL,target='core', verbose=TRUE, ...)
+normalizeToTarget(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE)
 }
 
 \arguments{
   \item{object}{Object containing probe intensities to be preprocessed.}
   \item{method}{String determining which method to use at that
     preprocessing step.}
-  \item{target}{Vector with the target distribution}
+  \item{targetDist}{Vector with the target distribution}
   \item{probes}{Character vector that identifies the name of the probes represented
     by the rows of \code{object}.}
   \item{copy}{Logical flag determining if data must be copied before
     processing (TRUE), or if data can be overwritten (FALSE).}
+  \item{subset}{Not yet implemented.}
+  \item{target}{One of the following values: 'core', 'full', 'extended',
+  'probeset'. Used only with Gene ST and Exon ST designs.}
   \item{extra}{Extra arguments to be passed to other methods.}
   \item{verbose}{Logical flag for verbosity.}
   \item{\dots}{Arguments to be passed to methods.}

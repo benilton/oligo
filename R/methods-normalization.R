@@ -98,18 +98,18 @@ setMethod("normalize", "ff_matrix",
           })
 
 setMethod("normalizeToTarget", "matrix",
-          function(object, target, method="quantile", copy=TRUE, verbose=TRUE){
-            stopifnot(!missing(target))
+          function(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE){
+            stopifnot(!missing(targetDist))
             method <- match.arg(method, "quantile")
             if (verbose) txtMsg("Normalizing using target... ")
-            out <- normalize.quantiles.use.target(object, target, copy=copy)
+            out <- normalize.quantiles.use.target(object, targetDist, copy=copy)
             if (verbose) msgOK()
             return(out)
           })
 
 setMethod("normalizeToTarget", "ff_matrix",
-          function(object, target, method="quantile", copy=TRUE, verbose=TRUE){
-            stopifnot(!missing(target))
+          function(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE){
+            stopifnot(!missing(targetDist))
             method <- match.arg(method, "quantile")
             if (verbose) txtMsg("Normalizing using target... ")
             if (copy){
@@ -118,25 +118,25 @@ setMethod("normalizeToTarget", "ff_matrix",
               out <- object
             }
             if (method == "quantile"){
-              quantileNormalizationLDSmaster(out, target)
+              quantileNormalizationLDSmaster(out, targetDist)
             }
             if (verbose) msgOK()
             return(out)
           })
 
 setMethod("normalize", "FeatureSet",
-          function(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...){
+          function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...){
               if (copy)
                   object <- cloneFS(object)
               if (method != 'quantile.in.blocks'){
-                  pm(object) <- normalize(pm(object), method=method,
+                  pm(object, subset=subset, target=target) <- normalize(pm(object, subset=subset, target=target), method=method,
                                           copy=FALSE, verbose=verbose, ...)
               }else{
                   theDots <- list(...)
                   blocks <- theDots[['blocks']]
-                  pms <- pm(object)
+                  pms <- pm(object, subset=subset, target=target)
                   if (is.null(blocks)){
-                      theDots[['blocks']] <- as.factor(probeNames(object))
+                      theDots[['blocks']] <- as.factor(probeNames(object, subset=subset, target=target))
                   }else{
                       stopifnot(length(blocks) == nrow(pms))
                   }
@@ -144,7 +144,7 @@ setMethod("normalize", "FeatureSet",
                   theDots[['method']] <- method
                   theDots[['copy']] <- copy
                   theDots[['verbose']] <- verbose
-                  pm(object) <- do.call('normalize', theDots)
+                  pm(object, subset=subset, target=target) <- do.call('normalize', theDots)
               }
               object
           })
@@ -253,7 +253,7 @@ invariantsetV <- function (data, ref, prd.td = c(0.003, 0.007)){
         i.set[i.set] <- prd < threshold
         ns.old <- ns
         ns <- sum(i.set)
-        if (prd.td.adj[1] > prd.td[1]) 
+        if (prd.td.adj[1] > prd.td[1])
             prd.td.adj <- prd.td.adj * 0.9
     }
     n.curve <- smooth.spline(ref[i.set], data[i.set])
@@ -295,7 +295,7 @@ loessNormV <- function(v1, v2, subset, span, degree, weights, family){
     index <- c(which.min(x), subset, which.max(x))
     xx <- x[index]
     yy <- v1[index]-v2[index]
-    aux <- loess(yy ~ xx, span=span, degree=degree, 
+    aux <- loess(yy ~ xx, span=span, degree=degree,
                  weights=weights, family=family)
     predict(aux, data.frame(xx=x))
 }
@@ -324,16 +324,16 @@ loessNorm <- function (mat, subset, epsilon=0.01, maxit=1, log.it=TRUE,
                                   family=family.loess)/J
                 means[, j] <- means[, j] + aux
                 means[, k] <- means[, k] - aux
-                if (verbose) 
+                if (verbose)
                     message("Done with ", j, " vs ", k, " in iteration ", iter)
             }
         }
         mat <- mat - means
         change <- max(colMeans((means[subset, ])^2))
-        if (verbose) 
+        if (verbose)
             message(sprintf("Iteration: %02d - Change: %02.8f", iter, change))
     }
-    if ((change > epsilon) & (maxit > 1)) 
+    if ((change > epsilon) & (maxit > 1))
         warning("No convergence after ", maxit, " iterations.")
     if (log.it) {
         return(2^mat)
@@ -374,7 +374,7 @@ normalizeAdv <- function(pmMat, mmMat, pnVec, normType, normPar, verbose=TRUE){
     ## types of normalization
     allowed <- c('quantile', 'quantile.probeset', 'scaling', 'quantile.robust')
     normType <- match.arg(normType, allowed)
-        
+
     ## regardless the normType, parameters must be passed as a list
     ## normPar with (at least) a 'type' element
     stopifnot(is.list(normPar), 'type' %in% names(normPar))

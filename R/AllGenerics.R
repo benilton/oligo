@@ -4,10 +4,10 @@ setGeneric("bg", function(object, subset=NULL) standardGeneric("bg"))
 
 setGeneric("intensity", function(object) standardGeneric("intensity"))
 setGeneric("intensity<-", function(object, value) standardGeneric("intensity<-"))
-setGeneric("pm", function(object, subset=NULL, ...) standardGeneric("pm"))
-setGeneric("pm<-", function(object, value) standardGeneric("pm<-"))
-setGeneric("mm", function(object, subset=NULL) standardGeneric("mm"))
-setGeneric("mm<-", function(object, value) standardGeneric("mm<-"))
+setGeneric("pm", function(object, subset=NULL, target='core') standardGeneric("pm"))
+setGeneric("pm<-", function(object, subset=NULL, target='core', value) standardGeneric("pm<-"))
+setGeneric("mm", function(object, subset=NULL, target='core') standardGeneric("mm"))
+setGeneric("mm<-", function(object, subset=NULL, target='core', value) standardGeneric("mm<-"))
 setGeneric("bg", function(object, subset=NULL) standardGeneric("bg"))
 setGeneric("bg<-", function(object, value) standardGeneric("bg<-"))
 setGeneric("logRatioAntisense", function(object) standardGeneric("logRatioAntisense"))
@@ -44,11 +44,11 @@ setGeneric("getY", function(object, type) standardGeneric("getY"))
 ###
 
 setGeneric("backgroundCorrect",
-           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
+           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE)
            standardGeneric("backgroundCorrect"))
 
 setGeneric("normalize",
-           function(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
+           function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...)
            standardGeneric("normalize"))
 
 setGeneric("summarize",
@@ -57,7 +57,7 @@ setGeneric("summarize",
            standardGeneric("summarize"))
 
 setGeneric("normalizeToTarget",
-           function(object, target, method="quantile", copy=TRUE, verbose=TRUE)
+           function(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE)
            standardGeneric("normalizeToTarget"))
 
 setGeneric("getNetAffx", function(object, type="probeset") standardGeneric("getNetAffx"))

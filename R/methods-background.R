@@ -200,12 +200,12 @@ setMethod("backgroundCorrect", "ff_matrix",
 
 
 setMethod("backgroundCorrect", "FeatureSet",
-          function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...){
+          function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE){
               method <- match.arg(method, backgroundCorrectionMethods())
               if (copy)
                   object <- cloneFS(object)
               if (method == "rma"){
-                  pm(object) <- backgroundCorrect(pm(object),
+                  pm(object, subset=subset, target=target) <- backgroundCorrect(pm(object, subset=subset, target=target),
                                                   method="rma",
                                                   copy=FALSE, extra=extra,
                                                   verbose=verbose)
@@ -214,9 +214,9 @@ setMethod("backgroundCorrect", "FeatureSet",
                   if (!missing(extra))
                       if ('griddim' %in% names(extra))
                           griddim <- extra[["griddim"]]
-                  out <- bgMASFS(object, griddim=griddim)
+                  object <- bgMASFS(object, griddim=griddim)
               }else if (method == "LESN"){
-                  pm(object) <- backgroundCorrect(pm(object),
+                  pm(object, subset=subset, target=target) <- backgroundCorrect(pm(object, subset=subset, target=target),
                                                   method="LESN",
                                                   copy=FALSE, extra=extra,
                                                   verbose=verbose)
