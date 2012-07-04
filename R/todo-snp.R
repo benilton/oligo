@@ -12,7 +12,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
     combs <- c("A", "B")
     ncomb <- length(combs)
   }
-  
+
   snps <- rownames(pmMat)
   snps <- unique(substr(snps, 1, (nchar(snps)-npars)))
   pns <- paste(rep(snps, each=ncomb),
@@ -20,7 +20,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
                sep="")
 
   idx <- match(pns, rownames(pmMat))
-  
+
   theClass <- class(pmMat)
   if ("matrix" %in% theClass){
     tmp <- pmMat[idx,]
@@ -30,7 +30,7 @@ alleleSetFrom <- function(pmMat, bothStrands=TRUE){
   }else{
     stop("Class ", theClass, " not supported by alleleSetFrom.")
   }
-  
+
   rownames(tmp) <- rep(snps, each=ncomb)
   aTa <- seq(1, nrow(tmp), by=ncomb)
   colnames(tmp) <- colnames(pmMat)
@@ -109,7 +109,7 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
     if (verbose) message("Normalizing to Hapmap.")
     load(system.file("extdata", paste(pkgname, "Ref.rda", sep=""), package=pkgname))
     reference <- sort(reference)
-    tmpExprs <- normalizeToTarget(tmpExprs, target=reference, copy=FALSE, method="quantile", verbose=FALSE)
+    tmpExprs <- normalizeToTarget(tmpExprs, targetDist=reference, copy=FALSE, method="quantile", verbose=FALSE)
     rm(reference)
   } else {
     tmpExprs <- normalize(tmpExprs, copy=FALSE, method="quantile", verbose=FALSE)
@@ -138,20 +138,20 @@ snprma2 <- function(object, verbose=TRUE, normalizeToHapmap=TRUE){
 
 crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
                    verbose=TRUE, balance=1.5){
-  
+
   ## make this a method for AlleleSet
   stopifnot(is(object, "AlleleSet"))
 
   ## bothStrands: TRUE (before SNP 5.0) / FALSE (SNP 5.0 or SNP 6.0)
   bs <- bothStrands(object)
-  
+
   library(annotation(object), character.only=TRUE)
 
   if (verbose) message("Calculating M correction... ", appendLF=FALSE)
   correction <- fitAffySnpMixture2(object, verbose=verbose)
   if (verbose) message("Done.\n")
 
-  
+
   snr <- correction$snr
 
   if(is.null(object$gender)){
@@ -175,14 +175,14 @@ crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
   myCalls[Index,] <- getInitialAffySnpCalls(correction, Index,
                                             verbose=verbose,
                                             sqsClass=class(object))
-  
+
   fs <- correction$fs;
   rparams <- getAffySnpGenotypeRegionParams(object, myCalls, fs,
                                             subset=Index,
                                             verbose=verbose,
                                             sqsClass=class(object))
   rm(myCalls)
-  
+
   if (bs){
     oneStrand <- apply(is.na(getM(object[,1])[,1,]), 1,
                        function(v) ifelse(length(ll <- which(v))==0, 0, ll))
@@ -208,7 +208,7 @@ crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
   }
 ## aqui
   rm(fs)
-  
+
   XIndex <- getChrXIndex(object)
   myCalls <- getAffySnpCalls(myDist,XIndex,maleIndex,verbose=verbose, sqsClass=class(object))
   LLR <- getAffySnpConfidence(myDist,myCalls,XIndex,maleIndex,verbose=verbose, sqsClass=class(object))
@@ -220,7 +220,7 @@ crlmm2 <- function(object, recalibrate=TRUE, minLLRforCalls=c(5, 1, 5),
       myCalls[myCalls == k & LLR < minLLRforCalls[k]] <- NA
     rm(LLR)
     myCalls[, snr < 3.675] <- NA
-    
+
     rparams <- getAffySnpGenotypeRegionParams(object, myCalls,
                                               fs, verbose=verbose, sqsClass=class(object))
     rm(myCalls)
@@ -285,9 +285,9 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
   }else{
     maleIndex <- object$gender == "male"
   }
-  
+
   XIndex <- getChrXIndex(object)
-  
+
   I <- dim(object)[1]
   J <- dim(object)[2]
   set.seed(seed)
@@ -330,7 +330,7 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
 #####                      c("AA","AB","BB"),
 #####                      c("antisense","sense"))
 #####  names(snr) <- sampleNames(object)
-  
+
   if(verbose) cat("Fitting mixture model to ", J, " arrays. Epsilon must reach ", eps, ".\n",sep="")
   L <- getSnpFragmentLength(object)
   fix <- which(is.na(L))
@@ -371,30 +371,30 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
     }
     A <- A-mean(A)
     a <- a-mean(a)
-    
+
     weights <- apply(cbind(mus, sigmas), 1, function(p) dnorm(y, p[1], p[2]))
     PreviousLogLik <- -Inf
     change <- eps+1
     itmax <- 0
-    
+
     matA <- ns(a, df2)
     while (change > eps && itmax < 100){
       itmax <- itmax+1
-      
+
       ## E
       z <- sweep(weights, 2, probs, "*")
       LogLik <- rowSums(z)
       z <- sweep(z, 1, LogLik, "/")
       LogLik <- sum(log(LogLik))
       change <- abs(LogLik-PreviousLogLik)
-      
+
       if (verbose){
         if (itmax > 1 || j > 1) cat(del)
         message <- paste("Array ",j,": epsilon = ", signif(change,2), "  ", sep="")
         del <- paste(rep("\b", nchar(message)), collapse="")
         cat(message)
       }
-      
+
       PreviousLogLik <- LogLik
       probs <- colMeans(z)
 
@@ -402,11 +402,11 @@ fitAffySnpMixture2 <- function(object, df1=3, df2=5, probs=rep(1/3,3),
       fit1 <- lm(y~matL+matA,weights=z[,1])
       fit2 <- sum(z[,2]*y)/sum(z[,2])
       fit3 <- lm(y~matL+matA,weights=z[,3])
-      
+
       sigmas[1] <- sqrt(sum(z[,1]*residuals(fit1)^2)/sum(z[,1]))
       sigmas[2] <- sqrt(sum(z[,2]*(y-fit2)^2)/sum(z[,2]))
       sigmas[3] <- sqrt(sum(z[,3]*residuals(fit3)^2)/sum(z[,3]))
-      
+
       weights[,1] <- dnorm(y,fitted(fit1),sigmas[1])
       weights[,2] <- dnorm(y,fit2,sigmas[2])
       weights[,3] <- dnorm(y,fitted(fit3),sigmas[3])
@@ -489,12 +489,12 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
     idx <- is.na(pi2[,1,1])
     pi2[idx,,] <- pi1[idx,,]
     rm(idx); ## gc()
-  
+
     if(verbose) cat("Picking good starting value: ")
     if(verbose) cat("Computing entropy, ")
     E1 <- rowEntropy(pi1)
     E2 <- rowEntropy(pi2); ## gc()
-  
+
     tmpN <- dim(pi1)
     tmpcall1 <- tmpcall2 <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
 #####  rownames(tmpcall1) <- rownames(tmpcall2) <- dimnames(pi1)[[1]]
@@ -507,7 +507,7 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
         tmpcall2[i, j] <- which.max(pi2[i,j,])
       }
     }
-  
+
     if(verbose) cat("determining non-concordant calls, ")
     concordance <- rowIndepChiSqTest(tmpcall1,tmpcall2); ## gc()
 
@@ -521,7 +521,7 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
     tc3 <- tmpcall2 == 3
     noABIndex2 <- which((rowSums(tc2)<3)*(rowSums(tc3)>0)*(rowSums(tc1)>0) == 1)
     rm(tc1, tc2, tc3); ## gc()
-  
+
     E1[noABIndex1] <- -Inf
     E2[noABIndex2] <- -Inf
 
@@ -529,12 +529,12 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
 
     ## gc()
     noInfoIndex <- intersect(noABIndex1, noABIndex2)
-  
+
     rm(noABIndex1, noABIndex2)
-  
+
     jointprobs[noInfoIndex,,] <- 1/3
     rm(noInfoIndex)
-  
+
     notBoth <- concordance < concordanceCutoff
     E1bE2 <- E1 > E2
     rm(E1, E2)
@@ -545,7 +545,7 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
     rm(i1, pi1)
     jointprobs[i2,,] <- pi2[i2,,]
     rm(i2, pi2); ## gc()
-    
+
     tmpN <- dim(jointprobs)
     tmpcall <- tmpmax <- matrix(NA, nrow=tmpN[1], ncol=tmpN[2])
 #####   rownames(tmpcall) <- rownames(tmpmax) <- dimnames(jointprobs)[[1]]
@@ -553,7 +553,7 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
   ## gc()
 
     if(verbose) cat(" finalizing"); ## gc()
-    
+
     for (i in 1:tmpN[1]){
       for (j in 1:tmpN[2]){
         tmpcall[i, j] <- which.max(jointprobs[i, j, ])
@@ -564,7 +564,7 @@ getInitialAffySnpCalls2 <- function(object,subset=NULL,
     tmpcall <- apply(object$pis[subset,, ], 1:2, which.max)
     tmpmax  <- apply(object$pis[subset,, ], 1:2, max)
   }
-  
+
     for(i in 1:3)
       tmpcall[tmpcall==i & tmpmax<cutoffs[i]] <- NA
   if(verbose) cat("\nCompleted!\n")
