@@ -26,7 +26,7 @@ setMethod("bgindex", "ExonFeatureSet",
 
 setMethod("bgSequence", "ExonFeatureSet",
           function(object){
-              theFile <- file.path(system.file(package = annotation(object)), 
+              theFile <- file.path(system.file(package = annotation(object)),
                                    "data", "pmSequence.rda")
               load(theFile)
               bgi <- bgindex(object)
@@ -81,7 +81,7 @@ setMethod("rma", "ExonFeatureSet",
 
 gcCounts <- function(seq)
     as.integer(Biostrings::letterFrequency(seq, letters='CG'))
-    
+
 getRefDABG <- function(x){
     conn <- db(x)
     sql <- paste('SELECT type FROM type_dict',
@@ -89,7 +89,7 @@ getRefDABG <- function(x){
     bgCode <- as.integer(dbGetQuery(conn, sql)[[1]])
     if (length(bgCode) != 1)
         stop("Can't find proper id for control-bgp-antigenomic probes")
-    
+
     sql <- paste('SELECT fid FROM pmfeature',
                  'INNER JOIN featureSet USING(fsetid)',
                  'WHERE', paste('type=', bgCode, sep=''))
@@ -118,7 +118,7 @@ computePSDABG <- function(x){
 computeDABG <- function(x){
     mmRef <- getRefDABG(x)
     pmCounts <- gcCounts(pmSequence(x))
-    pms <- pm(x)
+    pms <- pm(x, target='probeset')
     ns <- sapply(mmRef, nrow)
     rgCounts <- range(as.integer(names(ns[ns > 0])))
     pmCounts[pmCounts < rgCounts[1]] <- rgCounts[1]
