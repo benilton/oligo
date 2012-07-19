@@ -30,7 +30,7 @@ setMethod("getY", "DBPDInfo",
 
 ## from oligoClasses
 setMethod("pmindex", "DBPDInfo",
-          function(object, subset=NULL, target=NULL) { 
+          function(object, subset=NULL, target=NULL) {
             if (!is.null(subset))
               warning("Subset not implemented (yet). Returning everything.")
             tmp <- dbGetQuery(db(object),
@@ -109,6 +109,37 @@ setMethod("pmSequence", "DBPDInfo",
             if (file.exists(theFile)){
               load(theFile)
               return(pmSequence[["sequence"]])
+            }else{
+              warning("pmSequence.rda file is not available for this pdInfo pkg.")
+              return(NULL)
+            }
+          })
+
+
+setMethod("pmSequence", "stArrayDBPDInfo",
+          function(object, target='core'){
+            theFile <- file.path(system.file(package=annotation(object)), "data", "pmSequence.rda")
+            if (file.exists(theFile)){
+                fid <- getProbeInfo(object, target=target, sortBy='fid', fields=c('fid', 'man_fsetid'))$fid
+
+              load(theFile)
+                i <- match(fid, pmSequence$fid)
+              return(pmSequence[["sequence"]][i,])
+            }else{
+              warning("pmSequence.rda file is not available for this pdInfo pkg.")
+              return(NULL)
+            }
+          })
+
+setMethod("pmSequence", "AffyGenePDInfo",
+          function(object, target='core'){
+            theFile <- file.path(system.file(package=annotation(object)), "data", "pmSequence.rda")
+            if (file.exists(theFile)){
+                fid <- getProbeInfo(object, target=target, sortBy='fid', fields=c('fid', 'man_fsetid'))$fid
+
+              load(theFile)
+                i <- match(fid, pmSequence$fid)
+              return(pmSequence[["sequence"]][i,])
             }else{
               warning("pmSequence.rda file is not available for this pdInfo pkg.")
               return(NULL)

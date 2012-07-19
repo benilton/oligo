@@ -26,12 +26,17 @@ setMethod("bgindex", "GeneFeatureSet",
 
 setMethod("bgSequence", "GeneFeatureSet",
           function(object){
-              theFile <- file.path(system.file(package = annotation(object)), 
+              theFile <- file.path(system.file(package = annotation(object)),
                                    "data", "pmSequence.rda")
               load(theFile)
               bgi <- bgindex(object)
               idx <- match(bgi, pmSequence[["fid"]])
               pmSequence[idx, "sequence"]
+          })
+
+setMethod("pmSequence", "GeneFeatureSet",
+          function(object, target='core'){
+              pmSequence(getPD(object), target=target)
           })
 
 

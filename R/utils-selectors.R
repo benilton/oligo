@@ -47,16 +47,18 @@ availProbeInfo <- function(object, probeType='pm', target='core'){
 
 getProbeInfo <- function(object, field, probeType='pm', target='core',
                          sortBy=c('fid', 'man_fsetid', 'none'), ...){
-    if (!require(annotation(object), character.only=TRUE))
-        stop("The annotation package '", annotation(object), "' is not available.")
+    pkgName <- ifelse(is.character(object), object, annotation(object))
+    if (!require(pkgName, character.only=TRUE))
+        stop("The annotation package '", pkgName, "' is not available.")
     sortBy <- match.arg(sortBy)
-    conn <- db(object)
+##    conn <- db(object)
+    conn <- db(get(pkgName))
 
     ## With ST arrays:
     ## 1) fsetid is both fsetid and man_fsetid
     ## 2) transcript_cluster_id is in both *mps and featureSet tables
     ## 3) chrom/level/type_dict tables exist
-    isST <- class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')
+    isST <- class(get(pkgName)) %in% c('ExonFeatureSet', 'GeneFeatureSet', 'AffyExonPDInfo', 'AffyGenePDInfo')
 
     if (missing(field)) field <- 'fid'
 
