@@ -7,6 +7,10 @@
 \alias{pmSequence,DBPDInfo-method}
 \alias{pmSequence,FeatureSet-method}
 \alias{pmSequence,AffySNPPDInfo-method}
+\alias{pmSequence,AffyGenePDInfo-method}
+\alias{pmSequence,ExonFeatureSet-method}
+\alias{pmSequence,GeneFeatureSet-method}
+\alias{pmSequence,stArrayDBPDInfo-method}
 \alias{bgSequence}
 \alias{bgSequence,ExonFeatureSet-method}
 \alias{bgSequence,FeatureSet-method}
