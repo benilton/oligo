@@ -32,7 +32,7 @@ setMethod('nprobesets', 'oligoPLM',
               object@nprobesets
           })
 
-coefs <- function()
+coefs <- function(...)
     .Defunct('coef')
 
 setMethod('coef', 'oligoPLM',
@@ -73,7 +73,7 @@ setReplaceMethod('weights', 'oligoPLM',
                  })
 
 ## setGeneric('resids', function(object) standardGeneric('resids'))
-resids <- function()
+resids <- function(...)
     .Defunct('residuals')
 
 setMethod('residuals', 'oligoPLM',
@@ -299,5 +299,5 @@ setMethod('image', 'oligoPLM',
           }
 )
 
-fitPLM <- function()
+fitPLM <- function(...)
     .Defunct('fitProbeLevelModel')

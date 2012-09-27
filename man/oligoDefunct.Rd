@@ -6,9 +6,13 @@
 \title{Defunct Functions in Package 'oligo'}
 \description{The functions or variables listed here are no longer part of 'oligo'}
 \usage{
-fitPLM()
-coefs()
-resids()
+fitPLM(...)
+coefs(...)
+resids(...)
+}
+
+\arguments{
+	\item{...}{Arguments.}
 }
 
 \details{
