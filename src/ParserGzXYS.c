@@ -71,7 +71,7 @@ static char *gzxys_header_field(const char *currentFile, const char *field){
 static void gzread_one_xys(const char *filename, double *signal,
 			   int *xy, int i, int nrow, int verbose){
   int count, n, x, y, j;
-  char buffer[LINEMAX], sc[WORD], ss[WORD], *endps, *token;
+  char buffer[LINEMAX], sc[WORD], ss[WORD], *endps;
   gzFile fp=NULL;
 
   if (verbose) Rprintf("Reading %s.\n", filename);
@@ -91,7 +91,7 @@ static void gzread_one_xys(const char *filename, double *signal,
     if (buffer[j] == '\n')
       buffer[j] = '\0';
 
-    n = sscanf(buffer, "%d\t%d\%s\t%s", &x, &y, ss, sc);
+    n = sscanf(buffer, "%d\t%d\t%s\t%s", &x, &y, ss, sc);
     
     // If it's the end of file, we're done.
     if (n == EOF) break;
