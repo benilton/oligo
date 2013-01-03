@@ -1,7 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <Rdefines.h>
-#include <R_ext/RConverters.h>
 #include <R_ext/Rdynload.h>
 #include <string.h>
 #define STR(SE) CHAR(STRING_ELT(SE,0))
