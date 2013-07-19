@@ -10,7 +10,8 @@ justSNPRMA <- function(filenames,
   headdetails <- readCelHeader(filenames[1])
   pkgname <- cleanPlatformName(headdetails[["chiptype"]])
   require(pkgname, character.only=TRUE, quietly=TRUE)
-  fid <- dbGetQuery(db(get(pkgname)), "SELECT fid FROM pmfeature")[[1]]
+  fid <- pmindex(get(pkgname))
+  ##fid <- dbGetQuery(db(get(pkgname)), "SELECT fid FROM pmfeature")[[1]]
   tmpExprs <- readCelIntensities(filenames, indices=fid)
   dimnames(tmpExprs) <- NULL
   rm(headdetails); gc(); gc()
