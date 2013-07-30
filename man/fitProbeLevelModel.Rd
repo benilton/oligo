@@ -10,7 +10,7 @@
   on a (meta)probeset by (meta)probeset basis.
 }
 \usage{
-fitProbeLevelModel(object, target = "core", subset, method = "plm", verbose = TRUE, S4 = TRUE)
+fitProbeLevelModel(object, target = "core", method = "plm", verbose = TRUE, S4 = TRUE, ...)
 }
 
 \arguments{
@@ -18,11 +18,11 @@ fitProbeLevelModel(object, target = "core", subset, method = "plm", verbose = TR
   \item{target}{character vector describing the summarization
     target. Valid values are: 'probeset', 'core' (Gene/Exon), 'full'
     (Exon), 'extended' (Exon).}
-  \item{subset}{subset to be passed down to \code{\link{getProbeInfo}}}
   \item{method}{summarization method to be used.}
   \item{verbose}{verbosity flag.}
   \item{S4}{return final value as an S4 object (\code{oligoPLM}) if
   \code{TRUE}. If \code{FALSE}, final value is returned as a \code{list}.}
+  \item{...}{subset to be passed down to \code{\link{getProbeInfo}} for subsetting. See \code{\link{subset}} for details.}
 }
 
 \value{\code{fitProbeLevelModel} returns an \code{\link{oligoPLM}}
@@ -44,7 +44,7 @@ fitProbeLevelModel(object, target = "core", subset, method = "plm", verbose = TR
     Summarization}. PhD Dissertation. University of California,
   Berkeley.}
 
-\seealso{\code{\link[oligo]{rma}}, \code{\link[oligo]{summarizationMethods}}}
+\seealso{\code{\link[oligo]{rma}}, \code{\link[oligo]{summarizationMethods}}, \code{subset}}
 
 \examples{
 if (require(oligoData)){

@@ -4,7 +4,7 @@ getRandom <- function(dt){
     i <- sort(sample(nrow(dt), 100))
     d0 <- dt[i,]
     rownames(d0) <- NULL
-    list(idx=i, data=d0)
+    d0
 }
 
 genFidCore <- function(pkg){
@@ -38,15 +38,8 @@ genAntigenomic <- function(pkg){
     featureInfo$man_fsetid <- as.character(featureInfo$man_fsetid)
     featureInfo
 }
-core <- lapply(lapply(pkgs, genFidCore), getRandom)
-pset <- lapply(lapply(pkgs, genFidProbeset), getRandom)
-agen <- lapply(lapply(pkgs, genAntigenomic), getRandom)
-core0 <- unlist(lapply(core, '[', 'data'), recursive=FALSE)
-pset0 <- unlist(lapply(pset, '[', 'data'), recursive=FALSE)
-agen0 <- unlist(lapply(agen, '[', 'data'), recursive=FALSE)
-icore0 <- unlist(lapply(core, '[', 'idx'), recursive=FALSE)
-ipset0 <- unlist(lapply(pset, '[', 'idx'), recursive=FALSE)
-iagen0 <- unlist(lapply(agen, '[', 'idx'), recursive=FALSE)
+core0 <- lapply(lapply(pkgs, genFidCore), getRandom)
+pset0 <- lapply(lapply(pkgs, genFidProbeset), getRandom)
+agen0 <- lapply(lapply(pkgs, genAntigenomic), getRandom)
 names(core0) <- names(pset0) <- names(agen0) <- pkgs
-names(icore0) <- names(ipset0) <- names(iagen0) <- pkgs
-save(core0, pset0, agen0, icore0, ipset0, iagen0, file='fids_ref0.rda')
+save(core0, pset0, agen0, file='fids_ref0.rda')

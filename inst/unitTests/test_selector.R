@@ -31,6 +31,6 @@ test_selector <- function(){
     pset <- list(psetExon, psetGene)
     agen <- list(agenExon, agenGene)
     names(core) <- names(pset) <- names(agen) <- pkgs
-    load('fids_ref0.rda')
+    load(system.file('unitTests', 'fids_ref0.rda', package='oligo'))
     checkEquals(core, core0) & checkEquals(pset, pset0) & checkEquals(agen, agen0)
 }

@@ -10,7 +10,7 @@
   not need to use the SQL approaches.
 }
 \usage{
-getProbeInfo(object, field, probeType = "pm", target = "core", subset, sortBy = c("fid", "man_fsetid", "none"))
+getProbeInfo(object, field, probeType = "pm", target = "core", sortBy = c("fid", "man_fsetid", "none"), ...)
 }
 
 \arguments{
@@ -18,8 +18,8 @@ getProbeInfo(object, field, probeType = "pm", target = "core", subset, sortBy = 
   \item{field}{character string with names of field(s) of interest to be obtained from database.}
   \item{probeType}{character string: 'pm' or 'mm'}
   \item{target}{Used only for Exon or Gene ST arrays: 'core', 'full', 'extended', 'probeset'.}
-  \item{subset}{Unused for the moment.}
   \item{sortBy}{Field to be used for sorting.}
+  \item{...}{Arguments to be passed to \code{\link{subset}}}
 }
 
 \value{
@@ -39,6 +39,9 @@ if (require(oligoData)){
    availProbeInfo(affyGeneFS)
    probeInfo <- getProbeInfo(affyGeneFS, c('fid', 'x', 'y', 'chrom'))
    head(probeInfo)
+   ## Selecting antigenomic background probes
+   agenGene <- getProbeInfo(affyGeneFS, field=c('fid', 'fsetid', 'type'), target='probeset', subset= type == 'control->bgp->antigenomic')
+   head(agenGene)
 }
 }
 
