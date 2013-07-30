@@ -311,7 +311,9 @@ outputEqualizer <- function(lst, sampleNames=NULL){
 
 
 runSummarize <- function(mat, pnVec, transfo=log2,
-                         method=summarizationMethods()){
+                         method=summarizationMethods(),
+                         verbose=TRUE){
+    if (verbose) message('Summarizing... ', appendLF=FALSE)
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
@@ -323,6 +325,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
         theFun(y=transfo(submat), rownames(submat))
     }
     out <- unlist(out, recursive=FALSE)
+    if (verbose) message('OK.')
     outputEqualizer(out, colnames(mat))
 }
 
