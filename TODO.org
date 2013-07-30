@@ -14,6 +14,7 @@
 * Testing
 ** Use unit tests
 * Downstream support
+** Add filtering and summarization options (eg, exon/rma and gene/rma)
 ** Add crlmm pipeline from SnpFeatureSet (snprma is ready, under snprma2)
 ** Add option to save genotype dosages
 ** Add Mbox (actually a function to compute M and make a boxplot - needed?) !!!
@@ -27,4 +28,4 @@
 ** Add subset argument to functions that may benefit from selectProbes()
 ** Add oligo version to FeatureSet objs
 ** Optimize (par) pm<- mm<- bg<- for ff_matrix objs
-** Fix PLM alternatives
+* consider

@@ -81,7 +81,6 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
 
     probeTable <- paste(probeType, 'feature', sep='')
     if (isST & target!='probeset'){
-        ## FIXME: if 'field' contains man_fsetid, return that as well
         fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
         fields[fields == 'fsetid'] <- 'pmfeature.fsetid'
         fields <- paste(fields, collapse=', ')
@@ -97,14 +96,21 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     }else{
         fields <- unique(c('fid', 'man_fsetid', field))
         fields[fields == 'fsetid'] <- paste(probeTable, 'fsetid', sep='.')
-        fields[fields == 'man_fsetid'] <- paste(probeTable, 'fsetid as man_fsetid', sep='.')
+        if (isST | class(object) == 'TilingFeatureSet')
+            fields[fields == 'man_fsetid'] <- paste(probeTable, 'fsetid as man_fsetid', sep='.')
         fields <- paste(fields, collapse=', ')
         sql <- paste('SELECT', fields, 'FROM',
                      probeTable, 'INNER JOIN featureSet',
                      'USING(fsetid)')
         rm(fields)
     }
+
     info <- dbGetQuery(conn, sql)
+
+    ## Getting data from dictionaries
+    ## .. chrom: chromosome: mapping to proper chr ids
+    ## .. level: ST arrays: bg/genomic/antigenomic
+    ## .. type: ST arrays: core, extended, full
     field2dict <- c('chrom', 'level', 'type')
     addMerge <- field2dict[field2dict %in% field]
     if (length(addMerge) > 0)
@@ -115,13 +121,30 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
             info[[item]] <- NULL
             rm(dict, sql)
         }
-    ## FIXME: below will also change trnscript_cluster_id
-    names(info) <- gsub('\\_id$', '', names(info))
+
+    ## This is to rename the dictionary columns that are
+    ##   like chrom_id, type_id, level_id
+    nmsOrig <- names(info)
+    iTID <- grep('transcript_cluster_id', nmsOrig)
+    if (length(iTID) > 0) origValue <- nmsOrig[iTID]
+    nmsOrig <- gsub('\\_id$', '', nmsOrig)
+    if (length(iTID) > 0) nms[iTID] <- origValue
+    names(info) <- nms
+    rm(nmsOrig, iTID, origValue)
+
+    ## Sorting
     if (sortBy!='none'){
         i2 <- setdiff(c('fid', 'man_fsetid'), sortBy)
         info <- info[order(info[[sortBy]], info[[i2]]),]
         rownames(info) <- NULL
         rm(i2)
     }
+
+    ## Make sure man_fsetid is character
+    if ('man_fsetid' %in% names(info))
+        if (!is.character(info$man_fsetid))
+            info$man_fsetid <- as.character(info$man_fsetid)
+
+    ## Return final object
     info
 }
