@@ -321,10 +321,11 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     theFun <- switch(method,
                      medianpolish=subrcModelMedianPolish,
                      plm=subrcModelPLM)
-    out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
-        theFun(y=transfo(submat), rownames(submat))
-    }
-    out <- unlist(out, recursive=FALSE)
+##     out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
+##         theFun(y=transfo(submat), rownames(submat))
+##     }
+##     out <- unlist(out, recursive=FALSE)
+    out <- theFun(y=transfo(mat), pnVec)
     if (verbose) message('OK.')
     outputEqualizer(out, colnames(mat))
 }
