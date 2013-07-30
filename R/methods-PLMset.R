@@ -244,6 +244,18 @@ NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
 setMethod('image', 'oligoPLM',
           function(x, which=1, type=c('weights', 'residuals', 'pos.residuals', 'neg.residuals', 'sign.residuals'), col, main, ...){
               type <- match.arg(type)
+              geom <- geometry(x)
+
+              ## NimbleGen is slightly harder
+              if (tolower(manufacturer(x)) != "affymetrix"){
+                  conn <- db(get(annotation(x)))
+                  tbls <- dbGetQuery(conn, "SELECT tbl FROM table_info WHERE tbl LIKE '%feature' AND row_count > 0")[[1]]
+                  theInfo <- lapply(tbls, function(tb) dbGetQuery(conn, paste("SELECT x, y, fid FROM", tb)))
+                  theInfo <- do.call("rbind", theInfo)
+                  theInfo <- theInfo[order(theInfo[["fid"]]), ]
+                  idx <- geom[1]*(theInfo[["x"]]-1)+theInfo[["y"]]
+              }
+
               if (type == 'weights'){
                   theMat <- weights(x)[, which]
                   candCols <- rev(seqColors(2560))
@@ -265,7 +277,16 @@ setMethod('image', 'oligoPLM',
                   candCols <- divColors(2)
                   candMain <- 'Sign of Residuals'
               }
-              dim(theMat) <- x@geometry
+              candMain <- paste(candMain, colnames(plm@chip.coefs)[which], sep=' - ')
+              if (tolower(manufacturer(x)) != 'affymetrix'){
+                  theMat0 <- matrix(NA, nrow=geom[1], ncol=geom[2])
+                  theMat0[idx] <- theMat[theInfo$fid]
+                  theMat <- theMat0
+                  rm(theMat0)
+                  theMat <- theMat[,geom[2]:1]
+              }else{
+                  dim(theMat) <- geom
+              }
               if (missing(col)){
                   col <- candCols
                   rm(candCols)

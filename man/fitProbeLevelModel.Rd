@@ -48,8 +48,8 @@ fitProbeLevelModel(object, target = "core", subset, method = "plm", verbose = TR
 
 \examples{
 if (require(oligoData)){
-  data(affyExpressionFS)
-  fit <- fitProbeLevelModel(affyExpressionFS)
+  data(nimbleExpressionFS)
+  fit <- fitProbeLevelModel(nimbleExpressionFS)
   image(fit)
   NUSE(fit)
   RLE(fit)
