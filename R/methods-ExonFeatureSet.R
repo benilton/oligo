@@ -34,11 +34,6 @@ setMethod("bgSequence", "ExonFeatureSet",
               pmSequence[idx, "sequence"]
           })
 
-setMethod("pmSequence", "ExonFeatureSet",
-          function(object, target='core'){
-              pmSequence(getPD(object), target=target)
-          })
-
 ## setMethod("probeNames", "ExonFeatureSet",
 ##           function(object, subset=NULL){
 ##             res <- dbGetQuery(db(object), "SELECT fid, fsetid FROM pmfeature")
@@ -122,7 +117,7 @@ computePSDABG <- function(x){
 
 computeDABG <- function(x){
     mmRef <- getRefDABG(x)
-    pmCounts <- gcCounts(pmSequence(x, target='probeset'))
+    pmCounts <- gcCounts(pmSequence(x))
     pms <- pm(x, target='probeset')
     ns <- sapply(mmRef, nrow)
     rgCounts <- range(as.integer(names(ns[ns > 0])))
