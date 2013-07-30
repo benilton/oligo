@@ -62,14 +62,14 @@ setMethod("pm", "FeatureSet",
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
-                 function(object, value, ...){
+                 function(object, ..., value){
                    tmp <- exprs(object)
                    tmp[pmindex(object, ...),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
-                 function(object, value, ...){
+                 function(object, ..., value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
@@ -90,14 +90,14 @@ setMethod("mm", "FeatureSet",
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
-                 function(object, value, ...){
+                 function(object, ..., value){
                    tmp <- exprs(object)
                    tmp[mmindex(object, ...),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
-                 function(object, value){
+                 function(object, ..., value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
