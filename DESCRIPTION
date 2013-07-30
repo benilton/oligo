@@ -1,37 +1,35 @@
 Package: oligo
-Version: 1.25.2
+Version: 1.19.4
 Title: Preprocessing tools for oligonucleotide arrays.
-Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
-Maintainer: Benilton Carvalho <beniltoncarvalho@gmail.com>
-Depends: R (>= 2.15.0), BiocGenerics (>= 0.3.2), oligoClasses (>= 1.19.43), 
-         Biobase (>= 2.17.8)
-Imports: affyio (>= 1.25.0),
-         affxparser (>= 1.29.11),
-         Biostrings (>= 2.25.12),
-         BiocGenerics (>= 0.3.2),
+Author: Benilton Carvalho, Rafael A. Irizarry with contributions from Ben Bolstad, Vince Carey, Robert Gentleman, Wolfgang Huber
+Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
+Depends: R (>= 2.13.0),
+         oligoClasses (>= 1.13.9)
+Imports: affyio (>= 1.19.4),
+         affxparser (>= 1.23.1),
+         Biobase (>= 2.11.8),
+         Biostrings,
          DBI (>= 0.2-5),
          ff,
          graphics,
          methods,
-         preprocessCore (>= 1.19.0),
+         preprocessCore (>= 1.13.5),
          splines,
          stats,
-         stats4,
          utils,
          zlibbioc
-Enhances: ff, doMC, doMPI
+Enhances: ff,
+          snow
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
           pd.mapping50k.xba240,
           pd.huex.1.0.st.v2,
           pd.hg18.60mer.expr,
-          pd.hugene.1.0.st.v1,
           maqcExpression4plex,
           genefilter,
           limma,
           RColorBrewer,
-          oligoData,
-          RUnit
+          oligoData
 Description: A package to analyze oligonucleotide arrays (expression/SNP/tiling/exon) at probe-level. It currently supports Affymetrix (CEL files) and NimbleGen arrays (XYS files).
 License: LGPL (>= 2)
 Collate: AllGenerics.R
@@ -51,7 +49,6 @@ Collate: AllGenerics.R
          read.celfiles.R
          read.xysfiles.R
          utils-general.R
-         utils-selectors.R
          todo-snp.R
          functions-crlmm.R
          functions-snprma.R
@@ -59,6 +56,8 @@ Collate: AllGenerics.R
          justCRLMM.R
          methods-snp6.R
          methods-genotype.R
+         PLM_internal.R
+         fitPLM.R
          methods-PLMset.R
          zzz.R
 LazyLoad: Yes
