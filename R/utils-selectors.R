@@ -22,29 +22,6 @@ getProbeTargets <- function(object, probeType='pm'){
            bg=c('genomic', 'antigenomic'))
 }
 
-## getProbeIndex <- function(object, probeType='pm', target='core', subset, sortBy='fid'){
-##     probeType <- match.arg(probeType, getProbeTypes(object))
-##     target <- match.arg(target, getProbeTargets(object, probeType=probeType))
-##     sortBy <- match.arg(sortBy, c('fid', 'man_fsetid'))
-##     if (class(object) %in% c('ExonFeatureSet', 'GeneFeatureSet')){
-##         ## ST Arrays
-##         info <- switch(target,
-##                core=oligo:::getFidMetaProbesetCore(object, NULL),
-##                full=oligo:::getFidMetaProbesetFull(object, NULL),
-##                extended=oligo:::getFidMetaProbesetExtended(object, NULL),
-##                probeset=oligo:::getFidProbeset(object, NULL))
-##         names(info) <- c('fid', 'man_fsetid')
-##     }else{
-##         sql <- paste('SELECT fid, man_fsetid FROM',
-##                      paste(probeType, 'feature', sep=''))
-##         info <- dbGetQuery(db(object), sql)
-##     }
-##     sortCol <- which(names(info) == sortBy)
-##     if (!missing(subset))
-##         info <- subset(info, man_fsetid %in% subset)
-##     info[order(info[[sortCol]], info[[-sortCol]]), 'fid']
-## }
-
 availProbeInfo <- function(object, probeType='pm', target='core'){
     if (!require(annotation(object), character.only=TRUE))
         stop("The annotation package '", annotation(object), "' is not available.")
@@ -69,7 +46,7 @@ availProbeInfo <- function(object, probeType='pm', target='core'){
 }
 
 getProbeInfo <- function(object, field, probeType='pm', target='core',
-                         subset, sortBy=c('fid', 'man_fsetid', 'none')){
+                         sortBy=c('fid', 'man_fsetid', 'none'), ...){
     if (!require(annotation(object), character.only=TRUE))
         stop("The annotation package '", annotation(object), "' is not available.")
     sortBy <- match.arg(sortBy)
@@ -86,7 +63,9 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     probeTable <- paste(probeType, 'feature', sep='')
     if (isST & target!='probeset'){
         fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
-        fields[fields == 'fsetid'] <- 'pmfeature.fsetid'
+        ## pmfeature.fsetid probably shouldnt be used here, as it's != 'probeset'
+        ## fields[fields == 'fsetid'] <- 'pmfeature.fsetid'
+        fields[fields == 'fsetid'] <- 'meta_fsetid as fsetid'
         fields <- paste(fields, collapse=', ')
         mpsTable <- paste(target, 'mps', sep='_')
         fields <- gsub('transcript_cluster_id',
@@ -108,9 +87,7 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
                      'USING(fsetid)')
         rm(fields)
     }
-
     info <- dbGetQuery(conn, sql)
-    ## TODO: Add subset here!
 
     ## Getting data from dictionaries
     ## .. chrom: chromosome: mapping to proper chr ids
@@ -137,6 +114,8 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     if (length(iTID) > 0) nmsOrig[iTID] <- origValue
     names(info) <- nmsOrig
     rm(nmsOrig, iTID, origValue)
+
+    info <- subset(info, ...)
 
     ## Sorting
     if (sortBy!='none'){
