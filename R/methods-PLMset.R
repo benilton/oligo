@@ -216,3 +216,68 @@ setMethod("boxplot",signature(x="oligoPLM"),
             boxplot(theMat, col=col, range=range, ylim=ylim, ...)
           })
 
+
+RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
+                range=0, col=darkColors(ncol(obj)), ...){
+    RLE <- sweep(coefs(obj), 1, rowMedians(coefs(obj)), '-')
+    type <- match.arg(type)
+    if (type=='plot'){
+        boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
+        abline(h=0, lty=2)
+    }
+    invisible(RLE)
+}
+
+NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
+                 range=0, col=darkColors(ncol(obj)), ...){
+    if (is.null(se(obj)))
+        stop('This Probe Level Model does not allow for computation of NUSE')
+    NUSE <- sweep(se(obj), 1, rowMedians(se(obj)), '/')
+    type <- match.arg(type)
+    if (type == 'plot'){
+        boxplot(as.data.frame(NUSE), ylab='NUSE', range=range, ylim=ylim, col=col, ...)
+        abline(h=1, lty=2)
+    }
+    invisible(NUSE)
+}
+
+setMethod('image', 'oligoPLM',
+          function(x, which=1, type=c('weights', 'resids', 'pos.resids', 'neg.resids', 'sign.resids'), col, main, ...){
+              type <- match.arg(type)
+              if (type == 'weights'){
+                  theMat <- weights(x)[, which]
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Weights'
+              }else if (type == 'resids'){
+                  theMat <- resids(x)[, which]
+                  candCols <- divColors(2560)
+                  candMain <- 'Residuals'
+              }else if (type == 'pos.resids'){
+                  theMat <- pmax(resids(x)[, which], 0)
+                  candCols <- seqColors2(2560)
+                  candMain <- 'Positive Residuals'
+              }else if (type == 'neg.resids'){
+                  theMat <- pmin(resids(x)[, which], 0)
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Negative Residuals'
+              }else{
+                  theMat <- sign(resids(x)[, which])
+                  candCols <- divColors(2)
+                  candMain <- 'Sign of Residuals'
+              }
+              dim(theMat) <- x@geometry
+              if (missing(col)){
+                  col <- candCols
+                  rm(candCols)
+              }
+              if (missing(main)){
+                  main <- candMain
+                  rm(candMain)
+              }
+              image(theMat, col=col, yaxt='n', xaxt='n', main=main, ...)
+          }
+)
+
+
+fitPLM <- function(...)
+    .Deprecated('fitProbeLevelModel')
