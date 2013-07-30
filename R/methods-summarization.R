@@ -339,16 +339,20 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     outputEqualizer(out, colnames(mat), verbose=verbose)
 }
 
-fitProbeLevelModel <- function(object, target='core', method='plm', verbose=TRUE, S4=TRUE, ...){
+fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='core', method='plm', verbose=TRUE, S4=TRUE, ...){
     ## essential to be sorted by man_fsetid, so weights/residuals can be
     ## matched to original FS object
-    probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
+    vars <- all.vars(substitute(list(...)))
+    vars <- unique(c('fid', 'fsetid', vars))
+    probeInfo <- getProbeInfo(object, target=target, field=vars,
                               sortBy='man_fsetid', ...)
     probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
 
     tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
-    tmpMat <- backgroundCorrect(tmpMat, method='rma', verbose=verbose)
-    tmpMat <- normalize(tmpMat, method='quantile', verbose=verbose)
+    if (background)
+        tmpMat <- backgroundCorrect(tmpMat, method='rma', verbose=verbose)
+    if (normalize)
+        tmpMat <- normalize(tmpMat, method='quantile', verbose=verbose)
     ## rownames below is really important for parallelization
     dimnames(tmpMat) <- list(probeInfo$man_fsetid, sampleNames(object))
     fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method, verbose=verbose)

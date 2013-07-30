@@ -1,33 +1,6 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
-\section{Changes in version 1.24}{
-	\subsection{BUG FIXES}{
-		\itemize{
-			\item Removed dependency on RConverters.h
-		}
-	}
-}
-
-\section{Changes in version 1.22}{
-	\subsection{USER VISIBLE CHANGES}{
-		\itemize{
-			\item Improved results by getProbeInfo();
-			\item fitPLM, coefs and resids are now Defunct. Use fitProbeLevelModel,
-			coef and residuals respectively. 'coef' and 'residuals' follow the
-			standards used elsewhere in R;
-		}
-	}
-	\subsection{BUG FIXES}{
-		\itemize{
-			\item Fixed problem caused by the fact that oligoClasses had its own
-			annotation() method when BiocGenerics added a new one;
-			\item Several fixes to probe selector, allowing 'target' to be used;
-			\item PA Calls didn't know about target;
-			}
-	}
-}
-
 \section{Changes in version 1.20}{
   \subsection{USER VISIBLE CHANGES}{
     \itemize{
