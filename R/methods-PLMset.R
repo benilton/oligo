@@ -16,8 +16,8 @@ setClass('oligoPLM',
          )
 
 setMethod('ncol', 'oligoPLM',
-          function(object){
-              object@narrays
+          function(x){
+              x@narrays
           })
 
 setGeneric('nprobes', function(object) standardGeneric('nprobes'))
