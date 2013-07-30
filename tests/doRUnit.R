@@ -34,5 +34,6 @@ if( require( "RUnit", quietly=TRUE ) ) {
 		stop( paste( "\n\nunit testing failed (#test failures: ", tmp$nFail, ", #R errors: ",  tmp$nErr, ")\n\n", sep=""))
 	}
 } else {
+  message("Here")
 	warning( "cannot run unit tests -- package RUnit is not available" )
 }
