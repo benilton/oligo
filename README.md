@@ -1,3 +1,4 @@
+
 THE `OLIGO` PACKAGE
 ===================
 
@@ -40,6 +41,6 @@ Contact
 -------
 
 Benilton Carvalho
-<myFirstName.myLastName> AT cancer <dot> org <dot> uk
+<myFirstName.myLastName> AT gmail <dot> com
 
 [1]: http://github.com/benilton/oligo/issues
