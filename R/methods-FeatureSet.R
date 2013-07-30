@@ -61,14 +61,14 @@ setMethod("pm", "FeatureSet",
             return(out)
           })
 
-setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
+setReplaceMethod("pm", signature(object="FeatureSet", subset='ANY', target='ANY', value="matrix"),
                  function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    tmp[pmindex(object, subset=subset, target=target),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
+setReplaceMethod("pm", signature(object="FeatureSet", subset='ANY', target='ANY', value="ff_matrix"),
                  function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    open(tmp)
@@ -89,14 +89,14 @@ setMethod("mm", "FeatureSet",
             exprs(object)[mmindex(object, subset=subset, target=target),, drop=FALSE] ## subset
           })
 
-setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
+setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY', value="matrix"),
                  function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    tmp[mmindex(object, subset=subset, target=target),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
+setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY', value="ff_matrix"),
                  function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    open(tmp)
