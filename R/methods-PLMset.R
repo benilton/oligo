@@ -32,14 +32,16 @@ setMethod('nprobesets', 'oligoPLM',
               object@nprobesets
           })
 
-setGeneric('coefs', function(object) standardGeneric('coefs'))
-setMethod('coefs', 'oligoPLM',
+coefs <- function()
+    .Deprecated('coef')
+
+setMethod('coef', 'oligoPLM',
           function(object){
               object@chip.coefs
           })
 
-setGeneric('coefs<-', function(object, value) standardGeneric('coefs<-'))
-setReplaceMethod('coefs', 'oligoPLM',
+setGeneric('coef<-', function(object, value) standardGeneric('coef<-'))
+setReplaceMethod('coef', 'oligoPLM',
                  function(object, value){
                      object@chip.coefs <- value
                      object
@@ -71,14 +73,17 @@ setReplaceMethod('weights', 'oligoPLM',
                      object
                  })
 
-setGeneric('resids', function(object) standardGeneric('resids'))
-setMethod('resids', 'oligoPLM',
+## setGeneric('resids', function(object) standardGeneric('resids'))
+resids <- function()
+    .Deprecated('residuals')
+
+setMethod('residuals', 'oligoPLM',
           function(object){
               object@residuals
           })
 
-setGeneric('resids<-', function(object, value) standardGeneric('resids<-'))
-setReplaceMethod('resids', 'oligoPLM',
+setGeneric('residuals<-', function(object, value) standardGeneric('residuals<-'))
+setReplaceMethod('residuals', 'oligoPLM',
                  function(object, value){
                      object@residuals <- value
                      object
@@ -189,7 +194,8 @@ setMethod("show", "oligoPLM",
 
 ## fix names(theMat)
 setMethod("boxplot",signature(x="oligoPLM"),
-          function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ylim, ...){
+          function(x, type=c("NUSE", "RLE", "weights", "residuals"),
+                   col=darkColors(ncol(x)), range=0, ylim, ...){
             type <- match.arg(type)
             if (type == 'NUSE'){
                 theMat <- NUSE(x, type='values')
@@ -202,7 +208,7 @@ setMethod("boxplot",signature(x="oligoPLM"),
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
                 candYL <- c(0, 1)
             }else{
-                theMat <- resids(x)
+                theMat <- residuals(x)
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
                 candYL <- c(-1, 1)
             }
@@ -214,7 +220,7 @@ setMethod("boxplot",signature(x="oligoPLM"),
 
 RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
                 range=0, col=darkColors(ncol(obj)), ...){
-    RLE <- sweep(coefs(obj), 1, rowMedians(coefs(obj)), '-')
+    RLE <- sweep(coef(obj), 1, rowMedians(coef(obj)), '-')
     type <- match.arg(type)
     if (type=='plot'){
         boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
@@ -237,26 +243,26 @@ NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
 }
 
 setMethod('image', 'oligoPLM',
-          function(x, which=1, type=c('weights', 'resids', 'pos.resids', 'neg.resids', 'sign.resids'), col, main, ...){
+          function(x, which=1, type=c('weights', 'residuals', 'pos.residuals', 'neg.residuals', 'sign.residuals'), col, main, ...){
               type <- match.arg(type)
               if (type == 'weights'){
                   theMat <- weights(x)[, which]
                   candCols <- rev(seqColors(2560))
                   candMain <- 'Weights'
-              }else if (type == 'resids'){
-                  theMat <- resids(x)[, which]
+              }else if (type == 'residuals'){
+                  theMat <- residuals(x)[, which]
                   candCols <- divColors(2560)
                   candMain <- 'Residuals'
-              }else if (type == 'pos.resids'){
-                  theMat <- pmax(resids(x)[, which], 0)
+              }else if (type == 'pos.residuals'){
+                  theMat <- pmax(residuals(x)[, which], 0)
                   candCols <- seqColors2(2560)
                   candMain <- 'Positive Residuals'
-              }else if (type == 'neg.resids'){
-                  theMat <- pmin(resids(x)[, which], 0)
+              }else if (type == 'neg.residuals'){
+                  theMat <- pmin(residuals(x)[, which], 0)
                   candCols <- rev(seqColors(2560))
                   candMain <- 'Negative Residuals'
               }else{
-                  theMat <- sign(resids(x)[, which])
+                  theMat <- sign(residuals(x)[, which])
                   candCols <- divColors(2)
                   candMain <- 'Sign of Residuals'
               }
