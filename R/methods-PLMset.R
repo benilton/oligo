@@ -32,14 +32,16 @@ setMethod('nprobesets', 'oligoPLM',
               object@nprobesets
           })
 
-setGeneric('coefs', function(object) standardGeneric('coefs'))
-setMethod('coefs', 'oligoPLM',
+coefs <- function()
+    .Deprecated('coef')
+
+setMethod('coef', 'oligoPLM',
           function(object){
               object@chip.coefs
           })
 
-setGeneric('coefs<-', function(object, value) standardGeneric('coefs<-'))
-setReplaceMethod('coefs', 'oligoPLM',
+setGeneric('coef<-', function(object, value) standardGeneric('coef<-'))
+setReplaceMethod('coef', 'oligoPLM',
                  function(object, value){
                      object@chip.coefs <- value
                      object
@@ -58,7 +60,6 @@ setReplaceMethod('coefs.probe', 'oligoPLM',
                      object
                  })
 
-##setGeneric('weights', function(object) standardGeneric('weights'))
 setMethod('weights', 'oligoPLM',
           function(object, ...){
               object@weights
@@ -71,14 +72,17 @@ setReplaceMethod('weights', 'oligoPLM',
                      object
                  })
 
-setGeneric('resids', function(object) standardGeneric('resids'))
-setMethod('resids', 'oligoPLM',
+## setGeneric('resids', function(object) standardGeneric('resids'))
+resids <- function()
+    .Deprecated('residuals')
+
+setMethod('residuals', 'oligoPLM',
           function(object){
               object@residuals
           })
 
-setGeneric('resids<-', function(object, value) standardGeneric('resids<-'))
-setReplaceMethod('resids', 'oligoPLM',
+setGeneric('residuals<-', function(object, value) standardGeneric('residuals<-'))
+setReplaceMethod('residuals', 'oligoPLM',
                  function(object, value){
                      object@residuals <- value
                      object
@@ -187,9 +191,11 @@ setMethod("show", "oligoPLM",
               message("Annotation..........: ", annotation(object))
           })
 
+
 ## fix names(theMat)
 setMethod("boxplot",signature(x="oligoPLM"),
-          function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ylim, ...){
+          function(x, type=c("NUSE", "RLE", "weights", "residuals"),
+                   col=darkColors(ncol(x)), range=0, ylim, ...){
             type <- match.arg(type)
             if (type == 'NUSE'){
                 theMat <- NUSE(x, type='values')
@@ -202,7 +208,7 @@ setMethod("boxplot",signature(x="oligoPLM"),
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
                 candYL <- c(0, 1)
             }else{
-                theMat <- resids(x)
+                theMat <- residuals(x)
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
                 candYL <- c(-1, 1)
             }
@@ -211,3 +217,67 @@ setMethod("boxplot",signature(x="oligoPLM"),
             boxplot(theMat, col=col, range=range, ylim=ylim, ...)
           })
 
+
+RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
+                range=0, col=darkColors(ncol(obj)), ...){
+    RLE <- sweep(coef(obj), 1, rowMedians(coef(obj)), '-')
+    type <- match.arg(type)
+    if (type=='plot'){
+        boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
+        abline(h=0, lty=2)
+    }
+    invisible(RLE)
+}
+
+NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
+                 range=0, col=darkColors(ncol(obj)), ...){
+    if (is.null(se(obj)))
+        stop('This Probe Level Model does not allow for computation of NUSE')
+    NUSE <- sweep(se(obj), 1, rowMedians(se(obj)), '/')
+    type <- match.arg(type)
+    if (type == 'plot'){
+        boxplot(as.data.frame(NUSE), ylab='NUSE', range=range, ylim=ylim, col=col, ...)
+        abline(h=1, lty=2)
+    }
+    invisible(NUSE)
+}
+
+setMethod('image', 'oligoPLM',
+          function(x, which=1, type=c('weights', 'residuals', 'pos.residuals', 'neg.residuals', 'sign.residuals'), col, main, ...){
+              type <- match.arg(type)
+              if (type == 'weights'){
+                  theMat <- weights(x)[, which]
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Weights'
+              }else if (type == 'residuals'){
+                  theMat <- residuals(x)[, which]
+                  candCols <- divColors(2560)
+                  candMain <- 'Residuals'
+              }else if (type == 'pos.residuals'){
+                  theMat <- pmax(residuals(x)[, which], 0)
+                  candCols <- seqColors2(2560)
+                  candMain <- 'Positive Residuals'
+              }else if (type == 'neg.residuals'){
+                  theMat <- pmin(residuals(x)[, which], 0)
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Negative Residuals'
+              }else{
+                  theMat <- sign(residuals(x)[, which])
+                  candCols <- divColors(2)
+                  candMain <- 'Sign of Residuals'
+              }
+              dim(theMat) <- x@geometry
+              if (missing(col)){
+                  col <- candCols
+                  rm(candCols)
+              }
+              if (missing(main)){
+                  main <- candMain
+                  rm(candMain)
+              }
+              image(theMat, col=col, yaxt='n', xaxt='n', main=main, ...)
+          }
+)
+
+fitPLM <- function(...)
+    .Deprecated('fitProbeLevelModel')
