@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.19.14
+Version: 1.19.15
 Title: Preprocessing tools for oligonucleotide arrays.
 Authors@R: c(person("Benilton", "Carvalho", role=c("aut", "cre"), email="Benilton.Carvalho@cancer.org.uk"),
             person("Rafael", "Irizarry", role="aut"),
