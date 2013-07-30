@@ -299,12 +299,5 @@ setMethod('image', 'oligoPLM',
           }
 )
 
-fitPLM <- function(object,model=PM ~ -1 + probes +samples,
-                   variable.type=c(default="factor"),
-                   constraint.type=c(default="contr.treatment"),
-                   subset=NULL, background=TRUE, normalize=TRUE,
-                   background.method="RMA.2",
-                   normalize.method="quantile", background.param=list(),
-                   normalize.param=list(), output.param=NULL,
-                   model.param=NULL, verbosity.level=0)
+fitPLM <- function()
     .Defunct('fitProbeLevelModel')
