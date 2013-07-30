@@ -17,13 +17,13 @@
 \alias{intensity<-,FeatureSet-method}
 \alias{mm<-,FeatureSet,ANY,ANY,matrix-method}
 \alias{pm<-,FeatureSet,ANY,ANY,matrix-method}
-\alias{bg<-,FeatureSet,ANY,ANY,matrix-method}
+\alias{bg<-,FeatureSet,matrix-method}
 \alias{mm<-,FeatureSet,ANY,ANY,ff_matrix-method}
 \alias{pm<-,FeatureSet,ANY,ANY,ff_matrix-method}
-\alias{bg<-,FeatureSet,ANY,ANY,ff_matrix-method}
+\alias{bg<-,FeatureSet,ff_matrix-method}
 \alias{mm<-,TilingFeatureSet,ANY,ANY,array-method}
 \alias{pm<-,TilingFeatureSet,ANY,ANY,array-method}
-\alias{bg<-,TilingFeatureSet,ANY,ANY,array-method}
+\alias{bg<-,TilingFeatureSet,array-method}
 
 %% OK!
 
@@ -47,7 +47,6 @@ bg(object)<-value
   \item{value}{\code{matrix} object.}
   \item{target}{One of 'probeset', 'core', 'full', 'extended'. This is
   ignored if the array design is something other than Gene ST or Exon ST.}
-  \item{subset}{Not yet implemented.}
 }
 
 \details{
