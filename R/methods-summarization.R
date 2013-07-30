@@ -290,25 +290,26 @@ getFromListAsVector <- function(lst, elem, idx){
 
 outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
     idx <- 1:ncol(lst[[1]]$Residuals)
-    if (verbose) txtMsg('Extracting "Estimates"... ')
+    if (verbose) txtMsg('Extracting...', appendLF=TRUE)
+    if (verbose) txtMsg('  Estimates... ')
     theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
     colnames(theChipCoefs) <- sampleNames
     theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
     if (verbose) msgOK()
-    if (verbose) txtMsg('Extracting "Std Errors"... ')
+    if (verbose) txtMsg('  StdErrors... ')
     theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
     colnames(theChipSE) <- sampleNames
     theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
     if (verbose) msgOK()
-    if (verbose) txtMsg('Extracting "Weights"... ')
+    if (verbose) txtMsg('  Weights..... ')
     theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
     colnames(theWeights) <- sampleNames
     if (verbose) msgOK()
-    if (verbose) txtMsg('Extracting "Residuals"... ')
+    if (verbose) txtMsg('  Residuals... ')
     theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
     colnames(theResiduals) <- sampleNames
     if (verbose) msgOK()
-    if (verbose) txtMsg('Extracting "Scale"... ')
+    if (verbose) txtMsg('  Scale....... ')
     theScales <- unlist(lapply(lst, '[[', 'Scale'))
     if (verbose) msgOK()
     list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
@@ -321,7 +322,7 @@ outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
 runSummarize <- function(mat, pnVec, transfo=log2,
                          method=summarizationMethods(),
                          verbose=TRUE){
-    if (verbose) message('Summarizing... ', appendLF=FALSE)
+    if (verbose) message('Summarizing.... ', appendLF=FALSE)
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
