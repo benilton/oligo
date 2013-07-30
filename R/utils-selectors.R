@@ -97,6 +97,7 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     }else{
         fields <- unique(c('fid', 'man_fsetid', field))
         fields[fields == 'fsetid'] <- paste(probeTable, 'fsetid', sep='.')
+        fields[fields == 'man_fsetid'] <- paste(probeTable, 'fsetid as man_fsetid', sep='.')
         fields <- paste(fields, collapse=', ')
         sql <- paste('SELECT', fields, 'FROM',
                      probeTable, 'INNER JOIN featureSet',
