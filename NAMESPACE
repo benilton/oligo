@@ -33,7 +33,7 @@ importMethodsFrom(oligoClasses, allele, bothStrands, calls, db,
                   manufacturer)
 
 
-importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image)
+importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image, weights)
 
 importMethodsFrom(stats4, coef, plot)
 
@@ -69,7 +69,8 @@ importFrom(preprocessCore, normalize.quantiles,
            rma.background.correct,
            rcModelPLM, rcModelPLMr, rcModelPLMrr, rcModelPLMrc,
            rcModelWPLM, rcModelWPLMr, rcModelWPLMrr, rcModelWPLMrc,
-           rcModelMedianPolish)
+           rcModelMedianPolish,
+           subrcModelPLM, subrcModelMedianPolish)
 
 importFrom(splines, ns)
 
@@ -114,7 +115,7 @@ exportMethods(intensity, probesetNames)
 
 ## PLM
 export("fitPLM", "NUSE", "RLE")
-exportMethods("image", "paCalls", coef, residuals, se)
+exportMethods("paCalls")
 exportClasses(oligoPLM)
 exportMethods(ncol, nprobes, nprobesets, coef, coefs.probe, weights, residuals, se, se.probe, residualSE, geometry, method, manufacturer, annotation, show, boxplot, image)
 
