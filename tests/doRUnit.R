@@ -1,6 +1,5 @@
 ## from xmapcore package
 if( require( "RUnit", quietly=TRUE ) ) {
-message("There")
 	pkg <- "oligo"
         path <- ifelse(Sys.getenv( "RCMDCHECK" ) == "FALSE",
                        file.path( getwd(), "..", "inst", "unitTests" ),
@@ -35,6 +34,5 @@ message("There")
 		stop( paste( "\n\nunit testing failed (#test failures: ", tmp$nFail, ", #R errors: ",  tmp$nErr, ")\n\n", sep=""))
 	}
 } else {
-  message("Here")
 	warning( "cannot run unit tests -- package RUnit is not available" )
 }
