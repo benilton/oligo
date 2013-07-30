@@ -1,6 +1,14 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
+\section{Changes in version 1.24}{
+	\subsection{BUG FIXES}{
+		\itemize{
+			\item Removed dependency on RConverters.h
+		}
+	}
+}
+
 \section{Changes in version 1.22}{
 	\subsection{USER VISIBLE CHANGES}{
 		\itemize{
