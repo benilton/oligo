@@ -356,7 +356,7 @@ setMethod("pmChr", "FeatureSet",
             if (is(object, "TilingFeatureSet") & manufacturer(object) == "Affymetrix"){
               sql <- paste("SELECT fid, chrom_id as chrom",
                            "FROM pmfeature",
-                           "INNER JOIN chrom_dict",
+                           "LEFT JOIN chrom_dict",
                            "USING(chrom)")
             }else{
               sql <- paste("SELECT fid, chrom",
