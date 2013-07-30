@@ -62,20 +62,20 @@ setMethod("pm", "FeatureSet",
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
-                 function(object, ..., value){
+                 function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
-                   tmp[pmindex(object, ...),] <- value
+                   tmp[pmindex(object, subset=subset, target=target),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
-                 function(object, ..., value){
+                 function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
-                   pmi <- pmindex(object, ...)
+                   pmi <- pmindex(object, subset=subset, target=target)
                    for (i in 1:nc)
                        tmp[pmi, i] <- value[,i]
                    close(value)
@@ -85,25 +85,25 @@ setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
                  })
 
 setMethod("mm", "FeatureSet",
-          function(object, subset=NULL){
-            exprs(object)[mmindex(object, subset=subset),, drop=FALSE] ## subset
+          function(object, subset=NULL, target='core'){
+            exprs(object)[mmindex(object, subset=subset, target=target),, drop=FALSE] ## subset
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
-                 function(object, ..., value){
+                 function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
-                   tmp[mmindex(object, ...),] <- value
+                   tmp[mmindex(object, subset=subset, target=target),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
-                 function(object, ..., value){
+                 function(object, subset=NULL, target='core', value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
-                   mmi <- mmindex(object, ...)
+                   mmi <- mmindex(object, subset=subset, target=target)
                    for (i in 1:nc)
                        tmp[mmi, i] <- value[,i]
                    close(value)
