@@ -1,6 +1,0 @@
-%\VignetteIndexEntry{02 - NimbleGen Expression and Preprocessing}
-%\VignetteKeywords{Expression, NimbleGen}
-%\VignettePackage{oligo}
-\documentclass{article}
-\begin{document}
-\end{document}

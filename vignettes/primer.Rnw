@@ -1,5 +1,5 @@
-%\VignetteIndexEntry{01 - Overview}
-%\VignetteKeywords{expression, exon, tiling, SNP}
+%\VignetteIndexEntry{oligo - Primer}
+%\VignetteKeywords{expression, exon, gene, tiling, SNP}
 %\VignettePackage{oligo}
 
 %%% The real .Rnw is under inst/scripts.

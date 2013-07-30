@@ -1,6 +1,0 @@
-%\VignetteIndexEntry{03 - SNP Chips and Genotyping}
-%\VignetteKeywords{SNP, Affymetrix, Genotype, CRLMM}
-%\VignettePackage{oligo}
-\documentclass{article}
-\begin{document}
-\end{document}
