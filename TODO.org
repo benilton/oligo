@@ -27,3 +27,5 @@
 ** Add subset argument to functions that may benefit from selectProbes()
 ** Add oligo version to FeatureSet objs
 ** Optimize (par) pm<- mm<- bg<- for ff_matrix objs
+** Fix PLM alternatives
+
