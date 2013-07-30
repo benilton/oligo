@@ -327,7 +327,7 @@ runSummarize <- function(mat, pnVec, transfo=log2,
     }
 }
 
-fitProbeLevelModel <- function(object, target='core', subset, method='plm'){
+fitProbeLevelModel <- function(object, target='core', subset, method='plm', S4=TRUE){
     ## essential to be sorted by man_fsetid, so weights/residuals can be
     ## matched to original FS object
     probeInfo <- getProbeInfo(object, target=target, field=c('fid', 'fsetid'),
@@ -343,11 +343,6 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm'){
     ## Chip effects - number of probesets X number samples
     chipEffects <- do.call(rbind, lapply(fit, '[[', 'chipEffects'))
     dimnames(chipEffects) <- list(unique(pnVec), sampleNames(object))
-    if (method != 'medianpolish'){
-        RLE <- sweep(chipEffects, 1, rowMedians(chipEffects), '-')
-    }else{
-        RLE <- NULL
-    }
 
     ## Probe effects - number of probes
     probeEffects <- vector('numeric', nrow(object))
@@ -363,11 +358,6 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm'){
     ## Chip StdErrors
     chipStdErrors <- do.call(rbind, lapply(fit, '[[', 'chipStdErrors'))
     dimnames(chipStdErrors) <- list(unique(pnVec), sampleNames(object))
-    if (method != 'medianpolish'){
-        NUSE <- sweep(chipStdErrors, 1, rowMedians(chipStdErrors), '/')
-    }else{
-        NUSE <- NULL
-    }
 
     ## Probes StdErrors
     probesStdErrors <- vector('numeric', nrow(object))
@@ -382,34 +372,88 @@ fitProbeLevelModel <- function(object, target='core', subset, method='plm'){
 
     ## fix residuals/weights to have the array dims
 
-    out <- list(chipEffects=chipEffects,
-                probeEffects=probeEffects,
-                Weights=Weights,
-                Residuals=Residuals,
-                chipStdErrors=chipStdErrors,
-                probesStdErrors=probesStdErrors,
-                Scale=Scale,
-                NUSE=NUSE,
-                RLE=RLE,
-                method=method)
+    out <- list(Class='oligoPLM',
+                chip.coefs=chipEffects,
+                probe.coefs=probeEffects,
+                weights=Weights,
+                residuals=Residuals,
+                se.chip.coefs=chipStdErrors,
+                se.probe.coefs=probesStdErrors,
+                residualSE=Scale,
+                geometry=geometry(object),
+                method=method,
+                manufacturer=manufacturer(object),
+                annotation=annotation(object),
+                narrays=ncol(chipEffects),
+                nprobes=nrow(probeInfo),
+                nprobesets=nrow(chipEffects))
     rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors, probesStdErrors, Scale, NUSE, RLE)
+    if (S4)
+        out <- do.call(new, out)
     out
 }
 
-getRLE <- function(obj, type=c('plot', 'stats'), ...){
-    if (is.null(obj$chipEffects))
-        stop('This Probe Level Model does not allow for computation of RLE')
-    RLE <- sweep(obj$chipEffects, 1, rowMedians(obj$chipEffects), '-')
-    if (type=='plot')
-        boxplot(as.data.frame(RLE), ...)
+fitPLM <- function(...)
+    .Deprecated('fitProbeLevelModel')
+
+
+RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
+                range=0, col=darkColors(ncol(obj)), ...){
+    RLE <- sweep(coefs(obj), 1, rowMedians(coefs(obj)), '-')
+    type <- match.arg(type)
+    if (type=='plot'){
+        boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
+        abline(h=0, lty=2)
+    }
     invisible(RLE)
 }
 
-getNUSE <- function(obj, type=c('plot', 'stats'), ...){
+NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
+                 range=0, col=darkColors(ncol(obj)), ...){
     if (is.null(obj$chipStdErrors))
         stop('This Probe Level Model does not allow for computation of NUSE')
-    NUSE <- sweep(obj$chipStdErrors, 1, rowMedians(obj$chipStdErrors), '/')
-    if (type == 'plot')
-        boxplot(as.data.frame(RLE), ...)
+    NUSE <- sweep(se(obj), 1, rowMedians(se(obj)), '/')
+    type <- match.arg(type)
+    if (type == 'plot'){
+        boxplot(as.data.frame(NUSE), ylab='NUSE', range=range, ylim=ylim, col=col, ...)
+        abline(h=1, lty=2)
+    }
     invisible(NUSE)
 }
+
+setMethod('image', 'oligoPLM',
+          function(x, which=1, type=c('weights', 'resids', 'pos.resids', 'neg.resids', 'sign.resids'), col, main, ...){
+              type <- match.arg(type)
+              if (type == 'weights'){
+                  theMat <- weights(x)[, which]
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Weights'
+              }else if (type == 'resids'){
+                  theMat <- resids(x)[, which]
+                  candCols <- divColors(2560)
+                  candMain <- 'Residuals'
+              }else if (type == 'pos.resids'){
+                  theMat <- pmax(resids(x)[, which], 0)
+                  candCols <- seqColors2(2560)
+                  candMain <- 'Positive Residuals'
+              }else if (type == 'neg.resids'){
+                  theMat <- pmin(resids(x)[, which], 0)
+                  candCols <- rev(seqColors(2560))
+                  candMain <- 'Negative Residuals'
+              }else{
+                  theMat <- sign(resids(x)[, which])
+                  candCols <- divColors(2)
+                  candMain <- 'Sign of Residuals'
+              }
+              dim(theMat) <- x@geometry
+              if (missing(col)){
+                  col <- candCols
+                  rm(candCols)
+              }
+              if (missing(main)){
+                  main <- candMain
+                  rm(candMain)
+              }
+              image(theMat, col=col, yaxt='n', xaxt='n', main=main, ...)
+          }
+)
