@@ -89,7 +89,7 @@ export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
- 
+
 ## Testing
 exportMethods(backgroundCorrect, normalize, summarize,
               normalizeToTarget)
@@ -101,3 +101,5 @@ exportMethods(intensity, probesetNames)
 ##export("fitPLM", "NUSE", "RLE", coefs, se)
 exportMethods("image", "paCalls")
 ##exportClasses(PLMset)
+
+export('getRLE', 'getNUSE', 'fitProbeLevelModel', 'summarizationMethods')
