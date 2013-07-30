@@ -62,21 +62,22 @@ setMethod("pm", "FeatureSet",
           })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
-                 function(object, value){
+                 function(object, value, ...){
                    tmp <- exprs(object)
-                   tmp[pmindex(object),] <- value
+                   tmp[pmindex(object, ...),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
 setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
-                 function(object, value){
+                 function(object, value, ...){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
+                   pmi <- pmindex(object, ...)
                    for (i in 1:nc)
-                       tmp[pmindex(object), i] <- value[,i]
+                       tmp[pmi, i] <- value[,i]
                    close(value)
                    close(tmp)
                    rm(value)
@@ -89,9 +90,9 @@ setMethod("mm", "FeatureSet",
           })
 
 setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
-                 function(object, value){
+                 function(object, value, ...){
                    tmp <- exprs(object)
-                   tmp[mmindex(object),] <- value
+                   tmp[mmindex(object, ...),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
@@ -102,8 +103,9 @@ setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
+                   mmi <- mmindex(object, ...)
                    for (i in 1:nc)
-                       tmp[mmindex(object), i] <- value[,i]
+                       tmp[mmi, i] <- value[,i]
                    close(value)
                    close(tmp)
                    rm(value)
