@@ -1,14 +1,7 @@
 Package: oligo
-Version: 1.19.17
+Version: 1.19.18
 Title: Preprocessing tools for oligonucleotide arrays.
-Authors@R: c(person("Benilton", "Carvalho", role=c("aut", "cre"), email="Benilton.Carvalho@cancer.org.uk"),
-            person("Rafael", "Irizarry", role="aut"),
-            person("Ben", "Bolstad", role="ctb"),
-            person("Vincent", "Carey", role="ctb"),
-            person("Robert", "Gentleman", role="ctb"),
-            person("Wolfgang", "Huber", role="ctb"),
-            person("Jim", "MacDonald", role="ctb"),
-            person("Harris", "Jaffee", role="ctb"))
+Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
 Depends: R (>= 2.14.0),
          oligoClasses (>= 1.13.9),
