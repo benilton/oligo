@@ -1,7 +1,7 @@
-THE `OLIGO` PACKAGE
-=================
+oligo: an R/BioConductor Package for preprocessing oligonucleotide arrays
+=========================================================================
 
-The `oligo` package provides tools to preprocess oligonucleotide
+The oligo package provides tools to preprocess oligonucleotide
 arrays. It is designed to support all Affymetrix and NimbleGen chips and
 offers tools for reading in intensity files in their native format
 (Affymetrix CEL files and NimbleGen XYS files).
