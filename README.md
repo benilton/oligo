@@ -1,5 +1,5 @@
 THE `OLIGO` PACKAGE
-===================
+=================
 
 The `oligo` package provides tools to preprocess oligonucleotide
 arrays. It is designed to support all Affymetrix and NimbleGen chips and
@@ -36,10 +36,11 @@ Contributing
 4. Push to the branch (`git push origin my_contrib`)
 5. Create an [Issue][1] with a link to your branch
 
+
 Contact
 -------
 
 Benilton Carvalho
-<myFirstName.myLastName> AT cancer <dot> org <dot> uk
+<firstName.lastName> AT cancer <dot> org <dot> uk
 
 [1]: http://github.com/benilton/oligo/issues
