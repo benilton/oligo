@@ -690,18 +690,18 @@ pair2xys <- function(pairFile){
 
 
 ### parallel stuff
-iExprsProbesets <- function(x, ...){
-    rns <- rownames(x)
-    grps <- split(1:length(rns), rns)
-    it <- idiv(length(grps), ...)
-    i <- 1
-    nextEl <- function(){
-        n <- nextElem(it)
-        set <- seq(i, length=n)
-        i <<- i+n
-        x[unlist(grps[set]),, drop=FALSE]
-    }
-    obj <- list(nextElem=nextEl)
-    class(obj) <- c('iExprsProbesets', 'abstractiter', 'iter')
-    obj
-}
+### iExprsProbesets <- function(x, ...){
+###     rns <- rownames(x)
+###     grps <- split(1:length(rns), rns)
+###     it <- idiv(length(grps), ...)
+###     i <- 1
+###     nextEl <- function(){
+###         n <- nextElem(it)
+###         set <- seq(i, length=n)
+###         i <<- i+n
+###         x[unlist(grps[set]),, drop=FALSE]
+###     }
+###     obj <- list(nextElem=nextEl)
+###     class(obj) <- c('iExprsProbesets', 'abstractiter', 'iter')
+###     obj
+### }

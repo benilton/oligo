@@ -61,23 +61,22 @@ setMethod("pm", "FeatureSet",
             return(out)
           })
 
-setReplaceMethod("pm", signature(object="FeatureSet", subset='ANY', target='ANY', value="matrix"),
-                 function(object, subset=NULL, target='core', value){
+setReplaceMethod("pm", signature(object="FeatureSet", value="matrix"),
+                 function(object, value){
                    tmp <- exprs(object)
-                   tmp[pmindex(object, subset=subset, target=target),] <- value
+                   tmp[pmindex(object),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("pm", signature(object="FeatureSet", subset='ANY', target='ANY', value="ff_matrix"),
-                 function(object, subset=NULL, target='core', value){
+setReplaceMethod("pm", signature(object="FeatureSet", value="ff_matrix"),
+                 function(object, value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
-                   pmi <- pmindex(object, subset=subset, target=target)
                    for (i in 1:nc)
-                       tmp[pmi, i] <- value[,i]
+                       tmp[pmindex(object), i] <- value[,i]
                    close(value)
                    close(tmp)
                    rm(value)
@@ -85,27 +84,26 @@ setReplaceMethod("pm", signature(object="FeatureSet", subset='ANY', target='ANY'
                  })
 
 setMethod("mm", "FeatureSet",
-          function(object, subset=NULL, target='core'){
-            exprs(object)[mmindex(object, subset=subset, target=target),, drop=FALSE] ## subset
+          function(object, subset=NULL){
+            exprs(object)[mmindex(object, subset=subset),, drop=FALSE] ## subset
           })
 
-setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY', value="matrix"),
-                 function(object, subset=NULL, target='core', value){
+setReplaceMethod("mm", signature(object="FeatureSet", value="matrix"),
+                 function(object, value){
                    tmp <- exprs(object)
-                   tmp[mmindex(object, subset=subset, target=target),] <- value
+                   tmp[mmindex(object),] <- value
                    assayDataElementReplace(object, "exprs", tmp)
                  })
 
-setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY', value="ff_matrix"),
-                 function(object, subset=NULL, target='core', value){
+setReplaceMethod("mm", signature(object="FeatureSet", value="ff_matrix"),
+                 function(object, value){
                    tmp <- exprs(object)
                    open(tmp)
                    open(value)
                    finalizer(value) <- "delete"
                    nc <- ncol(tmp)
-                   mmi <- mmindex(object, subset=subset, target=target)
                    for (i in 1:nc)
-                       tmp[mmi, i] <- value[,i]
+                       tmp[mmindex(object), i] <- value[,i]
                    close(value)
                    close(tmp)
                    rm(value)
@@ -113,7 +111,7 @@ setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY'
                  })
 
 setMethod("pmSequence", "FeatureSet",
-          function(object, ...) pmSequence(getPD(object), ...))
+          function(object) pmSequence(getPD(object)))
 
 setMethod("mmSequence", "FeatureSet",
           function(object) mmSequence(getPD(object)))
@@ -358,7 +356,7 @@ setMethod("pmChr", "FeatureSet",
             if (is(object, "TilingFeatureSet") & manufacturer(object) == "Affymetrix"){
               sql <- paste("SELECT fid, chrom_id as chrom",
                            "FROM pmfeature",
-                           "LEFT JOIN chrom_dict",
+                           "INNER JOIN chrom_dict",
                            "USING(chrom)")
             }else{
               sql <- paste("SELECT fid, chrom",

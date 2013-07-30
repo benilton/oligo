@@ -19,12 +19,13 @@ importClassesFrom(oligoClasses, AffySNPPDInfo, DBPDInfo,
 ## Importing: Methods
 ######################################
 
-importMethodsFrom(Biobase, annotation, "annotation<-", channelNames,
-                  combine, description, experimentData, exprs, featureData,
+importMethodsFrom(Biobase, annotation, "annotation<-", channel,
+                  channelNames, combine, description, experimentData,
+                  "experimentData<-", exprs, "exprs<-", featureData,
                   "featureData<-", featureNames, "featureNames<-",
-                  "notes<-", pData, "pData<-", phenoData, "phenoData<-", preproc,
-                  "preproc<-", protocolData, rowMedians, sampleNames,
-                  "sampleNames<-", varMetadata)
+                  "notes<-", pData, "pData<-", phenoData, "phenoData<-",
+                  preproc, "preproc<-", protocolData, "protocolData<-",
+                  rowMedians, sampleNames, "sampleNames<-", varMetadata)
 
 importMethodsFrom(DBI, dbGetQuery, dbListTables)
 
@@ -45,8 +46,8 @@ importFrom(affxparser, createCel, readCelHeader, readCelIntensities,
 
 importFrom(affyio, read.celfile.header, read.celfile)
 
-importFrom(Biobase, assayDataElement, assayDataElementReplace,
-           assayDataNew)
+importFrom(Biobase, assayData, assayDataElement, assayDataElementReplace,
+           assayDataNew, assayDataElementNames)
 
 importFrom(BiocGenerics, boxplot, image, ncol, residuals)
 
@@ -101,7 +102,7 @@ export(basecontent, cleanPlatformName, read.celfiles, read.xysfiles,
        getCrlmmSummaries, getNgsColorsInfo, read.xysfiles2,
        read.celfiles2, basicRMA, darkColors, seqColors, seqColors2,
        divColors, getAffinitySplineCoefficients, getBaseProfile,
-       basicPLM, getProbeInfo)
+       basicPLM, getProbeInfo, availProbeInfo)
 
 ## Exported functions for CRLMM
 export(crlmm, snprma, justSNPRMA, justCRLMM, getPD)
