@@ -33,7 +33,7 @@ setMethod('nprobesets', 'oligoPLM',
           })
 
 coefs <- function()
-    .Deprecated('coef')
+    .Defunct('coef')
 
 setMethod('coef', 'oligoPLM',
           function(object){
@@ -74,7 +74,7 @@ setReplaceMethod('weights', 'oligoPLM',
 
 ## setGeneric('resids', function(object) standardGeneric('resids'))
 resids <- function()
-    .Deprecated('residuals')
+    .Defunct('residuals')
 
 setMethod('residuals', 'oligoPLM',
           function(object){
@@ -307,4 +307,4 @@ fitPLM <- function(object,model=PM ~ -1 + probes +samples,
                    normalize.method="quantile", background.param=list(),
                    normalize.param=list(), output.param=NULL,
                    model.param=NULL, verbosity.level=0)
-    .Deprecated('fitProbeLevelModel')
+    .Defunct('fitProbeLevelModel')
