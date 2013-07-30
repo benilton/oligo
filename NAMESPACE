@@ -19,7 +19,7 @@ importClassesFrom(oligoClasses, AffySNPPDInfo, DBPDInfo,
 ## Importing: Methods
 ######################################
 
-importMethodsFrom(Biobase, annotation, "annotation<-", channel,
+importMethodsFrom(Biobase, channel,
                   channelNames, combine, description, experimentData,
                   "experimentData<-", exprs, "exprs<-", featureData,
                   "featureData<-", featureNames, "featureNames<-",
@@ -49,7 +49,8 @@ importFrom(affyio, read.celfile.header, read.celfile)
 importFrom(Biobase, assayData, assayDataElement, assayDataElementReplace,
            assayDataNew, assayDataElementNames)
 
-importFrom(BiocGenerics, boxplot, image, ncol, residuals)
+importFrom(BiocGenerics, boxplot, image, ncol, residuals,
+           annotation, "annotation<-")
 
 importFrom(graphics, hist, lines, matplot, par)
 
