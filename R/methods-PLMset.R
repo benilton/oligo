@@ -277,7 +277,7 @@ setMethod('image', 'oligoPLM',
                   candCols <- divColors(2)
                   candMain <- 'Sign of Residuals'
               }
-              candMain <- paste(candMain, colnames(plm@chip.coefs)[which], sep=' - ')
+              candMain <- paste(candMain, colnames(x@chip.coefs)[which], sep=' - ')
               if (tolower(manufacturer(x)) != 'affymetrix'){
                   theMat0 <- matrix(NA, nrow=geom[1], ncol=geom[2])
                   theMat0[idx] <- theMat[theInfo$fid]
