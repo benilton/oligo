@@ -2,23 +2,35 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{oligoPLM-class}
+\alias{oligoPLM}
 \alias{annotation,oligoPLM-method}
 \alias{boxplot,oligoPLM-method}
 \alias{coef,oligoPLM-method}
+\alias{coefs.probe}
 \alias{coefs.probe,oligoPLM-method}
 \alias{geometry,oligoPLM-method}
 \alias{image,oligoPLM-method}
 \alias{manufacturer,oligoPLM-method}
+\alias{method}
 \alias{method,oligoPLM-method}
 \alias{ncol,oligoPLM-method}
+\alias{nprobes}
 \alias{nprobes,oligoPLM-method}
+\alias{nprobesets}
 \alias{nprobesets,oligoPLM-method}
 \alias{residuals,oligoPLM-method}
+\alias{residualSE}
 \alias{residualSE,oligoPLM-method}
+\alias{se}
 \alias{se,oligoPLM-method}
+\alias{se.probe}
 \alias{se.probe,oligoPLM-method}
 \alias{show,oligoPLM-method}
 \alias{weights,oligoPLM-method}
+\alias{NUSE}
+\alias{NUSE,oligoPLM-method}
+\alias{RLE}
+\alias{RLE,oligoPLM-method}
 
 \title{Class \code{"oligoPLM"}}
 \description{
@@ -90,6 +102,10 @@
     \item{show}{\code{signature(object = "oligoPLM")}: show method}
     \item{weights}{\code{signature(object = "oligoPLM")}:
       accessor/replacement method to weights slot}
+    \item{NUSE}{\code{signature(x = "oligoPLM")} : Boxplot of Normalized
+      Unscaled Standard Errors (NUSE) or NUSE values.}
+    \item{RLE}{\code{signature(x = "oligoPLM")} : Relative Log Expression
+      boxplot or values.}
   }
 }
 

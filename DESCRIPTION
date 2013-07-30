@@ -1,28 +1,25 @@
 Package: oligo
-Version: 1.19.18
+Version: 1.19.19
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
-Depends: R (>= 2.14.0),
-         oligoClasses (>= 1.13.9),
-         foreach
-Imports: affyio (>= 1.19.4),
-         affxparser (>= 1.23.1),
-         Biobase (>= 2.11.8),
-         Biostrings,
+Depends: R (>= 2.14.0), oligoClasses (>= 1.13.9)
+Imports: affyio (>= 1.23.2),
+         affxparser (>= 1.27.5),
+         Biobase (>= 2.15.4),
+         Biostrings (>= 2.23.6),
          BiocGenerics (>= 0.1.14),
          DBI (>= 0.2-5),
          ff,
          graphics,
          methods,
-         preprocessCore (>= 1.17.5),
+         preprocessCore (>= 1.17.7),
          splines,
          stats,
          stats4,
          utils,
          zlibbioc
-Enhances: ff,
-          snow
+Enhances: ff, doMC, doMPI
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
           pd.mapping50k.xba240,
