@@ -38,7 +38,7 @@ if(require(oligoData) & require(pd.hg18.60mer.expr)){
   image(nimbleExpressionFS, which=4)
 ##  fit <- fitPLM(nimbleExpressionFS)
 ##  image(fit, which=4)
-  plot(1) ## while fixing fitPLM TODO
+  plot(1) ## while fixing fitPLM
 }
 }
 

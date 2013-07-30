@@ -98,6 +98,6 @@ export(plotM, backgroundCorrectionMethods, normalizationMethods)
 exportMethods(intensity, probesetNames)
 
 ## PLM
-export("fitPLM", "NUSE", "RLE", coefs, se)
+##export("fitPLM", "NUSE", "RLE", coefs, se)
 exportMethods("image", "paCalls")
-exportClasses(PLMset)
+##exportClasses(PLMset)
