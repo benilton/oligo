@@ -192,7 +192,7 @@ if( !isGeneric("boxplot") )
     setGeneric("boxplot", function(x,...)
                standardGeneric("boxplot"))
 
-
+## fix names(theMat)
 setMethod("boxplot",signature(x="oligoPLM"),
           function(x, type=c("NUSE", "RLE", "weights","resids"), col=darkColors(ncol(x)), range=0, ...){
             type <- match.arg(type)
@@ -208,6 +208,6 @@ setMethod("boxplot",signature(x="oligoPLM"),
                 theMat <- theMat[!is.na(theMat[,1]),,drop=FALSE]
             }
             theMat <- as.data.frame(theMat)
-            boxplot(theMat, col=col, range=range)
+            boxplot(theMat, col=col, range=range, ...)
           })
 
