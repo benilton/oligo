@@ -22,7 +22,6 @@ Imports: affyio (>= 1.23.2),
 Enhances: ff, doMC, doMPI
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
-          pd.hugene.1.0.st.v1,
           pd.mapping50k.xba240,
           pd.huex.1.0.st.v2,
           pd.hg18.60mer.expr,
