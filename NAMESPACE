@@ -99,7 +99,7 @@ exportMethods(intensity, probesetNames)
 
 ## PLM
 export("fitPLM", "NUSE", "RLE", coefs, se)
-exportMethods("image", "paCalls", ncol)
+exportMethods("image", "paCalls", ncol, resids)
 exportClasses(oligoPLM)
 
 export('fitProbeLevelModel', 'summarizationMethods')
