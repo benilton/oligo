@@ -36,7 +36,6 @@ Contributing
 4. Push to the branch (`git push origin my_contrib`)
 5. Create an [Issue][1] with a link to your branch
 
-
 Contact
 -------
 
