@@ -10,22 +10,19 @@
   on a (meta)probeset by (meta)probeset basis.
 }
 \usage{
-fitProbeLevelModel(object, background=TRUE, normalize=TRUE, target="core", method="plm", verbose=TRUE, S4=TRUE, ...)
+fitProbeLevelModel(object, target = "core", subset, method = "plm", verbose = TRUE, S4 = TRUE)
 }
 
 \arguments{
-  \item{object}{\code{\link[oligoClasses:FeatureSet]{FeatureSet}}
-    object.}
-  \item{background}{Do background correction?}
-  \item{normalize}{Do normalization?}
+  \item{object}{\code{\link[oligoClasses:FeatureSet]{FeatureSet}} object.}
   \item{target}{character vector describing the summarization
     target. Valid values are: 'probeset', 'core' (Gene/Exon), 'full'
     (Exon), 'extended' (Exon).}
+  \item{subset}{subset to be passed down to \code{\link{getProbeInfo}}}
   \item{method}{summarization method to be used.}
   \item{verbose}{verbosity flag.}
   \item{S4}{return final value as an S4 object (\code{oligoPLM}) if
   \code{TRUE}. If \code{FALSE}, final value is returned as a \code{list}.}
-  \item{...}{subset to be passed down to \code{\link{getProbeInfo}} for subsetting. See \code{\link{subset}} for details.}
 }
 
 \value{\code{fitProbeLevelModel} returns an \code{\link{oligoPLM}}
@@ -47,12 +44,12 @@ fitProbeLevelModel(object, background=TRUE, normalize=TRUE, target="core", metho
     Summarization}. PhD Dissertation. University of California,
   Berkeley.}
 
-\seealso{\code{\link[oligo]{rma}}, \code{\link[oligo]{summarizationMethods}}, \code{subset}}
+\seealso{\code{\link[oligo]{rma}}, \code{\link[oligo]{summarizationMethods}}}
 
 \examples{
 if (require(oligoData)){
-  data(nimbleExpressionFS)
-  fit <- fitProbeLevelModel(nimbleExpressionFS)
+  data(affyExpressionFS)
+  fit <- fitProbeLevelModel(affyExpressionFS)
   image(fit)
   NUSE(fit)
   RLE(fit)
