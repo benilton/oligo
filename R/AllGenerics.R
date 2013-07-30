@@ -44,11 +44,11 @@ setGeneric("getY", function(object, type) standardGeneric("getY"))
 ###
 
 setGeneric("backgroundCorrect",
-           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, verbose=TRUE, ...)
+           function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE)
            standardGeneric("backgroundCorrect"))
 
 setGeneric("normalize",
-           function(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
+           function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...)
            standardGeneric("normalize"))
 
 setGeneric("summarize",

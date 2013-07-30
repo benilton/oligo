@@ -15,15 +15,15 @@
 \alias{pm<-}
 \alias{bg<-}
 \alias{intensity<-,FeatureSet-method}
-\alias{mm<-,FeatureSet,matrix-method}
-\alias{pm<-,FeatureSet,matrix-method}
-\alias{bg<-,FeatureSet,matrix-method}
-\alias{mm<-,FeatureSet,ff_matrix-method}
-\alias{pm<-,FeatureSet,ff_matrix-method}
-\alias{bg<-,FeatureSet,ff_matrix-method}
-\alias{mm<-,TilingFeatureSet,array-method}
-\alias{pm<-,TilingFeatureSet,array-method}
-\alias{bg<-,TilingFeatureSet,array-method}
+\alias{mm<-,FeatureSet,ANY,ANY,matrix-method}
+\alias{pm<-,FeatureSet,ANY,ANY,matrix-method}
+\alias{bg<-,FeatureSet,ANY,ANY,matrix-method}
+\alias{mm<-,FeatureSet,ANY,ANY,ff_matrix-method}
+\alias{pm<-,FeatureSet,ANY,ANY,ff_matrix-method}
+\alias{bg<-,FeatureSet,ANY,ANY,ff_matrix-method}
+\alias{mm<-,TilingFeatureSet,ANY,ANY,array-method}
+\alias{pm<-,TilingFeatureSet,ANY,ANY,array-method}
+\alias{bg<-,TilingFeatureSet,ANY,ANY,array-method}
 
 %% OK!
 
@@ -33,11 +33,11 @@
 }
 \usage{
 intensity(object)
-mm(object, subset = NULL)
-pm(object, subset = NULL, ...)
+mm(object, subset = NULL, target='core')
+pm(object, subset = NULL, target='core')
 bg(object, subset = NULL)
-mm(object, ...)<-value
-pm(object, ...)<-value
+mm(object, subset = NULL, target='core')<-value
+pm(object, subset = NULL, target='core')<-value
 bg(object)<-value
 }
 
@@ -45,8 +45,9 @@ bg(object)<-value
   \item{object}{\code{FeatureSet} object.}
   \item{subset}{Not implemented yet.}
   \item{value}{\code{matrix} object.}
-  \item{...}{Extra arguments: \code{target} that can take the following
-  values 'probeset', 'core', 'full', 'extended'. See Details.}
+  \item{target}{One of 'probeset', 'core', 'full', 'extended'. This is
+  ignored if the array design is something other than Gene ST or Exon ST.}
+  \item{subset}{Not yet implemented.}
 }
 
 \details{
