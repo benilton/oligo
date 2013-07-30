@@ -10,7 +10,6 @@ test_selector <- function(){
     coreExon <- getProbeInfo(affyExonFS, field=fld, target='core')[out][icore0[[pkgs[1]]],]
     psetExon <- getProbeInfo(affyExonFS, field=fld, target='probeset')[out][ipset0[[pkgs[1]]],]
     agenExon <- getProbeInfo(affyExonFS, field=fld, target='probeset', subset= type == 'control->bgp->antigenomic')[out][iagen0[[pkgs[1]]],]
-    agenExon <- getRandom(agenExon)
 
     data(affyGeneFS)
     coreGene <- getProbeInfo(affyGeneFS, field=fld, target='core')[out][icore0[[pkgs[2]]],]
