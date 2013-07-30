@@ -57,7 +57,7 @@ setGeneric("summarize",
            standardGeneric("summarize"))
 
 setGeneric("normalizeToTarget",
-           function(object, target, method="quantile", copy=TRUE, verbose=TRUE)
+           function(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE)
            standardGeneric("normalizeToTarget"))
 
 setGeneric("getNetAffx", function(object, type="probeset") standardGeneric("getNetAffx"))
