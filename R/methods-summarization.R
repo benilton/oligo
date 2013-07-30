@@ -298,12 +298,14 @@ outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
     if (verbose) msgOK()
     if (verbose) txtMsg('  StdErrors... ')
     theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
-    colnames(theChipSE) <- sampleNames
+    if (!is.null(theChipSE))
+        colnames(theChipSE) <- sampleNames
     theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
     if (verbose) msgOK()
     if (verbose) txtMsg('  Weights..... ')
     theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
-    colnames(theWeights) <- sampleNames
+    if (!is.null(theWeights))
+        colnames(theWeights) <- sampleNames
     if (verbose) msgOK()
     if (verbose) txtMsg('  Residuals... ')
     theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
@@ -322,7 +324,7 @@ outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
 runSummarize <- function(mat, pnVec, transfo=log2,
                          method=summarizationMethods(),
                          verbose=TRUE){
-    if (verbose) message('Summarizing.... ', appendLF=FALSE)
+    if (verbose) message('Summarizing... ', appendLF=FALSE)
     stopifnot(length(pnVec) == nrow(mat),
               is.character(pnVec),
               is.function(transfo))
@@ -358,15 +360,39 @@ fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='
     fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method, verbose=verbose)
     rm(tmpMat)
 
+    Weights <- array(NA_integer_, dim(object))
+    if (method == 'plm')
+        Weights[probeInfo$fid,] <- fit$Weights
+    fit$Weights <- Weights
+    rm(Weights)
+    Residuals <- array(NA_integer_, dim(object))
+    Residuals[probeInfo$fid,] <- fit$Residuals
+    fit$Residuals <- Residuals
+    rm(Residuals)
+    if (method == 'medianpolish'){
+        fit$chipStdErrors <- array(NA_integer_, dim(chipEffects))
+        fit$probesStdErrors <- rep(NA_integer_, length(probeEffects))
+        fit$Scale <- rep(NA_integer_, nrow(chipEffects))
+    }
+
+    if (FALSE){
     chipEffects <- fit$chipEffects
     probeEffects <- fit$probeEffects
-    Weights <- Residuals <- array(NA, dim(object))
-    Weights[probeInfo$fid,] <- fit$Weights
+    Weights <- Residuals <- array(NA_integer_, dim(object))
+    if (method == 'plm')
+        Weights[probeInfo$fid,] <- fit$Weights
     Residuals[probeInfo$fid,] <- fit$Residuals
-    chipStdErrors <- fit$chipStdErrors
-    probesStdErrors <- fit$probesStdErrors
-    Scale <- fit$Scale
+    if (method == 'plm'){
+        chipStdErrors <- fit$chipStdErrors
+        probesStdErrors <- fit$probesStdErrors
+        Scale <- fit$Scale
+    }else{
+        chipStdErrors <- array(NA_integer_, dim(chipEffects))
+        probesStdErrors <- rep(NA_integer_, length(probeEffects))
+        Scale <- rep(NA_integer_, nrow(chipEffects))
+    }
     rm(fit)
+    gc()
 
     ## fix residuals/weights to have the array dims
 
@@ -387,8 +413,32 @@ fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='
                 nprobesets=nrow(chipEffects))
     rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors,
        probesStdErrors, Scale)
+    gc()
+
+}
+
+    theSlots <- c('chip.coefs', 'probe.coefs', 'weights', 'residuals',
+                  'se.chip.coefs', 'se.probe.coefs', 'residualSE')
+    myNames <- c('chipEffects', 'probeEffects', 'Weights', 'Residuals',
+                 'chipStdErrors', 'probesStdErrors', 'Scale')
+    names(fit) <- theSlots[match(names(fit), myNames)]
+
+    fit$Class <- 'oligoPLM'
+    fit$geometry <- geometry(object)
+    fit$method <- method
+    fit$manufacturer <- manufacturer(object)
+    fit$annotation <- annotation(object)
+    fit$narrays <- ncol(fit$chip.coefs)
+    fit$nprobes <- nrow(probeInfo)
+    fit$nprobesets <- nrow(fit$chip.coefs)
+
+    if (FALSE){
     if (S4)
         out <- do.call(new, out)
     out
+}
+    if (S4)
+        return(do.call(new, fit))
+    fit
 }
 

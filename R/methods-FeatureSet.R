@@ -113,7 +113,7 @@ setReplaceMethod("mm", signature(object="FeatureSet", subset='ANY', target='ANY'
                  })
 
 setMethod("pmSequence", "FeatureSet",
-          function(object) pmSequence(getPD(object)))
+          function(object, ...) pmSequence(getPD(object), ...))
 
 setMethod("mmSequence", "FeatureSet",
           function(object) mmSequence(getPD(object)))

@@ -1,12 +1,11 @@
 Package: oligo
-Version: 1.21.4
+Version: 1.21.5
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <Benilton.Carvalho@cancer.org.uk>
-Depends: R (>= 2.14.0), oligoClasses (>= 1.17.35)
+Depends: R (>= 2.14.0), oligoClasses (>= 1.17.35), Biobase (>= 2.15.4)
 Imports: affyio (>= 1.23.2),
          affxparser (>= 1.27.5),
-         Biobase (>= 2.15.4),
          Biostrings (>= 2.23.6),
          BiocGenerics (>= 0.1.14),
          DBI (>= 0.2-5),
