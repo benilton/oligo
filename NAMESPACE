@@ -34,7 +34,7 @@ importMethodsFrom(oligoClasses, allele, bothStrands, calls, db,
                   manufacturer)
 
 
-importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image, weights)
+importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image, weights, 'annotation<-', annotation)
 
 importMethodsFrom(stats4, coef, plot)
 

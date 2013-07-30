@@ -166,13 +166,13 @@ setReplaceMethod('manufacturer', 'oligoPLM',
                      object
                  })
 
-setGeneric('annotation', function(object) standardGeneric('annotation'))
+##setGeneric('annotation', function(object) standardGeneric('annotation'))
 setMethod('annotation', 'oligoPLM',
           function(object){
               object@annotation
           })
 
-setGeneric('annotation<-', function(object, value) standardGeneric('annotation<-'))
+##setGeneric('annotation<-', function(object, value) standardGeneric('annotation<-'))
 setReplaceMethod('annotation', 'oligoPLM',
                  function(object, value){
                      object@annotation <- value
