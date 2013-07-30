@@ -145,7 +145,7 @@ runPLM <- function(PM, pnVec, funPLM){
     summaries <- lapply(groups, plm1Probeset, M=PM, funPLM=funPLM, nc=ncol(PM))
     estimates <- do.call(rbind, lapply(summaries, '[[', 'Estimates'))
     stderrors <- do.call(rbind, lapply(summaries, '[[', 'StdErrors'))
-    residuals <- matrix(NA, nrow=nrow(PM), ncol=ncol(PM))
+    residuals <- matrix(NA, nr=nrow(PM), nc=ncol(PM))
     residuals[unlist(groups, use.names=FALSE),] <- do.call(rbind, lapply(summaries, '[[', 'Residuals'))
     rm(summaries)
     colnames(estimates) <- colnames(stderrors) <- colnames(residuals) <- colnames(PM)
@@ -219,47 +219,83 @@ basicPLM <- function(pmMat, pnVec, normalize=TRUE, background=TRUE,
     list(Estimates=estimates, StdErrors=stderrors, Residuals=residuals)
 }
 
-## summarizationMethods <- function()
-##     c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc',
-##       'wplm', 'wplmr', 'wplmrr', 'wplmrc')
-
 summarizationMethods <- function()
-    c('medianpolish', 'plm')
+    c('medianpolish', 'plm', 'plmr', 'plmrr', 'plmrc',
+      'wplm', 'wplmr', 'wplmrr', 'wplmrc')
 
 ###########
 ###########
 
+## The other rcModel* functions return a scale parameter
+## This equalizes output:
+## - Estimates
+## - Weights
+## - Residuals
+## - StdErrors
+## - Scale
+rcModelMedianPolish0 <- function(...)
+    c(rcModelMedianPolish(...), list(Scale=NULL))
 
+rcModelPLMr0 <- function(...)
+    c(rcModelPLMr(...), list(Scale=NULL))
+
+rcModelPLMrr0 <- function(...)
+    c(rcModelPLMrr(...), list(Scale=NULL))
+
+rcModelPLMrc0 <- function(...)
+    c(rcModelPLMrc(...), list(Scale=NULL))
+
+rcModelWPLMr0 <- function(...)
+    c(rcModelWPLMr(...), list(Scale=NULL))
+
+rcModelWPLMrr0 <- function(...)
+    c(rcModelWPLMrr(...), list(Scale=NULL))
+
+rcModelWPLMrc0 <- function(...)
+    c(rcModelWPLMrc(...), list(Scale=NULL))
+
+
+runSummarize <- function(mat, pnVec, transfo=log2,
+                         method=summarizationMethods(),
+                         ...){
+    stopifnot(length(pnVec) == nrow(mat),
+              is.character(pnVec),
+              is.function(transfo))
+    method <- match.arg(method)
+    theFun <- switch(method,
+                     medianpolish=rcModelMedianPolish0,
+                     plm=rcModelPLM,
+                     plmr=rcModelPLMr0,
+                     plmrr=rcModelPLMrr0,
+                     plmrc=rcModelPLMrc0,
+                     wplm=rcModelWPLM0,
+                     wplmr=rcModelWPLMr0,
+                     wplmrr=rcModelWPLMrr0,
+                     wplmrc=rcModelWPLMrc0)
+
+    psets <- sort(unique(pnVec))
+    output <- foreach(set=psets) %dopar% {
+        ## handle ff objects in here
+        theFun(y=transfo(mat[pnVec == set,, drop=FALSE]), ...)
+    }
+
+}
 
 ## Y: nr x nc - nr: number of *probes* in probeset; nc: number of samples
 
-## rcModelPLM/rcModelWPLM (supported)
-## - Estimates: nc + nr
+## rcModelPLM/rcModelWPLM
+## - Estimates: nr + nc
 ## - Weights..: nr x nc
 ## - Residuals: nr x nc
-## - StdErrors: nc + nr
+## - StdErrors: nr + nc
 ## - Scale....: 1
 
-## rcModelMedianPolish (supported)
-## - Estimates: nc + nr
+## rcModelMedianPolish
+## - Estimates: nr + nc
 ## - Weights..: NULL
 ## - Residuals: nr x nc
 ## - StdErrors: NULL
 ## - Scale....: NULL
-
-## rcModelPLMr/rcModelPLMrr/rcModelPLMrc (supported)
-## - Estimates: nc + nr
-## - Weights..: nr x nc
-## - Residuals: nr x nc
-## - StdErrors: nc + nr
-## - Scale....: NULL
-
-## rcModelPLM/rcModelWPLM (input.scale given) (supported)
-## - Estimates: nc + nr
-## - Weights..: nr x nc
-## - Residuals: nr x nc
-## - StdErrors: nc + nr
-## - Scale....: 1
 
 ## rcModelPLM/rcModelWPLM (row.effects given)
 ## - Estimates: 00 + nc
@@ -268,6 +304,13 @@ summarizationMethods <- function()
 ## - StdErrors: 00 + nc
 ## - Scale....: nc
 
+## rcModelPLM/rcModelWPLM (input.scale given)
+## - Estimates: nr + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nr + nc
+## - Scale....: 1
+
 ## rcModelPLM/rcModelWPLM (row.effects+input.scale given)
 ## - Estimates: 00 + nc
 ## - Weights..: nr x nc
@@ -275,170 +318,9 @@ summarizationMethods <- function()
 ## - StdErrors: 00 + nc
 ## - Scale....: nc
 
-
-## The other rcModel* functions return a scale parameter
-## This equalizes output:
-## - Estimates (chip and probe)
-## - Weights
-## - Residuals
-## - StdErrors (chip and probe)
-## - Scale
-
-getFromListAsVector <- function(lst, elem, idx){
-    lapply(lst, function(x, idx) x[[elem]][idx], idx)
-}
-
-outputEqualizer <- function(lst, sampleNames=NULL, verbose=TRUE){
-    idx <- 1:ncol(lst[[1]]$Residuals)
-    if (verbose) txtMsg('Extracting...', appendLF=TRUE)
-    if (verbose) txtMsg('  Estimates... ')
-    theChipCoefs <- do.call(rbind, getFromListAsVector(lst, 'Estimates', idx))
-    colnames(theChipCoefs) <- sampleNames
-    theProbeCoefs <- unlist(getFromListAsVector(lst, 'Estimates', -idx))
-    if (verbose) msgOK()
-    if (verbose) txtMsg('  StdErrors... ')
-    theChipSE <- do.call(rbind, getFromListAsVector(lst, 'StdErrors', idx))
-    if (!is.null(theChipSE))
-        colnames(theChipSE) <- sampleNames
-    theProbeSE <- unlist(getFromListAsVector(lst, 'StdErrors', -idx))
-    if (verbose) msgOK()
-    if (verbose) txtMsg('  Weights..... ')
-    theWeights <- do.call(rbind, lapply(lst, '[[', 'Weights'))
-    if (!is.null(theWeights))
-        colnames(theWeights) <- sampleNames
-    if (verbose) msgOK()
-    if (verbose) txtMsg('  Residuals... ')
-    theResiduals <- do.call(rbind, lapply(lst, '[[', 'Residuals'))
-    colnames(theResiduals) <- sampleNames
-    if (verbose) msgOK()
-    if (verbose) txtMsg('  Scale....... ')
-    theScales <- unlist(lapply(lst, '[[', 'Scale'))
-    if (verbose) msgOK()
-    list(chipEffects=theChipCoefs, probeEffects=theProbeCoefs,
-         Weights=theWeights, Residuals=theResiduals,
-         chipStdErrors=theChipSE, probesStdErrors=theProbeSE,
-         Scale=theScales)
-}
-
-
-runSummarize <- function(mat, pnVec, transfo=log2,
-                         method=summarizationMethods(),
-                         verbose=TRUE){
-    if (verbose) message('Summarizing... ', appendLF=FALSE)
-    stopifnot(length(pnVec) == nrow(mat),
-              is.character(pnVec),
-              is.function(transfo))
-    method <- match.arg(method)
-    theFun <- switch(method,
-                     medianpolish=subrcModelMedianPolish,
-                     plm=subrcModelPLM)
-##     out <- foreach(submat=iExprsProbesets(mat, chunkSize=ocProbesets()), .packages='preprocessCore') %dopar% {
-##         theFun(y=transfo(submat), rownames(submat))
-##     }
-##     out <- unlist(out, recursive=FALSE)
-    out <- theFun(y=transfo(mat), pnVec)
-    if (verbose) message('OK')
-    outputEqualizer(out, colnames(mat), verbose=verbose)
-}
-
-fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='core', method='plm', verbose=TRUE, S4=TRUE, ...){
-    ## essential to be sorted by man_fsetid, so weights/residuals can be
-    ## matched to original FS object
-    vars <- all.vars(substitute(list(...)))
-    vars <- unique(c('fid', 'fsetid', vars))
-    probeInfo <- getProbeInfo(object, target=target, field=vars,
-                              sortBy='man_fsetid', ...)
-    probeInfo$man_fsetid <- as.character(probeInfo$man_fsetid)
-
-    tmpMat <- exprs(object)[probeInfo$fid,,drop=FALSE]
-    if (background)
-        tmpMat <- backgroundCorrect(tmpMat, method='rma', verbose=verbose)
-    if (normalize)
-        tmpMat <- normalize(tmpMat, method='quantile', verbose=verbose)
-    ## rownames below is really important for parallelization
-    dimnames(tmpMat) <- list(probeInfo$man_fsetid, sampleNames(object))
-    fit <- runSummarize(tmpMat, probeInfo$man_fsetid, method=method, verbose=verbose)
-    rm(tmpMat)
-
-    Weights <- array(NA_integer_, dim(object))
-    if (method == 'plm')
-        Weights[probeInfo$fid,] <- fit$Weights
-    fit$Weights <- Weights
-    rm(Weights)
-    Residuals <- array(NA_integer_, dim(object))
-    Residuals[probeInfo$fid,] <- fit$Residuals
-    fit$Residuals <- Residuals
-    rm(Residuals)
-    if (method == 'medianpolish'){
-        fit$chipStdErrors <- array(NA_integer_, dim(chipEffects))
-        fit$probesStdErrors <- rep(NA_integer_, length(probeEffects))
-        fit$Scale <- rep(NA_integer_, nrow(chipEffects))
-    }
-
-    if (FALSE){
-    chipEffects <- fit$chipEffects
-    probeEffects <- fit$probeEffects
-    Weights <- Residuals <- array(NA_integer_, dim(object))
-    if (method == 'plm')
-        Weights[probeInfo$fid,] <- fit$Weights
-    Residuals[probeInfo$fid,] <- fit$Residuals
-    if (method == 'plm'){
-        chipStdErrors <- fit$chipStdErrors
-        probesStdErrors <- fit$probesStdErrors
-        Scale <- fit$Scale
-    }else{
-        chipStdErrors <- array(NA_integer_, dim(chipEffects))
-        probesStdErrors <- rep(NA_integer_, length(probeEffects))
-        Scale <- rep(NA_integer_, nrow(chipEffects))
-    }
-    rm(fit)
-    gc()
-
-    ## fix residuals/weights to have the array dims
-
-    out <- list(Class='oligoPLM',
-                chip.coefs=chipEffects,
-                probe.coefs=probeEffects,
-                weights=Weights,
-                residuals=Residuals,
-                se.chip.coefs=chipStdErrors,
-                se.probe.coefs=probesStdErrors,
-                residualSE=Scale,
-                geometry=geometry(object),
-                method=method,
-                manufacturer=manufacturer(object),
-                annotation=annotation(object),
-                narrays=ncol(chipEffects),
-                nprobes=nrow(probeInfo),
-                nprobesets=nrow(chipEffects))
-    rm(chipEffects, probeEffects, Weights, Residuals, chipStdErrors,
-       probesStdErrors, Scale)
-    gc()
-
-}
-
-    theSlots <- c('chip.coefs', 'probe.coefs', 'weights', 'residuals',
-                  'se.chip.coefs', 'se.probe.coefs', 'residualSE')
-    myNames <- c('chipEffects', 'probeEffects', 'Weights', 'Residuals',
-                 'chipStdErrors', 'probesStdErrors', 'Scale')
-    names(fit) <- theSlots[match(names(fit), myNames)]
-
-    fit$Class <- 'oligoPLM'
-    fit$geometry <- geometry(object)
-    fit$method <- method
-    fit$manufacturer <- manufacturer(object)
-    fit$annotation <- annotation(object)
-    fit$narrays <- ncol(fit$chip.coefs)
-    fit$nprobes <- nrow(probeInfo)
-    fit$nprobesets <- nrow(fit$chip.coefs)
-
-    if (FALSE){
-    if (S4)
-        out <- do.call(new, out)
-    out
-}
-    if (S4)
-        return(do.call(new, fit))
-    fit
-}
-
+## rcModelPLMr/rcModelPLMrr/rcModelPLMrc
+## - Estimates: nr + nc
+## - Weights..: nr x nc
+## - Residuals: nr x nc
+## - StdErrors: nr + nc
+## - Scale....: NULL
