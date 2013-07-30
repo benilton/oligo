@@ -1,8 +1,7 @@
 ## from xmapcore package
 if( require( "RUnit", quietly=TRUE ) ) {
 message("There")
-  pkg <- "oligo"
-
+	pkg <- "oligo"
         path <- ifelse(Sys.getenv( "RCMDCHECK" ) == "FALSE",
                        file.path( getwd(), "..", "inst", "unitTests" ),
                        system.file( package=pkg, "unitTests" ))
