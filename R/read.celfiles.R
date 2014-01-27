@@ -16,15 +16,12 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
     tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
                       headdetails[[1]], headdetails[[2]], verbose,
                       PACKAGE="affyio")
-    datetime <- sapply(filenames, getCelDateTime)
+    datetime <- GetAffyTimeDateAsString(filenames)
   }
   dimnames(tmpExprs) <- dns
   rm(headdetails, dns)
   return(list(exprMatrix=tmpExprs, intensityFile=intensityFile, datetime=datetime))
 }
-
-getCelDateTime <- function(celFile)
-    read.celfile.header(celFile, info="full")[["DatHeader"]]
 
 oligoReadCels <- function(cols, headdetails, filenames, out){
   ## runs on the nodes
@@ -37,7 +34,7 @@ oligoReadCels <- function(cols, headdetails, filenames, out){
       out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
                               FALSE, FALSE, headdetails[[1]],
                               headdetails[[2]], FALSE, PACKAGE="affyio")
-      dates[[i]] <- sapply(filenames[theCols], getCelDateTime)
+      dates[[i]] <- GetAffyTimeDateAsString(filenames[theCols])
       i <- i + 1
   }
     close(out)
@@ -84,7 +81,6 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   intensityFile <- results[["intensityFile"]]
   datetime <- results[["datetime"]]
   rm(results)
-##  datetime <- GetAffyTimeDateAsString(filenames, useAffyio=TRUE)
 
   arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
@@ -94,6 +90,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
                      SNPCNV="SnpCnvFeatureSet",
                      exon="ExonFeatureSet",
                      gene="GeneFeatureSet",
+                     hta="HTAFeatureSet",
                      stop("Unknown array type: ", arrayType))
   
   out <- new(theClass)
