@@ -3,7 +3,7 @@ Version: 1.27.2
 Title: Preprocessing tools for oligonucleotide arrays.
 Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <beniltoncarvalho@gmail.com>
-Depends: R (>= 2.15.0), BiocGenerics (>= 0.3.2), oligoClasses (>= 1.19.43), 
+Depends: R (>= 2.15.0), BiocGenerics (>= 0.3.2), oligoClasses (>= 1.21.18), 
          Biobase (>= 2.17.8), Biostrings (>= 2.25.12)
 Imports: affyio (>= 1.25.0),
          affxparser (>= 1.29.11),
@@ -43,6 +43,7 @@ Collate: AllGenerics.R
          methods-SnpFeatureSet.R
          methods-SnpCnvFeatureSet.R
          methods-TilingFeatureSet.R
+         methods-HtaFeatureSet.R
          methods-DBPDInfo.R
          methods-background.R
          methods-normalization.R

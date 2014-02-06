@@ -187,29 +187,37 @@ getNgsColorsInfo <- function(path=".", pattern1="_532", pattern2="_635", ...){
 ## Selectors for probes - useful for exon/gene arrays
 
 getFidProbeset <- function(object, sortBy='fsetid'){
-    if (!is.null(sortBy))
-        sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
-  conn <- db(object)
-  sql <- "SELECT fid, fsetid FROM pmfeature"
-  featureInfo <- dbGetQuery(conn, sql)
-  if (!is.null(sortBy)){
-      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
-      rownames(featureInfo) <- NULL
-  }
-  return(featureInfo)
+    conn <- db(object)
+    on.exit(close(conn))
+    if (!is(object, 'HTAFeatureSet')){
+        if (!is.null(sortBy))
+            sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
+        sql <- "SELECT fid, fsetid FROM pmfeature"
+    }else{
+        if (!is.null(sortBy))
+            sortBy <- match.arg(sortBy, c('fid', 'man_fsetid'))
+        sql <- "SELECT fid, man_fsetid FROM pmfeature INNER JOIN featureSet USING(fsetid)"
+    }
+    featureInfo <- dbGetQuery(conn, sql)
+    if (!is.null(sortBy)){
+        featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+        rownames(featureInfo) <- NULL
+    }
+    return(featureInfo)
 }
 
 getFidMetaProbesetCore <- function(object, sortBy='fsetid'){
+    conn <- db(object)
+    on.exit(close(conn))
     if (!is.null(sortBy))
         sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
-  conn <- db(object)
-  sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
-  featureInfo <- dbGetQuery(conn, sql)
-  if (!is.null(sortBy)){
-      featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
-      rownames(featureInfo) <- NULL
-  }
-  return(featureInfo)
+    sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
+    featureInfo <- dbGetQuery(conn, sql)
+    if (!is.null(sortBy)){
+        featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
+        rownames(featureInfo) <- NULL
+    }
+    return(featureInfo)
 }
 
 getFidMetaProbesetFull <- function(object, sortBy='fsetid'){
