@@ -3,6 +3,7 @@
 \alias{rma}
 \alias{rma-methods}
 \alias{rma,ExonFeatureSet-method}
+\alias{rma,HTAFeatureSet-method}
 \alias{rma,ExpressionFeatureSet-method}
 \alias{rma,GeneFeatureSet-method}
 \alias{rma,SnpCnvFeatureSet-method}
@@ -40,6 +41,13 @@ summaries at different levels: probeset (as defined in the PGF) and
 summarization, use the \code{target} argument.
 }
 
+\item{\code{signature(object = "HTAFeatureSet")}}{
+When applied to a \code{HTAFeatureSet} object, \code{rma} can produce
+summaries at different levels: probeset (as defined in the PGF) and
+'core genes' (as defined in the core.mps file). To determine the level for
+summarization, use the \code{target} argument.
+}
+
 \item{\code{signature(object = "SnpCnvFeatureSet")}}{
 If used on a \code{SnpCnvFeatureSet} object (ie., SNP 5.0 or SNP 6.0
 arrays), \code{rma} will produce summaries for the CNV probes. Note that
@@ -54,13 +62,14 @@ a Copy Number tool specifically designed for these data.
 
 \usage{
   \S4method{rma}{ExonFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL, target="core")
+  \S4method{rma}{HTAFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL, target="core")
   \S4method{rma}{ExpressionFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL)
   \S4method{rma}{GeneFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL, target="core")
   \S4method{rma}{SnpCnvFeatureSet}(object, background=TRUE, normalize=TRUE, subset=NULL)
 }
 
 \arguments{
-  \item{object}{Exon/Expression/Gene/SnpCnv-FeatureSet object.}
+  \item{object}{Exon/HTA/Expression/Gene/SnpCnv-FeatureSet object.}
   \item{background}{Logical - perform RMA background correction?}
   \item{normalize}{Logical - perform quantile normalization?}
   \item{subset}{To be implemented.}
