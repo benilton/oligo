@@ -123,7 +123,7 @@ setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which=c("pm", "mm", "bg", "both", "all"),
                    transfo=log2, nsample=10000, ...){
             stopifnot(is.function(transfo))
-            idx <- getProbeIndex(x, which)
+            idx <- unique(getProbeIndex(x, which))
             if (length(idx) > nsample)
                 idx <- sort(sample(idx, nsample))
 
@@ -261,7 +261,7 @@ setMethod("hist", "FeatureSet",
           function(x, transfo=log2, which=c("pm", "mm", "bg", "both", "all"),
                    nsample=10000, ...){
             stopifnot(is.function(transfo))
-            idx <- getProbeIndex(x, which)
+            idx <- unique(getProbeIndex(x, which))
             if (length(idx) > nsample)
               idx <- sort(sample(idx, nsample))
 
