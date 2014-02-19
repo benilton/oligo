@@ -209,7 +209,11 @@ getFidMetaProbesetCore <- function(object, sortBy='fsetid'){
     on.exit(dbDisconnect(conn))
     if (!is.null(sortBy))
         sortBy <- match.arg(sortBy, c('fid', 'fsetid'))
-    sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
+    if (!is(object, 'HTAFeatureSet')){
+        sql <- "SELECT fid, meta_fsetid as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
+    }else{
+        sql <- "SELECT fid, core_mps.transcript_cluster_id as fsetid FROM pmfeature INNER JOIN core_mps USING(fsetid)"
+    }
     featureInfo <- dbGetQuery(conn, sql)
     if (!is.null(sortBy)){
         featureInfo <- featureInfo[order(featureInfo[[sortBy]]),]
