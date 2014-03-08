@@ -134,9 +134,21 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
 
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(exprs=tmpExprs)
-  if (missing(phenoData))
+  if (missing(phenoData)){
       phenoData <- basicPhData1(tmpExprs)
+  }else{
+      overwrite <- TRUE
+      sns <- sampleNames(phenoData)
+      vmd <- varMetadata(phenoData)
+      if (!('channel' %in% colnames(vmd))){
+          warning("'channel' automatically added to varMetadata in phenoData.")
+          vmd$channel <- factor(rep("_ALL_", nrow(vmd)), levels=c("exprs", "_ALL_"))
+          varMetadata(phenoData) <- vmd
+      }
+  }
   slot(out, "phenoData") <- phenoData
+  if (overwrite)
+      sampleNames(out) <- sns
   rm(phenoData)
   if (missing(featureData))
       featureData <- basicAnnotatedDataFrame(tmpExprs, TRUE)
@@ -144,6 +156,8 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   rm(featureData)
   if (missing(protocolData))
       protocolData <- basicPData(tmpExprs, filenames, datetime)
+  if (overwrite)
+      sampleNames(protocolData) <- sns
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Nimblegen"
@@ -203,10 +217,16 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(channel1=channel1Intensities,
                                          channel2=channel2Intensities)
-  if (missing(phenoData))
+  if (missing(phenoData)){
       phenoData <- basicPhData2(channel1Intensities,
                                 channel2Intensities)
+  }else{
+      overwrite <- TRUE
+      sns <- sampleNames(phenoData)
+  }
   slot(out, "phenoData") <- phenoData
+  if (overwrite)
+      sampleNames(out) <- sns
   rm(phenoData)
   if (missing(featureData))
       featureData <- basicAnnotatedDataFrame(channel1Intensities, TRUE)
@@ -217,6 +237,8 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
                                channel2Intensities,
                                channel1, channel2,
                                datetime1, datetime2)
+  if (overwrite)
+      sampleNames(protocolData) <- sns
   slot(out, "protocolData") <- protocolData
   rm(protocolData)
   slot(out, "manufacturer") <- "Nimblegen"
