@@ -134,6 +134,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
 
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(exprs=tmpExprs)
+  overwrite <- FALSE
   if (missing(phenoData)){
       phenoData <- basicPhData1(tmpExprs)
   }else{
@@ -217,6 +218,7 @@ read.xysfiles2 <- function(channel1, channel2, pkgname, phenoData,
   out <- new(theClass)
   slot(out, "assayData") <- assayDataNew(channel1=channel1Intensities,
                                          channel2=channel2Intensities)
+  overwrite <- FALSE
   if (missing(phenoData)){
       phenoData <- basicPhData2(channel1Intensities,
                                 channel2Intensities)
