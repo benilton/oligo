@@ -264,8 +264,10 @@ stArrayPmInfo <- function(object, target='core', sortBy='fsetid'){
 ## Date/time extractors
 GetAffyTimeDateAsString <- function(filenames){
     f <- function(x) read.celfile.header(x, "full")[["ScanDate"]]
-    sapply(filenames, f)
+    res <- sapply(filenames, f)
+    sapply(res, function(x) ifelse(length(x) == 0, NA_character_, x))
 }
+
 
 NgsDate2Posix <- function(txt){
   if (!missing(txt)){
