@@ -21,7 +21,7 @@ setMethod("rma", "ExpressionFeatureSet",
             theClass <- class(exprs(object))
 
             if ("matrix" %in% theClass){
-              pms <- exprs(object[pmi,])
+              pms <- exprs(object)[pmi,]
               dimnames(pms) <- NULL
               colnames(pms) <- sampleNames(object)
               exprs <- basicRMA(pms, pnVec, normalize, background)
