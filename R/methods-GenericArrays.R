@@ -134,6 +134,7 @@ setMethod("rma", "GenericFeatureSet",
               exprs <- basicRMA(pm0[as.character(targetInfo$fid),,drop=FALSE],
                                 pnVec=targetInfo$man_fsetid, normalize=FALSE,
                                 background=FALSE, verbose=TRUE)
+              colnames(exprs) <- sampleNames(object)
               out <- new("ExpressionSet")
               slot(out, "assayData") <- assayDataNew(exprs=exprs)
               slot(out, "phenoData") <- phenoData(object)
