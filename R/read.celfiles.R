@@ -84,6 +84,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
 
   arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
+                     generic="GenericFeatureSet",
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
                      SNP="SnpFeatureSet",
@@ -276,6 +277,7 @@ read.mc.celfiles <- function( ..., filenames, pkgname, phenoData,
     
     arrayType <- kind(get(pkgname))
     theClass <- switch(arrayType,
+                       generic="GenericFeatureSet",
                        tiling="TilingFeatureSet",
                        expression="ExpressionFeatureSet",
                        SNP="SnpFeatureSet",

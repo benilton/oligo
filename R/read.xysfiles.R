@@ -123,6 +123,7 @@ read.xysfiles <- function(..., filenames, pkgname, phenoData,
   
   arrayType <- kind(get(pkgname))
   theClass <- switch(arrayType,
+                     generic="GenericFeatureSet",
                      tiling="TilingFeatureSet",
                      expression="ExpressionFeatureSet",
                      SNP="SnpFeatureSet",

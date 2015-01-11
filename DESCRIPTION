@@ -1,35 +1,76 @@
 Package: oligo
-Version: 1.31.0
+Version: 1.31.1
 Title: Preprocessing tools for oligonucleotide arrays.
-Author: Benilton Carvalho and Rafael Irizarry. Contributors: Ben
-        Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim
-        MacDonald, Matt Settles
+Author: Benilton Carvalho and Rafael Irizarry.
+Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <beniltoncarvalho@gmail.com>
-Depends: R (>= 2.15.0), BiocGenerics (>= 0.3.2), oligoClasses (>=
-        1.25.4), Biobase (>= 2.17.8), Biostrings (>= 2.25.12)
-Imports: affyio (>= 1.25.0), affxparser (>= 1.29.11), BiocGenerics (>=
-        0.3.2), DBI (>= 0.2-5), ff, graphics, methods, preprocessCore
-        (>= 1.19.0), splines, stats, stats4, utils, zlibbioc
-Enhances: ff, doMC, doMPI
+Depends: R (>= 2.15.0),
+         BiocGenerics (>= 0.3.2),
+         oligoClasses (>= 1.25.4),
+         Biobase (>= 2.17.8),
+         Biostrings (>= 2.25.12)
+Imports: affyio (>= 1.25.0),
+         affxparser (>= 1.29.11),
+         BiocGenerics (>=0.3.2),
+         DBI (>= 0.2-5),
+         ff,
+         graphics,
+         methods,
+         preprocessCore (>= 1.19.0),
+         splines,
+         stats,
+         stats4,
+         utils,
+         zlibbioc
+Enhances: ff,
+          doMC,
+          doMPI
 LinkingTo: preprocessCore
-Suggests: hapmap100kxba, pd.mapping50k.xba240, pd.huex.1.0.st.v2,
-        pd.hg18.60mer.expr, pd.hugene.1.0.st.v1, maqcExpression4plex,
-        genefilter, limma, RColorBrewer, oligoData, RUnit
+Suggests: hapmap100kxba,
+          pd.mapping50k.xba240,
+          pd.huex.1.0.st.v2,
+          pd.hg18.60mer.expr,
+          pd.hugene.1.0.st.v1,
+          maqcExpression4plex,
+          genefilter,
+          limma,
+          RColorBrewer,
+          oligoData,
+          RUnit
 Description: A package to analyze oligonucleotide arrays
         (expression/SNP/tiling/exon) at probe-level. It currently
         supports Affymetrix (CEL files) and NimbleGen arrays (XYS
         files).
 License: LGPL (>= 2)
-Collate: AllGenerics.R methods-GeneFeatureSet.R
-        methods-ExonFeatureSet.R methods-ExpressionFeatureSet.R
-        methods-ExpressionSet.R methods-LDS.R methods-FeatureSet.R
-        methods-SnpFeatureSet.R methods-SnpCnvFeatureSet.R
-        methods-TilingFeatureSet.R methods-HtaFeatureSet.R
-        methods-DBPDInfo.R methods-background.R methods-normalization.R
-        methods-summarization.R read.celfiles.R read.xysfiles.R
-        utils-general.R utils-selectors.R todo-snp.R functions-crlmm.R
-        functions-snprma.R justSNPRMA.R justCRLMM.R methods-snp6.R
-        methods-genotype.R methods-PLMset.R zzz.R
+Collate: AllGenerics.R
+         methods-GenericArrays.R
+         methods-GeneFeatureSet.R
+         methods-ExonFeatureSet.R
+         methods-ExpressionFeatureSet.R
+         methods-ExpressionSet.R
+         methods-LDS.R
+         methods-FeatureSet.R
+         methods-SnpFeatureSet.R
+         methods-SnpCnvFeatureSet.R
+         methods-TilingFeatureSet.R
+         methods-HtaFeatureSet.R
+         methods-DBPDInfo.R
+         methods-background.R
+         methods-normalization.R
+         methods-summarization.R
+         read.celfiles.R
+         read.xysfiles.R
+         utils-general.R
+         utils-selectors.R
+         todo-snp.R
+         functions-crlmm.R
+         functions-snprma.R
+         justSNPRMA.R
+         justCRLMM.R
+         methods-snp6.R
+         methods-genotype.R
+         methods-PLMset.R
+         zzz.R
 LazyLoad: Yes
 biocViews: Microarray, OneChannel, TwoChannel, Preprocessing, SNP,
         DifferentialExpression, ExonArray, GeneExpression, DataImport
