@@ -53,7 +53,7 @@ getFeatureInfo <- function(obj, fields, type='pm'){
     dbGetQuery(conn, sql)
 }
 
-setMethod("pmindex", "GenericDBPDInfo",
+setMethod("pmindex", "GenericPDInfo",
           function(object, subset=NULL, target=NULL) {
               ## target:
               ## - mps0: probes (without duplicates / pmfeature)

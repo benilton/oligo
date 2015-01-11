@@ -11,7 +11,7 @@ Depends: R (>= 2.15.0),
          Biostrings (>= 2.25.12)
 Imports: affyio (>= 1.25.0),
          affxparser (>= 1.29.11),
-         BiocGenerics (>=0.3.2),
+         BiocGenerics (>= 0.3.2),
          DBI (>= 0.2-5),
          ff,
          graphics,
