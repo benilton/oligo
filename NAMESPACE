@@ -25,7 +25,7 @@ importMethodsFrom(Biobase, channel,
                   "featureData<-", featureNames, "featureNames<-",
                   "notes<-", pData, "pData<-", phenoData, "phenoData<-",
                   preproc, "preproc<-", protocolData, "protocolData<-",
-                  rowMedians, sampleNames, "sampleNames<-", varMetadata)
+                  rowMedians, sampleNames, "sampleNames<-", varMetadata, "varMetadata<-", varLabels)
 
 importMethodsFrom(DBI, dbGetQuery, dbListTables)
 
@@ -37,6 +37,8 @@ importMethodsFrom(oligoClasses, allele, bothStrands, calls, db,
 importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image, weights, 'annotation<-', annotation)
 
 importMethodsFrom(stats4, coef, plot)
+
+importMethodsFrom(RSQLite, dbListFields, dbDisconnect)
 
 ######################################
 ## Importing: Functions
@@ -62,7 +64,7 @@ importFrom(methods, callNextMethod, is, new, slot, "slot<-",
 importFrom(oligoClasses, list.celfiles, requireAnnotation,
            isPackageLoaded, setCluster, delCluster, getCluster,
            ocProbesets, ocSamples, ocLapply, splitIndicesByLength,
-           splitIndicesByNode)
+           splitIndicesByNode, getBar, createFF, ldPath, ldStatus)
 
 importFrom(preprocessCore, normalize.quantiles,
            normalize.quantiles.determine.target,
@@ -116,7 +118,7 @@ export(plotM, backgroundCorrectionMethods, normalizationMethods)
 exportMethods(intensity, probesetNames)
 
 ## PLM
-export("fitPLM", "NUSE", "RLE")
+export("NUSE", "RLE")
 exportMethods("paCalls")
 exportClasses(oligoPLM)
 exportMethods(ncol, nprobes, nprobesets, coef, coefs.probe, weights, residuals, se, se.probe, residualSE, geometry, method, manufacturer, annotation, show, boxplot, image)

@@ -32,9 +32,6 @@ setMethod('nprobesets', 'oligoPLM',
               object@nprobesets
           })
 
-coefs <- function(...)
-    .Defunct('coef')
-
 setMethod('coef', 'oligoPLM',
           function(object){
               object@chip.coefs
@@ -71,10 +68,6 @@ setReplaceMethod('weights', 'oligoPLM',
                      object@weights <- value
                      object
                  })
-
-## setGeneric('resids', function(object) standardGeneric('resids'))
-resids <- function(...)
-    .Defunct('residuals')
 
 setMethod('residuals', 'oligoPLM',
           function(object){
@@ -217,18 +210,20 @@ setMethod("boxplot",signature(x="oligoPLM"),
           })
 
 
-RLE <- function(obj, type=c('plot', 'values'), ylim=c(-.75, .75),
+RLE <- function(obj, type=c('plot', 'values', 'stats'), ylim=c(-.75, .75),
                 range=0, col=darkColors(ncol(obj)), ...){
     RLE <- sweep(coef(obj), 1, rowMedians(coef(obj)), '-')
     type <- match.arg(type)
     if (type=='plot'){
         boxplot(as.data.frame(RLE), ylab='RLE', range=range, ylim=ylim, col=col, ...)
         abline(h=0, lty=2)
+    }else if (type=='stats'){
+      RLE <- apply(RLE, 2, quantile, c(0, .25, .50, .75, 1))
     }
     invisible(RLE)
 }
 
-NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
+NUSE <- function(obj, type=c('plot', 'values', 'stats'), ylim=c(.95, 1.10),
                  range=0, col=darkColors(ncol(obj)), ...){
     if (is.null(se(obj)))
         stop('This Probe Level Model does not allow for computation of NUSE')
@@ -237,6 +232,8 @@ NUSE <- function(obj, type=c('plot', 'values'), ylim=c(.95, 1.10),
     if (type == 'plot'){
         boxplot(as.data.frame(NUSE), ylab='NUSE', range=range, ylim=ylim, col=col, ...)
         abline(h=1, lty=2)
+    }else if (type == 'stats'){
+      NUSE <- apply(NUSE, 2, quantile, c(0, .25, .50, .75, 1))
     }
     invisible(NUSE)
 }
@@ -298,6 +295,3 @@ setMethod('image', 'oligoPLM',
               image(theMat, col=col, yaxt='n', xaxt='n', main=main, ...)
           }
 )
-
-fitPLM <- function(...)
-    .Defunct('fitProbeLevelModel')

@@ -126,6 +126,7 @@ setMethod("normalizeToTarget", "ff_matrix",
 
 setMethod("normalize", "FeatureSet",
           function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...){
+            method = match.arg(method)
               if (copy)
                   object <- cloneFS(object)
               if (method != 'quantile.in.blocks'){

@@ -1,0 +1,625 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{oligo User's Guide}
+%\VignetteDepends{oligoData, pd.hg18.60mer.expr}
+%\VignetteKeywords{preprocessing, microarray, normalization, summarization}
+%\VignettePackage{oligo}
+
+%% compiling this:
+%% Rscript -e 'library(knitr); knit("oug.Rnw"); system("pdflatex oug"); system("pdflatex oug")'
+
+
+\documentclass[12pt, letterpaper]{book}
+\usepackage{subfigure}
+%\usepackage{graphicx, setspace, amsfonts, amsmath, multirow, hyperref, amssymb, rotating}
+
+%% Preamble
+<<style-knitr, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+
+
+\title{\Biocpkg{oligo} User's Guide}
+\author{Benilton S. Carvalho}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+<<loading, message=FALSE, warning=FALSE>>=
+suppressPackageStartupMessages(library(oligo))
+suppressPackageStartupMessages(library(oligoData))
+suppressPackageStartupMessages(library(pd.hg.u95av2))
+suppressPackageStartupMessages(library(DBI))
+suppressPackageStartupMessages(library(RSQLite))
+@
+
+\chapter{Introduction}
+\label{chap:intro}
+
+\Biocpkg{Oligo} is a \Bioconductor{} package for preprocessing
+oligonucleotide microarrays. It currently supports chips produced by
+Affymetrix and NimbleGen and uses files provided by these manufacturers
+in their native format. The package provides a unified framework for
+preprocessing and uses the data representation established by the
+\Bioconductor{} project, which simplifies the interface with other packages
+in the project.
+
+The \Biocpkg{oligo} package allows users to preprocess their
+microarray data using \R{}. This is a convenient approach as analysts
+can combine the preprocessed data with a number of tools already
+implemented in \R{}, like downstream analyses and visualization.
+
+The software is designed to support large datasets and also provides
+parallel execution of common tasks like background subtraction,
+normalization and summarization.
+
+This guide describes \Biocpkg{oligo} and its features as available on
+\R{} Version 3.2.0 with BioConductor Version 3.1.
+
+\chapter{Preamble}
+\label{chap:preamble}
+
+\section{Citing \Biocpkg{oligo}}
+\label{sec:citing}
+
+The \Biocpkg{oligo} package is comprised of a collection of tools
+developed by different authors. Please cite their work appropriately.
+
+If you use \Biocpkg{oligo}, please cite:
+\begin{description}
+\item Carvalho and Irizarry. A Framework for Oligonucleotide Microarray
+  Preprocessing. Bioinformatics (2010) vol. 16 (19) pp. 2363-2367.
+\end{description}
+
+If you use the SNPRMA and/or CRLMM algorithm implemented in \Biocpkg{oligo}, please
+also cite:
+\begin{description}
+\item Carvalho et al. Exploration, normalization, and genotype calls of
+  high-density oligonucleotide SNP array data. Biostatistics (2007)
+  vol. 8 (2) pp. 485-99.
+\end{description}
+
+If you use the RMA algorithm, please cite:
+\begin{description}
+\item Bolstad, B.M., Irizarry R. A., Astrand M., and Speed, T.P. (2003),
+  A Comparison of Normalization Methods for High Density Oligonucleotide
+  Array Data Based on Bias and Variance. Bioinformatics 19(2):185-193;
+\item Rafael. A. Irizarry, Benjamin M. Bolstad, Francois Collin, Leslie
+  M. Cope, Bridget Hobbs and Terence P. Speed (2003), Summaries of
+  Affymetrix GeneChip probe level data Nucleic Acids Research 31(4):e15;
+\item Irizarry, RA, Hobbs, B, Collin, F, Beazer-Barclay, YD, Antonellis,
+  KJ, Scherf, U, Speed, TP (2003) Exploration, Normalization, and
+  Summaries of High Density Oligonucleotide Array Probe Level
+  Data. Biostatistics .Vol. 4, Number 2: 249-264.
+\end{description}
+
+If you use the PLM algorithm, please cite:
+\begin{description}
+\item Bolstad, BM (2004). Low Level Analysis of High-density
+  Oligonucleotide Array Data: Background, Normalization and
+  Summarization. PhD Dissertation. University of California, Berkeley.
+\end{description}
+
+\fixme{If you use the MAS5 Present/Absent calls... }
+
+\fixme{If you use the DABG Present/Absent calls...}
+
+\section{Installation}
+\label{sec:install}
+
+The \Biocpkg{oligo} package is available for download through the
+BioConductor project for all platforms. We recommend the installation of
+the latest R in order to get the latest features
+available in the package, which can be installed using
+\Rcode{biocLite} as shown below:
+
+<<install, eval=FALSE>>=
+source('http://www.bioconductor.org/biocLite.R')
+biocLite('oligo')
+@ 
+
+\Biocpkg{oligo} is in constant development and the users can obtain a
+summary of the changes by using the \Rcode{news} command:
+
+<<news, eval=FALSE>>=
+## All documented changes
+news(package='oligo')
+@ 
+
+\section{Requirements}
+\label{sec:requirements}
+
+\Biocpkg{oligo} depends on a few packages that will be automatically
+installed if the instructions on Section~\ref{sec:install} are
+used. These dependencies are available for all platforms and do not
+require any intervention for their successful installation.
+
+Once \Biocpkg{oligo} is installed, the users will need to install
+the annotation packages associated to the data they want to import. The
+annotation packages are built using the \Biocpkg{pdInfoBuilder}
+package, but several of them are available for download on the
+BioConductor website.
+
+If a user tries to import a dataset for which an annotation package is
+not installed on the user's system, \Biocpkg{oligo} will search for it
+on the BioConductor website. If the annotation package is found, then
+\Biocpkg{oligo} will download and install it automatically. If the
+annotation package is not found, \Biocpkg{oligo} will return an error
+and the user is expected to build the one using the
+\Biocpkg{pdInfoBuilder} package. After the package is built, the user
+must install it before attempting to import the data.
+
+\chapter{Getting Started}
+\label{chap:getstart}
+
+To get started with \Biocpkg{oligo}, one must load the package, which
+can be achieved with the \Rcode{library} command:
+
+<<loadOligo, quiet=TRUE, message=FALSE>>=
+library(oligo)
+@ 
+
+\Biocpkg{oligo} can appropriately handle data files for Affymetrix and
+NimbleGen designs. The supported formats are CEL (Affymetrix) and XYS
+(NimbleGen).
+
+\section{Importing Data}
+\label{sec:importing}
+
+\subsection{Affymetrix Data}
+\label{sec:affydata}
+
+Affymetrix distributes data using CEL files, to simplify the access to
+these files, \Biocpkg{oligo} provides the \Rcode{list.celfiles} tool,
+which is a wrapper around \Rcode{list.files} (consult the documentation
+for \Rcode{list.files} to get detailed information on advanced
+usage). The \Rcode{list.celfiles} command should be used to obtain the
+list of CEL files at a given directory. We strongly recommend the use of
+fully qualified names (i.e., including the whole path) for CEL files, to
+minimize the chance of problems. The snippet below shows the syntax to
+list CEL files in the hypothetical directory \Robject{myCELs}:
+
+<<listCEL, eval=FALSE>>=
+celFiles <- list.celfiles('myCELs', full.names=TRUE)
+@ 
+
+The CEL files can be in either binary or text formats. Regardless the
+internal structure of the files, \Biocpkg{oligo} can import them
+transparently via the command \Rcode{read.celfiles} as shown below:
+
+<<readCEL, eval=FALSE>>=
+rawData <- read.celfiles(celFiles)
+@ 
+
+\subsection{NimbleGen Data}
+\label{sec:nimbledata}
+
+The NimbleGen data supported by oligo is provided as XYS files. They are
+produced through the NimbleScan software from the TIFF image and NDF
+specification file. The \Rcode{list.xysfiles} function can be used to
+simplify the access to the XYS files. If a hypothetical directory
+\Robject{myXYSs} contains the XYS files for a given dataset, the suggested
+approach to point to these files is as follows:
+
+<<listXYS, eval=FALSE>>=
+xysFiles <- list.celfiles('myXYSs', full.names=TRUE)
+@ 
+
+The files listed in \Robject{xysFiles} can then be imported using the
+\Rcode{read.xysfiles} command:
+
+<<importXYS, eval=FALSE>>=
+rawData <- read.xysfiles(xysFiles)
+@ 
+
+\section{Containers for Raw Data}
+\label{sec:rawdata}
+
+\Biocpkg{oligo} uses different containers to store data at the
+feature-level, i.e. data imported from CEL and/or XYS files, as
+Table~\ref{tab:classes} shows. This approach improves the flexibility of
+the package as it allows any method to behave differently depending on
+the type of array from which the data were obtained. As a consequence,
+the user benefits from the simplicity of the software, as algorithms
+should be able to handle data appropriately independent of their
+origin.
+
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{|c|c|} \hline
+    \textbf{Type} & \textbf{Array} \\ \hline
+    \Rclass{ExonFeatureSet} & Exon ST \\
+    \Rclass{ExpressionFeature} & Expression \\
+    \Rclass{GeneFeatureSet} & Gene ST \\
+    \Rclass{TilingFeatureSet} & Tiling \\
+    \Rclass{SnpFeatureSet} & SNP \\ \hline
+  \end{tabular}
+  \caption{Types of containers for feature-level data used in oligo.}
+  \label{tab:classes}
+\end{table}
+
+One simple example is the RMA algorithm. When it is applied to
+expression data, the software software uses the usual definition of sets
+of features (often referred to as \textit{probesets}) to group features
+together for summarization. If the same method is applied to Affymetrix
+exon arrays, the software is able to identify that and use the
+definition of \textit{meta-probesets} given by Affymetrix to provide
+summaries at the transcript level, if such behavior is requested.
+
+\chapter{Visualization and QC Tools}
+\label{chap:visqc}
+
+On this chapter, we will demonstrate how \Biocpkg{oligo} can be used
+for visualization of data at the feature-level.
+
+To demonstrate the capabilities of the software, the
+\Robject{affyExpressionFS} dataset from the \Rpackage{oligoData}
+package will be used.
+
+<<exData>>=
+library(oligoData)
+data(affyExpressionFS)
+@ 
+
+This dataset is comprised of 59 samples on expression arrays provided by
+Affymetrix. This dataset is the \textit{Human Genome U95 Data Set}, used
+to validade preprocessing algorithms, as it contains genes that were
+spiked-in in known concentrations. Below we create a table containing
+sample information, using descriptors found on the Affymetrix website. 
+
+The user must pay attention to the fact that the objects handled by \Biocpkg{oligo} always carry information about channels. This information must be reported on a metadata object, which is represented below by the \Robject{metadata} data.frame. Because Affymetrix expression arrays are one-color devices and the information we provide is valid for this channel, we fill the \Robject{channel} column with the value \Robject{ALL}.
+
+<<setData>>=
+affyExpressionFS
+sns <- sampleNames(affyExpressionFS)
+## all 1521 were meant to be 1251
+sns <- gsub('1521', '1251', sns)
+## removing the 'r' (repeat) flag from the name
+sns <- gsub('r\\.CEL$', '\\.CEL', sns)
+wafer <- substr(sns, 1, 4)
+experiment <- substr(sns, 5, 5)
+tmp <- substr(sns, 6, 7)
+complex <- rep('+', length(tmp))
+complex[tmp == '00'] <- '-'
+info <- data.frame(wafer=wafer, experiment=experiment, complex=complex)
+rownames(info) <- sns
+metadata <- data.frame(labelDescription=c('wafer', 'experiment', 'complex'), channel=factor('_ALL_'))
+sampleNames(affyExpressionFS) <- sns
+pd <- new('AnnotatedDataFrame', data=info, varMetadata=metadata)
+phenoData(affyExpressionFS) <- pd
+rm(tmp, wafer, experiment, complex, pd, metadata)
+@ 
+
+\section{Pseudo-image Plots}
+\label{sec:pseudoimg}
+
+Pseudo-image plots are used to assess the spatial distribution of the
+data on the chips. Due to the magnitude of the readings, pseudo-images
+using data on the original scale often mask spatial features that may
+be present on the arrays. This is why we recommend the use of the
+default $\log_2$-scale of the \Rfunction{image} method. One useful
+alternative for the $\log_2$-scale pseudo-image is the use of the
+ranks of the observations. This can be achieved by setting the
+\Robject{transfo} argument on the \Rfunction{image} method.
+
+
+<<pseudoimg, include=FALSE>>=
+image(affyExpressionFS, which=55)
+image(affyExpressionFS, which=55, transfo=rank)
+@
+
+\begin{figure}[!htp]
+  \centering
+  \subfigure[$\log_2$-intensities]{\label{fig:pseudoimglog2}\includegraphics[width=.4\textwidth]{figure/pseudoimg-1}}
+  \subfigure[Rank]{\label{fig:pseudoimgrank}\includegraphics[width=.4\textwidth]{figure/pseudoimg-2}}
+  \caption{Pseudo-images}
+  \label{fig:pseudoimg}
+\end{figure}
+
+
+\section{MA Plots}
+\label{sec:maplot}
+
+Plotting log-ratios, $M$, \textit{versus} average log-intensities, $A$,
+is a strategy to visualize the relationship between these two
+variables. Both $M$ and $A$ are computed as a function of a
+reference. To illustrate this, the definitions of log-ratios and average
+log-intensities of a generic sample, indexed by $i$, and a given
+reference, $R$, are given below:
+
+\begin{eqnarray}
+  \label{eq:ma}
+  M_{i,R} & = & \log I_i - \log I_R \\
+  A_{i,R} & = & \frac{1}{2} \left[ \log\left(I_i\right) + \log\left(I_R\right) \right]
+\end{eqnarray}
+
+For one color arrays, one common approach is to create MA plots for
+every combination of two samples on the (sub-)dataset of interest. On
+the snippet below, we use the \Robject{pairs} argument to generate MA
+plots for pairs of samples (restricted to the first three samples, which
+belong to the same group).
+
+<<maplotpairssmooth, fig.cap='MA Plot using smoothScatter', fig.align='center', fig.width=4, fig.height=4>>=
+xl <- c(2.8, 4)
+yl <- c(-1, 1)
+MAplot(affyExpressionFS[, 1:3], pairs=TRUE, ylim=yl, xlim=xl)
+@ 
+
+
+The standard approach to plot data used by \Rfunction{MAplot} is to use
+\Rfunction{smoothScatter}, which provides better visualization through
+the use of 2-D smoothed densities. This behavior can be changed by
+setting the \Robject{plotFun} argument, as shown below. Valid values for
+this argument are functions that preferentially take the same arguments
+as \Rfunction{smoothScatter}, like the \Rfunction{plot} function.
+
+<<maplotpairspoints, fig.cap='MA Plot using points', fig.align='center', fig.width=4, fig.height=4>>=
+MAplot(affyExpressionFS[, 1:3], pairs=TRUE, ylim=yl, xlim=xl, plotFun=plot)
+@ 
+
+The \Rfunction{MAplot} method also allows the combination of data into
+groups. With the code below, the investigator obtains the MA plot for
+the first levels of \Robject{wafer}, \textit{'1251'}, comparing the
+results against the reference group, \textit{2353}. Note that
+\Robject{wafer} is a factor and that the definition of a reference group
+was arbitrary and used here just to illustrate the software capabilities.
+
+<<maplotgrpprep>>=
+wafer <- affyExpressionFS$wafer
+levels(wafer)
+@ 
+
+<<maplotgrp, fig.cap='MA Plot comparing groups', fig.align='center', fig.width=4, fig.height=4>>=
+MAplot(affyExpressionFS, groups=wafer, which=1, refSamples=3) 
+@ 
+
+When the \Robject{groups} argument is not set and the \Robject{pairs}
+argument is set to \Rcode{FALSE}, the \Rfunction{MAplot}
+method estimates a pseudo-reference sample from the whole dataset passed
+to the function. The pseudo-reference sample and the group summaries (if
+\Robject{groups} is defined) are estimated using the
+\Robject{summaryFun} argument, which must be a function that takes an
+$N \times C$ matrix and returns a vector of length $N$. The default
+value for \Robject{summaryFun} is \Rfunction{rowMedians}.
+
+\section{Boxplots}
+\label{sec:bxp}
+
+Boxplots are used to visualize key components on the distribution of the
+data and simplify the comparison of such statistics across samples.
+
+<<boxplotlog2, include=FALSE>>=
+boxplot(affyExpressionFS, main='Sample NimbleGen Dataset', ylab='log2-intensity')
+@
+
+The call above produces a boxplot for the PM features. If the array
+contains other features types, the \Rfunction{boxplot} method can be used
+to generate figures for specific probe types by using the
+\Robject{which} argument, which take values \Rcode{'pm'}, \Rcode{'mm'},
+\Rcode{'bg'}, \Rcode{'both'} and \Rcode{'all'}.
+
+Data transformation can also be applied. The default is to log-transform
+(base 2) the data, but other functions can be used, as long as they are
+passed through the \Robject{transfo} argument. The example below
+presents the boxplot using the original scale.
+
+<<boxplotorig, include=FALSE>>=
+boxplot(affyExpressionFS, main='Sample NimbleGen Dataset',
+        ylab='intensity', transfo=identity)
+@ 
+
+
+\begin{figure}[!htp]
+  \centering
+  \subfigure[log-scale]{\label{fig:bxp1}\includegraphics[width=.4\textwidth]{figure/boxplotlog2-1}}
+  \subfigure[original scale]{\label{fig:bxp2}\includegraphics[width=.4\textwidth]{figure/boxplotorig-1}}
+  \caption{Boxplots for intensity data: the visualization of the data is simplified if the logarithmic-scale is used}
+  \label{fig:bxps}
+\end{figure}
+
+The \Rfunction{boxplot} method for \Rclass{FeatureSet} and
+\Rclass{ExpressionSet} objects uses a sample of the data (of size
+\Robject{nsample}) to produce the plot. Therefore small differences
+between consecutive calls to the method are expected. Users interested
+in getting the exact same plot should specify a fixed seed through
+\Rfunction{set.seed} prior to calling \Rfunction{boxplot}.
+
+\section{Density Plots}
+\label{sec:densplots}
+
+Smoothed histograms are also used to assess the distribution of the data
+under analysis. They allow the immediate visualization (possibly
+non-unique) modes, which can not be reliably detected through the
+investigation of boxplots and other graphical tools.
+
+<<densplotlog2, include=FALSE>>=
+hist(affyExpressionFS, main='Density Estimate for log-intensities')
+@ 
+
+Similar to the \Rfunction{boxplot} method described on
+Section~\ref{sec:bxp}, \Rfunction{hist}:
+
+\begin{itemize}
+  \item allows subsetting by feature type, if such probes are available on the
+    chip, through the \Robject{which} argument;
+  \item uses a random sample of the data to generate the plot, requiring
+    the use of \Rcode{set.seed} to create reproducible charts. The size
+    of the sample is determined by the \Robject{nsample} argument;
+  \item permits the use of functions other than $\log_2$ to transform
+    the data prior to plotting. The argument \Robject{transfo} is the
+    one that handles the transformation function, which should return an
+    object with the same attributes as the input.
+\end{itemize}
+
+<<densplotorig, include=FALSE>>=
+hist(affyExpressionFS, main='Density Estimate for intensities',
+     transfo=identity, nsample=15000, xlab='intensity')
+@ 
+
+\begin{figure}[!htp]
+  \centering
+  \subfigure[log-scale]{\label{fig:bxp1}\includegraphics[width=.4\textwidth]{figure/densplotlog2-1}}
+  \subfigure[original scale]{\label{fig:bxp2}\includegraphics[width=.4\textwidth]{figure/densplotorig-1}}
+  \caption{Density plots for intensity data: the visualization of the data is simplified if the logarithmic-scale is used}
+  \label{fig:densps}
+\end{figure}
+
+\section{Probe Level Models}
+\label{sec:plm}
+
+Using the \Rfunction{fitProbeLevelModel} method, the user is able to fit Probe Level
+Models (PLMs) with probe-level and sample-level parameters. The
+resulting object is an \Rclass{oligoPLM} object, which stores parameter
+estimates, residuals and weights.
+
+\subsection{Fitting PLMs}
+\label{sec:fitplm}
+
+The simplest call to adjust a probe level model is as simple as
+<<plm1, cache=TRUE>>=
+fit1 <- fitProbeLevelModel(affyExpressionFS)
+@
+and will fit a model that accounts for probe (feature) and sample
+effects, whose estimates and standard errors can be recovered,
+respectively, with the \Rfunction{coef} and \Rfunction{se} methods, as
+shown below.
+<<coef1>>=
+coef(fit1)[1:4, 1:2]
+se(fit1)[1:4, 1:2]
+@ 
+
+\subsection{Visualizing \Rfunction{fitProbeLevelModel} Results}
+\label{sec:visplm}
+
+One of the most used QC metrics is the Relative Log Expression (RLE),
+which is computed (for each sample on every probeset) by comparing the
+expression level of one probeset against the median expression of that
+probeset across samples.
+
+The estimates obtained via RLE can be accessed by setting the argument \Rcode{type} to \Rcode{values}. By setting this argument to \Rcode{stats}, the user will be able to access the statistics (quantiles) for each sample.
+
+<<rleStats>>=
+RLE(fit1, type='stats')[, 1:2]
+RLE(fit1, type='values')[1:4, 1:2]
+@ 
+
+Generating a boxplot of the RLE values is the default behavior of the method.
+<<rle1, include=FALSE>>=
+RLE(fit1)
+@ 
+
+Another useful tool for QC is the Normalized Unscaled Standard Errors
+(NUSE). To determine NUSE, the standard error estimates are standardized
+across arrays so that the median standard error for that probeset is 1
+across all arrays. Therefore, arrays whose NUSE values are significantly
+higher than other samples are often lower quality chips. Similarly to
+RLE, the statistics, values and boxplot of NUSE can be obtained by
+appropriately setting the \Robject{type} argument of the \Rfunction{NUSE} method.
+<<nuseStats>>=
+NUSE(fit1, type='stats')[, 1:2]
+NUSE(fit1, type='values')[1:4, 1:2]
+@ 
+<<nuse1, include=FALSE>>=
+NUSE(fit1)
+@ 
+
+
+\begin{figure}[!htp]
+  \centering
+  \subfigure[RLE]{\label{fig:plmplotsrle}\includegraphics[width=.4\textwidth]{figure/rle1-1}}
+  \subfigure[NUSE]{\label{fig:plmplotsnuse}\includegraphics[width=.4\textwidth]{figure/nuse1-1}}
+  \caption{Visualization of PLM results}
+  \label{fig:plmplots}
+\end{figure}
+
+The use of PLMs also permits the inspection of the spatial distribution of
+the data on the chip. The current implementation allows the
+visualization of the estimated weights and residuals. Residuals can be
+further decomposed in 4 types: residuals, positive residuals, negative
+residuals and residual
+signs. Figures~\ref{fig:imgplm1}-\ref{fig:imgplm5} show these plots for
+the dataset used as example here.
+
+<<imgplm, include=FALSE>>=
+image(fit1, which=55, type='weights')
+image(fit1, which=55, type='residuals')
+image(fit1, which=55, type='pos.residuals')
+image(fit1, which=55, type='neg.residuals')
+image(fit1, which=55, type='sign.residuals')
+@ 
+
+
+\begin{figure}[!htp]
+  \centering
+  \subfigure[Weights]{\label{fig:imgplm1}\includegraphics[width=.4\textwidth]{figure/imgplm-1}}
+  \subfigure[Residuals]{\label{fig:imgplm2}\includegraphics[width=.4\textwidth]{figure/imgplm-2}} \\
+  \subfigure[Positive Residuals]{\label{fig:imgplm3}\includegraphics[width=.4\textwidth]{figure/imgplm-3}}
+  \subfigure[Negative Residuals]{\label{fig:imgplm4}\includegraphics[width=.4\textwidth]{figure/imgplm-4}} \\
+  \subfigure[Residual Signs]{\label{fig:imgplm5}\includegraphics[width=.4\textwidth]{figure/imgplm-5}}
+  \caption{Pseudo-images for PLM objects}
+  \label{fig:imgplm}
+\end{figure}
+
+\chapter{Preprocessing}
+\label{chap:preproc}
+
+Preprocessing refers to a series of complex statistical procedures
+applied to microarray data prior to dowstream analyses. These steps are
+required mainly for two reasons: A) technical artifacts are known to
+affect results, so background subtraction and normalization are used to
+minimize these issues; and B) there are multiple probes per probeset,
+therefore summarization to the probeset level is needed, so downstream
+analyses can be carried on.
+
+\section{Background Subtraction}
+\label{sec:bg}
+
+The \Biocpkg{oligo} package implements background subtraction through
+the \Rfunction{backgroundCorrect} command. The method currently available
+is the one used in RMA, which treats the PM intensities as a convolution
+of noise and true signal. Additional methods will be available on future
+releases and choices will be made with the \Robject{method} argument
+(currently, the default is \Robject{'rma'}).
+
+<<bgrma, cache=TRUE>>=
+backgroundCorrectionMethods()
+bgData1 <- backgroundCorrect(affyExpressionFS)
+bgData2 <- backgroundCorrect(affyExpressionFS, method='mas')
+#bgData3 <- backgroundCorrect(affyExpressionFS, method='LESN')
+@ 
+
+Because the input was an \Rclass{ExpressionFeatureSet} object, the
+output \Robject{bgData1} is also an
+\Rclass{ExpressionFeatureSet}. Below, we show a boxplot of the corrected
+data, which can be compared to Figure~\ref{fig-boxplot}.
+
+<<bgbxp, fig.cap="Boxplot of background corrected data", fig.width=4, fig.height=4, fig.align='center'>>=
+boxplot(bgData1)
+@ 
+
+\section{Normalization}
+\label{sec:norm}
+
+The Rmethod{normalize} method provided by \Rpackage{oligo} allows the
+user to normalize the input data. Different normalization methods are
+available. The available options are given by
+\Rcode{normalizationMethods} and the argument \Robject{method} in
+\Rcode{normalize} is used to select the normalization approach to be used.
+
+<<norm, cache=TRUE>>=
+normData <- normalize(bgData1)
+@ 
+
+\section{Summarization}
+\label{sec:summ}
+
+\fixme{to finish}
+
+\chapter{Workflows}
+\label{sec:workflows}
+
+\fixme{to finish}
+
+\end{document}

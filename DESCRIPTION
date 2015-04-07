@@ -1,22 +1,22 @@
 Package: oligo
-Version: 1.31.2
-Title: Preprocessing tools for oligonucleotide arrays.
-Author: Benilton Carvalho and Rafael Irizarry.
+Version: 1.31.5
+Title: Preprocessing tools for oligonucleotide arrays
+Author: Benilton Carvalho and Rafael Irizarry
 Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
 Maintainer: Benilton Carvalho <beniltoncarvalho@gmail.com>
-Depends: R (>= 2.15.0),
-         BiocGenerics (>= 0.3.2),
-         oligoClasses (>= 1.25.4),
-         Biobase (>= 2.17.8),
-         Biostrings (>= 2.25.12)
-Imports: affyio (>= 1.25.0),
-         affxparser (>= 1.29.11),
-         BiocGenerics (>= 0.3.2),
-         DBI (>= 0.2-5),
+Depends: R (>= 3.2.0),
+         BiocGenerics (>= 0.13.11),
+         oligoClasses (>= 1.29.6),
+         Biobase (>= 2.27.3),
+         Biostrings (>= 2.35.12)
+Imports: affyio (>= 1.35.0),
+         affxparser (>= 1.39.4),
+         DBI (>= 0.3.1),
          ff,
          graphics,
          methods,
-         preprocessCore (>= 1.19.0),
+         preprocessCore (>= 1.29.0),
+         RSQLite (>= 1.0.0),
          splines,
          stats,
          stats4,
@@ -36,7 +36,9 @@ Suggests: hapmap100kxba,
           limma,
           RColorBrewer,
           oligoData,
+          BiocStyle, knitr,
           RUnit
+VignetteBuilder: knitr
 Description: A package to analyze oligonucleotide arrays
         (expression/SNP/tiling/exon) at probe-level. It currently
         supports Affymetrix (CEL files) and NimbleGen arrays (XYS

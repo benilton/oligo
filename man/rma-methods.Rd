@@ -7,6 +7,8 @@
 \alias{rma,ExpressionFeatureSet-method}
 \alias{rma,GeneFeatureSet-method}
 \alias{rma,SnpCnvFeatureSet-method}
+\alias{rma,GenericFeatureSet-method}
+
 \title{RMA - Robust Multichip Average algorithm}
 
 \description{

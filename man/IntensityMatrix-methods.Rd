@@ -24,6 +24,9 @@
 \alias{mm<-,TilingFeatureSet,ANY,ANY,array-method}
 \alias{pm<-,TilingFeatureSet,ANY,ANY,array-method}
 \alias{bg<-,TilingFeatureSet,array-method}
+\alias{pm,GenericFeatureSet-method}
+\alias{pm<-,GenericFeatureSet,ANY,ANY,ff_matrix-method}
+\alias{pm<-,GenericFeatureSet,ANY,ANY,matrix-method}
 
 %% OK!
 

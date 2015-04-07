@@ -8,6 +8,9 @@
 \alias{bgindex}
 \alias{bgindex,FeatureSet-method}
 \alias{bgindex,DBPDInfo-method}
+\alias{pmindex,GenericFeatureSet-method}
+\alias{pmindex,GenericPDInfo-method}
+
 %% TODO: add mmindex / bgindex?
 \alias{pmindex,stArrayDBPDInfo-method}
 
