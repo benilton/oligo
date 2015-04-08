@@ -27,6 +27,7 @@ Enhances: ff,
           doMPI
 LinkingTo: preprocessCore
 Suggests: hapmap100kxba,
+          pd.hg.u95av2,
           pd.mapping50k.xba240,
           pd.huex.1.0.st.v2,
           pd.hg18.60mer.expr,
