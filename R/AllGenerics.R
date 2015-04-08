@@ -47,9 +47,9 @@ setGeneric("backgroundCorrect",
            function(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE)
            standardGeneric("backgroundCorrect"))
 
-setGeneric("normalize",
-           function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...)
-           standardGeneric("normalize"))
+## setGeneric("normalize",
+##            function(object, method=normalizationMethods(), copy=TRUE, subset=NULL, target='core', verbose=TRUE, ...)
+##            standardGeneric("normalize"))
 
 setGeneric("summarize",
            function(object, probes=rownames(object),
