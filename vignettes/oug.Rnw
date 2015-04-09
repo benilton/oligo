@@ -1179,9 +1179,9 @@ define meta-probesets (MPSs), used to summarize the data to the gene
 level. These MPSs are classified in three groups -- core, extended and
 full -- depending on the level of confidence of the sources used to
 generate such annotations. Additional values allowed for the
-\Rfunarg{target} argument are \Robject{"core"}, \Robject{"extended"}
-and \Robject{"full"}. The example below shows how gene level summaries
-can be obtained through \Rpackage{oligo}.
+\Rcode{target} argument are \Rcode{"core"}, \Rcode{"extended"}
+and \Rcode{"full"}. The example below shows how gene level summaries
+can be obtained through \Biocpkg{oligo}.
 <<rmaExonGeneCore, results='hide'>>=
 geneSummaries <- rma(affyExonFS, target="core")
 @
@@ -1189,7 +1189,7 @@ geneSummaries <- rma(affyExonFS, target="core")
 
 The results obtained from analyses performed with \Rpackage{oligo} can
 be easily combined with features offered by other packages. As an
-example, we use the \Rpackage{biomaRt} package to obtain IDs of
+example, we use the \Biocpkg{biomaRt} package to obtain IDs of
 probesets on the Human Exon array that map to Entrez Gene ID~10948
 (ENSG00000131748).
 <<probesetIDs2EntrezGeneID, results='hide'>>=
