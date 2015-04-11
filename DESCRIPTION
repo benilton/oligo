@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.31.9
+Version: 1.31.11
 Title: Preprocessing tools for oligonucleotide arrays
 Author: Benilton Carvalho and Rafael Irizarry
 Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
@@ -39,7 +39,7 @@ Suggests: BSgenome.Hsapiens.UCSC.hg18,
           RColorBrewer,
           oligoData,
           BiocStyle, knitr,
-          RUnit
+          RUnit, biomaRt, AnnotationDbi, GenomeGraphs, RCurl
 VignetteBuilder: knitr
 Description: A package to analyze oligonucleotide arrays
         (expression/SNP/tiling/exon) at probe-level. It currently

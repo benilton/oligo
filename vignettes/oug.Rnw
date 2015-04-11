@@ -1,6 +1,6 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{oligo User's Guide}
-%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg19,GenomeGraphs}
+%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg18,GenomeGraphs,RCurl}
 %\VignetteKeywords{preprocessing, microarray, normalization, summarization}
 %\VignettePackage{oligo}
 
@@ -27,7 +27,7 @@ BiocStyle::latex()
 
 \tableofcontents
 
-<<loadingBack, message=FALSE, warning=FALSE>>=
+<<loadingBack, message=FALSE, warning=FALSE, echo=FALSE>>=
 suppressPackageStartupMessages(library(oligo))
 suppressPackageStartupMessages(library(oligoData))
 suppressPackageStartupMessages(library(pd.hg.u95av2))
@@ -340,7 +340,7 @@ the snippet below, we use the \Robject{pairs} argument to generate MA
 plots for pairs of samples (restricted to the first three samples, which
 belong to the same group).
 
-<<maplotpairssmooth, fig.cap='MA Plot using smoothScatter', fig.align='center', fig.width=4, fig.height=4>>=
+<<maplotpairssmooth, fig.cap='MA Plot using smoothScatter', fig.align='center', fig.width=4, fig.height=4, warning=FALSE>>=
 xl <- c(2.8, 4)
 yl <- c(-1, 1)
 MAplot(affyExpressionFS[, 1:3], pairs=TRUE, ylim=yl, xlim=xl)
@@ -354,7 +354,7 @@ setting the \Robject{plotFun} argument, as shown below. Valid values for
 this argument are functions that preferentially take the same arguments
 as \Rfunction{smoothScatter}, like the \Rfunction{plot} function.
 
-<<maplotpairspoints, fig.cap='MA Plot using points', fig.align='center', fig.width=4, fig.height=4>>=
+<<maplotpairspoints, fig.cap='MA Plot using points', fig.align='center', fig.width=4, fig.height=4, warning=FALSE>>=
 MAplot(affyExpressionFS[, 1:3], pairs=TRUE, ylim=yl, xlim=xl, plotFun=plot)
 @ 
 
@@ -405,7 +405,7 @@ passed through the \Robject{transfo} argument. The example below
 presents the boxplot using the original scale.
 
 <<boxplotorig, include=FALSE>>=
-boxplot(affyExpressionFS, main='Sample NimbleGen Dataset',
+boxplot(affyExpressionFS, main='Data on Original Scale',
         ylab='intensity', transfo=identity)
 @ 
 
@@ -493,7 +493,7 @@ The dependence of intensity on probe sequence is a well established fact
 on the microarray literature. The use of the \Biocpkg{oligo} package
 simplifies significantly the observation of this event, as it provides
 simple access to both observed intensities and annotation. Below, we
-estimate the affinity splines coefficients \citep{Wu:2004p1634}.
+estimate the affinity splines coefficients \cite{Wu:2004p1634}.
 <<affinityCoefficients>>=
 coefs <- getAffinitySplineCoefficients(pmsLog2, pmSeq)
 @
@@ -503,7 +503,7 @@ above can be used to estimate the base-position effects on the
 $\log_2$-intensities observed for the first sample in the dataset. The
 \Rfunction{getBaseProfile} function provides a simple way of using the
 affinity coefficients to estimate the effects of interest. It accepts a
-\Rfunarg{plot} argument, which takes logical values, to make the plot
+\Rcode{plot} argument, which takes logical values, to make the plot
 and returns, invisibly, the estimated effects. All the arguments that
 can be passed to the \Rfunction{matplot} function can also be passed to
 \Rfunction{getBaseProfile}.
@@ -518,7 +518,7 @@ getBaseProfile(coefs[,1], plot=TRUE, pch=pchs, type="b", xlab=xL, ylab=yL,
 
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/seqEffectAffyExpression}
+  \includegraphics[width=.45\textwidth]{figure/seqEffectAffyExpression-1}
   \caption{Sequence effect for the first sample in the dataset. These
     results have been reported in detail elsewhere, but can be easily
     reproduced with the use of the \Biocpkg{oligo} package.}
@@ -548,7 +548,7 @@ boxplot(pmsLog2[,1]~GCcontent, xlab=xL, ylab=yL, range=0, col=colors)
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/intensityByContentAffyExpression}
+  \includegraphics[width=.45\textwidth]{figure/intensityByContentAffyExpression-1}
   \caption{On this boxplot stratified by GC content, we can observe the
     strong dependency of $\log_2$-intensities on the number of G or C
     bases observed in the probe sequency.}
@@ -713,7 +713,7 @@ normData <- normalize(bgData1)
 \label{sec:prepr-affym-expr}
 
 To preprocess expression data, \Biocpkg{oligo} implements the RMA
-algorithm \citep{Irizarry2003a, Irizarry2003b}. The \Rmethod{rma}
+algorithm \cite{Irizarry2003a, Irizarry2003b}. The \Rfunction{rma}
 method, as shown below, proceeds with background subtraction,
 normalization and summarization using median-polish.
 <<rmaAffyExpression, results='hide'>>=
@@ -735,19 +735,19 @@ stores the summaries in a matrix called \Robject{exprs}, present in the
 \Robject{assayData} data slot of the \Rclass{ExpressionSet}
 object. Therefore, the only restriction the additional strategies used
 with the preprocessed data have is to be aware that the processed data
-can be easily accessed with the \Rmethod{exprs} method.
+can be easily accessed with the \Rfunction{exprs} method.
 
 \section{Preprocessing NimbleGen Expression Arrays}
 \label{sec:prepr-nimbl-expr}
 
-This section presents a non-trivial use of the \oligo{} Package for the
+This section presents a non-trivial use of the \Biocpkg{oligo} Package for the
 analysis of NimbleGen Expression data. This vignette follows the
 structure of the chapter \textbf{From CEL files to a list of interesting
   genes} by R. A. Irizarry \textit{in} \textit{Bioinformatics and
   Computational Biology Solutions Using R and Bioconductor}, which shows
 a case study for Affymetrix Expression arrays.
 
-In order to analyze microarray data using \oligo{}, the user is expected
+In order to analyze microarray data using \Biocpkg{oligo}, the user is expected
 to have installed on the system a package with the annotation for the
 particular array design on which the experiment was performed. For the
 example in question here, the design is hg18\_60mer\_expr and the
@@ -811,26 +811,26 @@ a method with the same name.
 exprs(maqc)[10001:10010, 1:2]
 @ %def
 
-The \Rmethod{boxplot} method can be used to produce boxplots for the
+The \Rfunction{boxplot} method can be used to produce boxplots for the
 feature-level data.
 <<maqcBoxplot, include=FALSE>>=
 boxplot(maqc, main="MAQC Sample Data")
 @ %def
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/maqcBoxplot}
+  \includegraphics[width=.45\textwidth]{figure/maqcBoxplot-1}
   \caption{Distribution of $\log_2$-intensities of samples on the MAQC dataset.}
 \label{fig:maqcBp}
 \end{figure}
 
 Similarly, a smoothed histogram for the feature-level data can be
-obtained with the \Rmethod{hist} method.
+obtained with the \Rfunction{hist} method.
 <<maqcHist, include=FALSE>>=
 hist(maqc, main="MAQC Sample Data")
 @ %def
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/maqcHist}
+  \includegraphics[width=.45\textwidth]{figure/maqcHist-1}
   \caption{Smoothed histogram of $\log_2$-intensities of samples on the MAQC dataset.}
 \label{fig:maqcHist}
 \end{figure}
@@ -839,10 +839,10 @@ hist(maqc, main="MAQC Sample Data")
 \label{sec:rma}
 
 The RMA algorithm can be applied to the raw data of expression
-arrays. It is available via the \Rmethod{rma} method. The algorithm will
+arrays. It is available via the \Rfunction{rma} method. The algorithm will
 perform background subtraction, quantile normalization and summarization
-via median polish. The result of \Rmethod{rma} is an instance of
-\Rclass{ExpressionSet} class, which also contains an \Rmethod{exprs}
+via median polish. The result of \Rfunction{rma} is an instance of
+\Rclass{ExpressionSet} class, which also contains an \Rfunction{exprs}
 slot and method.
 <<rma>>=
   eset <- rma(maqc)
@@ -851,21 +851,18 @@ slot and method.
   exprs(eset)[1:10, 1:2]
 @ %def
 
-The \Rmethod{boxplot} and \Rmethod{hist} methods are also implemented
-for \Rclass{ExpressionSet} objects. Note that \Rmethod{rma}'s output is
+The \Rfunction{boxplot} and \Rfunction{hist} methods are also implemented
+for \Rclass{ExpressionSet} objects. Note that \Rfunction{rma}'s output is
 in the $\log_2$ scale, so we call such methods using the argument
 \Rcode{transfo=identity}, so the data are not transformed in any way.
-<<rmaResultsB, include=FALSE>>=
+<<rmaResults, include=FALSE>>=
   boxplot(eset, transfo=identity, main="After RMA")
-@ %def
-
-<<rmaResultsH, include=FALSE>>=
   hist(eset, transfo=identity, main="After RMA")
 @ %def
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/rmaResultsB}
-  \includegraphics[width=.45\textwidth]{figure/rmaResultsH}
+  \includegraphics[width=.45\textwidth]{figure/rmaResults-1}
+  \includegraphics[width=.45\textwidth]{figure/rmaResults-2}
   \caption{Boxplot and smoothed histogram for MAQC data after preprocessing.}
 \label{fig:maqcHist}
 \end{figure}
@@ -901,7 +898,7 @@ differentially expressed.
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/maplotNG}
+  \includegraphics[width=.45\textwidth]{figure/maplotNG-1}
   \caption{MA plot for Brain vs. Universal Reference. The red lines show
   the threshold for fold-change of 2, up or down, which correspond to
   log- fold-change of $1$ and $-1$, respectively.}
@@ -923,7 +920,7 @@ the top 25 in log-ratio and, in red, the top 25 in effect size.
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/volcanoplot2}
+  \includegraphics[width=.45\textwidth]{figure/volcanoplot2-1}
   \caption{Volcano plot for Brain vs. Universal Reference. The vertical
   red lines show the threshold for fold-change of 2 (up or down), while
   the horizontal red line shows the threshold for p-values at the
@@ -958,7 +955,7 @@ volcano plot, but using the moderated $t$-statisic.
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/volcanoplot3}
+  \includegraphics[width=.45\textwidth]{figure/volcanoplot3-1}
   \caption{Volcano plot for Brain vs. Universal Reference using
   moderated t-tests. The vertical red lines show the threshold for
   fold-change of 2 (up or down), while the horizontal red line shows the
@@ -970,7 +967,7 @@ volcano plot, but using the moderated $t$-statisic.
 \label{fig:maplot}
 \end{figure}
 
-The \Rmethod{topTable} command provides us a way of ranking genes for
+The \Rfunction{topTable} command provides us a way of ranking genes for
 further evaluation. In the case below, we adjust for multiple testing by
 FDR and look at the Top-10 genes.
 <<toptable>>=
@@ -1032,7 +1029,7 @@ Given the always increasing density of the SNP arrays, we developed
 efficient methods to process these chips, reducing the required amount
 of memory even for large studies. Using this approach, we process
 batches of SNPs at a time, saving partial results to disk. We refer the
-interested reader to \citet{Carvalho:2007p32} for detailed information on
+interested reader to \cite{Carvalho:2007p32} for detailed information on
 the CRLMM algorithm. The genotyping strategy, in summary, has three
 steps: A) quantile normalizes against a known reference distribution; B)
 summarizes the data to the SNP-allele level using median polish; C) uses
@@ -1047,7 +1044,7 @@ allele and within strand, ie:
 \end{eqnarray}
 where $s$ defines the strand (antisense or sense). On the genomewide
 designs, SNP 5.0 and 6.0, the strand information is dropped. These
-summaries can be obtained via \Rmethod{getA} and \Rmethod{getM} methods,
+summaries can be obtained via \Rfunction{getA} and \Rfunction{getM} methods,
 which return arrays with dimensions corresponding to SNPs, samples and
 strands (if applicable), respectively. These measures are later used for
 genotyping.
@@ -1116,18 +1113,18 @@ plotM(crlmmOut, snps[2], ylim=LIM, xlim=LIM, col=gtypes)
     on scenarios like this. On this plot, genotype calls provided by
     oligo are represented in different colors (black: AA; red: AB;
     green: BB)]{\label{fig:goodSNP}
-      \includegraphics[width=.45\textwidth]{fig-goodSNP}}
+      \includegraphics[width=.45\textwidth]{figure/goodSNP-1}}
     \subfigure[SNP\_A-1725330 presents poor discrimination on the sense
     strand. Because CRLMM does not average across strands, it can
     perfectly predict the genotype cluster each sample belongs to. On
     similar scenarios, competing algorithms are known to fail. Color
     scheme follows Figure~\ref{fig:goodSNP}.]{\label{fig:senseSNP}
-      \includegraphics[width=.45\textwidth]{fig-senseSNP}}
+      \includegraphics[width=.45\textwidth]{figure/senseSNP-1}}
   \end{center}
 \end{figure}
 
 CRLMM was shown to outperform competing genotyping tools. We refer the
-reader to \citet{Lin:2008p33} for further details on this subject. The
+reader to \cite{Lin:2008p33} for further details on this subject. The
 genotypes provided by CRLMM, and in this example stored in
 \Robject{crlmmOut}, can be easily used with other BioConductor tools,
 like the \Biocpkg{snpStats} package, for downstream analyses.
@@ -1225,7 +1222,7 @@ The availability of start and stop positions of the probesets improves
 the visualization of the summaries at the exon level. If genomic
 coordinates were available for probes themselves, visualization could be
 improved even more. To achieve this, we first obtain the sequences for
-the probes identified above. We saw that the \Rmethod{pmSequence} method
+the probes identified above. We saw that the \Rfunction{pmSequence} method
 provides the sequences for all PM probes identified on the chip but,
 instead, we directly load the \Biocpkg{Biostrings} object used to store
 the sequence information for these probes. This gives us access not only
@@ -1299,7 +1296,7 @@ rm(matches)
 With the updated coordinates, we reorder the probe information object,
 \Robject{probeInfo}, and extract the probe intensities in the same
 order. The probe ID field, \Robject{fid} in \Robject{probeInfo},
-provides direct access to the probes of interest. The \Rmethod{exprs}
+provides direct access to the probes of interest. The \Rfunction{exprs}
 method is used to access the intensity matrix of the
 \Robject{affyExonFS} object and immediately subsetted to the probes of
 interest. After subsetting the observed intensities, we
@@ -1353,7 +1350,7 @@ title <- makeTitle(text=geneid, color="darkred")
 @
 
 The raw data, in the $\log_2$ scale, will be represented by the
-\Robject{raw} object below, created with the \Rmethod{makeExonArray}
+\Robject{raw} object below, created with the \Rfunction{makeExonArray}
 constructor.
 <<rawExon, results='hide'>>=
 attach(probeInfo)
@@ -1368,7 +1365,7 @@ detach(probeInfo)
 @
 
 The summarized data is also represented through an object created by
-\Rmethod{makeExonArray}. The structure is identical to the one used
+\Rfunction{makeExonArray}. The structure is identical to the one used
 above.
 <<processedExon, results='hide'>>=
 attach(psInfo)
@@ -1411,7 +1408,7 @@ gdPlot(list(title, raw, exon, affyModel, gene, transcript, legend))
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/ENSG131748}
+  \includegraphics[width=.45\textwidth]{figure/ENSG131748-1}
   \caption{Visual representation of observed $\log_2$-intensities and
     summarized data at the exon level for gene ENSG00000131748. The
     probes, gene and transcript are also represented, respectively, in
@@ -1439,7 +1436,7 @@ plot(x, gSummaries, xlab="Sample", ylab="Expression", main=geneid)
 @
 \begin{figure}[!htp]
   \centering
-  \includegraphics[width=.45\textwidth]{figure/geneLevelSummaries}
+  \includegraphics[width=.45\textwidth]{figure/geneLevelSummaries-1}
   \caption{Expression levels estimated through RMA at the gene level.}
   \label{fig:scatterENSG131748}
 \end{figure}
