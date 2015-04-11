@@ -1,6 +1,16 @@
 \name{NEWS}
 \title{News for Package 'oligo'}
 
+\section{Changes in version 1.32}{
+        \subsection{USER VISIBLE CHANGES}{
+                \itemize{
+                       \item Fixed vignette
+                       \item Added initial support to Generic Arrays
+                       \item Using BiocGenerics definition of normalize
+                }
+        }
+}
+
 \section{Changes in version 1.24}{
 	\subsection{BUG FIXES}{
 		\itemize{

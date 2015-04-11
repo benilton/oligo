@@ -39,7 +39,7 @@ Suggests: BSgenome.Hsapiens.UCSC.hg18,
           RColorBrewer,
           oligoData,
           BiocStyle, knitr,
-          RUnit, biomaRt, AnnotationDbi, GenomeGraphs, RCurl
+          RUnit, biomaRt, AnnotationDbi, GenomeGraphs, RCurl, ACME
 VignetteBuilder: knitr
 Description: A package to analyze oligonucleotide arrays
         (expression/SNP/tiling/exon) at probe-level. It currently

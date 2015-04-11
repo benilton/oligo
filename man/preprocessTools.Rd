@@ -11,8 +11,6 @@
 \alias{backgroundCorrect,matrix-method}
 \alias{backgroundCorrect,ff_matrix-method}
 \alias{backgroundCorrect,FeatureSet-method}
-\alias{normalize}
-\alias{normalize-methods}
 \alias{normalize,matrix-method}
 \alias{normalize,ff_matrix-method}
 \alias{normalize,FeatureSet-method}
@@ -36,7 +34,9 @@ normalizationMethods()
 summarizationMethods()
 backgroundCorrect(object, method=backgroundCorrectionMethods(), copy=TRUE, extra, subset=NULL, target='core', verbose=TRUE)
 summarize(object, probes=rownames(object), method="medianpolish", verbose=TRUE, ...)
-normalize(object, method=normalizationMethods(), copy=TRUE, subset=NULL,target='core', verbose=TRUE, ...)
+\S4method{normalize}{FeatureSet}(object, method=normalizationMethods(), copy=TRUE, subset=NULL,target='core', verbose=TRUE, ...)
+\S4method{normalize}{matrix}(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
+\S4method{normalize}{ff_matrix}(object, method=normalizationMethods(), copy=TRUE, verbose=TRUE, ...)
 normalizeToTarget(object, targetDist, method="quantile", copy=TRUE, verbose=TRUE)
 }
 
