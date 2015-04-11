@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.31.8
+Version: 1.31.9
 Title: Preprocessing tools for oligonucleotide arrays
 Author: Benilton Carvalho and Rafael Irizarry
 Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
@@ -26,7 +26,8 @@ Enhances: ff,
           doMC,
           doMPI
 LinkingTo: preprocessCore
-Suggests: hapmap100kxba,
+Suggests: BSgenome.Hsapiens.UCSC.hg18,
+          hapmap100kxba,
           pd.hg.u95av2,
           pd.mapping50k.xba240,
           pd.huex.1.0.st.v2,
