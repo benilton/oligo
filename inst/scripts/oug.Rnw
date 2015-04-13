@@ -1,11 +1,11 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{oligo User's Guide}
-%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg18,GenomeGraphs,RCurl,ACME}
+%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg18,GenomeGraphs,RCurl,ACME,pd.huex.1.0.st.v2,pd.mapping50k.xba240}
 %\VignetteKeywords{preprocessing, microarray, normalization, summarization}
 %\VignettePackage{oligo}
 
 %% compiling this:
-%% Rscript -e 'library(knitr); knit("oug.Rnw"); system("pdflatex oug"); system("pdflatex oug")'
+%% Rscript -e 'library(knitr); knit("oug.Rnw"); system("pdflatex oug"); system("pdflatex oug"); system("bibtex oug"); system("bibtex oug"); system("pdflatex oug"); system("pdflatex oug")'
 
 
 \documentclass[12pt, letterpaper]{book}
@@ -1560,7 +1560,7 @@ regs <- findRegions(calc)
 head(regs)
 @
 
-\section{High Performance Computing Features}
+\chapter{High Performance Computing Features}
 
 Starting on series 1.12.x, the \Biocpkg{oligo} package offers high
 performance computing features:
@@ -1580,7 +1580,7 @@ desired). The methods themselves are able to detect if these
 experimental features are enabled and use them if possible, without any
 modification of the method call.
 
-\subsection{Support to large datasets}
+\section{Support to large datasets}
 
 The \Biocpkg{oligo} package uses the features implemented by the \CRANpkg{ff}
 package to provide a better support to large datasets. If the user
@@ -1619,7 +1619,7 @@ ocProbesets(100) ## changing default to 100
   exprs(rmaRes)[1:10,]
 @ 
  
-\subsection{Parallel computing}
+\section{Parallel computing}
 
 The \Biocpkg{oligo} package can make use of a parallel environment (with
 \Rcode{rma} in the meantime) set via \CRANpkg{foreach} package, as long as
@@ -1647,7 +1647,7 @@ rmaRes <- rma(rawData)
 rmaRes
 @ 
 
-\subsection{Parallel Computing on Multicore Machines}
+\section{Parallel Computing on Multicore Machines}
 
 On multicore machines, one alternative for parallel preprocessing is
 shown below. It assumes that the machine has enough RAM to deal with the
@@ -1668,11 +1668,13 @@ t0
 t1
 @
 
-\section{Session Info}
+\chapter{Session Info}
 
-<<echo=FALSE, results='tex'>>=
-toLatex(sessionInfo())
+<<echo=FALSE>>=
+sessionInfo()
 @
+
+\newpage
 
 \bibliography{FrameworkPreprocessing}
 
