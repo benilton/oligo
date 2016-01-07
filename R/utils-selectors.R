@@ -63,7 +63,7 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
     if (missing(field)) field <- 'fid'
 
     probeTable <- paste(probeType, 'feature', sep='')
-    if (isST & target!='probeset'){
+    if (isST && target!='probeset'){
         fields <- unique(c('fid', 'meta_fsetid as man_fsetid', field))
         ## pmfeature.fsetid probably shouldnt be used here, as it's != 'probeset'
         ## fields[fields == 'fsetid'] <- 'pmfeature.fsetid'
@@ -78,6 +78,17 @@ getProbeInfo <- function(object, field, probeType='pm', target='core',
                      'WHERE pmfeature.fsetid=featureSet.fsetid AND',
                      paste('featureSet.fsetid=', mpsTable, '.fsetid', sep=''))
         rm(fields, mpsTable, tables)
+    }else if (class(object) == "GenericFeatureSet") {
+        probeTypeTable <- paste0(probeType, 'feature')
+        metaTable <- paste0(target, probeType)
+        featureTable <- paste0('featureSet', substr(target, 4, 4))
+        fields <- c(sprintf("%s.fid as fid", metaTable),
+                    sprintf("%s.man_fsetid as man_fsetid", featureTable),
+                    sprintf("%s.fsetid as fsetid", metaTable))
+        fields <- paste(fields, collapse=', ')
+        sql <- paste('SELECT', fields, 'FROM', metaTable, 'INNER JOIN', featureTable,
+                     'USING(fsetid)')
+        rm(fields, probeTypeTable, metaTable, featureTable)
     }else{
         fields <- unique(c('fid', 'man_fsetid', field))
         fields[fields == 'fsetid'] <- paste(probeTable, 'fsetid', sep='.')

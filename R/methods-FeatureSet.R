@@ -121,9 +121,9 @@ setMethod("mmSequence", "FeatureSet",
 ## QAish functions
 setMethod("boxplot", signature(x="FeatureSet"),
           function(x, which=c("pm", "mm", "bg", "both", "all"),
-                   transfo=log2, nsample=10000, ...){
+                   transfo=log2, nsample=10000, target="mps1", ...){
             stopifnot(is.function(transfo))
-            idx <- unique(getProbeIndex(x, which))
+            idx <- unique(getProbeIndex(x, type=which, target=target))
             if (length(idx) > nsample)
                 idx <- sort(sample(idx, nsample))
 
@@ -259,9 +259,9 @@ getProbeIndex <- function(x, type=c("pm", "mm", "bg", "both", "all"), target='co
 
 setMethod("hist", "FeatureSet",
           function(x, transfo=log2, which=c("pm", "mm", "bg", "both", "all"),
-                   nsample=10000, ...){
+                   nsample=10000, target="mps1", ...){
             stopifnot(is.function(transfo))
-            idx <- unique(getProbeIndex(x, which))
+            idx <- unique(getProbeIndex(x, type=which, target=target))
             if (length(idx) > nsample)
               idx <- sort(sample(idx, nsample))
 
