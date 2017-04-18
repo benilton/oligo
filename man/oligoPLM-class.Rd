@@ -31,6 +31,8 @@
 \alias{NUSE,oligoPLM-method}
 \alias{RLE}
 \alias{RLE,oligoPLM-method}
+\alias{opset2eset}
+\alias{opset2eset,oligoPLM-method}
 
 \title{Class \code{"oligoPLM"}}
 \description{
@@ -106,6 +108,7 @@
       Unscaled Standard Errors (NUSE) or NUSE values.}
     \item{RLE}{\code{signature(x = "oligoPLM")} : Relative Log Expression
       boxplot or values.}
+    \item{opset2eset}{\code{signature(x = "oligoPLM")} : Convert to ExpressionSet.}
   }
 }
 

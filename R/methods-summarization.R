@@ -408,6 +408,9 @@ fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='
                 method=method,
                 manufacturer=manufacturer(object),
                 annotation=annotation(object),
+				phenoData=phenoData(object), #added Guido
+				description=description(object), #added Guido
+				protocolData=protocolData(object), #added Guido
                 narrays=ncol(chipEffects),
                 nprobes=nrow(probeInfo),
                 nprobesets=nrow(chipEffects))
@@ -428,6 +431,9 @@ fitProbeLevelModel <- function(object, background=TRUE, normalize=TRUE, target='
     fit$method <- method
     fit$manufacturer <- manufacturer(object)
     fit$annotation <- annotation(object)
+	fit$phenoData <- phenoData(object) #added Guido
+	fit$description <- description(object) #added Guido
+	fit$protocolData <- protocolData(object) # added Guido
     fit$narrays <- ncol(fit$chip.coefs)
     fit$nprobes <- nrow(probeInfo)
     fit$nprobesets <- nrow(fit$chip.coefs)

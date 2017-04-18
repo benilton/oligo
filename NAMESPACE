@@ -121,6 +121,6 @@ exportMethods(intensity, probesetNames)
 export("NUSE", "RLE")
 exportMethods("paCalls")
 exportClasses(oligoPLM)
-exportMethods(ncol, nprobes, nprobesets, coef, coefs.probe, weights, residuals, se, se.probe, residualSE, geometry, method, manufacturer, annotation, show, boxplot, image)
+exportMethods(ncol, nprobes, nprobesets, coef, coefs.probe, weights, residuals, se, se.probe, residualSE, geometry, method, manufacturer, annotation, show, boxplot, image, opset2eset)
 
 export('fitProbeLevelModel', 'summarizationMethods')

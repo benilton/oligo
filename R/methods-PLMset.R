@@ -10,10 +10,44 @@ setClass('oligoPLM',
                         method='character',
                         manufacturer='character',
                         annotation='character',
+						phenoData='AnnotatedDataFrame', #$added GH
+						description='MIAME', # added GH
+						protocolData='AnnotatedDataFrame', #added Guido
                         narrays='integer',
                         nprobes='integer',
                         nprobesets='integer')
          )
+
+### ADDED GH
+setMethod('phenoData', 'oligoPLM',
+          function(object){
+              object@phenoData
+          })
+
+setMethod('description', 'oligoPLM',
+          function(object){
+              object@description
+          })
+
+setMethod('protocolData', 'oligoPLM',
+          function(object){
+              object@protocolData
+          })
+### END ADDED GH
+
+## suggestion by Guido (thanks!!!!)
+setGeneric('opset2eset', function(object) standardGeneric('opset2eset'))
+setMethod('opset2eset', 'oligoPLM',
+          function(object){
+              new("ExpressionSet",
+                  exprs =  coef(object),
+                  se.exprs =  se(object),
+                  phenoData = phenoData(object),
+                  annotation = annotation(object),
+                  experimentData = description(object),
+                  protocolData =  protocolData(object))
+          })
+          
 
 setMethod('ncol', 'oligoPLM',
           function(x){

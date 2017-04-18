@@ -1,8 +1,8 @@
 Package: oligo
-Version: 1.39.0
+Version: 1.39.1
 Title: Preprocessing tools for oligonucleotide arrays
 Author: Benilton Carvalho and Rafael Irizarry
-Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles
+Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles, Guido Hooiveld
 Maintainer: Benilton Carvalho <benilton@unicamp.br>
 Depends: R (>= 3.2.0),
          BiocGenerics (>= 0.13.11),
