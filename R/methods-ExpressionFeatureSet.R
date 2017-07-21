@@ -81,6 +81,7 @@ paMAS5 <- function(object, verbose=TRUE,
     if(verbose) message("Getting probe level data... ", appendLF=FALSE);
     pms <- pm(object)
     mms <- mm(object)
+    if(nrow(pms) != nrow(mms)) stop("This is a PM-only array, so MAS5-style P/A calls are not applicable.\n\n", call. = FALSE)
     if (verbose) message("OK.")
 
     ## Saturation:
