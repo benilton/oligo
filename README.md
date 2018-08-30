@@ -13,8 +13,9 @@ Installation
 `oligo` is a BioConductor package. The recommended way to install it is
 loading `R` and using `biocLite`, as shown below:
 
-     source('http://www.bioconductor.org/biocLite.R')
-     biocLite('oligo')
+     if (!requireNamespace("BiocManager", quietly=TRUE))
+         install.packages("BiocManager")
+     BiocManager::install('oligo')
 
 What does it offer?
 -------------------

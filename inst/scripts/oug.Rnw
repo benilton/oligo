@@ -115,8 +115,9 @@ available in the package, which can be installed using
 \Rcode{biocLite} as shown below:
 
 <<install, eval=FALSE>>=
-source('http://www.bioconductor.org/biocLite.R')
-biocLite('oligo')
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install('oligo')
 @ 
 
 \Biocpkg{oligo} is in constant development and the users can obtain a
