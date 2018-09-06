@@ -111,8 +111,7 @@ If you use the PLM algorithm, please cite:
 The \Biocpkg{oligo} package is available for download through the
 BioConductor project for all platforms. We recommend the installation of
 the latest R in order to get the latest features
-available in the package, which can be installed using
-\Rcode{biocLite} as shown below:
+available in the package, which can be installed using:
 
 <<install, eval=FALSE>>=
 if (!requireNamespace("BiocManager", quietly=TRUE))
