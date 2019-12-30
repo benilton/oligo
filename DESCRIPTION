@@ -42,12 +42,9 @@ Suggests: BSgenome.Hsapiens.UCSC.hg18,
           RUnit,
           biomaRt,
           AnnotationDbi,
-          GenomeGraphs,
-          RCurl,
           ACME,
           biomaRt,
           AnnotationDbi,
-          GenomeGraphs,
           RCurl
 VignetteBuilder: knitr
 Description: A package to analyze oligonucleotide arrays
