@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{oligo User's Guide}
-%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg18,GenomeGraphs,RCurl}
+%\VignetteDepends{oligoData, pd.hg18.60mer.expr, maqcExpression4plex, genefilter, limma, pd.hg.u95av2, RSQLite, biomaRt, AnnotationDbi, Biostrings,BSgenome.Hsapiens.UCSC.hg18,RCurl}
 %\VignetteKeywords{preprocessing, microarray, normalization, summarization}
 %\VignettePackage{oligo}
 
