@@ -49,7 +49,13 @@
 \section{Slots}{
   \describe{
     \item{\code{chip.coefs}:}{\code{"matrix"} with chip/sample effects -
-    probeset-level}
+      probeset-level}
+    \item{\code{description}:}{\code{"MIAME"} compliant description
+      information.}
+    \item{\code{phenoData}:}{\code{"AnnotatedDataFrame"} with phenotypic
+      data.}
+    \item{\code{protocolData}:}{\code{"AnnotatedDataFrame"} with
+    protocol data.}
     \item{\code{probe.coefs}:}{\code{"numeric"} vector with probe effects}
     \item{\code{weights}:}{\code{"matrix"} with weights - probe-level}
     \item{\code{residuals}:}{\code{"matrix"} with residuals - probe-level}

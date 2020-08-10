@@ -11,7 +11,7 @@
 \usage{
 
 \S4method{hist}{FeatureSet}(x, transfo=log2, which=c("pm", "mm", "bg", "both", "all"),
-                   nsample=10000, ...)
+                   nsample=10000, target = "mps1", ...)
 
 \S4method{hist}{ExpressionSet}(x, transfo=identity, nsample=10000, ...)
 

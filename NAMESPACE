@@ -40,6 +40,14 @@ importMethodsFrom(stats4, coef, plot)
 
 importMethodsFrom(RSQLite, dbListFields, dbDisconnect)
 
+importFrom(graphics, abline, frame, mtext, smoothScatter,
+             text)
+importFrom(stats, IQR, aggregate, approx, complete.cases,
+             loess, predict, rnorm, smooth.spline, splinefun)
+importFrom(utils, data)
+
+
+
 ######################################
 ## Importing: Functions
 ######################################
@@ -86,7 +94,7 @@ importFrom(utils, packageDescription, read.delim, read.table,
 
 importFrom(Biostrings, letterFrequency)
 
-importFrom(ff, ff, ffvecapply, clone, filename, is.ff, 'finalizer<-', vmode)
+importFrom(ff, ff, ffvecapply, clone.ff, clone.ffdf, filename, is.ff, 'finalizer<-', vmode)
 ##importFrom(ff, open, finalizer, close, 'finalizer<-', delete)
 
 import(zlibbioc)

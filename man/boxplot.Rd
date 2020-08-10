@@ -13,7 +13,8 @@
 }
 
 \usage{
-\S4method{boxplot}{FeatureSet}(x, which=c("pm", "mm", "bg", "both", "all"), transfo=log2, nsample=10000, \dots)
+\S4method{boxplot}{FeatureSet}(x, which=c("pm", "mm", "bg", "both",
+"all"), transfo=log2, nsample=10000, target = "mps1", \dots)
 
 \S4method{boxplot}{ExpressionSet}(x, which, transfo=identity, nsample=10000, \dots)
 }
