@@ -22,8 +22,7 @@ Imports: affyio (>= 1.35.0),
          stats4,
          utils,
          zlibbioc
-Enhances: ff,
-          doMC,
+Enhances: doMC,
           doMPI
 LinkingTo: preprocessCore
 Suggests: BSgenome.Hsapiens.UCSC.hg18,
@@ -43,8 +42,6 @@ Suggests: BSgenome.Hsapiens.UCSC.hg18,
           biomaRt,
           AnnotationDbi,
           ACME,
-          biomaRt,
-          AnnotationDbi,
           RCurl
 VignetteBuilder: knitr
 Description: A package to analyze oligonucleotide arrays
