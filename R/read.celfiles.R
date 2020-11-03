@@ -76,7 +76,7 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
   if (missing(sampleNames))
     sampleNames <- basename(filenames)
 
-  results <- smartReadCEL(filenames, sampleNames, headdetails=headdetails)
+  results <- smartReadCEL(filenames, sampleNames, headdetails=headdetails, verbose=verbose)
   tmpExprs <- results[["exprMatrix"]]
   intensityFile <- results[["intensityFile"]]
   datetime <- results[["datetime"]]

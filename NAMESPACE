@@ -27,7 +27,7 @@ importMethodsFrom(Biobase, channel,
                   preproc, "preproc<-", protocolData, "protocolData<-",
                   rowMedians, sampleNames, "sampleNames<-", varMetadata, "varMetadata<-", varLabels)
 
-importMethodsFrom(DBI, dbGetQuery, dbListTables)
+importMethodsFrom(DBI, dbGetQuery, dbListFields, dbListTables)
 
 importMethodsFrom(oligoClasses, allele, bothStrands, calls, db,
                   genomeBuild, geometry, getA, getM, kind,
@@ -38,7 +38,7 @@ importMethodsFrom(BiocGenerics, ncol, boxplot, residuals, image, weights, 'annot
 
 importMethodsFrom(stats4, coef, plot)
 
-importMethodsFrom(RSQLite, dbListFields, dbDisconnect)
+importMethodsFrom(RSQLite, dbDisconnect)
 
 importFrom(graphics, abline, frame, mtext, smoothScatter,
              text)
