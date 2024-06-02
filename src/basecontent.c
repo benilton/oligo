@@ -13,7 +13,7 @@
 
 //#include "strutils.h"
 
-char errmess[256];
+//char errmess[256];
 
 SEXP basecontent(SEXP x)
 {
@@ -33,7 +33,7 @@ SEXP basecontent(SEXP x)
 
     for(j=0; j<strlen(seq); j++) {
       switch(seq[j]) {
-      case 'a': 
+      case 'a':
       case 'A':
 	ia++;
 	break;
@@ -50,14 +50,15 @@ SEXP basecontent(SEXP x)
 	ig++;
 	break;
       default:
-	sprintf(errmess, "Unknown base %c in row %d, column %d.", seq[j], i+1, j+1);
-	error(errmess);
+//	sprintf(errmess, "Unknown base %c in row %d, column %d.", seq[j], i+1, j+1);
+//	error(errmess);
+	error("Unknown base %c in row %d, column %d.", seq[j], i+1, j+1);
       }
     }
-    INTEGER(rv)[i    ] = ia; 
-    INTEGER(rv)[i+n  ] = it; 
-    INTEGER(rv)[i+n*2] = ic; 
-    INTEGER(rv)[i+n*3] = ig; 
+    INTEGER(rv)[i    ] = ia;
+    INTEGER(rv)[i+n  ] = it;
+    INTEGER(rv)[i+n*2] = ic;
+    INTEGER(rv)[i+n*3] = ig;
   }
 
   /* dim */

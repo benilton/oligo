@@ -9,7 +9,7 @@
 /***************************************************************
  ** countLines: counts lines, returns integer
 ***************************************************************/
-static int gzcountLines(gzFile *file){
+static int gzcountLines(gzFile file){
   int lines = 0;
   char buffer[1000];
   char *token;
@@ -38,7 +38,7 @@ static int gzcountLines(gzFile *file){
 ***************************************************************/
 
 static char *gzxys_header_field(const char *currentFile, const char *field){
-  gzFile *fp;
+  gzFile fp;
   int j;
   char *result, *final;
   char buffer[LINEMAX];
@@ -53,7 +53,7 @@ static char *gzxys_header_field(const char *currentFile, const char *field){
   j = strlen(buffer)-1;
   if (buffer[j] == '\n')
     buffer[j] = '\0';
-  
+
   result = strstr(buffer, field);
   if (result == NULL)
     error("Can't find \'%s\' field. %s corrupted?", field, currentFile);
@@ -92,7 +92,7 @@ static void gzread_one_xys(const char *filename, double *signal,
       buffer[j] = '\0';
 
     n = sscanf(buffer, "%d\t%d\t%s\t%s", &x, &y, ss, sc);
-    
+
     // If it's the end of file, we're done.
     if (n == EOF) break;
 
@@ -124,7 +124,7 @@ static void gzread_one_xys(const char *filename, double *signal,
 SEXP R_read_gzxys_files(SEXP filenames, SEXP verbosity){
   int nfiles, nrows, i, verbose, *ptr2xy;
   double *ptr2signal;
-  gzFile *fp;
+  gzFile fp;
   SEXP signal, xy, output;
   SEXP dimnames, dimnamesxy, fnames, colnamesxy, namesout, dates;
   char *d0, *d1;
