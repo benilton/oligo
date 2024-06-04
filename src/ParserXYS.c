@@ -142,9 +142,12 @@ static char *xys_header_field(const char *currentFile, const char *field){
   if (fp == NULL)
     error("Can't open %s.\n", currentFile);
 
-  fgets(buffer, LINEMAX, fp);
+  if (fgets(buffer, LINEMAX, fp) == NULL) {
+    fclose(fp);
+    error("Error reading from %s.\n", currentFile);
+  }
   fclose(fp);
-
+  
   j = strlen(buffer)-1;
   if (buffer[j] == '\n')
     buffer[j] = '\0';
@@ -317,7 +320,11 @@ SEXP R_read_xys_header(SEXP filename){
   fp = fopen(currentFile, "r");
   if (fp == NULL)
     error("Can't open %s.\n", currentFile);
-  fgets(buffer, LINEMAX, fp);
+  
+  if (fgets(buffer, LINEMAX, fp) == NULL) {
+    fclose(fp);
+    error("Error reading from %s.\n", currentFile);
+  }
   fclose(fp);
 
   j = strlen(buffer)-1;
