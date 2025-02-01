@@ -2,6 +2,7 @@
 /* get the CGAT content of a sequence             */
 /*------------------------------------------------*/
 
+#define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
 #include "R_ext/Arith.h"

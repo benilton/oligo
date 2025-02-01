@@ -18,6 +18,7 @@
  **
  ***********************************************************************/
 
+#define R_NO_REMAP
 #include "rma_common.h"
 #include <stdlib.h>
 #include <string.h>

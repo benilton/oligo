@@ -1,3 +1,4 @@
+#define R_NO_REMAP
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

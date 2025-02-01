@@ -104,7 +104,7 @@
  **
  ************************************************************************/
 
-
+#define R_NO_REMAP
 #include "rma_common.h"
 #include "rma_background4.h"
 
