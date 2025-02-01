@@ -60,7 +60,7 @@ int sort_double(const double *a1,const double *a2){
 double  median(double *x, int length){
   int half;
   double med;
-  double *buffer = Calloc(length,double);
+  double *buffer = R_Calloc(length,double);
   
   memcpy(buffer,x,length*sizeof(double));
 
@@ -82,7 +82,7 @@ double  median(double *x, int length){
     med = (med + buffer[half])/2.0;
   }
   
-  Free(buffer);
+  R_Free(buffer);
   return med;
 }
 
@@ -102,7 +102,7 @@ double  median(double *x, int length){
 double  median_nocopy(double *x, int length){
   int half;
   double med;
-  double *buffer = x;  //Calloc(length,double);
+  double *buffer = x;  //R_Calloc(length,double);
   
   memcpy(buffer,x,length*sizeof(double));
 

@@ -20,15 +20,15 @@ SEXP R_DABG_P(SEXP X, SEXP Y, SEXP G){
   Gp = INTEGER_POINTER(AS_INTEGER(G));
 
 
-  PROTECT(dim1 = getAttrib(X, R_DimSymbol));
+  PROTECT(dim1 = Rf_getAttrib(X, R_DimSymbol));
   N = INTEGER(dim1)[0];
   S = INTEGER(dim1)[1];
-  PROTECT(R = allocMatrix(REALSXP, N, S));
+  PROTECT(R = Rf_allocMatrix(REALSXP, N, S));
   Rp = NUMERIC_POINTER(AS_NUMERIC(R));
 
   for (i=0; i < N; i++){
     ref = REAL(VECTOR_ELT(Y, Gp[i]));
-    PROTECT(dim2 = getAttrib(VECTOR_ELT(Y, Gp[i]), R_DimSymbol));
+    PROTECT(dim2 = Rf_getAttrib(VECTOR_ELT(Y, Gp[i]), R_DimSymbol));
     M = INTEGER(dim2)[0];
     for (j=0; j < S; j++){
       count = 0;

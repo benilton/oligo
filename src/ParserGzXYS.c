@@ -46,7 +46,7 @@ static char *gzxys_header_field(const char *currentFile, const char *field){
 
   fp = gzopen(currentFile, "rb");
   if (fp == NULL)
-    error("Can't open %s.\n", currentFile);
+    Rf_error("Can't open %s.\n", currentFile);
 
   gzgets(fp, buffer, LINEMAX);
   gzclose(fp);
@@ -57,10 +57,10 @@ static char *gzxys_header_field(const char *currentFile, const char *field){
 
   result = strstr(buffer, field);
   if (result == NULL)
-    error("Can't find \'%s\' field. %s corrupted?", field, currentFile);
+    Rf_error("Can't find \'%s\' field. %s corrupted?", field, currentFile);
   result = strtok(result, "=");
   result = strtok(NULL, "\t");
-  final = Calloc(strlen(result)+1, char);
+  final = R_Calloc(strlen(result)+1, char);
   strcpy(final, result);
   return final;
 }
@@ -78,7 +78,7 @@ static void gzread_one_xys(const char *filename, double *signal,
   if (verbose) Rprintf("Reading %s.\n", filename);
   fp = gzopen(filename, "rb");
   if (fp == NULL)
-    error("Can't open %s.\n", filename);
+    Rf_error("Can't open %s.\n", filename);
 
   // Header - 2 lines - skip
   while (gzgetc(fp) != '\n');
@@ -112,13 +112,13 @@ static void gzread_one_xys(const char *filename, double *signal,
       }
     } else {
       gzclose(fp);
-      error("Line %d of %s has an unexpected format.\n", count, filename);
+      Rf_error("Line %d of %s has an unexpected format.\n", count, filename);
     }
     count++;
   }
   gzclose(fp);
   if (count != nrow)
-    error("%s: Expected %d lines. Found %d lines. Corrupted file?",
+    Rf_error("%s: Expected %d lines. Found %d lines. Corrupted file?",
 	  filename, nrow, count);
 }
 
@@ -130,11 +130,11 @@ SEXP R_read_gzxys_files(SEXP filenames, SEXP verbosity){
   SEXP dimnames, dimnamesxy, fnames, colnamesxy, namesout, dates;
   char *d0, *d1;
 
-  verbose = asLogical(verbosity);
-  nfiles = length(filenames);
+  verbose = Rf_asLogical(verbosity);
+  nfiles = Rf_length(filenames);
   fp = gzopen(CHAR(STRING_ELT(filenames, 0)), "rb");
   if (fp == NULL)
-    error("Can't open %s.\n", CHAR(STRING_ELT(filenames, 0)));
+    Rf_error("Can't open %s.\n", CHAR(STRING_ELT(filenames, 0)));
   nrows = gzcountLines(fp)-2;
   gzclose(fp);
 
@@ -145,22 +145,22 @@ SEXP R_read_gzxys_files(SEXP filenames, SEXP verbosity){
     for (i = 1; i < nfiles; i++){
       d1 = gzxys_header_field(CHAR(STRING_ELT(filenames, i)), "designname=");
       if(strcasecmp(d1, d0) != 0){
-	Free(d0);
-	Free(d1);
-	error("\'%s\' and \'%s\' use different designs.\n",
+	R_Free(d0);
+	R_Free(d1);
+	Rf_error("\'%s\' and \'%s\' use different designs.\n",
 	      CHAR(STRING_ELT(filenames, 0)),
 	      CHAR(STRING_ELT(filenames, i)));
       }
-      Free(d1); // Missed: 12/02/09
+      R_Free(d1); // Missed: 12/02/09
     }
-  Free(d0);
+  R_Free(d0);
   if (verbose) Rprintf("Done.\n");
 
   // Allocating memory in R
   if (verbose) Rprintf("Allocating memory... ");
-  PROTECT(signal = allocMatrix(REALSXP, nrows, nfiles));
-  PROTECT(xy = allocMatrix(INTSXP, nrows, 2));
-  PROTECT(dates = allocVector(STRSXP, nfiles));
+  PROTECT(signal = Rf_allocMatrix(REALSXP, nrows, nfiles));
+  PROTECT(xy = Rf_allocMatrix(INTSXP, nrows, 2));
+  PROTECT(dates = Rf_allocVector(STRSXP, nfiles));
   if (verbose) Rprintf("Done.\n");
   ptr2xy = INTEGER_POINTER(xy);
   ptr2signal = NUMERIC_POINTER(signal);
@@ -170,38 +170,38 @@ SEXP R_read_gzxys_files(SEXP filenames, SEXP verbosity){
     gzread_one_xys(CHAR(STRING_ELT(filenames, i)), ptr2signal,
 		 ptr2xy, i, nrows, verbose);
     d0 = gzxys_header_field(CHAR(STRING_ELT(filenames, i)), "date=");
-    SET_STRING_ELT(dates, i, mkChar(d0));
-    Free(d0);
+    SET_STRING_ELT(dates, i, Rf_mkChar(d0));
+    R_Free(d0);
   }
 
-  PROTECT(output = allocVector(VECSXP, 3));
+  PROTECT(output = Rf_allocVector(VECSXP, 3));
   SET_VECTOR_ELT(output, 0, xy);
   SET_VECTOR_ELT(output, 1, signal);
   SET_VECTOR_ELT(output, 2, dates);
 
   // Dimnames +5 PROTECTs
-  PROTECT(dimnames = allocVector(VECSXP, 2));
-  PROTECT(fnames = allocVector(STRSXP, nfiles));
+  PROTECT(dimnames = Rf_allocVector(VECSXP, 2));
+  PROTECT(fnames = Rf_allocVector(STRSXP, nfiles));
   for (i=0; i < nfiles; i++)
-    SET_STRING_ELT(fnames, i, mkChar(CHAR(STRING_ELT(filenames, i))));
+    SET_STRING_ELT(fnames, i, Rf_mkChar(CHAR(STRING_ELT(filenames, i))));
   SET_VECTOR_ELT(dimnames, 1, fnames);
   SET_VECTOR_ELT(dimnames, 0, R_NilValue);
-  setAttrib(signal, R_DimNamesSymbol, dimnames);
-  setAttrib(dates, R_NamesSymbol, fnames);
+  Rf_setAttrib(signal, R_DimNamesSymbol, dimnames);
+  Rf_setAttrib(dates, R_NamesSymbol, fnames);
 
-  PROTECT(dimnamesxy = allocVector(VECSXP, 2));
-  PROTECT(colnamesxy = allocVector(STRSXP, 2));
-  SET_STRING_ELT(colnamesxy, 0, mkChar("X"));
-  SET_STRING_ELT(colnamesxy, 1, mkChar("Y"));
+  PROTECT(dimnamesxy = Rf_allocVector(VECSXP, 2));
+  PROTECT(colnamesxy = Rf_allocVector(STRSXP, 2));
+  SET_STRING_ELT(colnamesxy, 0, Rf_mkChar("X"));
+  SET_STRING_ELT(colnamesxy, 1, Rf_mkChar("Y"));
   SET_VECTOR_ELT(dimnamesxy, 0, R_NilValue);
   SET_VECTOR_ELT(dimnamesxy, 1, colnamesxy);
-  setAttrib(xy, R_DimNamesSymbol, dimnamesxy);
+  Rf_setAttrib(xy, R_DimNamesSymbol, dimnamesxy);
 
-  PROTECT(namesout = allocVector(STRSXP, 3));
-  SET_STRING_ELT(namesout, 0, mkChar("coordinates"));
-  SET_STRING_ELT(namesout, 1, mkChar("intensities"));
-  SET_STRING_ELT(namesout, 2, mkChar("date"));
-  setAttrib(output, R_NamesSymbol, namesout);
+  PROTECT(namesout = Rf_allocVector(STRSXP, 3));
+  SET_STRING_ELT(namesout, 0, Rf_mkChar("coordinates"));
+  SET_STRING_ELT(namesout, 1, Rf_mkChar("intensities"));
+  SET_STRING_ELT(namesout, 2, Rf_mkChar("date"));
+  Rf_setAttrib(output, R_NamesSymbol, namesout);
 
   UNPROTECT(9);
   return(output);

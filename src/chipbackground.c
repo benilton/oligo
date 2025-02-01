@@ -65,8 +65,8 @@
 
 void static get_centroids(int rows, int cols, int grid_dim_rows, int grid_dim_cols, double *centroidx, double *centroidy){
   int i,j;
-  double *cuts_x = (double *)Calloc(grid_dim_rows,double);
-  double *cuts_y = (double *)Calloc(grid_dim_cols,double);
+  double *cuts_x = (double *)R_Calloc(grid_dim_rows,double);
+  double *cuts_y = (double *)R_Calloc(grid_dim_cols,double);
   
   for (i = 0; i < grid_dim_rows; i++)
     cuts_x[i] = ((double)(i+1)*(double)rows)/(double)grid_dim_rows - (double)rows/(2.0*(double)grid_dim_rows);
@@ -79,8 +79,8 @@ void static get_centroids(int rows, int cols, int grid_dim_rows, int grid_dim_co
       centroidy[j*grid_dim_rows + i] = cuts_y[(j*grid_dim_rows + i) % grid_dim_rows]+0.5;
     }
   }
-  Free(cuts_x);
-  Free(cuts_y);
+  R_Free(cuts_x);
+  R_Free(cuts_y);
 }
 
 
@@ -179,14 +179,14 @@ void static find_distances(int x, int y, int grid_dim,double *centroidx, double 
 void static compute_weights_individual(int x, int y, int grid_dim, double *centroidx, double *centroidy, double *weights, double smooth){
 
   int i=0;
-  double *distance = (double *)Calloc(grid_dim,double);
+  double *distance = (double *)R_Calloc(grid_dim,double);
 
   find_distances(x, y, grid_dim, centroidx, centroidy, distance);
 
   for (i = 0; i < grid_dim; i++){
     weights[i] =  1.0/((double)distance[i] + smooth);
   }
-  Free(distance);
+  R_Free(distance);
 }
 
 /*********************************************************************************************
@@ -349,9 +349,9 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
 
   int lower2pc;
   int i=0,j=0;
-  int *nprobes_in_sec = (int *)Calloc(grid_dim,int); 
-  int *cur_n = (int *)Calloc(grid_dim,int);
-  double **data_by_sector =(double **)Calloc(grid_dim,double *);
+  int *nprobes_in_sec = (int *)R_Calloc(grid_dim,int); 
+  int *cur_n = (int *)R_Calloc(grid_dim,int);
+  double **data_by_sector =(double **)R_Calloc(grid_dim,double *);
   double sumx,sumx2;
 
   for (j = 0; j < grid_dim; j++){  
@@ -363,7 +363,7 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
   }
   
   for (j =0; j < grid_dim; j++){
-    data_by_sector[j] = (double *)Calloc(nprobes_in_sec[j],double);
+    data_by_sector[j] = (double *)R_Calloc(nprobes_in_sec[j],double);
   }
   
   for (j =0; j < grid_dim; j++){
@@ -407,12 +407,12 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
   }
  
   for (j =0; j < grid_dim; j++){
-    Free(data_by_sector[j]);
+    R_Free(data_by_sector[j]);
   }
   
-  Free(nprobes_in_sec);
-  Free(cur_n);
-  Free(data_by_sector);
+  R_Free(nprobes_in_sec);
+  R_Free(cur_n);
+  R_Free(data_by_sector);
 }
 
 
@@ -476,14 +476,14 @@ double static max(double one, double two){
 
 void static affy_background_adjust(double *probeintensity,int *x, int *y, int nprobes, int nchips, int rows, int cols, int grid_dim){
   int i=0,j=0;
-  int *whichgrid = (int *)Calloc(nprobes,int);
-  double *bg_q = (double *)Calloc(grid_dim,double);
-  double *noise_q = (double *)Calloc(grid_dim,double);
-  double *weights = (double *)Calloc(grid_dim*nprobes,double);
-  double *centroidx = (double *)Calloc(grid_dim,double);
-  double *centroidy = (double *)Calloc(grid_dim,double);
-  int *gridpt_x = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
-  int *gridpt_y = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
+  int *whichgrid = (int *)R_Calloc(nprobes,int);
+  double *bg_q = (double *)R_Calloc(grid_dim,double);
+  double *noise_q = (double *)R_Calloc(grid_dim,double);
+  double *weights = (double *)R_Calloc(grid_dim*nprobes,double);
+  double *centroidx = (double *)R_Calloc(grid_dim,double);
+  double *centroidy = (double *)R_Calloc(grid_dim,double);
+  int *gridpt_x = (int *)R_Calloc(((int)(sqrt(grid_dim) -1.0)),int);
+  int *gridpt_y = (int *)R_Calloc(((int)(sqrt(grid_dim) -1.0)),int);
   
   get_centroids(rows, cols, (int)sqrt(grid_dim),(int)sqrt(grid_dim), centroidx, centroidy);
   get_gridpts(rows, cols, grid_dim, gridpt_x, gridpt_y);
@@ -500,14 +500,14 @@ void static affy_background_adjust(double *probeintensity,int *x, int *y, int np
     }
   }
 
-  Free(gridpt_x);
-  Free(gridpt_y);
-  Free(centroidx);
-  Free(centroidy);
-  Free(weights);
-  Free(whichgrid);
-  Free(noise_q);
-  Free(bg_q);
+  R_Free(gridpt_x);
+  R_Free(gridpt_y);
+  R_Free(centroidx);
+  R_Free(centroidy);
+  R_Free(weights);
+  R_Free(whichgrid);
+  R_Free(noise_q);
+  R_Free(bg_q);
 }
 
 

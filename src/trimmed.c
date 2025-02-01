@@ -21,7 +21,7 @@ static void trimmed_mean(double *datavec, int *classvec, int class, double trim,
     if (classvec[i] == class)
       n++;
 
-  double *buffer=Calloc(n, double);
+  double *buffer=R_Calloc(n, double);
   for (i = 0; i < cols; i++)
     if (classvec[i] == class){
       buffer[j]=datavec[i];
@@ -42,13 +42,13 @@ static void trimmed_mean(double *datavec, int *classvec, int class, double trim,
   m1[i_ext + (class-1) * rows]=sum;
   m2[i_ext + (class-1) * rows]=sum2;
   m3[i_ext + (class-1) * rows]=j;
-  Free(buffer);
+  R_Free(buffer);
 }
 
 static void trimmed_stats(double *data, double *m1, double *m2, double *m3, int *class, int rows, int cols, double *trim){
   int i, j, n1, n2, n3;
-  double *datvec=Calloc(cols,double);
-  int *classvec=Calloc(cols,int);
+  double *datvec=R_Calloc(cols,double);
+  int *classvec=R_Calloc(cols,int);
 
   for (i=0; i < rows; i++){
     n1=0;
@@ -77,8 +77,8 @@ static void trimmed_stats(double *data, double *m1, double *m2, double *m3, int 
     trimmed_mean(datvec, classvec, 2, trim[0], cols, rows, m1, m2, m3, i);
     trimmed_mean(datvec, classvec, 3, trim[0], cols, rows, m1, m2, m3, i);
   }
-  Free(datvec);
-  Free(classvec);
+  R_Free(datvec);
+  R_Free(classvec);
 }
 
 
@@ -89,7 +89,7 @@ SEXP R_trimmed_stats(SEXP X, SEXP Y, SEXP trim){
   int *Yptr;
   int rows, cols;
 
-  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  PROTECT(dim1 = Rf_getAttrib(X,R_DimSymbol));
   rows = INTEGER(dim1)[0];
   cols = INTEGER(dim1)[1];
   
@@ -97,9 +97,9 @@ SEXP R_trimmed_stats(SEXP X, SEXP Y, SEXP trim){
   Yptr = INTEGER_POINTER(AS_INTEGER(Y));
   Tptr = NUMERIC_POINTER(AS_NUMERIC(trim));
 
-  PROTECT(estimates1 = allocMatrix(REALSXP, rows, 3));
-  PROTECT(estimates2 = allocMatrix(REALSXP, rows, 3));
-  PROTECT(estimates3 = allocMatrix(REALSXP, rows, 3));
+  PROTECT(estimates1 = Rf_allocMatrix(REALSXP, rows, 3));
+  PROTECT(estimates2 = Rf_allocMatrix(REALSXP, rows, 3));
+  PROTECT(estimates3 = Rf_allocMatrix(REALSXP, rows, 3));
   
   Mptr1 = NUMERIC_POINTER(estimates1);
   Mptr2 = NUMERIC_POINTER(estimates2);
@@ -107,7 +107,7 @@ SEXP R_trimmed_stats(SEXP X, SEXP Y, SEXP trim){
   
   trimmed_stats(Xptr, Mptr1, Mptr2, Mptr3, Yptr, rows, cols, Tptr);
 
-  PROTECT(output = allocVector(VECSXP,3));
+  PROTECT(output = Rf_allocVector(VECSXP,3));
   SET_VECTOR_ELT(output, 0, estimates1);
   SET_VECTOR_ELT(output, 1, estimates2);
   SET_VECTOR_ELT(output, 2, estimates3);
