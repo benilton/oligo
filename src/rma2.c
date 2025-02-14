@@ -104,7 +104,7 @@
  **
  ************************************************************************/
 
-#define R_NO_REMAP
+
 #include "rma_common.h"
 #include "rma_background4.h"
 
@@ -170,7 +170,7 @@ SEXP rma_c_call(SEXP PMmat,  SEXP PM_rowIndexList, SEXP N_probes, SEXP norm_flag
   SEXP outvec, outnamesvec; 
   SEXP dimnames,names;
 
-  PROTECT(dim1 = Rf_getAttrib(PMmat,R_DimSymbol)); 
+  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
   rows = INTEGER(dim1)[0];
   cols = INTEGER(dim1)[1]; 
   UNPROTECT(1);
@@ -194,15 +194,15 @@ SEXP rma_c_call(SEXP PMmat,  SEXP PM_rowIndexList, SEXP N_probes, SEXP norm_flag
 
   /* now lets put names on the matrix */
 
-  PROTECT(outnamesvec = Rf_getAttrib(PM_rowIndexList,R_NamesSymbol));
-  PROTECT(dimnames = Rf_allocVector(VECSXP,2));
-  PROTECT(names = Rf_allocVector(STRSXP,nprobesets));
+  PROTECT(outnamesvec = getAttrib(PM_rowIndexList,R_NamesSymbol));
+  PROTECT(dimnames = allocVector(VECSXP,2));
+  PROTECT(names = allocVector(STRSXP,nprobesets));
   
   for ( i =0; i < nprobesets; i++){
     SET_STRING_ELT(names,i,STRING_ELT(outnamesvec,i)); 
   }
   SET_VECTOR_ELT(dimnames,0,names);
-  Rf_setAttrib(outvec, R_DimNamesSymbol, dimnames);
+  setAttrib(outvec, R_DimNamesSymbol, dimnames);
   
   UNPROTECT(4);
   return outvec;
@@ -240,7 +240,7 @@ SEXP rma_c_complete(SEXP PMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag,
     if (INTEGER(verbose)[0]){
       Rprintf("Background correcting\n");
     }
-    PROTECT(dim1 = Rf_getAttrib(PMmat,R_DimSymbol));
+    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
     rows = INTEGER(dim1)[0];
     cols = INTEGER(dim1)[1];
     PM = NUMERIC_POINTER(PMmat);
@@ -280,22 +280,22 @@ SEXP rma_c_complete_copy(SEXP PMmat,  SEXP ProbeNamesVec,SEXP N_probes, SEXP nor
     if (INTEGER(verbose)[0]){
       Rprintf("Background correcting\n");
     }  
-    PROTECT(dim1 = Rf_getAttrib(PMmat,R_DimSymbol));
+    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
     rows = INTEGER(dim1)[0];
     cols = INTEGER(dim1)[1];
-    PROTECT(PMcopy = Rf_allocMatrix(REALSXP,rows,cols));
+    PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
     PM = NUMERIC_POINTER(PMcopy);
-    Rf_copyMatrix(PMcopy,PMmat,0);
+    copyMatrix(PMcopy,PMmat,0);
     rma_bg_correct(PM, rows, cols);
     exprs = rma_c_call(PMcopy, ProbeNamesVec, N_probes, norm_flag, verbose);
     UNPROTECT(2);
     return exprs;
   } else {
-    PROTECT(dim1 = Rf_getAttrib(PMmat,R_DimSymbol));
+    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
     rows = INTEGER(dim1)[0];
     cols = INTEGER(dim1)[1];
-    PROTECT(PMcopy = Rf_allocMatrix(REALSXP,rows,cols));
-    Rf_copyMatrix(PMcopy,PMmat,0);
+    PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(PMcopy,PMmat,0);
     exprs = rma_c_call(PMcopy, ProbeNamesVec, N_probes, norm_flag, verbose);
     UNPROTECT(2);
     return exprs;

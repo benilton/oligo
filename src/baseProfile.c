@@ -1,4 +1,3 @@
-#define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
 #include <Rdefines.h>
@@ -16,7 +15,7 @@ SEXP gcrma_getSeq2(SEXP psequence, SEXP x, SEXP length) {
     pseq=STR(psequence);
     seql=INTEGER(length)[0];
 
-    PROTECT(outMatrix = Rf_allocMatrix(INTSXP, K, 3*seql));
+    PROTECT(outMatrix = allocMatrix(INTSXP, K, 3*seql));
         for(k=0;k<K;k++){
       for (i = 0; i < seql; i++) {
 	if (pseq[k*seql+i] == 'A')

@@ -18,7 +18,6 @@
  **
  ***********************************************************************/
 
-#define R_NO_REMAP
 #include "rma_common.h"
 #include <stdlib.h>
 #include <string.h>
@@ -60,7 +59,7 @@ int sort_double(const double *a1,const double *a2){
 double  median(double *x, int length){
   int half;
   double med;
-  double *buffer = R_Calloc(length,double);
+  double *buffer = Calloc(length,double);
   
   memcpy(buffer,x,length*sizeof(double));
 
@@ -82,7 +81,7 @@ double  median(double *x, int length){
     med = (med + buffer[half])/2.0;
   }
   
-  R_Free(buffer);
+  Free(buffer);
   return med;
 }
 
@@ -102,7 +101,7 @@ double  median(double *x, int length){
 double  median_nocopy(double *x, int length){
   int half;
   double med;
-  double *buffer = x;  //R_Calloc(length,double);
+  double *buffer = x;  //Calloc(length,double);
   
   memcpy(buffer,x,length*sizeof(double));
 
