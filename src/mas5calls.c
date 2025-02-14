@@ -1,3 +1,4 @@
+#define R_NO_REMAP
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -195,7 +196,7 @@ void DetectionPValue (double *pm, double *mm, char **names, int *nprobes, double
       dpval[j] = pma(&(pm[start]),&(mm[start]),i-start,*tao,*sat);
       start = i;
       j++;
-      if(j > *nprobesets) { error("Expecting %d unique probesets, found %d\n",*nprobesets,j); }
+      if(j > *nprobesets) { Rf_error("Expecting %d unique probesets, found %d\n",*nprobesets,j); }
     }
   }
   dpval[j] = pma(&(pm[start]),&(mm[start]),i - start,*tao,*sat);
