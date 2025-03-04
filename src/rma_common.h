@@ -1,3 +1,6 @@
+#ifndef R_NO_REMAP
+#  define R_NO_REMAP
+#endif
 #ifndef RMA_COMMON
 #define RMA_COMMON 1
 
