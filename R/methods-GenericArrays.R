@@ -68,7 +68,7 @@ setMethod("pmindex", "GenericPDInfo",
                   info <- getMPSInfo(object, substr(target, 4, 4), 'fid', type='pm')
                   ## info will have: fsetid, man_fsetid, fid
                   if (!is.null(subset))
-                      info <- subset(info, man_fsetid %in% subset)
+                      info <- subset(info, info$man_fsetid %in% subset)
                   pmi <- info$fid
                   names(pmi) <- info$man_fsetid
                   rm(info)

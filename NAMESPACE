@@ -54,10 +54,10 @@ importFrom(utils, data)
 importFrom(affxparser, createCel, readCelHeader, readCelIntensities,
            updateCel)
 
-importFrom(affyio, read.celfile.header, read.celfile)
+importFrom(affyio, read.celfile.header, read.celfile, read_abatch)
 
 importFrom(Biobase, assayData, assayDataElement, assayDataElementReplace,
-           assayDataNew, assayDataElementNames)
+           assayDataNew, assayDataElementNames, annotatedDataFrameFrom)
 
 importFrom(BiocGenerics, boxplot, image, ncol, residuals,
            annotation, "annotation<-")
@@ -67,7 +67,7 @@ importFrom(graphics, hist, lines, matplot, par)
 importFrom(grDevices, colorRampPalette, gray)
 
 importFrom(methods, callNextMethod, is, new, slot, "slot<-",
-           validObject)
+           validObject, show)
 
 importFrom(oligoClasses, list.celfiles, requireAnnotation,
            isPackageLoaded, setCluster, delCluster, getCluster,
@@ -96,6 +96,8 @@ importFrom(Biostrings, letterFrequency)
 
 importFrom(ff, ff, ffvecapply, clone.ff, clone.ffdf, filename, is.ff, 'finalizer<-', vmode)
 ##importFrom(ff, open, finalizer, close, 'finalizer<-', delete)
+
+importFrom(bit, clone)
 
 ## EXPORTS
 

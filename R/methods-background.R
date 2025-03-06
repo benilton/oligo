@@ -152,7 +152,7 @@ setMethod("backgroundCorrect", "matrix",
                           is.numeric(geometry))
                 griddim <- 16
                 if ('griddim' %in% nms) griddim <- extra[['griddim']]
-                out <- bgMAS(intensities, xcoord, ycoord, geometry, griddim)
+                out <- bgMAS(object, xcoord, ycoord, geometry, griddim)
             } else if (method == "LESN") {
                 method <- 2
                 baseline <- .25

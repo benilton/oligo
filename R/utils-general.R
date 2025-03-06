@@ -355,7 +355,8 @@ basicPhData2 <- function(mat1, mat2){
 }
 
 basicAnnotatedDataFrame <- function(mat, byrow=FALSE){
-    Biobase:::annotatedDataFrameFromMatrix(mat, byrow=byrow)
+    ##Biobase:::annotatedDataFrameFromMatrix(mat, byrow=byrow)
+    annotatedDataFrameFrom(mat, byrow=byrow)
 }
 
 ## colors I like in oligo

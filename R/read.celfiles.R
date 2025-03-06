@@ -13,9 +13,11 @@ smartReadCEL <- function(filenames, sampleNames, headdetails,
     datetime <- unlist(datetime)
   }else{
     intensityFile <- NA_character_
-    tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
-                      headdetails[[1]], headdetails[[2]], verbose,
-                      PACKAGE="affyio")
+    ## tmpExprs <- .Call("read_abatch", filenames, FALSE, FALSE, FALSE,
+    ##                  headdetails[[1]], headdetails[[2]], verbose,
+    ##                  PACKAGE="affyio")
+    tmpExprs <- read_abatch(filenames, FALSE, FALSE, FALSE,
+                            headdetails[[1]], headdetails[[2]], verbose)
     datetime <- GetAffyTimeDateAsString(filenames)
   }
   dimnames(tmpExprs) <- dns
@@ -31,9 +33,12 @@ oligoReadCels <- function(cols, headdetails, filenames, out){
     open(out)
     i <- 1
     for (theCols in grpCols){
-      out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
+      ##out[, theCols] <- .Call("read_abatch", filenames[theCols], FALSE,
+      ##                        FALSE, FALSE, headdetails[[1]],
+      ##                        headdetails[[2]], FALSE, PACKAGE="affyio")
+      out[, theCols] <- read_abatch(filenames[theCols], FALSE,
                               FALSE, FALSE, headdetails[[1]],
-                              headdetails[[2]], FALSE, PACKAGE="affyio")
+                              headdetails[[2]], FALSE)
       dates[[i]] <- GetAffyTimeDateAsString(filenames[theCols])
       i <- i + 1
   }
@@ -70,8 +75,9 @@ read.celfiles <- function( ..., filenames, pkgname, phenoData,
     stop("The annotation package, ", pkgname, ", could not be loaded.")
   }
 
-  headdetails <- .Call("ReadHeader", as.character(filenames[1]),
-                       PACKAGE="affyio")
+##  headdetails <- .Call("ReadHeader", as.character(filenames[1]),
+##                       PACKAGE="affyio")
+  headdetails <- read.celfile.header(filenames[1])
 
   if (missing(sampleNames))
     sampleNames <- basename(filenames)

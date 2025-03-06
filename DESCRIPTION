@@ -1,5 +1,5 @@
 Package: oligo
-Version: 1.71.2
+Version: 1.71.5
 Title: Preprocessing tools for oligonucleotide arrays
 Author: Benilton Carvalho and Rafael Irizarry
 Contributors: Ben Bolstad, Vincent Carey, Wolfgang Huber, Harris Jaffee, Jim MacDonald, Matt Settles, Guido Hooiveld
@@ -20,7 +20,8 @@ Imports: affyio (>= 1.35.0),
          splines,
          stats,
          stats4,
-         utils
+         utils,
+         bit
 Enhances: doMC,
           doMPI
 LinkingTo: preprocessCore

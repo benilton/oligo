@@ -27,6 +27,8 @@
 \alias{pm,GenericFeatureSet-method}
 \alias{pm<-,GenericFeatureSet,ANY,ANY,ff_matrix-method}
 \alias{pm<-,GenericFeatureSet,ANY,ANY,matrix-method}
+\alias{pm<-,TilingFeatureSet,missing,missing,array-method}
+\alias{mm<-,TilingFeatureSet,missing,missing,array-method}
 
 %% OK!
 

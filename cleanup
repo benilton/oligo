@@ -2,3 +2,4 @@
 
 rm -f src/*o
 rm -f R/*~ *~ config.* man/*~
+rm -f config.* src/Makevars

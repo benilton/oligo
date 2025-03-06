@@ -5,6 +5,7 @@
 **  
 **  I) HISTORY
 **
+**  Mar   05, 2025 - Adding Rf_ prefix to functions
 **  Dec   02, 2009 - Fixed memory leak (forgotten Free(d0))
 **  July  30, 2009 - Removed 'dimnamesout' from
 **                   the variable definition in
@@ -145,7 +146,7 @@ static char *xys_header_field(const char *currentFile, const char *field){
 
   if (fgets(buffer, LINEMAX, fp) == NULL) {
     fclose(fp);
-    error("Error reading from %s.\n", currentFile);
+    Rf_error("Error reading from %s.\n", currentFile);
   }
   fclose(fp);
   
@@ -321,7 +322,10 @@ SEXP R_read_xys_header(SEXP filename){
   fp = fopen(currentFile, "r");
   if (fp == NULL)
     Rf_error("Can't open %s.\n", currentFile);
-  fgets(buffer, LINEMAX, fp);
+  if (fgets(buffer, LINEMAX, fp) == NULL) {
+    fclose(fp);
+    Rf_error("Error reading from %s.\n", currentFile);
+  }
   fclose(fp);
 
   j = strlen(buffer)-1;

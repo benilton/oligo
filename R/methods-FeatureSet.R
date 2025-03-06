@@ -203,7 +203,7 @@ setMethod("image", signature(x="FeatureSet"),
                 for (j in 1:nchns){
                   dots[["main"]] <- paste(sampleNames(x)[i],
                                           chns[j], sep=" - ")
-                  tmp <- matrix(NA, nr=geom[1], nc=geom[2])
+                  tmp <- matrix(NA, nrow=geom[1], ncol=geom[2])
                   tmp[idx] <- transfo(as.numeric(exprs(channel(tmpObj, chns[j]))))
                   tmp <- as.matrix(rev(as.data.frame(tmp)))
                   dots[["x"]] <- tmp

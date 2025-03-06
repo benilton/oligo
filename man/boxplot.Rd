@@ -27,6 +27,7 @@
   \item{transfo}{a function to transform the data before plotting. See
     'Details'.}
   \item{nsample}{number of units to sample and build the plot.}
+  \item{target}{the target type of the probes to be used.}
   \item{\dots}{arguments to be passed to the default boxplot method.}
 }
 
