@@ -10,6 +10,9 @@
 % Bioconductor SVN repository. See the 'Makefile' in this directory, which will 
 % copy the PDF from inst/vignettes/ to here.
 
+
 \documentclass[11pt]{article}
+\usepackage{pdfpages}
 \begin{document}
+\includepdf[pages=-]{../inst/scripts/oug.pdf}
 \end{document}
